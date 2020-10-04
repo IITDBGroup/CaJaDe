@@ -18,6 +18,8 @@ run
 user could select specify the following flags to run experiments
 
 ```
+usage: experiments.py [-h] [-M] [-F] [-o] [-s] [-m] [-H] [-P] [-t] -U  -p  -d
+
 Running experiments of CaJaDe
 
 optional arguments:
@@ -28,14 +30,14 @@ optional arguments:
   -F , --f1_sample_rate 
                         Sample rate of apt when calculating the f1 score
                         (default: 1.0)
-  -o , --optimized      use opt or not (y yes, n no), (default: y)
+  -o , --optimized      use opt or not (y: yes, n: no), (default: y)
   -s , --db_size        scale factor of database, (default: 1.0)
   -m , --min_recall_threshold 
                         recall threshold when calculating f1 score (default:
                         1.0)
   -H , --db_host        database host, (default: localhost)
   -P , --port           database port, (default: 5432)
-  -t , --f1_calc_type   f1 score type (sample s, ordinal o), (default: s)
+  -t , --f1_calc_type   f1 score type (s sample, o original), (default: s)
 
 required named arguments:
   -U , --user_name      owner of the database (required)
