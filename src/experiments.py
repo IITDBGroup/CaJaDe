@@ -356,7 +356,7 @@ if __name__ == '__main__':
     help='Sample rate of apt when calculating the f1 score (default: %(default)s)')
 
   parser.add_argument('-o','--optimized', metavar='', type=str, default='y', 
-    help='use opt or not (y yes, n no), (default: %(default)s)')
+    help='use opt or not (y: yes, n: no), (default: %(default)s)')
 
   parser.add_argument('-s','--db_size', metavar='', type=float, default=1.0, 
     help='scale factor of database, (default: %(default)s)')
@@ -372,7 +372,7 @@ if __name__ == '__main__':
 
 
   parser.add_argument('-t','--f1_calc_type', metavar='', type=str, default='s',
-    help='f1 score type (sample s, ordinal o), (default: %(default)s)')
+    help='f1 score type (s sample, o original) (default: %(default)s)')
   
   requiredNamed = parser.add_argument_group('required named arguments')
 
