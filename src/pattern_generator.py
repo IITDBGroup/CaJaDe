@@ -35,7 +35,12 @@ class PatternGeneratorStats(ExecStats):
               }
 
     PARAMS = {'n_p_pass_node_rule',
-              'n_p_pass_node_rule_and_recall_thresh'
+              'n_p_pass_node_rule_and_recall_thresh',
+              'sample_evaluate_pattern_cnt',
+              'sample_misclassification_cnt', 
+              # use this only when you want to measure effectiveness of sampling on fscore
+              'error_sum_of_squares'
+              # use this only when you want to measure effectiveness of sampling on fscore
               }
 
 
@@ -164,22 +169,18 @@ class Pattern_Generator:
 
     
     def get_fscore(self,
-                   sample_repeatable,
-                   seed,
+                   prov_version,
                    f1_calculation_type,
-                   f1_calculation_sample_rate,
-                   f1_calculation_min_size,
                    pattern,
                    pattern_recall_threshold,
                    jg_name,
-                   jg_apt_size,
-                   recall_dict
+                   recall_dicts
                    ):
-
 
         # use to keep the true positive value here since 
         # true postive for recall will always be the same
-
+        if('sample' not in recall_dicts):
+            f1_calculation_type='o'
 
         self.stats.startTimer('validate_patterns_recall_constraint')
         where_cond_list = []
@@ -199,94 +200,200 @@ class Pattern_Generator:
         where_cond_list.append(f"is_user='{pattern['is_user']}'")
         true_positive_conditions = " AND ".join(where_cond_list)
 
-
-        check_recall_threshold_q = f"""
-        SELECT ROUND
-        (
-          (
-          SELECT COUNT(DISTINCT prov_number) 
-          FROM {jg_name}
-          WHERE {true_positive_conditions}
-          )::NUMERIC
-          /
-          NULLIF(
-          {recall_dict['no'] if pattern['is_user']=='no' else recall_dict['yes']}
-          ,0)
-        ,5
-        );
-        """
-
-        self.cur.execute(check_recall_threshold_q)
-
-        recall_result = self.cur.fetchone()[0]
-
-        if(recall_result is None):
-            recall_result = 0
-        else:
-            recall_result = float(recall_result)
-
-        if(recall_result<pattern_recall_threshold):
-            self.stats.stopTimer('validate_patterns_recall_constraint')
-            return pattern, False
-        else:
-            pattern['recall'] = recall_result
-            self.stats.stopTimer('validate_patterns_recall_constraint')
-
+        if(prov_version=='fractional'):
             F1_q = f"""
-            WITH precision AS 
-            (SELECT 
-                (
-                SELECT COUNT(DISTINCT prov_number)
-                FROM {jg_name}
-                WHERE {true_positive_conditions}
-                )::NUMERIC
-                /
-                NULLIF(
-                (
-                SELECT SUM(prov_number_sum) FROM 
-                (
-                SELECT COUNT(DISTINCT prov_number) AS prov_number_sum
-                FROM {jg_name}
-                WHERE {pattern_conditions}
-                GROUP BY is_user
-                ) AS FP_AND_TR
-                )::NUMERIC,0) AS prec
-            )
-            SELECT  
-            p.prec,
+            SELECT 
             2*
             ROUND
             (
                 (
-                    (p.prec)
-                    * {recall_result}
+                    (
+                        (
+                        SELECT SUM(prov_value) 
+                        FROM {jg_name}_d
+                        WHERE {true_positive_conditions}
+                        )::NUMERIC
+                        /
+                        (
+                        SELECT SUM(prov_value) 
+                        FROM {jg_name}_d
+                        WHERE {pattern_conditions}
+                        )::NUMERIC
+                    )
+                    *
+                    (
+                        (
+                        SELECT SUM(prov_value) 
+                        FROM {jg_name}_d
+                        WHERE {true_positive_conditions}
+                        )::NUMERIC
+                        /
+                        (
+                        SELECT SUM(prov_value) 
+                        FROM {jg_name}_d
+                        WHERE is_user='{pattern['is_user']}'
+                        )::NUMERIC
+                    )
                 )
                 /
-                NULLIF(
-                ( 
-                    (p.prec) + {recall_result}
-                ),0),5
-            ) AS f1
-            from precision p
-            """
-           
-        self.stats.startTimer('run_F1_query')
-        self.cur.execute(F1_q)
-        self.stats.stopTimer('run_F1_query')
-        result = self.cur.fetchone()
-        prec,f1 = result[0], result[1]
-
-        if(f1 is None):
-            pattern['F1'] = 0
+                (
+                    (
+                        (
+                        SELECT SUM(prov_value) 
+                        FROM {jg_name}_d
+                        WHERE {true_positive_conditions}
+                        )::NUMERIC
+                        /
+                        (
+                        SELECT SUM(prov_value) 
+                        FROM {jg_name}_d
+                        WHERE {pattern_conditions}
+                        )::NUMERIC
+                    )
+                    +
+                    (
+                        (
+                        SELECT SUM(prov_value) 
+                        FROM {jg_name}_d
+                        WHERE {true_positive_conditions}
+                        )::NUMERIC
+                        /
+                        (
+                        SELECT SUM(prov_value) 
+                        FROM {jg_name}_d
+                        WHERE is_user='{pattern['is_user']}'
+                        )::NUMERIC
+                    )
+                )
+            ,5
+            )
+            """          
         else:
-            pattern['F1'] = float(f1)
+            if(f1_calculation_type!='s'):
+                check_original_recall_threshold_q = f"""
+                SELECT ROUND
+                (
+                  (
+                  SELECT COUNT(DISTINCT prov_number) 
+                  FROM {jg_name}
+                  WHERE {true_positive_conditions}
+                  )::NUMERIC
+                  /
+                  NULLIF(
+                  {recall_dicts['original']['no'] if pattern['is_user']=='no' else recall_dicts['original']['yes']}
+                  ,0)
+                ,5
+                );
+                """
+            if(f1_calculation_type=='e' or f1_calculation_type=='s'):
+                check_sample_recall_threshold_q = f"""
+                SELECT ROUND
+                (
+                  (
+                  SELECT COUNT(DISTINCT prov_number) 
+                  FROM {jg_name}_fs
+                  WHERE {true_positive_conditions}
+                  )::NUMERIC
+                  /
+                  NULLIF(
+                  {recall_dicts['sample']['no'] if pattern['is_user']=='no' else recall_dicts['sample']['yes']}
+                  ,0)
+                ,5
+                );
+                """
 
-        if(prec is None):
-            pattern['precision'] = 0
-        else:
-            pattern['precision'] = float(prec)
+            if(f1_calculation_type=='o' or f1_calculation_type=='e'):
+                self.cur.execute(check_original_recall_threshold_q)
+                original_recall_result = self.cur.fetchone()[0]
+                if(original_recall_result is None):
+                    original_recall_result = 0
+                else:
+                    original_recall_result = float(original_recall_result)
 
-        return pattern, True
+            if(f1_calculation_type=='e' or f1_calculation_type=='s'):
+                self.cur.execute(check_sample_recall_threshold_q)
+                sample_recall_result = self.cur.fetchone()[0]
+                if(sample_recall_result is None):
+                    sample_recall_result = 0
+                else:
+                    sample_recall_result = float(sample_recall_result)
+
+            if(f1_calculation_type=='e'):
+                # check if missclassify
+                self.stats.params['sample_evaluate_pattern_cnt']+=1
+                if((original_recall_result<pattern_recall_threshold and sample_recall_result>pattern_recall_threshold)\
+                    or (original_recall_result>pattern_recall_threshold and sample_recall_result<pattern_recall_threshold)):
+                    self.stats.params['sample_misclassification_cnt']+=1
+                self.stats.params['error_sum_of_squares'] += (original_recall_result-sample_recall_result)**2
+            
+            if(f1_calculation_type=='o' or f1_calculation_type=='e'):
+                recall_result=original_recall_result
+            else:
+                recall_result=sample_recall_result
+                jg_name = f"{jg_name}_fs"
+
+            if(recall_result<pattern_recall_threshold):
+                self.stats.stopTimer('validate_patterns_recall_constraint')
+                return pattern, False
+            else:
+                pattern['recall'] = recall_result
+                self.stats.stopTimer('validate_patterns_recall_constraint')
+
+                F1_q = f"""
+                WITH precision AS 
+                (SELECT 
+                    (
+                    SELECT COUNT(DISTINCT prov_number)
+                    FROM {jg_name}
+                    WHERE {true_positive_conditions}
+                    )::NUMERIC
+                    /
+                    NULLIF(
+                    (
+                    SELECT SUM(prov_number_sum) FROM 
+                    (
+                    SELECT COUNT(DISTINCT prov_number) AS prov_number_sum
+                    FROM {jg_name}
+                    WHERE {pattern_conditions}
+                    GROUP BY is_user
+                    ) AS FP_AND_TR
+                    )::NUMERIC,0) AS prec
+                )
+                SELECT  
+                p.prec,
+                2*
+                ROUND
+                (
+                    (
+                        (p.prec)
+                        * {recall_result}
+                    )
+                    /
+                    NULLIF(
+                    ( 
+                        (p.prec) + {recall_result}
+                    ),0),5
+                ) AS f1
+                from precision p
+                """
+               
+            self.stats.startTimer('run_F1_query')
+            self.cur.execute(F1_q)
+            self.stats.stopTimer('run_F1_query')
+            result = self.cur.fetchone()
+            prec,f1 = result[0], result[1]
+
+            if(f1 is None):
+                pattern['F1'] = 0
+            else:
+                pattern['F1'] = float(f1)
+
+            if(prec is None):
+                pattern['precision'] = 0
+            else:
+                pattern['precision'] = float(prec)
+
+            return pattern, True
 
 
     def gen_patterns(self, 
@@ -297,10 +404,11 @@ class Pattern_Generator:
                       user_questions_map,
                       original_pt_size,
                       attr_alias='a',
+                      prov_version='existential',
                       max_sample_factor=5,
                       s_rate_for_s=0.5,
                       pattern_recall_threshold=0.3, 
-                      numercial_attr_filter_method = 'n',
+                      numercial_attr_filter_method = 'y',
                       sample_repeatable = True,
                       seed = 0.5,
                       f1_calculation_type = 'o',
@@ -318,7 +426,11 @@ class Pattern_Generator:
         attr_alias: used to further ignore colmns from user query in provenance
         
         s_rate_for_s: sample rate for s: this is a must, usually very small compared to d size 
-                
+        
+        prov_version: choose from ['existential', 'fractional']
+        
+        numercial_attr_filter_method: 'varclus', 'rf', 'none'
+
         user_assigned_num_pred_cap: maximum number of numerical attributes allowed.
         doesnt need to meet this number: (could be filtered by recall thresh or invalidated by
         max number of clusters)
@@ -327,11 +439,18 @@ class Pattern_Generator:
         many important features will be considered? it is equal to user_assigned_num_pred_cap*num_numerical_attr_rate
         """
 
-        # logger.debug(jg.jg_number)
+        logger.debug(jg.jg_number)
+        # logger.debug(renaming_dict)
+        # logger.debug(f"""prov_version={prov_version}, max_sample_factor={max_sample_factor}, s_rate_for_s={s_rate_for_s}, \n
+        #     pattern_recall_threshold={pattern_recall_threshold}, numercial_attr_filter_method={numercial_attr_filter_method}, original_pt_size={original_pt_size}""")
 
         self.pattern_by_jg[jg] = []
 
-        recall_dict = {'yes':0, 'no':0}
+        recall_dicts = {}
+        # a dictionary of dictionary which could
+        # store up to 2 dictionaries, 1 for "original" f1 version
+        # the other one for "sample" f1 version
+        # this could happen if f1_calculation_type='e'
 
         count_user_prov = f"SELECT count(*) as size FROM {jg_name} WHERE is_user='yes'"
         self.cur.execute(count_user_prov)
@@ -344,8 +463,10 @@ class Pattern_Generator:
         jg_apt_size = user_p_size+n_user_p_size
 
         # based on f1 calcuation type set up recall dict and materialized apt to evaluate f1
-        if(f1_calculation_type=='s' and jg_apt_size>f1_calculation_min_size):
+        if((f1_calculation_type=='s' or f1_calculation_type=='e') and jg_apt_size>f1_calculation_min_size):
 
+            sample_recall_dict = {}
+            
             self.stats.startTimer('create_f1_sample_jg')
 
             sample_f1_jg_size = math.ceil(jg_apt_size * f1_calculation_sample_rate)
@@ -363,46 +484,46 @@ class Pattern_Generator:
             )
             """
             self.cur.execute(create_f1_jg_size)
-            # use {jg_name}_fs as jg to calculate recall and f1
         
             q_tp_yes = f"""
             SELECT COUNT(DISTINCT prov_number)
-            FROM {jg_name}
+            FROM {jg_name}_fs
             WHERE is_user='yes'
             """
             self.cur.execute(q_tp_yes)
-            recall_dict['yes'] = int(self.cur.fetchone()[0])
+            sample_recall_dict['yes'] = int(self.cur.fetchone()[0])
 
             q_tp_no = f"""
             SELECT COUNT(DISTINCT prov_number)
-            FROM {jg_name}
+            FROM {jg_name}_fs
             WHERE is_user='no'
             """
             self.cur.execute(q_tp_no)
-            recall_dict['no'] = int(self.cur.fetchone()[0])
+            sample_recall_dict['no'] = int(self.cur.fetchone()[0])
 
             self.stats.stopTimer('create_f1_sample_jg')
 
-            fscore_calculation_jg = f"{jg_name}_fs"
-        
-        else:
-            q_tp_yes = f"""
-            SELECT COUNT(DISTINCT prov_number)
-            FROM {jg_name}
-            WHERE is_user='yes'
-            """
-            self.cur.execute(q_tp_yes)
-            recall_dict['yes'] = int(self.cur.fetchone()[0])
+            recall_dicts['sample']=sample_recall_dict
 
-            q_tp_no = f"""
-            SELECT COUNT(DISTINCT prov_number)
-            FROM {jg_name}
-            WHERE is_user='no'
-            """
-            self.cur.execute(q_tp_no)
-            recall_dict['no'] = int(self.cur.fetchone()[0])
+        original_recall_dict={}
 
-            fscore_calculation_jg = jg_name
+        q_tp_yes = f"""
+        SELECT COUNT(DISTINCT prov_number)
+        FROM {jg_name}
+        WHERE is_user='yes'
+        """
+        self.cur.execute(q_tp_yes)
+        original_recall_dict['yes'] = int(self.cur.fetchone()[0])
+
+        q_tp_no = f"""
+        SELECT COUNT(DISTINCT prov_number)
+        FROM {jg_name}
+        WHERE is_user='no'
+        """
+        self.cur.execute(q_tp_no)
+        original_recall_dict['no'] = int(self.cur.fetchone()[0])
+
+        recall_dicts['original'] = original_recall_dict
 
 
         self.stats.startTimer('create_samples')
@@ -433,6 +554,7 @@ class Pattern_Generator:
 
         considered_attrs_d = [x for x in attrs if (x not in skip_cols and re.search(r'{}_'.format(attr_alias), x)) 
                               or (x=='is_user' or x=='prov_number')]
+
         attrs_in_d = ','.join(considered_attrs_d) 
 
         drop_prov_d = f"DROP MATERIALIZED VIEW IF EXISTS {jg_name}_d CASCADE;"
@@ -478,25 +600,58 @@ class Pattern_Generator:
             select setseed({seed})
             """
 
-            prov_d_creation_q = f"""
-            CREATE MATERIALIZED VIEW {jg_name}_d AS
-            (
+            if(prov_version=='fractional'):
+                prov_d_creation_q = f"""
+                CREATE MATERIALIZED VIEW {jg_name}_d AS
                 (
-                SELECT {attrs_in_d}
-                FROM {jg_name} 
-                WHERE is_user = 'yes'
-                ORDER BY RANDOM()
-                LIMIT {d_user_p_sample_size} 
-                )       
-            UNION ALL
+                WITH d_{jg_name} AS 
+                  (
+                    (
+                    SELECT {attrs_in_d}
+                    FROM {jg_name}
+                    WHERE is_user = 'yes'
+                    ORDER BY RANDOM()
+                    LIMIT {d_user_p_sample_size}
+                    )
+                UNION ALL
+                    (
+                    SELECT {attrs_in_d}
+                    FROM {jg_name} 
+                    WHERE is_user = 'no'
+                    ORDER BY RANDOM()
+                    LIMIT {d_n_user_p_sample_size}
+                    )
+                  ),
+                  prov_groups AS
+                  (
+                  SELECT is_user, prov_number, count(*) AS group_size 
+                  FROM d_{jg_name} 
+                  GROUP BY is_user,prov_number
+                  )
+                  SELECT d.*, ROUND(CAST(1 AS NUMERIC)/CAST(pg.group_size AS NUMERIC),5) AS prov_value 
+                  FROM d_{jg_name} d, prov_groups pg WHERE d.prov_number = pg.prov_number AND d.is_user=pg.is_user
+                );
+                """
+            else:
+                prov_d_creation_q = f"""
+                CREATE MATERIALIZED VIEW {jg_name}_d AS
                 (
-                SELECT {attrs_in_d}
-                FROM {jg_name} 
-                WHERE is_user = 'no'
-                ORDER BY RANDOM()
-                LIMIT {d_n_user_p_sample_size}
-                )
-            );
+                    (
+                    SELECT {attrs_in_d}
+                    FROM {jg_name} 
+                    WHERE is_user = 'yes'
+                    ORDER BY RANDOM()
+                    LIMIT {d_user_p_sample_size} 
+                    )       
+                UNION ALL
+                    (
+                    SELECT {attrs_in_d}
+                    FROM {jg_name} 
+                    WHERE is_user = 'no'
+                    ORDER BY RANDOM()
+                    LIMIT {d_n_user_p_sample_size}
+                    )
+                );
             """
 
             if(sample_repeatable):
@@ -570,10 +725,11 @@ class Pattern_Generator:
                 n_pa_dict['nominal_values'] = [(k, v) for k, v in n_pa.items() if (v is not None and not pd.isnull(v))]
                 nominal_pattern_dict_list.append(n_pa_dict) 
 
-            valid_patterns = [] # list of all the valid patterns that can be generated from this nominal pattern
 
 
             if(numercial_attr_filter_method=='y'):
+
+                valid_patterns = [] # list of all the valid patterns that can be generated from this nominal pattern
 
                 # clustering + random forest to select important attributes 
                 # with a caveat in mind that at least one of the attributes
@@ -596,9 +752,9 @@ class Pattern_Generator:
                 cor_df = raw_df[ordinal_pattern_attr_list]
 
                 # remove constant
-                cor_df = cor_df.loc[:,(cor_df != cor_df.iloc[0]).any()] 
+                cor_df = cor_df.loc[:, (cor_df != cor_df.iloc[0]).any()] 
 
-                variable_clustering = VarClusHi(cor_df, maxeigval2=1, maxclus=None)
+                variable_clustering = VarClusHi(cor_df, maxeigval2=0.5, maxclus=None)
                 variable_clustering.varclus()
 
                 cluster_dict = variable_clustering.rsquare[['Cluster', 'Variable']].groupby('Cluster')['Variable'].apply(list).to_dict()
@@ -665,16 +821,12 @@ class Pattern_Generator:
                         'max_cluster_rank':-2, 'is_user':'no'})
 
                     for n_pat in nominal_patterns:
-                        n_pat_processed, is_valid = self.get_fscore(sample_repeatable=sample_repeatable,
-                                                          seed=seed,
+                        n_pat_processed, is_valid = self.get_fscore(prov_version=prov_version,
                                                           f1_calculation_type=f1_calculation_type,
-                                                          f1_calculation_sample_rate=f1_calculation_sample_rate,
-                                                          f1_calculation_min_size=f1_calculation_min_size,
                                                           pattern=n_pat,
                                                           pattern_recall_threshold=pattern_recall_threshold,
-                                                          jg_name=fscore_calculation_jg,
-                                                          jg_apt_size=jg_apt_size,
-                                                          recall_dict=recall_dict)
+                                                          jg_name=jg_name,
+                                                          recall_dicts=recall_dicts)
                         if(is_valid):
                             cur_pattern_candidates.append(n_pat_processed)
 
@@ -736,16 +888,12 @@ class Pattern_Generator:
                                 good_candidates=[]
 
                                 for pc in cur_pattern_candidates:
-                                    pc_processed, is_valid = self.get_fscore(sample_repeatable=sample_repeatable,
-                                                                  seed=seed,
+                                    pc_processed, is_valid = self.get_fscore(prov_version=prov_version,
                                                                   f1_calculation_type=f1_calculation_type,
-                                                                  f1_calculation_sample_rate=f1_calculation_sample_rate,
-                                                                  f1_calculation_min_size=f1_calculation_min_size,
                                                                   pattern=pc,
                                                                   pattern_recall_threshold=pattern_recall_threshold,
-                                                                  jg_name=fscore_calculation_jg,
-                                                                  jg_apt_size=jg_apt_size,
-                                                                  recall_dict=recall_dict)
+                                                                  jg_name=jg_name,
+                                                                  recall_dicts=recall_dicts)
                                     if(is_valid):
                                         self.stats.startTimer('deepcopy')
                                         val_pat = deepcopy(pc_processed)
@@ -800,16 +948,12 @@ class Pattern_Generator:
                                 # that is about to be generated will be "valid"
 
                                 for ic in initial_candidates:
-                                    ic_processed, is_valid = self.get_fscore(sample_repeatable=sample_repeatable,
-                                                                  seed=seed,
+                                    ic_processed, is_valid = self.get_fscore(prov_version=prov_version,
                                                                   f1_calculation_type=f1_calculation_type,
-                                                                  f1_calculation_sample_rate=f1_calculation_sample_rate,
-                                                                  f1_calculation_min_size=f1_calculation_min_size,
                                                                   pattern=ic,
                                                                   pattern_recall_threshold=pattern_recall_threshold,
-                                                                  jg_name=fscore_calculation_jg,
-                                                                  jg_apt_size=jg_apt_size,
-                                                                  recall_dict=recall_dict)
+                                                                  jg_name=jg_name,
+                                                                  recall_dicts=recall_dicts)
                                     if(is_valid):
                                         self.stats.startTimer('deepcopy')
                                         val_pat = deepcopy(ic_processed)
@@ -845,16 +989,13 @@ class Pattern_Generator:
 
                                         if(new_candidates):
                                             for nc in new_candidates:
-                                                pc_processed, is_valid = self.get_fscore(sample_repeatable=sample_repeatable,
-                                                              seed=seed,
+                                                pc_processed, is_valid = self.get_fscore(prov_version=prov_version,
                                                               f1_calculation_type=f1_calculation_type,
-                                                              f1_calculation_sample_rate=f1_calculation_sample_rate,
-                                                              f1_calculation_min_size=f1_calculation_min_size,
                                                               pattern=nc,
                                                               pattern_recall_threshold=pattern_recall_threshold,
-                                                              jg_name=fscore_calculation_jg,
-                                                              jg_apt_size=jg_apt_size,
-                                                              recall_dict=recall_dict)
+                                                              jg_name=jg_name,
+                                                              recall_dicts=recall_dicts
+                                                              )
                                                 if(is_valid):
                                                     self.stats.startTimer('deepcopy')
                                                     val_pat = deepcopy(pc_processed)
@@ -865,14 +1006,18 @@ class Pattern_Generator:
                                     cur_pattern_candidates = good_candidates
                                     cur_number_of_numercial_attrs+=1
 
-                        self.stats.params['n_p_pass_node_rule'] += len(valid_patterns)
+                self.stats.params['n_p_pass_node_rule'] += len(valid_patterns)
 
             else:
+
+                valid_patterns = []
+
                 self.stats.startTimer('enumerate_all_from_nominal_patterns')
 
                 patterns_passed_node_cond = []
                 # construct dictionary for each nominal pattern with ordinal attributes
                 for npa in nominal_pattern_dict_list:
+                    cur_number_numerical = 0
                     # add patterns that only include nominal attributes
                     patterns_passed_node_cond.append({'join_graph':jg, 'recall':0, 'precision':0, 
                                                       'nominal_values': npa['nominal_values'], 
@@ -909,34 +1054,57 @@ class Pattern_Generator:
                     # patterns with one ordinal attribute
                     ordi_one_attr = list(npa['ordinal_quartiles'])
                     
-                    for one in ordi_one_attr:
-                        attrs_with_const_set = set([x[0] for x in npa['nominal_values']] + [one])
-                        # last node has to have an predicate attribute
-                        if(len( attrs_from_spec_node.intersection(attrs_with_const_set))>0):
-                            for val in npa['ordinal_quartiles'][one]:
-                                for one_dir in ['>','<']:
-                                    # one_patt_with_ordi_dir_yes 
-                                    patterns_passed_node_cond.append({'join_graph':jg, 'recall':0, 'precision':0, 'nominal_values': npa['nominal_values'], 
-                                        'ordinal_values': [(one,one_dir,val)], 'attrs_with_const':attrs_with_const_set, 'is_user':'yes'})
-                                    # one_patt_with_ordi_dir_no 
-                                    patterns_passed_node_cond.append({'join_graph':jg, 'recall':0, 'precision':0, 'nominal_values': npa['nominal_values'], 
-                                        'ordinal_values': [(one,one_dir,val)], 'attrs_with_const':attrs_with_const_set , 'is_user':'no'})
+                    if(cur_number_numerical<user_assigned_num_pred_cap):
+                        cur_number_numerical+=1
+                        for one in ordi_one_attr:
+                            attrs_with_const_set = set([x[0] for x in npa['nominal_values']] + [one])
+                            # last node has to have an predicate attribute
+                            if(len( attrs_from_spec_node.intersection(attrs_with_const_set))>0):
+                                for val in npa['ordinal_quartiles'][one]:
+                                    for one_dir in ['>','<']:
+                                        # one_patt_with_ordi_dir_yes 
+                                        patterns_passed_node_cond.append({'join_graph':jg, 'recall':0, 'precision':0, 'nominal_values': npa['nominal_values'], 
+                                            'ordinal_values': [(one,one_dir,val)], 'attrs_with_const':attrs_with_const_set, 'is_user':'yes'})
+                                        # one_patt_with_ordi_dir_no 
+                                        patterns_passed_node_cond.append({'join_graph':jg, 'recall':0, 'precision':0, 'nominal_values': npa['nominal_values'], 
+                                            'ordinal_values': [(one,one_dir,val)], 'attrs_with_const':attrs_with_const_set , 'is_user':'no'})
 
+                    if(cur_number_numerical<user_assigned_num_pred_cap):
+                        cur_number_numerical+=1
+                        ordi_two_attr_pairs = list(itertools.combinations(list(npa['ordinal_quartiles']),2))
+                        dir_combinations = list(itertools.product(['>', '<'], repeat=2))
+                        for n in ordi_two_attr_pairs:
+                            attrs_with_const_set = set([x[0] for x in npa['nominal_values']] + list(n))
+                            if(len(attrs_from_spec_node.intersection(attrs_with_const_set))>0):
+                                for val_pair in itertools.product(npa['ordinal_quartiles'][n[0]],npa['ordinal_quartiles'][n[1]]):
+                                    for one_dir in dir_combinations:
+                                        # two_patt_dicts_with_dir_yes
+                                        patterns_passed_node_cond.append({'join_graph':jg, 'recall':0, 'precision':0, 'nominal_values': npa['nominal_values'], 
+                                            'ordinal_values': list(zip(n,one_dir,val_pair)), 'attrs_with_const':attrs_with_const_set,  'is_user':'yes'})
+                                        # two_patt_dicts_with_dir_no
+                                        patterns_passed_node_cond.append({'join_graph':jg, 'recall':0, 'precision':0, 'nominal_values': npa['nominal_values'], 
+                                            'ordinal_values': list(zip(n,one_dir,val_pair)), 'attrs_with_const':attrs_with_const_set, 'is_user':'no'})
 
-                    ordi_two_attr_pairs = list(itertools.combinations(list(npa['ordinal_quartiles']),2))
-                    dir_combinations = list(itertools.product(['>', '<'], repeat=2))
+                    if(cur_number_numerical<user_assigned_num_pred_cap):
+                        cur_number_numerical+=1
+                        ordi_three_attr_pairs = list(itertools.combinations(list(npa['ordinal_quartiles']),3))
+                        dir_combinations = list(itertools.product(['>', '<'], repeat=3))
+                        logger.debug(ordi_three_attr_pairs)
+                        for n in ordi_three_attr_pairs:
+                            logger.debug(n)
+                            attrs_with_const_set = set([x[0] for x in npa['nominal_values']] + list(n))
+                            if(len(attrs_from_spec_node.intersection(attrs_with_const_set))>0):
+                                for val_pair in itertools.product(npa['ordinal_quartiles'][n[0]],npa['ordinal_quartiles'][n[1]],npa['ordinal_quartiles'][n[2]]):
+                                    if(len(patterns_passed_node_cond)>100000):
+                                        break
+                                    for one_dir in dir_combinations:
+                                        # three_patt_dicts_with_dir_yes
+                                        patterns_passed_node_cond.append({'join_graph':jg, 'recall':0, 'precision':0, 'nominal_values': npa['nominal_values'], 
+                                            'ordinal_values': list(zip(n,one_dir,val_pair)), 'attrs_with_const':attrs_with_const_set,  'is_user':'yes'})
+                                        # three_patt_dicts_with_dir_no
+                                        patterns_passed_node_cond.append({'join_graph':jg, 'recall':0, 'precision':0, 'nominal_values': npa['nominal_values'], 
+                                            'ordinal_values': list(zip(n,one_dir,val_pair)), 'attrs_with_const':attrs_with_const_set, 'is_user':'no'})
 
-                    for n in ordi_two_attr_pairs:
-                        attrs_with_const_set = set([x[0] for x in npa['nominal_values']] + list(n))
-                        if(len(attrs_from_spec_node.intersection(attrs_with_const_set))>0):
-                            for val_pair in itertools.product(npa['ordinal_quartiles'][n[0]],npa['ordinal_quartiles'][n[1]]):
-                                for one_dir in dir_combinations:
-                                    # two_patt_dicts_with_dir_yes
-                                    patterns_passed_node_cond.append({'join_graph':jg, 'recall':0, 'precision':0, 'nominal_values': npa['nominal_values'], 
-                                        'ordinal_values': list(zip(n,one_dir,val_pair)), 'attrs_with_const':attrs_with_const_set,  'is_user':'yes'})
-                                    # two_patt_dicts_with_dir_no
-                                    patterns_passed_node_cond.append({'join_graph':jg, 'recall':0, 'precision':0, 'nominal_values': npa['nominal_values'], 
-                                        'ordinal_values': list(zip(n,one_dir,val_pair)), 'attrs_with_const':attrs_with_const_set, 'is_user':'no'})
 
                 self.stats.params['n_p_pass_node_rule'] += len(patterns_passed_node_cond)
 
@@ -944,29 +1112,31 @@ class Pattern_Generator:
 
 
                 for ppnc in patterns_passed_node_cond:
-                    pc_processed, is_valid = self.get_fscore(sample_repeatable=sample_repeatable,
-                                  seed=seed,
+                    pc_processed, is_valid = self.get_fscore(prov_version=prov_version,
                                   f1_calculation_type=f1_calculation_type,
-                                  f1_calculation_sample_rate=f1_calculation_sample_rate,
-                                  f1_calculation_min_size=f1_calculation_min_size,
                                   pattern=ppnc,
                                   pattern_recall_threshold=pattern_recall_threshold,
-                                  jg_name=fscore_calculation_jg,
-                                  jg_apt_size=jg_apt_size,
-                                  recall_dict=recall_dict)
+                                  jg_name=jg_name,
+                                  recall_dicts=recall_dicts
+                                  )
                     if(is_valid):
                         valid_patterns.append(pc_processed)
 
-
             if(valid_patterns):
                 for vp in valid_patterns:
-                    # logger.debug(vp)
                     self.stats.startTimer('pattern_recover')
                     vp_recovered = self.pattern_recover(renaming_dict, vp, user_questions_map)
                     self.stats.params['n_p_pass_node_rule_and_recall_thresh']+=1
                     self.stats.stopTimer('pattern_recover')
                     self.pattern_pool.append(vp_recovered)
                     self.pattern_by_jg[jg].append(vp_recovered)
+
+
+
+
+            # for qualified_pat in random.choices(patterns_passed_node_cond, k=max(100, int(0.01*len(patterns_passed_node_cond)))):
+
+
 
 
 

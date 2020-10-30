@@ -185,6 +185,9 @@ def run_experiment(result_schema,
     # f1_calculation_type: "o": evaluate on original materialized jg
     #                      "s": evaluate on a sampled materialized jg only sample size is decided
     #                           based on f1_sample_rate and f1_min_sample_size_threshold
+    #                      "e": f1 sample rate evaluation mode: this is to investigate the sample
+    #                           rate effect on the accuracy in terms of fscore, dont use this mode
+    #                           to measure runtime.
     
     statstracker.params['result_schema'] = "'{}'".format(result_schema)
     statstracker.params['user_query'] = "'{}'".format(user_query[1])
@@ -205,7 +208,12 @@ def run_experiment(result_schema,
                 str(max_sample_factor), str(maximum_edges), str(min_recall_threshold), str(numercial_attr_filter_method), 
                 exclude_high_cost_jg[1], str(f1_calculation_type), str(f1_sample_rate), str(f1_min_sample_size_threshold)])
 
+
     logger.debug(exp_desc)
+
+    for k,v in statstracker.params.items():
+      logger.debug(f'{k} : {v}')
+
 
     conn = psycopg2.connect(f"dbname={dbname} user={user_name} password={password} port={port}")
 
@@ -358,10 +366,10 @@ if __name__ == '__main__':
   parser.add_argument('-o','--optimized', metavar='', type=str, default='y', 
     help='use opt or not (y: yes, n: no), (default: %(default)s)')
 
-  parser.add_argument('-s','--db_size', metavar='', type=float, default=1.0, 
-    help='scale factor of database, (default: %(default)s)')
+  # parser.add_argument('-s','--db_size', metavar='', type=float, default=1.0, 
+  #   help='scale factor of database, (default: %(default)s)')
 
-  parser.add_argument('-m','--min_recall_threshold', metavar='', type=float, default=1.0, 
+  parser.add_argument('-m','--min_recall_threshold', metavar='', type=float, default=0.5, 
     help='recall threshold when calculating f1 score (default: %(default)s)')
 
   parser.add_argument('-H','--db_host', metavar='', type=str, default='localhost',
@@ -370,16 +378,16 @@ if __name__ == '__main__':
   parser.add_argument('-P','--port', metavar='', type=int, default=5432,
     help='database port, (default: %(default)s)')
 
+  parser.add_argument('-D','--result_schema', metavar='', type=str, default="none",
+    help='result_schema_name_prefix, (default: exp_[timestamp of the start]')
 
   parser.add_argument('-t','--f1_calc_type', metavar='', type=str, default='s',
-    help='f1 score type (s sample, o original) (default: %(default)s)')
+    help='f1 score type (s sample, o original, e: evaluate_sample) (default: %(default)s)')
   
   requiredNamed = parser.add_argument_group('required named arguments')
 
   requiredNamed.add_argument('-U','--user_name', metavar='', type=str, required=True,
     help='owner of the database (required)')
-  # parser.add_argument('-U','--user_name', metavar='', type=str, required=True,
-  #   help='owner of the database (required)')
 
   requiredNamed.add_argument('-p','--password', metavar='', type=str, required=True,
     help='password to the database (required)')
@@ -401,8 +409,12 @@ if __name__ == '__main__':
   args=parser.parse_args()
 
   now=datetime.now()
-  str_time = now.strftime("%Y_%m_%d_%H_%M_%S")
-  result_schema = f"exp_{str_time}"
+
+  if(args.result_schema=='none'):
+    str_time = now.strftime("%Y-%m-%d-%H-%M-%S")
+    result_schema = f"exp_{str_time}"
+  else:
+    result_schema = args.result_schema
 
   run_experiment(
     result_schema = result_schema,
