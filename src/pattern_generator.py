@@ -179,6 +179,8 @@ class Pattern_Generator:
 
         # use to keep the true positive value here since 
         # true postive for recall will always be the same
+        pattern['jg_name'] = jg_name
+
         if('sample' not in recall_dicts):
             f1_calculation_type='o'
 
@@ -317,6 +319,7 @@ class Pattern_Generator:
                     sample_recall_result = 0
                 else:
                     sample_recall_result = float(sample_recall_result)
+                pattern['sample_recall'] = sample_recall_result
 
             if(f1_calculation_type=='e'):
                 # check if missclassify
@@ -425,7 +428,7 @@ class Pattern_Generator:
         
         attr_alias: used to further ignore colmns from user query in provenance
         
-        s_rate_for_s: sample rate for s: this is a must, usually very small compared to d size 
+        s_rate_for_s: sample rate for s: this is used for LCA, usually very small compared to d size 
         
         prov_version: choose from ['existential', 'fractional']
         
@@ -440,7 +443,7 @@ class Pattern_Generator:
         """
 
         logger.debug(jg.jg_number)
-        # logger.debug(renaming_dict)
+        logger.debug(renaming_dict)
         # logger.debug(f"""prov_version={prov_version}, max_sample_factor={max_sample_factor}, s_rate_for_s={s_rate_for_s}, \n
         #     pattern_recall_threshold={pattern_recall_threshold}, numercial_attr_filter_method={numercial_attr_filter_method}, original_pt_size={original_pt_size}""")
 
@@ -463,47 +466,90 @@ class Pattern_Generator:
         jg_apt_size = user_p_size+n_user_p_size
 
         # based on f1 calcuation type set up recall dict and materialized apt to evaluate f1
-        if((f1_calculation_type=='s' or f1_calculation_type=='e') and jg_apt_size>f1_calculation_min_size):
+        if(f1_calculation_type=='s' or f1_calculation_type=='e'):
+            if(jg_apt_size>f1_calculation_min_size):
+                sample_recall_dict = {}
+                
+                self.stats.startTimer('create_f1_sample_jg')
 
-            sample_recall_dict = {}
+                sample_f1_jg_size = math.ceil(jg_apt_size * f1_calculation_sample_rate)
+                logger.debug(f"jg_apt_size : {jg_apt_size}")
+                # logger.debug(f"sample_f1_jg_size")
+
+                drop_f1_jg = f"""
+                DROP MATERIALIZED VIEW IF EXISTS {jg_name}_fs CASCADE
+                """
+                self.cur.execute(drop_f1_jg)
+                create_f1_jg_size = f"""
+                CREATE MATERIALIZED VIEW {jg_name}_fs AS 
+                (
+                SELECT * FROM {jg_name}
+                ORDER BY RANDOM()
+                LIMIT {sample_f1_jg_size}
+                )
+                """
+                self.cur.execute(create_f1_jg_size)
             
-            self.stats.startTimer('create_f1_sample_jg')
+                q_tp_yes = f"""
+                SELECT COUNT(DISTINCT prov_number)
+                FROM {jg_name}_fs
+                WHERE is_user='yes'
+                """
+                self.cur.execute(q_tp_yes)
+                sample_recall_dict['yes'] = int(self.cur.fetchone()[0])
 
-            sample_f1_jg_size = math.ceil(jg_apt_size * f1_calculation_sample_rate)
+                q_tp_no = f"""
+                SELECT COUNT(DISTINCT prov_number)
+                FROM {jg_name}_fs
+                WHERE is_user='no'
+                """
+                self.cur.execute(q_tp_no)
+                sample_recall_dict['no'] = int(self.cur.fetchone()[0])
 
-            drop_f1_jg = f"""
-            DROP MATERIALIZED VIEW IF EXISTS {jg_name}_fs CASCADE
-            """
-            self.cur.execute(drop_f1_jg)
-            create_f1_jg_size = f"""
-            CREATE MATERIALIZED VIEW {jg_name}_fs AS 
-            (
-            SELECT * FROM {jg_name}
-            ORDER BY RANDOM()
-            LIMIT {sample_f1_jg_size}
-            )
-            """
-            self.cur.execute(create_f1_jg_size)
-        
-            q_tp_yes = f"""
-            SELECT COUNT(DISTINCT prov_number)
-            FROM {jg_name}_fs
-            WHERE is_user='yes'
-            """
-            self.cur.execute(q_tp_yes)
-            sample_recall_dict['yes'] = int(self.cur.fetchone()[0])
+                self.stats.stopTimer('create_f1_sample_jg')
 
-            q_tp_no = f"""
-            SELECT COUNT(DISTINCT prov_number)
-            FROM {jg_name}_fs
-            WHERE is_user='no'
-            """
-            self.cur.execute(q_tp_no)
-            sample_recall_dict['no'] = int(self.cur.fetchone()[0])
+                recall_dicts['sample']=sample_recall_dict
+                logger.debug(recall_dicts)
 
-            self.stats.stopTimer('create_f1_sample_jg')
+            else:
+                sample_recall_dict = {}
+                
+                self.stats.startTimer('create_f1_sample_jg')
 
-            recall_dicts['sample']=sample_recall_dict
+                sample_f1_jg_size = math.ceil(jg_apt_size * f1_calculation_sample_rate)
+
+                drop_f1_jg = f"""
+                DROP MATERIALIZED VIEW IF EXISTS {jg_name}_fs CASCADE
+                """
+                self.cur.execute(drop_f1_jg)
+                create_f1_jg_size = f"""
+                CREATE MATERIALIZED VIEW {jg_name}_fs AS 
+                (
+                SELECT * FROM {jg_name}
+                )
+                """
+                self.cur.execute(create_f1_jg_size)
+            
+                q_tp_yes = f"""
+                SELECT COUNT(DISTINCT prov_number)
+                FROM {jg_name}_fs
+                WHERE is_user='yes'
+                """
+                self.cur.execute(q_tp_yes)
+                sample_recall_dict['yes'] = int(self.cur.fetchone()[0])
+
+                q_tp_no = f"""
+                SELECT COUNT(DISTINCT prov_number)
+                FROM {jg_name}_fs
+                WHERE is_user='no'
+                """
+                self.cur.execute(q_tp_no)
+                sample_recall_dict['no'] = int(self.cur.fetchone()[0])
+
+                self.stats.stopTimer('create_f1_sample_jg')
+
+                recall_dicts['sample']=sample_recall_dict
+
 
         original_recall_dict={}
 
@@ -565,10 +611,14 @@ class Pattern_Generator:
         # logger.debug(drop_prov_s)
         self.cur.execute(drop_prov_s)
 
-        s_user_p_sample_size = min(max_sample_factor*original_pt_size, math.ceil(user_p_size*s_rate_for_s))
+
+        logger.debug(f"max_sample_factor*original_pt_size: {max_sample_factor*original_pt_size}")
+        logger.debug(f"math.ceil(user_p_size*s_rate_for_s) : {math.ceil(user_p_size*s_rate_for_s)}")
+
+        s_user_p_sample_size = min(math.ceil(max_sample_factor*original_pt_size), math.ceil(user_p_size*s_rate_for_s))
         d_user_p_sample_size = s_user_p_sample_size
 
-        s_n_user_p_sample_size = min(max_sample_factor*original_pt_size, math.ceil(n_user_p_size*s_rate_for_s))
+        s_n_user_p_sample_size = min(math.ceil(max_sample_factor*original_pt_size), math.ceil(n_user_p_size*s_rate_for_s))
         d_n_user_p_sample_size = s_n_user_p_sample_size
 
         if(d_user_p_sample_size!=0):

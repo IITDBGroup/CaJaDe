@@ -84,7 +84,7 @@ def InsertPatterns(conn, exp_desc, patterns, pattern_relation_name, schema):
   # logger.debug(patterns[0:5])
 
   cur = conn.cursor()
-  cols = ['exp_desc', 'is_user', 'jg', 'num_edges', 'p_desc', 'recall', 'precision', 'fscore']
+  cols = ['exp_desc', 'is_user', 'jg', 'jg_name', 'num_edges', 'p_desc', 'recall', 'precision', 'fscore', 'sample_recall']
   cols_with_types = ''
 
   for col in cols[:-1]:
@@ -106,14 +106,17 @@ def InsertPatterns(conn, exp_desc, patterns, pattern_relation_name, schema):
       cur_batch_size+=1
       p_print = p['desc'].replace("'","''")
       jg_print = str(p['join_graph']).replace("'","''")
-      patterns_to_insert.append(f"('{exp_desc}', '{p['is_user']}', '{jg_print}', '{p['num_edges']}', '{p_print}', '{p['recall']}', '{p['precision']}','{p['F1']}')")
+      patterns_to_insert.append(f"('{exp_desc}', '{p['is_user']}', '{jg_print}', '{p['jg_name']}', '{p['num_edges']}', '{p_print}', \
+        '{p['recall']}', '{p['precision']}','{p['F1']}','{p['sample_recall']}')")
       continue
     else:
       cur.execute(
           'INSERT INTO ' + schema + '.' + pattern_relation_name + ' ('+ ','.join(cols) +')' + ' values '+ ', '.join(patterns_to_insert)
           )
       patterns_to_insert = []
-      patterns_to_insert.append(f"('{exp_desc}', '{p['is_user']}', '{jg_print}', '{p['num_edges']}', '{p_print}', '{p['recall']}', '{p['precision']}','{p['F1']}')")
+      patterns_to_insert.append(f"('{exp_desc}', '{p['is_user']}', '{jg_print}', '{p['jg_name']}', '{p['num_edges']}', '{p_print}', \
+        '{p['recall']}', '{p['precision']}','{p['F1']}','{p['sample_recall']}')")
+
       cur_batch_size=1
 
   if(patterns_to_insert):
@@ -357,42 +360,48 @@ if __name__ == '__main__':
 
   parser = argparse.ArgumentParser(description='Running experiments of CaJaDe')
 
-  parser.add_argument('-M','--maximum_edges', metavar='', type=int, default=3, 
+  parser.add_argument('-M','--maximum_edges', metavar="\b", type=int, default=3, 
     help='Maximum number of edges allowed in a join graph (default: %(default)s)')
 
-  parser.add_argument('-F','--f1_sample_rate', metavar='', type=float, default=1.0, 
+  parser.add_argument('-F','--f1_sample_rate', metavar="\b", type=float, default=1.0, 
     help='Sample rate of apt when calculating the f1 score (default: %(default)s)')
 
-  parser.add_argument('-o','--optimized', metavar='', type=str, default='y', 
+  parser.add_argument('-o','--optimized', metavar="\b", type=str, default='y', 
     help='use opt or not (y: yes, n: no), (default: %(default)s)')
 
-  # parser.add_argument('-s','--db_size', metavar='', type=float, default=1.0, 
-  #   help='scale factor of database, (default: %(default)s)')
+  parser.add_argument('-s','--db_size', metavar="\b", type=float, default=1.0, 
+    help='scale factor of database, (default: %(default)s)')
 
-  parser.add_argument('-m','--min_recall_threshold', metavar='', type=float, default=0.5, 
+  parser.add_argument('-m','--min_recall_threshold', metavar="\b", type=float, default=0.5, 
     help='recall threshold when calculating f1 score (default: %(default)s)')
 
-  parser.add_argument('-H','--db_host', metavar='', type=str, default='localhost',
+  parser.add_argument('-r','--sample_rate_for_lca', metavar="\b", type=float, default=0.05, 
+  help='sample rate for lca (default: %(default)s)')
+
+  parser.add_argument('-f','--sample_factor_for_lca', metavar="\b", type=float, default=2, 
+  help='sample factor for lca (default: %(default)s)')
+
+  parser.add_argument('-H','--db_host', metavar="\b", type=str, default='localhost',
     help='database host, (default: %(default)s)')
 
-  parser.add_argument('-P','--port', metavar='', type=int, default=5432,
+  parser.add_argument('-P','--port', metavar="\b", type=int, default=5432,
     help='database port, (default: %(default)s)')
 
-  parser.add_argument('-D','--result_schema', metavar='', type=str, default="none",
+  parser.add_argument('-D','--result_schema', metavar="\b", type=str, default="none",
     help='result_schema_name_prefix, (default: exp_[timestamp of the start]')
 
-  parser.add_argument('-t','--f1_calc_type', metavar='', type=str, default='s',
+  parser.add_argument('-t','--f1_calc_type', metavar="\b", type=str, default='s',
     help='f1 score type (s sample, o original, e: evaluate_sample) (default: %(default)s)')
   
   requiredNamed = parser.add_argument_group('required named arguments')
 
-  requiredNamed.add_argument('-U','--user_name', metavar='', type=str, required=True,
+  requiredNamed.add_argument('-U','--user_name', metavar="\b", type=str, required=True,
     help='owner of the database (required)')
 
-  requiredNamed.add_argument('-p','--password', metavar='', type=str, required=True,
+  requiredNamed.add_argument('-p','--password', metavar="\b", type=str, required=True,
     help='password to the database (required)')
 
-  requiredNamed.add_argument('-d','--db_name', metavar='', type=str, required=True,
+  requiredNamed.add_argument('-d','--db_name', metavar="\b", type=str, required=True,
     help='database name (required)')
 
 
@@ -402,7 +411,6 @@ if __name__ == '__main__':
   u_query = (user_query, 'n1')
   u_question =["season_name='2015-16'","season_name='2012-13'"]
   user_specified_attrs = (('team','team'),('season','season_name'))
-  sample_rate_for_s = 0.05
   max_sample_factor = 2
   exclude_high_cost_jg = (True,'t')
 
@@ -427,8 +435,8 @@ if __name__ == '__main__':
     host=args.db_host,
     port=args.port,
     dbname=args.db_name, 
-    sample_rate_for_s=sample_rate_for_s,
-    max_sample_factor=max_sample_factor, 
+    sample_rate_for_s=args.sample_rate_for_lca,
+    max_sample_factor=args.sample_factor_for_lca, 
     maximum_edges=args.maximum_edges,
     min_recall_threshold=args.min_recall_threshold,
     numercial_attr_filter_method=args.optimized,
@@ -436,6 +444,6 @@ if __name__ == '__main__':
     exclude_high_cost_jg=exclude_high_cost_jg,
     f1_calculation_type =args.f1_calc_type,
     f1_sample_rate = args.f1_sample_rate,
-    f1_min_sample_size_threshold=2000,
+    f1_min_sample_size_threshold=1000,
     )
   # logger.debug('\n\n')
