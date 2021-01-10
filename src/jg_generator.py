@@ -60,9 +60,8 @@ class Join_Graph:
         """
         graph_core: A multigraph from networkx
 
-        spec_node_key: The key of the node where during pattern generation 
+        spec_node_key: The key of the node of which during pattern generation 
         a pattern has to include at least one constant value from the attributes 
-        from this node 
 
         ignored_attrs: those are keys or attributes appeared in user query(such 
         as group by, A='a' etc)
@@ -82,12 +81,13 @@ class Join_Graph:
         self.jg_number = jg_number
         self.graph_core = graph_core
         self.ignored_attrs = []
-        self.spec_node_key = spec_node_key 
+        self.spec_node_key = spec_node_key
         self.intermediate = intermediate
         self.cost = 0
         self.num_edges = num_edges
         self.renaming_dict = None
         self.apt_create_q = None
+        self.redundant = False
 
     def __repr__(self):
 
@@ -132,11 +132,12 @@ class Join_Graph:
 
 class Join_Graph_Generator:
 
-    def __init__(self, schema_graph, attr_dict):
+    def __init__(self, schema_graph, attr_dict, gwrapper):
         self.schema_graph = schema_graph
         self.hash_jg_table = {} # a hash dictionary that used to check duplicates
         self.attr_dict = attr_dict
         self.stats = JGGeneratorStats()
+        self.gwrapper = gwrapper
 
     def valid_check(self, jg_candidate, pt_rels):
         """
@@ -179,6 +180,7 @@ class Join_Graph_Generator:
                     return False
         return True
 
+
     def add_one_edge(self, j_graph_target, node1_label, node2_label, condition):
         """
         adding an edge to j_graph_target given node1 and node2 and condition with the edge
@@ -209,8 +211,7 @@ class Join_Graph_Generator:
                 if(not FoundNode2):
                     plans_edge_w_new_node.append((j_graph_target, n.key, node2_label, condition))
 
-        return plans_just_edge, plans_edge_w_new_node               
-
+        return plans_just_edge, plans_edge_w_new_node
  
     def gen_new_jg(self, j_graph_target, pt_rels, jg_cur_number):
         """
@@ -305,7 +306,7 @@ class Join_Graph_Generator:
             while(cur_jg_size <= num_edges):
                 if(not prev_jg_set):
                     first_jg_core = MultiGraph(jg_id = '1', max_node_key = 1, sg = self.schema_graph, db_dict=self.attr_dict)
-                    first_jg = Join_Graph(graph_core=first_jg_core,jg_number=jg_cur_number, num_edges=0)
+                    first_jg = Join_Graph(graph_core=first_jg_core, jg_number=jg_cur_number, num_edges=0)
                     jg_cur_number+=1
                     first_node = Node(label='PT', pk_attributes=None)
                     first_node.key = first_jg.graph_core.graph['max_node_key']
@@ -334,6 +335,9 @@ class Join_Graph_Generator:
                 if(self.valid_check(n, pt_rels)==True):
                     valid_jgs.append(n)
             self.stats.stopTimer('jg_validtaion')
+            valid_jgs.sort(key=lambda j: j.jg_number)
+            logger.debug(valid_jgs)
+            # sort it to make sure jg materializer will see PT only first
             self.stats.params['valid_jgs']+=len(valid_jgs)
             return valid_jgs
         else:

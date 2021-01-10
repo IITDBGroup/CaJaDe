@@ -14,9 +14,9 @@ logger = logging.getLogger(__name__)
 
 
 
-rel_name = re.compile("PROV_(([^_]|[_][_])+)")
+rel_name = re.compile("PROV_(([^_]|[_][_])+)", flags=re.IGNORECASE)
 
-re_PROV = re.compile("PROV")
+re_PROV = re.compile("PROV", flags=re.IGNORECASE)
 re_CAT = re.compile("cat__")
 # single_underscore = re.compile("?[_]")
 
@@ -52,12 +52,13 @@ class provenance_getter:
 		# First run, get the relations accessed by query
 
 		code, output = self.gprom_wrapper.runQuery(query)
+		logger.debug(output)
 		original_pt_size = 0
 
 		if(code == 0):
 			drop_original_view_query = "DROP VIEW IF EXISTS original_pt CASCADE;"
 			gen_original_pt_query = output.decode("utf-8")
-			# logger.debug(f'gen_original_pt_query:\n {gen_original_pt_query}')
+			logger.debug(f'gen_original_pt_query:\n {gen_original_pt_query}')
 			original_PT_view = f"CREATE VIEW original_pt AS {gen_original_pt_query};"
 			self.cur.execute(drop_original_view_query)
 			self.cur.execute(original_PT_view)
@@ -81,13 +82,12 @@ class provenance_getter:
 		rels = [n.replace('__','_') for n in rel_set]
 		rels = list(rels)
 		
-		# a list of attributes we want to have(***keys and cat_attrs only!***)
 		pt_attrs = []
 
 		if(code==0):
-			drop_pt_full_view_query = "DROP VIEW IF EXISTS pt_full CASCADE;"
+			drop_pt_full_view_query = "DROP TABLE IF EXISTS pt_full CASCADE;"
 			gen_pt_query = output.decode("utf-8")
-			PT_full_view = f"CREATE VIEW pt_full AS {gen_pt_query};"
+			PT_full_view = f"CREATE TABLE pt_full AS {gen_pt_query};"
 
 			self.cur.execute(drop_pt_full_view_query)
 			self.cur.execute(PT_full_view)
@@ -135,18 +135,18 @@ class provenance_getter:
 
 				pt_attrs.append(f'"{k}"')
 
-			pt_dict['attributes']['prov_number:nominal'] = ('PT','prov_number')
+			pt_dict['attributes']['pnumber:nominal'] = ('PT','pnumber')
 			pt_dict['attributes']['is_user:nominal'] = ('PT','is_user')
 
 			# logger.debug(pt_attrs)
-			drop_PT_view_query = "DROP VIEW IF EXISTS pt CASCADE;"
+			drop_PT_view_query = "DROP TABLE IF EXISTS pt CASCADE;"
 
-			user_prov_part = "ROW_NUMBER() OVER () AS prov_number, 'yes' as is_user"
-			non_user_prov_part = "ROW_NUMBER() OVER () AS prov_number, 'no' as is_user"
+			user_prov_part = "ROW_NUMBER() OVER () AS pnumber, 'yes' as is_user"
+			non_user_prov_part = "ROW_NUMBER() OVER () AS pnumber, 'no' as is_user"
 			
 			if(len(user_questions)==1):
 				APT_view = f"""
-				CREATE VIEW pt AS 
+				CREATE TABLE pt AS 
 				(
 					(
 					SELECT {','.join(pt_attrs)}, {user_prov_part} FROM pt_full
@@ -161,7 +161,7 @@ class provenance_getter:
 				"""
 			else:
 				APT_view = f"""
-				CREATE VIEW pt AS 
+				CREATE TABLE pt AS 
 				(
 					(
 					SELECT {','.join(pt_attrs)}, {user_prov_part} FROM pt_full

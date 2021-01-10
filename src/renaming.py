@@ -5,7 +5,7 @@ logger = logging.getLogger(__name__)
 
 
 extract_pattern = re.compile('([a-zA-Z]+)_([0-9]+)')
-re_PROV = re.compile("PROV")
+re_PROV = re.compile("PROV", flags=re.IGNORECASE)
 
 def encode(rel, rel_alias = 'A', attr_alias = 'a', map_dict = None, is_pt= False):
 	"""	
@@ -28,7 +28,6 @@ def encode(rel, rel_alias = 'A', attr_alias = 'a', map_dict = None, is_pt= False
 
 	# logger.debug("~~~map_dict~~~")
 	if(map_dict):
-		m=None
 		renamed_rel_index_list = []
 		renamed_attr_index_list = []
 		one_key = [m for m in list(map_dict.keys()) if(m!='max_rel_index' and m!='max_attr_index' and m!='dtypes')][0]
@@ -66,10 +65,13 @@ def encode(rel, rel_alias = 'A', attr_alias = 'a', map_dict = None, is_pt= False
 
 	# update max rel index 
 	rel['renamed_rel'] = "{}_{}".format(rel_alias,max_rel_index)
-	if(is_pt):
-		renamed_attr_dict = dict.fromkeys([x.split(':')[0] for x in rel['columns']],None)
-	else:
-		renamed_attr_dict = dict.fromkeys([x[0] for x in rel['columns']],None)
+
+	# if(is_pt):
+	# 	renamed_attr_dict = dict.fromkeys([x.split(':')[0] for x in rel['columns']],None)
+	# else:
+	# 	renamed_attr_dict = dict.fromkeys([x[0] for x in rel['columns']],None)
+
+	renamed_attr_dict = {}
 
 	# logger.debug("!!!renamed_attr_dict!!!")
 	# logger.debug(renamed_attr_dict)
@@ -80,33 +82,38 @@ def encode(rel, rel_alias = 'A', attr_alias = 'a', map_dict = None, is_pt= False
 	if('dtypes' not in map_dict):
 		map_dict['dtypes'] = {} 
 	if(is_pt):
+		rel['rel_min_attr_index'] = max_attr_index
 		for n in rel['columns']:
-			n_name = n.split(':')[0]
-			n_type = n.split(':')[1]
-			if(not re_PROV.search(n_name)):
+			n_name, n_type = n.split(':')
+
+			if(not re_PROV.search(n_name)): 
+			# attributes from provenance where
+			# which is either user created or a constant
+			# does not rename those types of attributes 
 				renamed_attr_dict[n_name] = n_name
 				renamed_n = n_name
 			else:
 				max_attr_index += 1
-				renamed_attr_dict[n_name] = '{}_{}'.format(attr_alias,max_attr_index)
 				renamed_n = '{}_{}'.format(attr_alias,max_attr_index)
+				renamed_attr_dict[renamed_n] = n_name 
 
-			if(n_type in pg_numeric_list):
-				map_dict['dtypes'][renamed_n] = 'ordinal'
-			else:
-				map_dict['dtypes'][renamed_n] = 'nominal' 
+			map_dict['dtypes'][renamed_n] = n_type
+
+		rel['rel_max_attr_index'] = max_attr_index
+
 	else:
-		for n in rel['columns']:
-			n_name = n[0]
-			n_type = n[1]
-			max_attr_index += 1
-			renamed_attr_dict[n_name] = '{}_{}'.format(attr_alias,max_attr_index)
-			renamed_n = '{}_{}'.format(attr_alias,max_attr_index)
+		rel['rel_min_attr_index'] = max_attr_index
 
-			if(n_type in pg_numeric_list):
-				map_dict['dtypes'][renamed_n] = 'ordinal'
-			else:
-				map_dict['dtypes'][renamed_n] = 'nominal' 
+		for n in rel['columns']:
+			n_name, n_type= n[0], n[1]
+			max_attr_index += 1
+			renamed_n = '{}_{}'.format(attr_alias,max_attr_index)
+			renamed_attr_dict[renamed_n] = n_name
+
+			map_dict['dtypes'][renamed_n] = n_type
+				
+		rel['rel_max_attr_index'] = max_attr_index
+
 
 	rel['columns'] = renamed_attr_dict
 

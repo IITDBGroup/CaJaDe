@@ -69,19 +69,23 @@ class Schema_Graph_Generator:
 		"""
 		con_info = pd.read_sql(conf_query, self.conn)
 
-		con_info['condition_str'] = con_info.apply(
-			lambda row : "({})=({})".format(
-				sorted([
-			",".join((row["f_table"]+".") + x for x in row['f_key'].split(',')), 
-			",".join((row["p_table"]+".") + x for x in row['p_key'].split(','))
-				])[0],
-				sorted([
-			",".join((row["f_table"]+".") + x for x in row['f_key'].split(',')), 
-			",".join((row["p_table"]+".") + x for x in row['p_key'].split(','))
-				])[1]
-		),
-			axis=1
-		)
+		con_info['condition_str'] = con_info.apply(lambda r : " AND ".join(["("+r["p_table"]+"."+i+")=("+r["f_table"]+"."+j +")" 
+			for i,j in zip(r["p_key"].split(","), r["f_key"].split(","))]), axis=1)
+
+		# con_info['condition_str'] = con_info.apply(
+		# 	lambda row : "({})=({})".format(
+		# 		([
+		# 	",".join((row["f_table"]+".") + x for x in row['f_key'].split(',')), 
+		# 	",".join((row["p_table"]+".") + x for x in row['p_key'].split(','))
+		# 		])[0],
+		# 		([
+		# 	",".join((row["f_table"]+".") + x for x in row['f_key'].split(',')), 
+		# 	",".join((row["p_table"]+".") + x for x in row['p_key'].split(','))
+		# 		])[1]
+
+		# ),
+		# 	axis=1
+		# )
 
 		con_info['key_dict'] = con_info.apply(
 			lambda row: {row['f_table']:list(row['f_key'].split(',')), row['p_table']:row['p_key'].split(',')},
@@ -118,7 +122,6 @@ class Schema_Graph_Generator:
 		AND ic.table_schema='public' 
 		AND it.table_type = 'BASE TABLE'
 		GROUP BY ic.table_name;
-
 		"""
 
 		self.cur.execute(q_attr_viw)
@@ -131,9 +134,18 @@ class Schema_Graph_Generator:
 
 		attr_dict = pd.read_sql(attr_query, self.conn).set_index('table_name').T.to_dict('list')
 
+		pg_numeric_list = ['smallint','integer','bigint','decimal','numeric',
+		'real','double precision','smallserial','serial','bigserial']
+
 		for k,v in attr_dict.items():
-			attrs_list = [tuple(x.split(':')) for x in v[0].split(',')]
-			attrs_list.sort(key = lambda x:x[0])
+			attrs_list = []
+			for x in v[0].split(','):
+				an,at = x.split(':')
+				if(at in pg_numeric_list):
+					attrs_list.append(tuple((an,'ordinal')))
+				else:
+					attrs_list.append(tuple((an,'nominal')))
+
 			keys_list = list(set(x.strip() for x in v[1].split(',')))
 			keys_list.sort()
 

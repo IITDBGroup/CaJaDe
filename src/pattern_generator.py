@@ -276,7 +276,7 @@ class Pattern_Generator:
                 SELECT ROUND
                 (
                   (
-                  SELECT COUNT(DISTINCT prov_number) 
+                  SELECT COUNT(DISTINCT pnumber) 
                   FROM {jg_name}
                   WHERE {true_positive_conditions}
                   )::NUMERIC
@@ -292,7 +292,7 @@ class Pattern_Generator:
                 SELECT ROUND
                 (
                   (
-                  SELECT COUNT(DISTINCT prov_number) 
+                  SELECT COUNT(DISTINCT pnumber) 
                   FROM {jg_name}_fs
                   WHERE {true_positive_conditions}
                   )::NUMERIC
@@ -346,16 +346,16 @@ class Pattern_Generator:
                 WITH precision AS 
                 (SELECT 
                     (
-                    SELECT COUNT(DISTINCT prov_number)
+                    SELECT COUNT(DISTINCT pnumber)
                     FROM {jg_name}
                     WHERE {true_positive_conditions}
                     )::NUMERIC
                     /
                     NULLIF(
                     (
-                    SELECT SUM(prov_number_sum) FROM 
+                    SELECT SUM(pnumber_sum) FROM 
                     (
-                    SELECT COUNT(DISTINCT prov_number) AS prov_number_sum
+                    SELECT COUNT(DISTINCT pnumber) AS pnumber_sum
                     FROM {jg_name}
                     WHERE {pattern_conditions}
                     GROUP BY is_user
@@ -491,7 +491,7 @@ class Pattern_Generator:
                 self.cur.execute(create_f1_jg_size)
             
                 q_tp_yes = f"""
-                SELECT COUNT(DISTINCT prov_number)
+                SELECT COUNT(DISTINCT pnumber)
                 FROM {jg_name}_fs
                 WHERE is_user='yes'
                 """
@@ -499,7 +499,7 @@ class Pattern_Generator:
                 sample_recall_dict['yes'] = int(self.cur.fetchone()[0])
 
                 q_tp_no = f"""
-                SELECT COUNT(DISTINCT prov_number)
+                SELECT COUNT(DISTINCT pnumber)
                 FROM {jg_name}_fs
                 WHERE is_user='no'
                 """
@@ -531,7 +531,7 @@ class Pattern_Generator:
                 self.cur.execute(create_f1_jg_size)
             
                 q_tp_yes = f"""
-                SELECT COUNT(DISTINCT prov_number)
+                SELECT COUNT(DISTINCT pnumber)
                 FROM {jg_name}_fs
                 WHERE is_user='yes'
                 """
@@ -539,7 +539,7 @@ class Pattern_Generator:
                 sample_recall_dict['yes'] = int(self.cur.fetchone()[0])
 
                 q_tp_no = f"""
-                SELECT COUNT(DISTINCT prov_number)
+                SELECT COUNT(DISTINCT pnumber)
                 FROM {jg_name}_fs
                 WHERE is_user='no'
                 """
@@ -554,7 +554,7 @@ class Pattern_Generator:
         original_recall_dict={}
 
         q_tp_yes = f"""
-        SELECT COUNT(DISTINCT prov_number)
+        SELECT COUNT(DISTINCT pnumber)
         FROM {jg_name}
         WHERE is_user='yes'
         """
@@ -562,7 +562,7 @@ class Pattern_Generator:
         original_recall_dict['yes'] = int(self.cur.fetchone()[0])
 
         q_tp_no = f"""
-        SELECT COUNT(DISTINCT prov_number)
+        SELECT COUNT(DISTINCT pnumber)
         FROM {jg_name}
         WHERE is_user='no'
         """
@@ -599,7 +599,7 @@ class Pattern_Generator:
         # logger.debug(f'considered_attrs_s:{considered_attrs_s}')
 
         considered_attrs_d = [x for x in attrs if (x not in skip_cols and re.search(r'{}_'.format(attr_alias), x)) 
-                              or (x=='is_user' or x=='prov_number')]
+                              or (x=='is_user' or x=='pnumber')]
 
         attrs_in_d = ','.join(considered_attrs_d) 
 
@@ -674,12 +674,12 @@ class Pattern_Generator:
                   ),
                   prov_groups AS
                   (
-                  SELECT is_user, prov_number, count(*) AS group_size 
+                  SELECT is_user, pnumber, count(*) AS group_size 
                   FROM d_{jg_name} 
-                  GROUP BY is_user,prov_number
+                  GROUP BY is_user,pnumber
                   )
                   SELECT d.*, ROUND(CAST(1 AS NUMERIC)/CAST(pg.group_size AS NUMERIC),5) AS prov_value 
-                  FROM d_{jg_name} d, prov_groups pg WHERE d.prov_number = pg.prov_number AND d.is_user=pg.is_user
+                  FROM d_{jg_name} d, prov_groups pg WHERE d.pnumber = pg.pnumber AND d.is_user=pg.is_user
                 );
                 """
             else:

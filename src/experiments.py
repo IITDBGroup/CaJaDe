@@ -236,21 +236,17 @@ def run_experiment(result_schema,
 
     attr_dict['PT'] = pt_dict
 
-    jgg = Join_Graph_Generator(schema_graph = sg, attr_dict = attr_dict)
+    jgg = Join_Graph_Generator(schema_graph = sg, attr_dict = attr_dict, gwrapper=w)
 
     logger.debug('generate new valid_jgs')
     valid_result = jgg.Generate_JGs(pt_rels=pt_relations, num_edges=maximum_edges, customize=False)
-    jgm = Join_Graph_Materializer(conn=conn, db_dict=attr_dict)
+    jgm = Join_Graph_Materializer(conn=conn, db_dict=attr_dict, gwrapper=w, user_query=user_query[0])
     jgm.init_cost_estimator()
 
     pgen = Pattern_Generator(conn) 
 
     pattern_total = []
     pattern_ranked_within_jg = {}
-
-    valid_result_names = ['jg_{}'.format(n.jg_number) for n in valid_result]
-
-
 
     cost_friendly_jgs = []
     not_cost_friendly_jgs = []
@@ -261,26 +257,36 @@ def run_experiment(result_schema,
           if(n.intermediate==False):
             jgm.stats.startTimer('materialize_jg')
             _, renaming_dict, apt_q = jgm.materialize_jg(n)
-            drop_if_exist_jg_view = "DROP MATERIALIZED VIEW IF EXISTS {} CASCADE;".format('jg_{}'.format(n.jg_number))
-            jg_query_view = "CREATE MATERIALIZED VIEW {} AS {}".format('jg_{}'.format(n.jg_number), apt_q)
-            jgm.cur.execute(drop_if_exist_jg_view)
-            jgm.cur.execute(jg_query_view)
-            jgm.stats.stopTimer('materialize_jg')
-            pgen.gen_patterns(jg=n,
-                              jg_name=f"jg_{n.jg_number}", 
-                              renaming_dict=renaming_dict, 
-                              skip_cols=n.ignored_attrs, 
-                              s_rate_for_s=sample_rate_for_s,
-                              pattern_recall_threshold=min_recall_threshold,
-                              numercial_attr_filter_method=numercial_attr_filter_method,
-                              max_sample_factor=max_sample_factor,
-                              original_pt_size=pt_size,
-                              user_questions_map=user_questions_map,
-                              f1_calculation_type=f1_calculation_type,
-                              f1_calculation_sample_rate=f1_sample_rate,
-                              f1_calculation_min_size=f1_min_sample_size_threshold,
-                              user_assigned_num_pred_cap=user_assigned_max_num_pred
-                              )
+            if(apt_q is not None):
+              val_and_non_redundant +=1 
+            else:
+              n.redundant = True
+              continue
+      valid_result = [v for v in valid_result if not v.redundant]
+
+      logger.debug(f'we found {len(valid_result)} valid join graphs, now materializing and generating patterns')
+
+      for vr in valid_result:
+        drop_if_exist_jg_view = "DROP MATERIALIZED VIEW IF EXISTS {} CASCADE;".format('jg_{}'.format(n.jg_number))
+        jg_query_view = "CREATE MATERIALIZED VIEW {} AS {}".format('jg_{}'.format(n.jg_number), apt_q)
+        jgm.cur.execute(drop_if_exist_jg_view)
+        jgm.cur.execute(jg_query_view)
+        jgm.stats.stopTimer('materialize_jg')
+        pgen.gen_patterns(jg=n,
+                          jg_name=f"jg_{n.jg_number}", 
+                          renaming_dict=renaming_dict, 
+                          skip_cols=n.ignored_attrs, 
+                          s_rate_for_s=sample_rate_for_s,
+                          pattern_recall_threshold=min_recall_threshold,
+                          numercial_attr_filter_method=numercial_attr_filter_method,
+                          max_sample_factor=max_sample_factor,
+                          original_pt_size=pt_size,
+                          user_questions_map=user_questions_map,
+                          f1_calculation_type=f1_calculation_type,
+                          f1_calculation_sample_rate=f1_sample_rate,
+                          f1_calculation_min_size=f1_min_sample_size_threshold,
+                          user_assigned_num_pred_cap=user_assigned_max_num_pred
+                          )
     else:
       # cost_estimate_dict 
       cost_estimate_dict = {i:[] for i in range(0,maximum_edges+1)}
@@ -288,19 +294,24 @@ def run_experiment(result_schema,
       for vr in valid_result:
           if(vr.intermediate==False):
                 cost_estimate, renaming_dict, apt_q = jgm.materialize_jg(vr,cost_estimate=True)
-                vr.cost = cost_estimate
-                vr.apt_create_q = apt_q
-                vr.renaming_dict = renaming_dict
-                cost_estimate_dict[vr.num_edges].append(vr.cost)
+                if(apt_q is not None):
+                  vr.cost = cost_estimate
+                  vr.apt_create_q = apt_q
+                  vr.renaming_dict = renaming_dict
+                  cost_estimate_dict[vr.num_edges].append(vr.cost)
+                else:
+                  vr.redundant=True
+                  continue
+      valid_result = [v for v in valid_result if not v.redundant]
 
       avg_cost_estimate_by_num_edges = {k:mean(v) for k,v in cost_estimate_dict.items()}
       logger.debug(f'we found {len(valid_result)} valid join graphs, now materializing and generating patterns')
       jg_cnt=1
       for n in valid_result:
-        logger.debug(f'we are on joign graph number {jg_cnt}')
+        logger.debug(f'we are on join graph number {jg_cnt}')
         jg_cnt+=1
         if(n.intermediate==False):
-          if(n.cost<=avg_cost_estimate_by_num_edges[n.num_edges]*1.5):
+          if(n.cost<=avg_cost_estimate_by_num_edges[n.num_edges]*1.5 and not n.redundant):
             cost_friendly_jgs.append(n) 
             jgm.stats.startTimer('materialize_jg')
             drop_if_exist_jg_view = "DROP MATERIALIZED VIEW IF EXISTS {} CASCADE;".format('jg_{}'.format(n.jg_number))
@@ -326,7 +337,8 @@ def run_experiment(result_schema,
           else:
             not_cost_friendly_jgs.append(n)
 
-    jgg.stats.params['valid_jgs_cost_high']=len(not_cost_friendly_jgs)
+      jgg.stats.params['valid_jgs_cost_high']=len(not_cost_friendly_jgs)
+
     ranked_pattern_by_jg = pgen.rank_patterns(ranking_type = 'by_jg')
 
     patterns_all = pgen.rank_patterns(ranking_type = 'global')
