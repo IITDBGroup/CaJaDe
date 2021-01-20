@@ -178,9 +178,9 @@ def run_experiment(result_schema,
                    min_recall_threshold,
                    numercial_attr_filter_method,
                    f1_sample_rate,
-                   exclude_high_cost_jg = (True, 't'),
+                   exclude_high_cost_jg = (False, 'f'),
                    f1_calculation_type = 'o',
-                   user_assigned_max_num_pred = 2,
+                   user_assigned_max_num_pred = 3,
                    f1_min_sample_size_threshold=100,
                    max_sample_factor=5, 
                    statstracker=ExperimentParams()):
@@ -245,7 +245,6 @@ def run_experiment(result_schema,
 
     pgen = Pattern_Generator(conn) 
 
-    pattern_total = []
     pattern_ranked_within_jg = {}
 
     cost_friendly_jgs = []
@@ -253,29 +252,30 @@ def run_experiment(result_schema,
 
 
     if(exclude_high_cost_jg[0]==False):
+      valid_result = [v for v in valid_result if not v.intermediate]
       for n in valid_result:
-          if(n.intermediate==False):
-            jgm.stats.startTimer('materialize_jg')
-            _, renaming_dict, apt_q = jgm.materialize_jg(n)
-            if(apt_q is not None):
-              val_and_non_redundant +=1 
-            else:
-              n.redundant = True
-              continue
+        jgm.stats.startTimer('materialize_jg')
+        cost_estimate, renaming_dict, apt_q = jgm.materialize_jg(n)
+        if(apt_q is not None):
+          n.cost = cost_estimate
+          n.apt_create_q = apt_q
+          n.renaming_dict = renaming_dict
+        else:
+          n.redundant = True
+          continue
+          
       valid_result = [v for v in valid_result if not v.redundant]
 
-      logger.debug(f'we found {len(valid_result)} valid join graphs, now materializing and generating patterns')
-
       for vr in valid_result:
-        drop_if_exist_jg_view = "DROP MATERIALIZED VIEW IF EXISTS {} CASCADE;".format('jg_{}'.format(n.jg_number))
-        jg_query_view = "CREATE MATERIALIZED VIEW {} AS {}".format('jg_{}'.format(n.jg_number), apt_q)
+        drop_if_exist_jg_view = "DROP MATERIALIZED VIEW IF EXISTS {} CASCADE;".format('jg_{}'.format(vr.jg_number))
+        jg_query_view = "CREATE MATERIALIZED VIEW {} AS {}".format('jg_{}'.format(vr.jg_number), vr.apt_create_q)
         jgm.cur.execute(drop_if_exist_jg_view)
         jgm.cur.execute(jg_query_view)
         jgm.stats.stopTimer('materialize_jg')
-        pgen.gen_patterns(jg=n,
-                          jg_name=f"jg_{n.jg_number}", 
-                          renaming_dict=renaming_dict, 
-                          skip_cols=n.ignored_attrs, 
+        pgen.gen_patterns(jg=vr,
+                          jg_name=f"jg_{vr.jg_number}", 
+                          renaming_dict=vr.renaming_dict, 
+                          skip_cols=vr.ignored_attrs, 
                           s_rate_for_s=sample_rate_for_s,
                           pattern_recall_threshold=min_recall_threshold,
                           numercial_attr_filter_method=numercial_attr_filter_method,
@@ -289,19 +289,20 @@ def run_experiment(result_schema,
                           )
     else:
       # cost_estimate_dict 
+      valid_result = [v for v in valid_result if not v.intermediate]
+
       cost_estimate_dict = {i:[] for i in range(0,maximum_edges+1)}
       # logger.debug(cost_estimate_dict)
       for vr in valid_result:
-          if(vr.intermediate==False):
-                cost_estimate, renaming_dict, apt_q = jgm.materialize_jg(vr,cost_estimate=True)
-                if(apt_q is not None):
-                  vr.cost = cost_estimate
-                  vr.apt_create_q = apt_q
-                  vr.renaming_dict = renaming_dict
-                  cost_estimate_dict[vr.num_edges].append(vr.cost)
-                else:
-                  vr.redundant=True
-                  continue
+            cost_estimate, renaming_dict, apt_q = jgm.materialize_jg(vr,cost_estimate=True)
+            if(apt_q is not None):
+              vr.cost = cost_estimate
+              vr.apt_create_q = apt_q
+              vr.renaming_dict = renaming_dict
+              cost_estimate_dict[vr.num_edges].append(vr.cost)
+            else:
+              vr.redundant=True
+              continue
       valid_result = [v for v in valid_result if not v.redundant]
 
       avg_cost_estimate_by_num_edges = {k:mean(v) for k,v in cost_estimate_dict.items()}
@@ -309,6 +310,7 @@ def run_experiment(result_schema,
       jg_cnt=1
       for n in valid_result:
         logger.debug(f'we are on join graph number {jg_cnt}')
+        logger.debug(n)
         jg_cnt+=1
         if(n.intermediate==False):
           if(n.cost<=avg_cost_estimate_by_num_edges[n.num_edges]*1.5 and not n.redundant):
@@ -341,8 +343,11 @@ def run_experiment(result_schema,
 
     ranked_pattern_by_jg = pgen.rank_patterns(ranking_type = 'by_jg')
 
+    topk_from_top_jgs = pgen.topk_avg_jg_patterns(num_jg=5, k_p=5, sortby='entropy')
+
     patterns_all = pgen.rank_patterns(ranking_type = 'global')
 
+    logger.debug(f'total number of patterns {len(patterns_all)}')
 
     # collect stats 
     stats_trackers = [jgg.stats, jgm.stats, pgen.stats, statstracker]
@@ -350,6 +355,7 @@ def run_experiment(result_schema,
     Create_Stats_Table(conn=conn, stats_trackers=stats_trackers, stats_relation_name='time_and_params', schema=result_schema)
     InsertStats(conn=conn, stats_trackers=stats_trackers, stats_relation_name='time_and_params', schema=result_schema)
     InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=patterns_all, pattern_relation_name='patterns', schema=result_schema)
+    InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=topk_from_top_jgs, pattern_relation_name='topk_patterns_from_top_jgs', schema=result_schema)
     conn.close()
 
 
@@ -424,7 +430,7 @@ if __name__ == '__main__':
   u_question =["season_name='2015-16'","season_name='2012-13'"]
   user_specified_attrs = (('team','team'),('season','season_name'))
   max_sample_factor = 2
-  exclude_high_cost_jg = (True,'t')
+  exclude_high_cost_jg = (False,'f')
 
   args=parser.parse_args()
 

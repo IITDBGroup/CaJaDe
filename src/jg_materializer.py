@@ -97,7 +97,7 @@ class Join_Graph_Materializer:
         'original_attr_name':t_a_name, 
         'is_part_of_pk':ispk, 'table_pk':t_pk, 'ec_id':ec_id}
         
-        logger.debug(res)
+        # logger.debug(res)
 
         return res
 
@@ -116,7 +116,7 @@ class Join_Graph_Materializer:
         reg_rc_line = re.compile(r'EC T_ProjectionOperator.*\nList size [0-9]+\n({.*})')
         rc_line = reg_rc_line.search(outoput).group(1)
         res = re.findall(r'(\{.*?\})', rc_line)
-        logger.debug(res)
+        # logger.debug(res)
 
         return [x.strip('{}').split(' ') for x in res]
 
@@ -180,7 +180,7 @@ class Join_Graph_Materializer:
         """
 
         # logger.debug(self.db_dict)
-        logger.debug(jg_rename_dict)
+        # logger.debug(jg_rename_dict)
 
         if(self.pt_ec is None):
             pt_raw_ec = self.gen_ec(self.user_query)
@@ -189,16 +189,16 @@ class Join_Graph_Materializer:
             # only need to do this once since every jg will have the same 
             # mapping scheme for PT node 
 
-        logger.debug(self.pt_ec)
+        # logger.debug(self.pt_ec)
         
         jg_target_ec = [x for x in self.gen_ec(jg_target_query)
             if x!="pnumber" and x!="is_user"]
         
-        logger.debug(jg_target_ec)
+        # logger.debug(jg_target_ec)
 
         jg_target_ec = self.modifiy_jg_ec(jg_target_ec, self.pt_ec)
 
-        logger.debug(jg_target_ec)
+        # logger.debug(jg_target_ec)
 
         # rules to check if a jg_target is bringing new info using ECs
         # 1) if 2 ECs have the same number of entries, then it is guaranteed to be redundant

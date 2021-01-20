@@ -16,7 +16,6 @@ from copy import deepcopy
 
 logger = logging.getLogger(__name__)
 
-
 class PatternGeneratorStats(ExecStats):
     """
     Statistics gathered during mining
@@ -61,54 +60,101 @@ class Pattern_Generator:
 
         pending_pattern['desc'] = []
 
+        # logger.debug(pending_pattern)
+        # logger.debug(renaming_dict)
+
         for nt in pending_pattern['nominal_values']:
+            re_a_index = int(re.findall(r'([0-9]+)', nt[0])[0])
             for k_n, v_n in renaming_dict.items():
                 if(k_n=='max_rel_index' or k_n=='max_attr_index' or k_n=='dtypes'):
                     continue
                 else:
-                    for k1,v1 in v_n['columns'].items():
-                        if(v1==nt[0]):
-                            pending_pattern['desc'].append(f"{v_n['label']}_{k_n}.{k1}={nt[1]}")
-
+                    if(re_a_index>=v_n['rel_min_attr_index'] and re_a_index<=v_n['rel_max_attr_index']):
+                        pending_pattern['desc'].append(f"{v_n['label']}_{k_n}.{renaming_dict[k_n]['columns'][nt[0]]}={nt[1]}")
+                        break
 
         if('ordinal_values' in pending_pattern):
             for ot in pending_pattern['ordinal_values']:
+                re_a_index = int(re.findall(r'([0-9]+)', ot[0])[0])
                 for k_o, v_o in renaming_dict.items():
                     if(k_o=='max_rel_index' or k_o=='max_attr_index' or k_o=='dtypes'):
                         continue
                     else:
-                        for k2,v2 in v_o['columns'].items():
-                            if(v2 == ot[0]):
-                                pending_pattern['desc'].append(f"{v_o['label']}_{k_o}.{k2}{ot[1]}{ot[2]}")
+                        if(re_a_index>=v_o['rel_min_attr_index'] and re_a_index<=v_o['rel_max_attr_index']):
+                            pending_pattern['desc'].append(f"{v_o['label']}_{k_o}.{renaming_dict[k_o]['columns'][ot[0]]}{ot[1]}{ot[2]}")
+                            break
 
         if('correlated_attrs' in pending_pattern and bool(pending_pattern['correlated_attrs'])):
             correlated_attrs_recover_dict = {}
             for k,v in pending_pattern['correlated_attrs'].items():
+                re_a_index = int(re.findall(r'([0-9]+)', k)[0])
                 for k_r, v_r in renaming_dict.items():
                     if(k_r=='max_rel_index' or k_r=='max_attr_index' or k_r=='dtypes'):
                         continue
                     else:
-                        for k2,v2 in v_r['columns'].items():
-                            if(v2 == k):
-                                correlated_attrs_recover_dict[k2] = v
+                        if(re_a_index>=v_r['rel_min_attr_index'] and re_a_index<=v_r['rel_max_attr_index']):
+                            correlated_attrs_recover_dict[renaming_dict[k_r]['columns'][k]] = v
+                            break
+            # logger.debug(correlated_attrs_recover_dict)
 
             for used_col, cor_cols in correlated_attrs_recover_dict.items():
                 for i in range(len(cor_cols)):
+                    re_a_index = int(re.findall(r'([0-9]+)', cor_cols[i])[0])
                     for k_rr, v_rr in renaming_dict.items():
                         if(k_rr=='max_rel_index' or k_rr=='max_attr_index' or k_rr=='dtypes'):
                             continue
                         else:
-                            for k2,v2 in v_rr['columns'].items():
-                                if(v2 == cor_cols[i][0]):
-                                    correlated_attrs_recover_dict[used_col][i] = k2
+                            if(re_a_index>=v_rr['rel_min_attr_index'] and re_a_index<=v_rr['rel_max_attr_index']):
+                                correlated_attrs_recover_dict[used_col][i] = renaming_dict[k_rr]['columns'][cor_cols[i]]
+                                break
 
             pending_pattern['correlated_attrs'] = correlated_attrs_recover_dict
 
         pending_pattern['desc'] = ','.join(sorted(pending_pattern['desc']))
         pending_pattern['num_edges'] = pending_pattern['join_graph'].num_edges
         pending_pattern['is_user'] = user_questions_map[pending_pattern['is_user']]
+        # logger.debug(pending_pattern)
+
 
         return pending_pattern
+
+    def topk_avg_jg_patterns(self, num_jg=3, k_p=5, sortby='avg'):
+        """
+        return patterns from top num_jg jgs with 
+        top k patterns from each jg
+
+        sortby options: 'avg', 'entropy', 'stddv'
+        """
+        res = []
+
+        if(sortby=='avg'):
+            avg_list = []
+            for k,v in self.pattern_by_jg.items():
+                if(bool(self.pattern_by_jg[k])):
+                    avg_list.append((k,mean([x['F1'] for x in self.pattern_by_jg[k]])))
+
+            avg_list.sort(key = lambda x: x[1], reverse = True)
+
+            first_num_jgs = [j[0] for j in avg_list[0:num_jg]]
+
+
+        elif(sortby=='entropy'):
+
+            jg_entropy_list = []
+
+            for j in self.pattern_by_jg:
+                value,counts = np.unique([f['F1'] for f in self.pattern_by_jg[j]], return_counts=True)
+                jg_entropy_list.append((j,entropy(counts)))
+            
+            jg_entropy_list.sort(key = lambda p: p[1], reverse = True)
+            first_num_jgs = [j[0] for j in jg_entropy_list[0:num_jg]]
+
+
+        for jg in first_num_jgs:
+            self.pattern_by_jg[jg].sort(key = lambda p: p['F1'], reverse = True)
+            res.extend(self.pattern_by_jg[jg][0:k_p])
+
+        return res
 
 
     def rank_patterns(self, ranking_type='global'):
@@ -144,6 +190,7 @@ class Pattern_Generator:
 
         # logger.debug(patterns_to_extend)
         # logger.debug(numerical_variable_candidates)
+        # logger.debug(numerical_quartiles)
         for pte in patterns_to_extend:
             for n in numerical_variable_candidates:
                 if(n[0]>pte['max_cluster_rank']):
@@ -154,17 +201,16 @@ class Pattern_Generator:
                             new_ordinal_values.append((n[1],one_dir,val))
                             new_correlated_attrs = deepcopy(pte['correlated_attrs'])
                             self.stats.stopTimer('deepcopy')
-                            new_correlated_attrs[n[1]] = correlation_dict[n[1]]  
-                            is_user=pte['is_user']
+                            new_correlated_attrs[n[1]] = deepcopy(correlation_dict[n[1]])  
+                            is_user=deepcopy(pte['is_user'])
                             # one_patt_with_ordi_dir_yes 
                             candidates_to_return.append({'join_graph':pte['join_graph'], 'recall':0, 'precision':0, 
-                                'nominal_values': pte['nominal_values'], 
+                                'nominal_values': deepcopy(pte['nominal_values']), 
                                 'ordinal_values': new_ordinal_values,
                                 'correlated_attrs': new_correlated_attrs,
                                 'max_cluster_rank': n[0],                                            
                                 'is_user': is_user})
-
-        
+        # logger.debug(candidates_to_return)
         return candidates_to_return
 
     
@@ -395,6 +441,7 @@ class Pattern_Generator:
                 pattern['precision'] = 0
             else:
                 pattern['precision'] = float(prec)
+            # logger.debug(pattern)
 
             return pattern, True
 
@@ -442,8 +489,8 @@ class Pattern_Generator:
         many important features will be considered? it is equal to user_assigned_num_pred_cap*num_numerical_attr_rate
         """
 
-        logger.debug(jg.jg_number)
-        logger.debug(renaming_dict)
+        # logger.debug(jg.jg_number)
+        # logger.debug(renaming_dict)
         # logger.debug(f"""prov_version={prov_version}, max_sample_factor={max_sample_factor}, s_rate_for_s={s_rate_for_s}, \n
         #     pattern_recall_threshold={pattern_recall_threshold}, numercial_attr_filter_method={numercial_attr_filter_method}, original_pt_size={original_pt_size}""")
 
@@ -573,10 +620,10 @@ class Pattern_Generator:
 
 
         self.stats.startTimer('create_samples')
-        attrs_from_spec_node = set([v for k,v in renaming_dict[jg.spec_node_key]['columns'].items()])
+        attrs_from_spec_node = set([k for k in renaming_dict[jg.spec_node_key]['columns']])
 
-        # logger.debug(renaming_dict)
-        # logger.debug(attrs_from_spec_node)
+        logger.debug(renaming_dict)
+        logger.debug(attrs_from_spec_node)
 
         get_attrs_q = f"""
         select atr.attname
@@ -775,6 +822,7 @@ class Pattern_Generator:
                 n_pa_dict['nominal_values'] = [(k, v) for k, v in n_pa.items() if (v is not None and not pd.isnull(v))]
                 nominal_pattern_dict_list.append(n_pa_dict) 
 
+            # logger.debug(nominal_pattern_dict_list)
 
 
             if(numercial_attr_filter_method=='y'):
@@ -804,11 +852,12 @@ class Pattern_Generator:
                 # remove constant
                 cor_df = cor_df.loc[:, (cor_df != cor_df.iloc[0]).any()] 
 
-                variable_clustering = VarClusHi(cor_df, maxeigval2=0.5, maxclus=None)
+                variable_clustering = VarClusHi(cor_df, maxeigval2=1.5, maxclus=None)
                 variable_clustering.varclus()
 
                 cluster_dict = variable_clustering.rsquare[['Cluster', 'Variable']].groupby('Cluster')['Variable'].apply(list).to_dict()
-
+                logger.debug(cluster_dict)
+                logger.debug(renaming_dict)
                 for k,v in cluster_dict.items():
                     cluster_dict[k] = [[x,0,0] for x in v]      
 
@@ -838,9 +887,12 @@ class Pattern_Generator:
                     rf_input_vars.append(representative_var_for_clust)
                     correlation_dict[representative_var_for_clust] = [cora[0] for cora in cluster_dict[k][1:]]
 
+                logger.debug(correlation_dict)
+
                 # finish clustering here
 
                 rf_df = cor_df[rf_input_vars]
+                # logger.debug(rf_df)
                 target = raw_df['is_user']
                 le = LabelEncoder()
                 y = le.fit(target)
@@ -849,6 +901,7 @@ class Pattern_Generator:
                 forest.fit(rf_df, y)
                 importances = [list(t) for t in zip(rf_df, forest.feature_importances_)]
                 importances = sorted(importances, key = lambda x: x[1], reverse=True)
+                logger.debug(importances)
 
                 self.stats.stopTimer('numercial_attr_filter')
 
@@ -889,7 +942,6 @@ class Pattern_Generator:
                         for npair in npa['nominal_values']:
                             npa['ordinal_quartiles'] = {}
                             nominal_where_cond_list = []
-                            # logger.debug(npair)
                             nominal_where_cond_list.append("{}='{}'".format(npair[0],npair[1].replace("'","''")))
 
                         for n in importances:
@@ -906,11 +958,14 @@ class Pattern_Generator:
 
                             npa['ordinal_quartiles'][n[0]] = [x[0] for x in self.cur.fetchall()]
 
+                        # logger.debug(npa['ordinal_quartiles'])
+
                         attrs_with_const_set = set([x[0] for x in npa['nominal_values']])
 
                         self.stats.stopTimer('enumerate_all_from_nominal_patterns')
 
                         if(len(attrs_from_spec_node.intersection(attrs_with_const_set))>0): 
+                            # logger.debug("already has at least one attr from last node")
                             
                             self.stats.startTimer('enumerate_all_from_nominal_patterns')
 
@@ -918,6 +973,7 @@ class Pattern_Generator:
                             importance_feature_ranks = list(enumerate([x[0] for x in importances],0))
 
                             max_number_of_numerical_possible = len(importance_feature_ranks)
+                            # logger.debug(f"max_number_of_numerical_possible : {max_number_of_numerical_possible} ")
 
                             if(max_number_of_numerical_possible<=num_feature_to_consider):
                                 # if the number of clusters are smaller than the desired 
@@ -925,6 +981,8 @@ class Pattern_Generator:
                                 numerical_variable_candidates = importance_feature_ranks
                             else:
                                 numerical_variable_candidates = importance_feature_ranks[0:num_feature_to_consider]
+
+                            # logger.debug(numerical_variable_candidates)
 
                             cur_number_of_numercial_attrs = 0
 
@@ -934,7 +992,8 @@ class Pattern_Generator:
                             self.stats.stopTimer('enumerate_all_from_nominal_patterns')
 
                             # logger.debug(f"in has last node case: user_assigned_num_pred_cap: {user_assigned_num_pred_cap}")
-                            while(cur_pattern_candidates and cur_number_of_numercial_attrs<user_assigned_num_pred_cap):
+
+                            while(cur_pattern_candidates and cur_number_of_numercial_attrs<=user_assigned_num_pred_cap):
                                 good_candidates=[]
 
                                 for pc in cur_pattern_candidates:
@@ -948,6 +1007,7 @@ class Pattern_Generator:
                                         self.stats.startTimer('deepcopy')
                                         val_pat = deepcopy(pc_processed)
                                         self.stats.stopTimer('deepcopy')
+                                        # logger.debug(val_pat)
                                         valid_patterns.append(val_pat)
                                         good_candidates.append(pc_processed)
 
@@ -1009,6 +1069,7 @@ class Pattern_Generator:
                                         val_pat = deepcopy(ic_processed)
                                         self.stats.stopTimer('deepcopy')
                                         valid_patterns.append(val_pat)
+                                        # logger.debug(val_pat)
                                         cur_pattern_candidates.append(ic_processed)
 
                                 if(max_number_of_numerical_possible<=num_feature_to_consider):
@@ -1024,7 +1085,7 @@ class Pattern_Generator:
 
                                 # logger.debug(f"in no last node case: user_assigned_num_pred_cap: {user_assigned_num_pred_cap}")
 
-                                while(cur_pattern_candidates and cur_number_of_numercial_attrs<user_assigned_num_pred_cap):
+                                while(cur_pattern_candidates and cur_number_of_numercial_attrs<=user_assigned_num_pred_cap):
                                     
                                     good_candidates=[]
 
@@ -1051,6 +1112,7 @@ class Pattern_Generator:
                                                     val_pat = deepcopy(pc_processed)
                                                     self.stats.stopTimer('deepcopy')
                                                     valid_patterns.append(val_pat)
+                                                    # logger.debug(val_pat)
                                                     good_candidates.append(pc_processed)
 
                                     cur_pattern_candidates = good_candidates
@@ -1139,9 +1201,9 @@ class Pattern_Generator:
                         cur_number_numerical+=1
                         ordi_three_attr_pairs = list(itertools.combinations(list(npa['ordinal_quartiles']),3))
                         dir_combinations = list(itertools.product(['>', '<'], repeat=3))
-                        logger.debug(ordi_three_attr_pairs)
+                        # logger.debug(ordi_three_attr_pairs)
                         for n in ordi_three_attr_pairs:
-                            logger.debug(n)
+                            # logger.debug(n)
                             attrs_with_const_set = set([x[0] for x in npa['nominal_values']] + list(n))
                             if(len(attrs_from_spec_node.intersection(attrs_with_const_set))>0):
                                 for val_pair in itertools.product(npa['ordinal_quartiles'][n[0]],npa['ordinal_quartiles'][n[1]],npa['ordinal_quartiles'][n[2]]):
@@ -1173,6 +1235,7 @@ class Pattern_Generator:
                         valid_patterns.append(pc_processed)
 
             if(valid_patterns):
+                # logger.debug(f"number of valid patterns {len(valid_patterns)}")
                 for vp in valid_patterns:
                     self.stats.startTimer('pattern_recover')
                     vp_recovered = self.pattern_recover(renaming_dict, vp, user_questions_map)
