@@ -59,6 +59,7 @@ class Pattern_Generator:
     def pattern_recover(self, renaming_dict, pending_pattern, user_questions_map):
 
         pending_pattern['desc'] = []
+        pending_pattern['tokens'] = {}
 
         # logger.debug(pending_pattern)
         # logger.debug(renaming_dict)
@@ -71,6 +72,7 @@ class Pattern_Generator:
                 else:
                     if(re_a_index>=v_n['rel_min_attr_index'] and re_a_index<=v_n['rel_max_attr_index']):
                         pending_pattern['desc'].append(f"{v_n['label']}_{k_n}.{renaming_dict[k_n]['columns'][nt[0]]}={nt[1]}")
+                        pending_pattern['tokens'][f"{v_n['label']}_{k_n}.{renaming_dict[k_n]['columns'][nt[0]]}"]=f"{nt[1]}"
                         break
 
         if('ordinal_values' in pending_pattern):
@@ -82,6 +84,7 @@ class Pattern_Generator:
                     else:
                         if(re_a_index>=v_o['rel_min_attr_index'] and re_a_index<=v_o['rel_max_attr_index']):
                             pending_pattern['desc'].append(f"{v_o['label']}_{k_o}.{renaming_dict[k_o]['columns'][ot[0]]}{ot[1]}{ot[2]}")
+                            pending_pattern['tokens'][f"{v_o['label']}_{k_o}.{renaming_dict[k_o]['columns'][ot[0]]}"]=f"{ot[2]}"
                             break
 
         if('correlated_attrs' in pending_pattern and bool(pending_pattern['correlated_attrs'])):
@@ -118,7 +121,7 @@ class Pattern_Generator:
 
         return pending_pattern
 
-    def topk_avg_jg_patterns(self, num_jg=3, k_p=5, sortby='avg'):
+    def topk_jg_patterns(self, num_jg=3, k_p=5, sortby='avg'):
         """
         return patterns from top num_jg jgs with 
         top k patterns from each jg
@@ -156,6 +159,72 @@ class Pattern_Generator:
 
         return res
 
+    def pattern_diversification(self, 
+                            pattern_pool,
+                            k=5, 
+                            same_attr_weight=-1, # punish patterns sharing same attribute
+                            diff_attr_weight= 1, # encourage more diverse attribute 
+                            diff_val_weight=0.5, # must be smaller than 1
+                            same_val_weight=1, # punish same attr and same value,
+                            pass_thresh=0.5 # must be smaller than 1 
+                            ):
+        # record patterns' info as new patterns being added and everytime a new pattern 
+        # comes in, we iteratively compute its similarities between itself and the previously
+        # added patterns.
+
+        # evaluate if 
+        # f1*weight + diff_attr_weight + sum(same_attr_weight*identity[attr_value]) > pass_thresh
+
+        res = []
+
+        res.append(pattern_pool[0])
+        # logger.debug(f"diversification : {pattern_pool[0]['join_graph']}")
+
+        num_patterns = 1
+        # add the highest ranked pattern in terms
+        # of fscore as the starting point 
+
+        for i in range(1, len(pattern_pool)):
+            pat = pattern_pool[i]
+            p_print = pat['desc'].replace("'","''")
+            # logger.debug(p_print)
+            scores = [] 
+            pass_thresh_score = pass_thresh*pat['F1']
+            # logger.debug(f"pass_thresh_score : {pass_thresh_score}")
+            # similarity scores compared with the 
+            # patterns in current res
+            # logger.debug(res)
+            for r in res:
+                repeated_attrs = []
+                diff_attrs = []
+
+                for pk,pv in pat['tokens'].items():
+                    if(pk in r['tokens']):
+                        # logger.debug(f"{pk}={pv}")
+                        # logger.debug(f"{r['tokens'][pk]}")
+                        if(pv == r['tokens'][pk]):
+                            repeated_attrs.append(same_val_weight)
+                        else:
+                            repeated_attrs.append(diff_val_weight)
+                    else:
+                        diff_attrs.append(diff_attr_weight)
+
+                scores.append(pat['F1']+(sum(repeated_attrs)*same_attr_weight
+                    +sum(diff_attrs)*diff_attr_weight)/len(pat['tokens']))
+                # logger.debug(f"{pat['F1']} + (sum{repeated_attrs}*{same_attr_weight}+sum{diff_attrs}*{diff_attr_weight})/{len(pat['tokens'])}")
+
+            min_sim = min(scores)
+            # logger.debug(f"min_sim: {min_sim}")
+
+            if(min_sim>=pass_thresh_score):
+                res.append(pat)
+                num_patterns+=1
+                if(num_patterns==k):
+                    break
+
+        # logger.debug(res)
+        print('\n')
+        return res 
 
     def rank_patterns(self, ranking_type='global'):
         # organize patterns: either 'global' or 'by_jg'
@@ -852,7 +921,7 @@ class Pattern_Generator:
                 # remove constant
                 cor_df = cor_df.loc[:, (cor_df != cor_df.iloc[0]).any()] 
 
-                variable_clustering = VarClusHi(cor_df, maxeigval2=1.5, maxclus=None)
+                variable_clustering = VarClusHi(cor_df, maxeigval2=1, maxclus=None)
                 variable_clustering.varclus()
 
                 cluster_dict = variable_clustering.rsquare[['Cluster', 'Variable']].groupby('Cluster')['Variable'].apply(list).to_dict()

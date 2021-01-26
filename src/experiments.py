@@ -343,7 +343,14 @@ def run_experiment(result_schema,
 
     ranked_pattern_by_jg = pgen.rank_patterns(ranking_type = 'by_jg')
 
-    topk_from_top_jgs = pgen.topk_avg_jg_patterns(num_jg=5, k_p=5, sortby='entropy')
+    top_k_from_each_jg = []
+
+    for k,v in ranked_pattern_by_jg.items():
+      # logger.debug(v)
+      if(v):
+        top_k_from_each_jg.extend(pgen.pattern_diversification(v))
+
+    topk_from_top_jgs = pgen.topk_jg_patterns(num_jg=5, k_p=5, sortby='entropy')
 
     patterns_all = pgen.rank_patterns(ranking_type = 'global')
 
@@ -355,6 +362,7 @@ def run_experiment(result_schema,
     Create_Stats_Table(conn=conn, stats_trackers=stats_trackers, stats_relation_name='time_and_params', schema=result_schema)
     InsertStats(conn=conn, stats_trackers=stats_trackers, stats_relation_name='time_and_params', schema=result_schema)
     InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=patterns_all, pattern_relation_name='patterns', schema=result_schema)
+    InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=top_k_from_each_jg, pattern_relation_name='topk_from_each_jg', schema=result_schema)
     InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=topk_from_top_jgs, pattern_relation_name='topk_patterns_from_top_jgs', schema=result_schema)
     conn.close()
 
@@ -386,6 +394,9 @@ if __name__ == '__main__':
 
   parser.add_argument('-o','--optimized', metavar="\b", type=str, default='y', 
     help='use opt or not (y: yes, n: no), (default: %(default)s)')
+
+  parser.add_argument('-i','--ignore_expensive', metavar="\b", type=str, default='true', 
+    help='skip expensive jg or not, (default: %(default)s)')
 
   parser.add_argument('-s','--db_size', metavar="\b", type=float, default=1.0, 
     help='scale factor of database, (default: %(default)s)')
@@ -430,7 +441,6 @@ if __name__ == '__main__':
   u_question =["season_name='2015-16'","season_name='2012-13'"]
   user_specified_attrs = (('team','team'),('season','season_name'))
   max_sample_factor = 2
-  exclude_high_cost_jg = (False,'f')
 
   args=parser.parse_args()
 
@@ -441,6 +451,12 @@ if __name__ == '__main__':
     result_schema = f"exp_{str_time}"
   else:
     result_schema = args.result_schema
+
+  if(args.ignore_expensive=='true'):
+    exclude_high_cost_jg = (True, 't')
+  else:
+    exclude_high_cost_jg = (False, 'f')
+
 
   run_experiment(
     result_schema = result_schema,
