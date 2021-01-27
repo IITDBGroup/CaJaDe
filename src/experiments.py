@@ -265,6 +265,7 @@ def run_experiment(result_schema,
           continue
           
       valid_result = [v for v in valid_result if not v.redundant]
+      logger.debug(f'we found {len(valid_result)} valid join graphs, now materializing and generating patterns')
 
       for vr in valid_result:
         drop_if_exist_jg_view = "DROP MATERIALIZED VIEW IF EXISTS {} CASCADE;".format('jg_{}'.format(vr.jg_number))
@@ -437,6 +438,7 @@ if __name__ == '__main__':
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
   user_query = "provenance of (select count(*) as win, s.season_name from team t, game g, season s where t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' group by s.season_name);"
+  # user_query = "provenance of (select count(*) as gcnt, s.season_name from team t, game g, season s where (t.team_id = g.home_id or t.team_id=g.away_id) and g.season_id = s.season_id and t.team= 'GSW' group by s.season_name);"
   u_query = (user_query, 'n1')
   u_question =["season_name='2015-16'","season_name='2012-13'"]
   user_specified_attrs = (('team','team'),('season','season_name'))

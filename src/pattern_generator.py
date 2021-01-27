@@ -164,9 +164,9 @@ class Pattern_Generator:
                             k=5, 
                             same_attr_weight=-1, # punish patterns sharing same attribute
                             diff_attr_weight= 1, # encourage more diverse attribute 
-                            diff_val_weight=0.5, # must be smaller than 1
-                            same_val_weight=1, # punish same attr and same value,
-                            pass_thresh=0.5 # must be smaller than 1 
+                            diff_val_weight=0.3, # must be smaller than 1
+                            same_val_weight=2, # punish same attr and same value,
+                            pass_thresh=0.3 # must be smaller than 1 
                             ):
         # record patterns' info as new patterns being added and everytime a new pattern 
         # comes in, we iteratively compute its similarities between itself and the previously
@@ -219,8 +219,8 @@ class Pattern_Generator:
             if(min_sim>=pass_thresh_score):
                 res.append(pat)
                 num_patterns+=1
-                if(num_patterns==k):
-                    break
+                # if(num_patterns==k):
+                #     break
 
         # logger.debug(res)
         print('\n')
@@ -528,7 +528,7 @@ class Pattern_Generator:
                       s_rate_for_s=0.5,
                       pattern_recall_threshold=0.3, 
                       numercial_attr_filter_method = 'y',
-                      sample_repeatable = True,
+                      sample_repeatable = False,
                       seed = 0.5,
                       f1_calculation_type = 'o',
                       f1_calculation_sample_rate = 0.3,
