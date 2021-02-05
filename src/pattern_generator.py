@@ -298,6 +298,7 @@ class Pattern_Generator:
 
         if('sample' not in recall_dicts):
             f1_calculation_type='o'
+        # logger.debug(pattern)
 
         self.stats.startTimer('validate_patterns_recall_constraint')
         where_cond_list = []
@@ -496,6 +497,7 @@ class Pattern_Generator:
                 """
                
             self.stats.startTimer('run_F1_query')
+            # logger.debug(F1_q)
             self.cur.execute(F1_q)
             self.stats.stopTimer('run_F1_query')
             result = self.cur.fetchone()
@@ -526,6 +528,7 @@ class Pattern_Generator:
                       prov_version='existential',
                       max_sample_factor=5,
                       s_rate_for_s=0.5,
+                      s_max_size = 500,
                       pattern_recall_threshold=0.3, 
                       numercial_attr_filter_method = 'y',
                       sample_repeatable = True,
@@ -534,7 +537,7 @@ class Pattern_Generator:
                       f1_calculation_sample_rate = 0.3,
                       f1_calculation_min_size = 100,
                       user_assigned_num_pred_cap = 3,
-                      num_numerical_attr_rate = 1.5
+                      num_numerical_attr_rate = 1.5,
                       ):
 
         """
@@ -731,11 +734,12 @@ class Pattern_Generator:
         logger.debug(f"max_sample_factor*original_pt_size: {max_sample_factor*original_pt_size}")
         logger.debug(f"math.ceil(user_p_size*s_rate_for_s) : {math.ceil(user_p_size*s_rate_for_s)}")
 
-        s_user_p_sample_size = min(math.ceil(max_sample_factor*original_pt_size), math.ceil(user_p_size*s_rate_for_s))
+        s_user_p_sample_size = min(math.ceil(max_sample_factor*original_pt_size), math.ceil(user_p_size*s_rate_for_s), s_max_size)
         d_user_p_sample_size = s_user_p_sample_size
 
-        s_n_user_p_sample_size = min(math.ceil(max_sample_factor*original_pt_size), math.ceil(n_user_p_size*s_rate_for_s))
+        s_n_user_p_sample_size = min(math.ceil(max_sample_factor*original_pt_size), math.ceil(n_user_p_size*s_rate_for_s), s_max_size)
         d_n_user_p_sample_size = s_n_user_p_sample_size
+        logger.debug(d_n_user_p_sample_size)
 
         if(d_user_p_sample_size!=0):
             # make sure jg result is not empty            
@@ -882,6 +886,7 @@ class Pattern_Generator:
             # logger.debug(nominal_pattern_df)
 
             nominal_pattern_dicts = nominal_pattern_df.to_dict('records')
+            # logger.debug(nominal_pattern_dicts)
             self.stats.stopTimer('get_nominal_patterns')
 
             nominal_pattern_dict_list = []
@@ -889,7 +894,8 @@ class Pattern_Generator:
             for n_pa in nominal_pattern_dicts:
                 n_pa_dict = {}
                 n_pa_dict['nominal_values'] = [(k, v) for k, v in n_pa.items() if (v is not None and not pd.isnull(v))]
-                nominal_pattern_dict_list.append(n_pa_dict) 
+                if(n_pa_dict['nominal_values']):
+                    nominal_pattern_dict_list.append(n_pa_dict) 
 
             # logger.debug(nominal_pattern_dict_list)
 
@@ -903,8 +909,9 @@ class Pattern_Generator:
                 # comes from the "last node" specified in join graph 
                 # (either nominal or ordinal has to be in the patten)
 
+
                 self.stats.startTimer('numercial_attr_filter')
-                # do clustering first
+
                 Q_cor = f"""
                 SELECT {','.join(ordinal_pattern_attr_list)}, is_user 
                 FROM {jg_name} 
@@ -917,51 +924,61 @@ class Pattern_Generator:
 
                 raw_df = pd.read_sql(Q_cor, self.conn)
                 cor_df = raw_df[ordinal_pattern_attr_list]
-
-                # remove constant
-                cor_df = cor_df.loc[:, (cor_df != cor_df.iloc[0]).any()] 
-
-                variable_clustering = VarClusHi(cor_df, maxeigval2=1, maxclus=None)
-                variable_clustering.varclus()
-
-                cluster_dict = variable_clustering.rsquare[['Cluster', 'Variable']].groupby('Cluster')['Variable'].apply(list).to_dict()
-                logger.debug(cluster_dict)
-                logger.debug(renaming_dict)
-                for k,v in cluster_dict.items():
-                    cluster_dict[k] = [[x,0,0] for x in v]      
-
-                # entropy rank in each cluster to find the highest one 
-                # as the training input variable "representing" the cluster
-                # 3 elements list for each column, col[1] is for entropy, col[2] is flag indicating
-                # if it is from the  last node
-                # (from last node: 1 not from last node:0)
-
                 rf_input_vars = []
                 rep_from_last_node = []
-                correlation_dict = {} 
-                # this is for storing the correlated attrs with representative
-                
-                # random forest input variables
-                # logger.debug(attrs_from_spec_node)
-                for k,v in cluster_dict.items():
-                    for col in v:
-                        value,counts = np.unique(cor_df[col[0]], return_counts=True)
-                        col[1] = entropy(counts)
-                        if(col[0] in attrs_from_spec_node):
-                            col[2]=1
-                    cluster_dict[k] = sorted(v, key = lambda x: (x[2],x[1],x[0]), reverse=True)
-                    representative_var_for_clust = cluster_dict[k][0][0]
-                    if(representative_var_for_clust in attrs_from_spec_node):
-                        rep_from_last_node.append(representative_var_for_clust)
-                    rf_input_vars.append(representative_var_for_clust)
-                    correlation_dict[representative_var_for_clust] = [cora[0] for cora in cluster_dict[k][1:]]
 
-                logger.debug(correlation_dict)
+                if(len(ordinal_pattern_attr_list)>=5): 
+                    # if the number of numeric attributes is not large
+                    # then dont need to do clustering 
+
+                    # do clustering first
+
+                    # remove constant
+                    cor_df = cor_df.loc[:, (cor_df != cor_df.iloc[0]).any()] 
+
+                    logger.debug(cor_df.head())
+                    variable_clustering = VarClusHi(cor_df, maxeigval2=1, maxclus=None)
+                    variable_clustering.varclus()
+
+                    cluster_dict = variable_clustering.rsquare[['Cluster', 'Variable']].groupby('Cluster')['Variable'].apply(list).to_dict()
+                    # logger.debug(cluster_dict)
+                    # logger.debug(renaming_dict)
+                    for k,v in cluster_dict.items():
+                        cluster_dict[k] = [[x,0,0] for x in v]      
+
+                    # entropy rank in each cluster to find the highest one 
+                    # as the training input variable "representing" the cluster
+                    # 3 elements list for each column, col[1] is for entropy, col[2] is flag indicating
+                    # if it is from the  last node
+                    # (from last node: 1 not from last node:0)
+
+                    # this is for storing the correlated attrs with representative
+                    
+                    # random forest input variables
+                    # logger.debug(attrs_from_spec_node)
+                    for k,v in cluster_dict.items():
+                        for col in v:
+                            value,counts = np.unique(cor_df[col[0]], return_counts=True)
+                            col[1] = entropy(counts)
+                            if(col[0] in attrs_from_spec_node):
+                                col[2]=1
+                        cluster_dict[k] = sorted(v, key = lambda x: (x[2],x[1],x[0]), reverse=True)
+                        representative_var_for_clust = cluster_dict[k][0][0]
+                        if(representative_var_for_clust in attrs_from_spec_node):
+                            rep_from_last_node.append(representative_var_for_clust)
+                        rf_input_vars.append(representative_var_for_clust)
+                        correlation_dict[representative_var_for_clust] = [cora[0] for cora in cluster_dict[k][1:]]
+
+                    logger.debug(correlation_dict)
 
                 # finish clustering here
+                else:
+                    rf_input_vars = ordinal_pattern_attr_list
+                    rep_from_last_node = [r for r in rf_input_vars if r in attrs_from_spec_node]
+                    correlation_dict = dictOfWords = { i : [] for i in rf_input_vars}
 
                 rf_df = cor_df[rf_input_vars]
-                # logger.debug(rf_df)
+                logger.debug(rf_df.head())
                 target = raw_df['is_user']
                 le = LabelEncoder()
                 y = le.fit(target)

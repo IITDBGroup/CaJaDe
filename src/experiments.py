@@ -265,8 +265,13 @@ def run_experiment(result_schema,
           continue
           
       valid_result = [v for v in valid_result if not v.redundant]
+      logger.debug(f'we found {len(valid_result)} valid join graphs, now materializing and generating patterns')
+      jg_cnt=1
 
       for vr in valid_result:
+        logger.debug(f'we are on join graph number {jg_cnt}')
+        jg_cnt+=1
+        logger.debug(v)
         drop_if_exist_jg_view = "DROP MATERIALIZED VIEW IF EXISTS {} CASCADE;".format('jg_{}'.format(vr.jg_number))
         jg_query_view = "CREATE MATERIALIZED VIEW {} AS {}".format('jg_{}'.format(vr.jg_number), vr.apt_create_q)
         jgm.cur.execute(drop_if_exist_jg_view)
@@ -436,10 +441,20 @@ if __name__ == '__main__':
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-  user_query = "provenance of (select count(*) as win, s.season_name from team t, game g, season s where t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' group by s.season_name);"
-  u_query = (user_query, 'n1')
-  u_question =["season_name='2015-16'","season_name='2012-13'"]
-  user_specified_attrs = (('team','team'),('season','season_name'))
+  # user_query = "provenance of (select count(*) as win, s.season_name from team t, game g, season s where t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' group by s.season_name);"
+  # u_query = (user_query, 'n1')
+  # u_question =["season_name='2015-16'","season_name='2012-13'"]
+  # user_specified_attrs = [('team','team'),('season','season_name')]
+
+  # user_query = 'provenance of (select insurance, 1.0*SUM(hospital_expire_flag)/count(*) as death_rate from admissions group by insurance);'
+  # u_query = (user_query, 'n1')
+  # u_question =["insurance='Government'","insurance='Self Pay'"]
+  # user_specified_attrs = [('admissions','insurance')]
+
+  user_query = 'provenance of (select insurance, 1.0*SUM(hospital_expire_flag)/count(*) as death_rate from admissions group by insurance);'
+  u_query = (user_query, 'medicare vs private')
+  u_question =["insurance='Private'","insurance='Medicare'"]
+  user_specified_attrs = [('admissions',  'insurance'), ('admissions', 'hospital_expire_flag')]
   max_sample_factor = 2
 
   args=parser.parse_args()
@@ -462,7 +477,8 @@ if __name__ == '__main__':
     result_schema = result_schema,
     user_query = u_query,
     user_questions=u_question,
-    user_questions_map = {'yes':'2015-16', 'no':'2012-13'},
+    user_questions_map = {'yes':'Private', 'no':'Medicare'},
+    # user_questions_map = {'yes':'2015-16', 'no':'2012-13'},
     user_specified_attrs=user_specified_attrs,
     user_name=args.user_name,
     password=args.password,

@@ -33,12 +33,12 @@ logger = logging.getLogger(__name__)
 
 class Node:
 
-    def __init__(self,label,pk_attributes):
+    def __init__(self,label,cond_keys):
         self.key = None
         self.label = label  # join condition etc goes in here
-        self.pk_attributes = pk_attributes # primary key attributes for this relation (PT node does not have this, initialize as None)
+        self.cond_keys = cond_keys # primary key attributes for this relation (PT node does not have this, initialize as None)
         self.ignored_attrs = [] # attrs user chose to ignore when create customized tree
-        self.pk_attributes_used = [] # used to track what primary key attributes from this relation has been used as join condition in the current join graph
+        self.cond_keys_used = [] # used to track what primary key attributes from this relation has been used as join condition in the current join graph
 
     def __repr__(self):
         # return f"(key: {self.key}, label: {self.label})"
@@ -159,13 +159,13 @@ class Join_Graph_Generator:
                 remaining_conditions[n2] = [rc for rc in remaining_conditions[n2] if len(set(rc).intersection(cond[1][n2.label]))==0]
 
             if(n1.label!='PT'):
-                n1_pkey_attrs_involved = [pk for pk in re.findall(r'{}\.(\w+)?'.format(n1.label),cond[0]) if pk in n1.pk_attributes]
+                n1_pkey_attrs_involved = [pk for pk in re.findall(r'{}\.(\w+)?'.format(n1.label),cond[0]) if pk in n1.cond_keys]
                 if(n1_pkey_attrs_involved):
-                    n1.pk_attributes_used.extend(n1_pkey_attrs_involved)
+                    n1.cond_keys_used.extend(n1_pkey_attrs_involved)
             if(n2.label!='PT'):
-                n2_pkey_attrs_involved = [pk for pk in re.findall(r'{}\.(\w+)?'.format(n2.label),cond[0]) if pk in n2.pk_attributes]
+                n2_pkey_attrs_involved = [pk for pk in re.findall(r'{}\.(\w+)?'.format(n2.label),cond[0]) if pk in n2.cond_keys]
                 if(n2_pkey_attrs_involved):
-                    n2.pk_attributes_used.extend(n2_pkey_attrs_involved)
+                    n2.cond_keys_used.extend(n2_pkey_attrs_involved)
 
         # logger.debug(remaining_conditions)
         for k,v in remaining_conditions.items():
@@ -174,9 +174,9 @@ class Join_Graph_Generator:
 
         for n in jg_candidate.graph_core:
             if(n.label!='PT'):
-                n.pk_attributes.sort()
-                n.pk_attributes_used.sort()
-                if(set(n.pk_attributes)!=set(n.pk_attributes_used)):
+                n.cond_keys.sort()
+                n.cond_keys_used.sort()
+                if(set(n.cond_keys)!=set(n.cond_keys_used)):
                     return False
         return True
 
@@ -272,7 +272,7 @@ class Join_Graph_Generator:
                 for m in new_jg.graph_core:
                     if(m.key == n[1]):
                         node1 = m
-                node2 = Node(label=n[2], pk_attributes=self.attr_dict[n[2]]['p_key'])
+                node2 = Node(label=n[2], cond_keys=self.attr_dict[n[2]]['edge_keys'])
                 node2.key = new_jg.graph_core.graph['max_node_key']
                 attrs_from_node2 = [x[0] for x in self.attr_dict[n[2]]['attributes']]
                 keys_from_node2 = self.attr_dict[n[2]]['keys']
@@ -308,7 +308,7 @@ class Join_Graph_Generator:
                     first_jg_core = MultiGraph(jg_id = '1', max_node_key = 1, sg = self.schema_graph, db_dict=self.attr_dict)
                     first_jg = Join_Graph(graph_core=first_jg_core, jg_number=jg_cur_number, num_edges=0)
                     jg_cur_number+=1
-                    first_node = Node(label='PT', pk_attributes=None)
+                    first_node = Node(label='PT', cond_keys=None)
                     first_node.key = first_jg.graph_core.graph['max_node_key']
                     first_jg.graph_core.graph['max_node_key']+=1
                     first_jg.graph_core.add_node(first_node)

@@ -48,6 +48,7 @@ class provenance_getter:
 		# but to get the tables accessed by query, first need to get original provenance
 
 		keys = self.get_all_keys()
+		logger.debug(user_specified_attrs)
 
 		# First run, get the relations accessed by query
 
@@ -99,7 +100,7 @@ class provenance_getter:
 			pt_dict = {'attributes':{}, 
 			'keys':[],
 			'user_attrs':[]}
-			# logger.debug(pt_full_dict)
+			logger.debug(pt_full_dict)
 			# logger.debug(self.db_dict)
 			for k,v in pt_full_dict.items():
 				if(re_PROV.search(k)):
@@ -114,13 +115,18 @@ class provenance_getter:
 						origin_rel = origin_rel.replace('__','_')
 						origin_attr = str_items[3]
 						origin_attr = origin_attr.replace('__','_')
+					logger.debug(f"self.db_dict[origin_rel]['p_key']: {self.db_dict[origin_rel]['p_key']}")
+					logger.debug(f"self.db_dict[origin_rel]['keys']: {self.db_dict[origin_rel]['keys']}")
+					logger.debug(f"origin_rel: {origin_rel}")
 					for kk, vv in self.db_dict.items():
 						if(origin_rel==kk):
 							for attr in vv['attributes']:
 								if(origin_attr==attr[0]):
 									pt_dict['attributes'][':'.join([k,attr[1]])] = (origin_rel, origin_attr)
-									if(origin_attr in self.db_dict[origin_rel]['keys']):
+									if(origin_attr in self.db_dict[origin_rel]['keys'] or 
+										origin_attr in self.db_dict[origin_rel]['p_key']):
 										pt_dict['keys'].append(k)
+					# logger.debug((origin_rel, origin_attr))
 					if((origin_rel, origin_attr) in user_specified_attrs):
 						pt_dict['user_attrs'].append(k)									
 					# if(re_CAT.search(k)):
@@ -135,6 +141,7 @@ class provenance_getter:
 
 				pt_attrs.append(f'"{k}"')
 
+			logger.debug(f'pt_dict:{pt_dict}')
 			pt_dict['attributes']['pnumber:nominal'] = ('PT','pnumber')
 			pt_dict['attributes']['is_user:nominal'] = ('PT','is_user')
 

@@ -6,6 +6,8 @@ import pandas as pd
 import logging
 import time
 import numpy as np
+import copy 
+
 """
 Given a database connection info, 
 generate the join graph from it in order
@@ -200,12 +202,31 @@ class Schema_Graph_Generator:
 
 		# logger.debug(edge_info)
 		edge_info_dict = edge_info.to_dict(orient='records')
-
-
+		logger.debug(edge_info_dict)
 
 		for d in edge_info_dict:
 			graph.add_edge(d['f_table'], d['p_table'], condition=d['condition_str'], key_dict=d['key_dict'], 
 				p_table=d['p_table'],f_table=d['f_table'])
+
+
+		logger.debug(attr_dict)
+
+		# create an 'edge_keys' to be used to check for 
+		# fulfillment of join conditions in validation of
+		# jgs
+
+		for table in attr_dict:
+			p_key_list = copy.deepcopy(attr_dict[table]['p_key'])
+			for cond_dict in edge_info_dict:
+				if(cond_dict['p_table']==table):
+					if(cond_dict['p_key'] in p_key_list):
+						p_key_list.remove(cond_dict['p_key'])
+				if(cond_dict['f_table']==table):
+					if(cond_dict['f_key'] in p_key_list):
+						p_key_list.remove(cond_dict['p_key'])
+			attr_dict[table]['edge_keys'] = list(set(attr_dict[table]['p_key'])-set(p_key_list))
+
+		logger.debug(attr_dict)
 
 
 		return graph, attr_dict
