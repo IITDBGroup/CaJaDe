@@ -266,7 +266,9 @@ def run_experiment(result_schema,
           
       valid_result = [v for v in valid_result if not v.redundant]
       logger.debug(f'we found {len(valid_result)} valid join graphs, now materializing and generating patterns')
+      
       jg_cnt=1
+
 
       for vr in valid_result:
         logger.debug(f'we are on join graph number {jg_cnt}')
@@ -455,6 +457,7 @@ if __name__ == '__main__':
   u_query = (user_query, 'medicare vs private')
   u_question =["insurance='Private'","insurance='Medicare'"]
   user_specified_attrs = [('admissions',  'insurance'), ('admissions', 'hospital_expire_flag')]
+
   max_sample_factor = 2
 
   args=parser.parse_args()
