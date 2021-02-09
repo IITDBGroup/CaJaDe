@@ -14,6 +14,8 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import LabelEncoder
 from copy import deepcopy
 import datetime
+import heapq
+
 
 logger = logging.getLogger(__name__)
 
@@ -281,7 +283,7 @@ class Pattern_Generator:
         # logger.debug(candidates_to_return)
         return candidates_to_return
 
-    def find_jg_sample_name(self, pattern, jg_name, stddev_ranks):
+    def match_fit_weighted_sample(self, pattern, jg_name, stddev_ranks_dict, w_sample_attr, sample_size):
         """
         only used when we want to do weighted sampling
 
@@ -290,7 +292,72 @@ class Pattern_Generator:
               2: else rank numerical/ordinal attributes based on 
                  stddev_ranks and return sample name based on highest 
                  stddev from self.weighted_sample_views[jg_name]
+              3: if no appropriate jg sample can be found, then create
+                 a view and then return
         """
+
+        if(not pattern['ordinal_values']):
+            # if no numeric attribute is involved
+            return f"{jg_name}_ws_nom"
+        else:
+            pat_ordi_vals = [ov[0] for ov in pattern['ordinal_values']]
+            highest_rank_val_info = sorted([[p, stddev_ranks_dict[p]] for p in pat_ordi_vals], key = lambda x: x[1])[0]
+
+            if(self.weighted_sample_views[jg_name]['jg_samples']):
+                if(self.weighted_sample_views[jg_name][0][0]<=highest_rank_num):
+                    return self.weighted_sample_views[jg_name]['jg_samples'][0][1]
+
+            highest_rank_num = highest_rank_val_info[0]
+            highest_rank_attr = highest_rank_val_info[1]
+
+            view_number = self.weighted_sample_views[jg_name]['ws_index']
+
+            drop_jg_ws_q = f"""
+            DROP MATERIALIZED VIEW IF EXISTS {jg_name}_ws_{view_number} CASCADE
+            """
+            self.cur.execute(drop_jg_ws_q)
+
+            jg_new_ws_q = f"""
+            CREATE MATERIALIZED VIEW {jg_name}_ws_{view_number} AS
+            WITH weights AS
+            (SELECT {w_sample_attr}, COUNT(*) AS cnt, 
+            stddev({highest_rank_attr})::numeric/avg({highest_rank_attr}) AS sdv
+            FROM {jg_name}
+            GROUP BY {w_sample_attr}
+            )
+            SELECT j.* 
+            FROM {jg_name} j, weights w
+            WHERE j.{w_sample_attr} = w.{w_sample_attr}
+            ORDER BY RANDOM() * w.cnt * w.sdv
+            LIMIT {sample_size}; 
+            """
+            logger.debug(jg_new_ws_q)
+
+            self.cur.execute(jg_new_ws_q)
+
+            self.weighted_sample_views[jg_name]['ws_index']+=1
+
+            heapq.heappush(self.weighted_sample_views[jg_name]['jg_samples'], highest_rank_val_info)
+
+            q_tp_yes = f"""
+            SELECT COUNT(DISTINCT pnumber)
+            FROM {jg_name}_ws_{view_number}
+            WHERE is_user='yes'
+            """
+            self.cur.execute(q_tp_yes)
+            sample_recall_dict['yes'] = int(self.cur.fetchone()[0])
+
+            q_tp_no = f"""
+            SELECT COUNT(DISTINCT pnumber)
+            FROM {jg_name}_ws_{view_number}
+            WHERE is_user='no'
+            """
+            
+            self.cur.execute(q_tp_no)
+            sample_recall_dict['no'] = int(self.cur.fetchone()[0])
+
+            return f"{jg_name}_ws_{view_number}"
+
 
 
     
@@ -301,14 +368,16 @@ class Pattern_Generator:
                    pattern_recall_threshold,
                    jg_name,
                    recall_dicts,
-                   need_weighted_sampling
+                   need_weighted_sampling,
+                   stddv_ranks_dict=None,
+                   sample_size=0
                    ):
 
         # use to keep the true positive value here since 
         # true postive for recall will always be the same
         pattern['jg_name'] = jg_name
 
-        if('sample' not in recall_dicts):
+        if('sample' not in recall_dicts and not need_weighted_sampling):
             f1_calculation_type='o'
         # logger.debug(pattern)
 
@@ -421,8 +490,9 @@ class Pattern_Generator:
 
             if(f1_calculation_type=='e' or f1_calculation_type=='s'):
                 if(need_weighted_sampling==True):
-                    jg_sample_name = self.find_jg_sample_name(pattern, jg_name)
+                    all_p, jg_sample_name = self.match_fit_weighted_sample(pattern, jg_name,stddv_ranks_dict, w_sample_attr, sample_size)
                 else:
+                    all_p = recall_dicts['sample']['no'] if pattern['is_user']=='no' else recall_dicts['sample']['yes']
                     jg_sample_name = f"{jg_name}_fs"
 
                 check_sample_recall_threshold_q = f"""
@@ -435,7 +505,7 @@ class Pattern_Generator:
                   )::NUMERIC
                   /
                   NULLIF(
-                  {recall_dicts['sample']['no'] if pattern['is_user']=='no' else recall_dicts['sample']['yes']}
+                  {all_p}
                   ,0)
                 ,5
                 );
@@ -656,6 +726,8 @@ class Pattern_Generator:
         self.cur.execute(jg_size_q)
         jg_apt_size = int(self.cur.fetchone()[0])
 
+        sample_f1_jg_size=0
+
         # based on f1 calcuation type set up recall dict and materialized apt to evaluate f1
         if(f1_calculation_type=='s' or f1_calculation_type=='e'):
             if(jg_apt_size>f1_calculation_min_size): # this decides that we need sampling
@@ -704,6 +776,8 @@ class Pattern_Generator:
                     logger.debug(recall_dicts)
                 
                 else:
+
+                    recall_dicts['sample'] = {}
                     need_weighted_sampling = True
 
             else:
@@ -829,6 +903,7 @@ class Pattern_Generator:
             nominal_pattern_attr_clause = ",".join(nominal_pattern_attr_list)
 
             sample_repeatable_clause = None
+            w_sample_attr = None
 
             if(sample_repeatable):
                 sample_repeatable_clause = 'REPEATABLE({})'.format(seed)
@@ -972,8 +1047,7 @@ class Pattern_Generator:
                 ORDER BY RANDOM() * wf.cnt 
                 LIMIT {sample_jg_size};
                 """
-                self.weighted_sample_views[jg_name] = {}
-                self.weighted_sample_views[jg_name]['nominal_only'] = f"{jg_name}_ws_nom"
+                self.weighted_sample_views[jg_name] = {'jg_samples': [], 'ws_index':1}
 
 
             if(numercial_attr_filter_method=='y'):
@@ -1095,7 +1169,9 @@ class Pattern_Generator:
                                                           pattern_recall_threshold=pattern_recall_threshold,
                                                           jg_name=jg_name,
                                                           recall_dicts=recall_dicts,
-                                                          need_weighted_sampling=need_weighted_sampling)
+                                                          need_weighted_sampling=need_weighted_sampling,
+                                                          w_sample_attr=w_sample_attr,
+                                                          sample_size=sample_f1_jg_size)
                         if(is_valid):
                             cur_pattern_candidates.append(n_pat_processed)
 
@@ -1169,6 +1245,8 @@ class Pattern_Generator:
 
                                 logger.debug(num_stddv_results)
 
+                                sorted_stddvs = sorted(num_stddv_results, key = lambda x: x[1])
+                                sorted_stddv_dct = {k[0]: v for v, k in enumerate(sorted_stddvs)}
 
                             # logger.debug(numerical_variable_candidates)
 
@@ -1191,7 +1269,9 @@ class Pattern_Generator:
                                                                   pattern_recall_threshold=pattern_recall_threshold,
                                                                   jg_name=jg_name,
                                                                   recall_dicts=recall_dicts,
-                                                                  need_weighted_sampling=need_weighted_sampling)
+                                                                  need_weighted_sampling=need_weighted_sampling,
+                                                                  w_sample_attr=w_sample_attr,
+                                                                  sample_size=sample_f1_jg_size)
                                     if(is_valid):
                                         self.stats.startTimer('deepcopy')
                                         val_pat = deepcopy(pc_processed)
@@ -1255,7 +1335,9 @@ class Pattern_Generator:
                                                                   pattern_recall_threshold=pattern_recall_threshold,
                                                                   jg_name=jg_name,
                                                                   recall_dicts=recall_dicts,
-                                                                  need_weighted_sampling=need_weighted_sampling)
+                                                                  need_weighted_sampling=need_weighted_sampling,
+                                                                  w_sample_attr=w_sample_attr,
+                                                                  sample_size=sample_f1_jg_size)
                                     if(is_valid):
                                         self.stats.startTimer('deepcopy')
                                         val_pat = deepcopy(ic_processed)
@@ -1288,6 +1370,8 @@ class Pattern_Generator:
 
                                     logger.debug(num_stddv_results)
 
+                                    sorted_stddvs = sorted(num_stddv_results, key = lambda x: x[1])
+                                    sorted_stddv_dct = {k[0]: v for v, k in enumerate(sorted_stddvs)}
 
 
                                 if(max_number_of_numerical_possible<=user_assigned_num_pred_cap):
@@ -1316,7 +1400,10 @@ class Pattern_Generator:
                                                               pattern_recall_threshold=pattern_recall_threshold,
                                                               jg_name=jg_name,
                                                               recall_dicts=recall_dicts,
-                                                              need_weighted_sampling=need_weighted_sampling)
+                                                              need_weighted_sampling=need_weighted_sampling,
+                                                              w_sample_attr=w_sample_attr,
+                                                              sample_size=sample_f1_jg_size)
+
                                                 if(is_valid):
                                                     self.stats.startTimer('deepcopy')
                                                     val_pat = deepcopy(pc_processed)
@@ -1441,7 +1528,9 @@ class Pattern_Generator:
                                   pattern_recall_threshold=pattern_recall_threshold,
                                   jg_name=jg_name,
                                   recall_dicts=recall_dicts,
-                                  need_weighted_sampling=need_weighted_sampling
+                                  need_weighted_sampling=need_weighted_sampling,
+                                  w_sample_attr=w_sample_attr,
+                                  sample_size=sample_f1_jg_size,
                                   )
                     if(is_valid):
                         valid_patterns.append(pc_processed)
