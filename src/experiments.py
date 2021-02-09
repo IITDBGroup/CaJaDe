@@ -258,6 +258,9 @@ def run_experiment(result_schema,
 
     logger.debug('generate new valid_jgs')
     valid_result = jgg.Generate_JGs(pt_rels=pt_relations, num_edges=maximum_edges, customize=False)
+    
+    logger.debug(f"Before filtering any, we have {len(valid_result)} valid jgs \n")
+
     jgm = Join_Graph_Materializer(conn=conn, db_dict=attr_dict, gwrapper=w, user_query=user_query[0])
     jgm.init_cost_estimator()
 
@@ -271,6 +274,12 @@ def run_experiment(result_schema,
 
     if(exclude_high_cost_jg[0]==False):
       valid_result = [v for v in valid_result if not v.intermediate]
+      logger.debug(f"after filtering out intermediate we have {len(valid_result)} valid jgs \n")
+      for vr in valid_result:
+        logger.debug(vr)
+        logger.debug(vr.intermediate)
+        logger.debug('\n')
+
       for n in valid_result:
         jgm.stats.startTimer('materialize_jg')
         cost_estimate, renaming_dict, apt_q = jgm.materialize_jg(n)

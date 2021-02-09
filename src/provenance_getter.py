@@ -48,18 +48,18 @@ class provenance_getter:
 		# but to get the tables accessed by query, first need to get original provenance
 
 		keys = self.get_all_keys()
-		logger.debug(user_specified_attrs)
+		# logger.debug(user_specified_attrs)
 
 		# First run, get the relations accessed by query
 
 		code, output = self.gprom_wrapper.runQuery(query)
-		logger.debug(output)
+		# logger.debug(output)
 		user_pt_size = 0
 
 		if(code == 0):
 			drop_original_view_query = "DROP VIEW IF EXISTS original_pt CASCADE;"
 			gen_original_pt_query = output.decode("utf-8")
-			logger.debug(f'gen_original_pt_query:\n {gen_original_pt_query}')
+			# logger.debug(f'gen_original_pt_query:\n {gen_original_pt_query}')
 			original_PT_view = f"CREATE VIEW original_pt AS {gen_original_pt_query};"
 			self.cur.execute(drop_original_view_query)
 			self.cur.execute(original_PT_view)
@@ -100,7 +100,7 @@ class provenance_getter:
 			pt_dict = {'attributes':{}, 
 			'keys':[],
 			'user_attrs':[]}
-			logger.debug(pt_full_dict)
+			# logger.debug(pt_full_dict)
 			# logger.debug(self.db_dict)
 			for k,v in pt_full_dict.items():
 				if(re_PROV.search(k)):
@@ -115,9 +115,9 @@ class provenance_getter:
 						origin_rel = origin_rel.replace('__','_')
 						origin_attr = str_items[3]
 						origin_attr = origin_attr.replace('__','_')
-					logger.debug(f"self.db_dict[origin_rel]['p_key']: {self.db_dict[origin_rel]['p_key']}")
-					logger.debug(f"self.db_dict[origin_rel]['keys']: {self.db_dict[origin_rel]['keys']}")
-					logger.debug(f"origin_rel: {origin_rel}")
+					# logger.debug(f"self.db_dict[origin_rel]['p_key']: {self.db_dict[origin_rel]['p_key']}")
+					# logger.debug(f"self.db_dict[origin_rel]['keys']: {self.db_dict[origin_rel]['keys']}")
+					# logger.debug(f"origin_rel: {origin_rel}")
 					for kk, vv in self.db_dict.items():
 						if(origin_rel==kk):
 							for attr in vv['attributes']:
@@ -141,7 +141,7 @@ class provenance_getter:
 
 				pt_attrs.append(f'"{k}"')
 
-			logger.debug(f'pt_dict:{pt_dict}')
+			# logger.debug(f'pt_dict:{pt_dict}')
 			pt_dict['attributes']['pnumber:nominal'] = ('PT','pnumber')
 			pt_dict['attributes']['is_user:nominal'] = ('PT','is_user')
 

@@ -298,27 +298,31 @@ class Pattern_Generator:
 
         if(not pattern['ordinal_values']):
             # if no numeric attribute is involved
-            return f"{jg_name}_ws_nom"
+            return self.weighted_sample_views[jg_name]['nominal_only_recall'], f"{jg_name}_ws_nom"
         else:
             pat_ordi_vals = [ov[0] for ov in pattern['ordinal_values']]
-            highest_rank_val_info = sorted([[p, stddev_ranks_dict[p]] for p in pat_ordi_vals], key = lambda x: x[1])[0]
-
-            if(self.weighted_sample_views[jg_name]['jg_samples']):
-                if(self.weighted_sample_views[jg_name][0][0]<=highest_rank_num):
-                    return self.weighted_sample_views[jg_name]['jg_samples'][0][1]
+            # logger.debug(pat_ordi_vals)
+            # logger.debug(stddev_ranks_dict)
+            highest_rank_val_info = sorted([[stddev_ranks_dict[p], p] for p in pat_ordi_vals], key = lambda x: x[0])[0]
 
             highest_rank_num = highest_rank_val_info[0]
             highest_rank_attr = highest_rank_val_info[1]
 
+            if(self.weighted_sample_views[jg_name]['jg_samples']):
+                if(self.weighted_sample_views[jg_name]['jg_samples'][0][0]<=highest_rank_num):
+                    ret_sample_jg = self.weighted_sample_views[jg_name]['jg_samples'][0]
+                    return ret_sample_jg[3], ret_sample_jg[2]
+
             view_number = self.weighted_sample_views[jg_name]['ws_index']
 
+            new_ws = f"{jg_name}_ws_{view_number}"
             drop_jg_ws_q = f"""
-            DROP MATERIALIZED VIEW IF EXISTS {jg_name}_ws_{view_number} CASCADE
+            DROP MATERIALIZED VIEW IF EXISTS {new_ws} CASCADE
             """
             self.cur.execute(drop_jg_ws_q)
 
             jg_new_ws_q = f"""
-            CREATE MATERIALIZED VIEW {jg_name}_ws_{view_number} AS
+            CREATE MATERIALIZED VIEW {new_ws} AS
             WITH weights AS
             (SELECT {w_sample_attr}, COUNT(*) AS cnt, 
             stddev({highest_rank_attr})::numeric/avg({highest_rank_attr}) AS sdv
@@ -328,7 +332,7 @@ class Pattern_Generator:
             SELECT j.* 
             FROM {jg_name} j, weights w
             WHERE j.{w_sample_attr} = w.{w_sample_attr}
-            ORDER BY RANDOM() * w.cnt * w.sdv
+            ORDER BY RANDOM() * w.cnt * w.sdv DESC
             LIMIT {sample_size}; 
             """
             logger.debug(jg_new_ws_q)
@@ -337,11 +341,11 @@ class Pattern_Generator:
 
             self.weighted_sample_views[jg_name]['ws_index']+=1
 
-            heapq.heappush(self.weighted_sample_views[jg_name]['jg_samples'], highest_rank_val_info)
+            sample_recall_dict = {}
 
             q_tp_yes = f"""
             SELECT COUNT(DISTINCT pnumber)
-            FROM {jg_name}_ws_{view_number}
+            FROM {new_ws}
             WHERE is_user='yes'
             """
             self.cur.execute(q_tp_yes)
@@ -349,14 +353,20 @@ class Pattern_Generator:
 
             q_tp_no = f"""
             SELECT COUNT(DISTINCT pnumber)
-            FROM {jg_name}_ws_{view_number}
+            FROM {new_ws}
             WHERE is_user='no'
             """
-            
+
             self.cur.execute(q_tp_no)
             sample_recall_dict['no'] = int(self.cur.fetchone()[0])
 
-            return f"{jg_name}_ws_{view_number}"
+            highest_rank_val_info.append(new_ws)
+            highest_rank_val_info.append(sample_recall_dict)
+
+            heapq.heappush(self.weighted_sample_views[jg_name]['jg_samples'], highest_rank_val_info)
+
+
+            return sample_recall_dict, new_ws
 
 
 
@@ -369,9 +379,9 @@ class Pattern_Generator:
                    jg_name,
                    recall_dicts,
                    need_weighted_sampling,
+                   w_sample_attr=None,
                    stddv_ranks_dict=None,
-                   sample_size=0
-                   ):
+                   sample_size=0):
 
         # use to keep the true positive value here since 
         # true postive for recall will always be the same
@@ -490,7 +500,8 @@ class Pattern_Generator:
 
             if(f1_calculation_type=='e' or f1_calculation_type=='s'):
                 if(need_weighted_sampling==True):
-                    all_p, jg_sample_name = self.match_fit_weighted_sample(pattern, jg_name,stddv_ranks_dict, w_sample_attr, sample_size)
+                    weighted_s_dict, jg_sample_name = self.match_fit_weighted_sample(pattern, jg_name, stddv_ranks_dict, w_sample_attr, sample_size)
+                    all_p = weighted_s_dict['no'] if pattern['is_user']=='no' else weighted_s_dict['yes']
                 else:
                     all_p = recall_dicts['sample']['no'] if pattern['is_user']=='no' else recall_dicts['sample']['yes']
                     jg_sample_name = f"{jg_name}_fs"
@@ -548,43 +559,44 @@ class Pattern_Generator:
                 pattern['recall'] = recall_result
                 self.stats.stopTimer('validate_patterns_recall_constraint')
                 
-                sample_F1_q = f"""
-                WITH precision AS 
-                (SELECT 
-                    (
-                    SELECT COUNT(DISTINCT pnumber)
-                    FROM {jg_sample_name}
-                    WHERE {true_positive_conditions}
-                    )::NUMERIC
-                    /
-                    NULLIF(
-                    (
-                    SELECT SUM(pnumber_sum) FROM 
-                    (
-                    SELECT COUNT(DISTINCT pnumber) AS pnumber_sum
-                    FROM {jg_sample_name}
-                    WHERE {pattern_conditions}
-                    GROUP BY is_user
-                    ) AS FP_AND_TR
-                    )::NUMERIC,0) AS prec
-                )
-                SELECT  
-                p.prec,
-                2*
-                ROUND
-                (
-                    (
-                        (p.prec)
-                        * {sample_recall_result}
+                if(f1_calculation_type!='o'):
+                    sample_F1_q = f"""
+                    WITH precision AS 
+                    (SELECT 
+                        (
+                        SELECT COUNT(DISTINCT pnumber)
+                        FROM {jg_sample_name}
+                        WHERE {true_positive_conditions}
+                        )::NUMERIC
+                        /
+                        NULLIF(
+                        (
+                        SELECT SUM(pnumber_sum) FROM 
+                        (
+                        SELECT COUNT(DISTINCT pnumber) AS pnumber_sum
+                        FROM {jg_sample_name}
+                        WHERE {pattern_conditions}
+                        GROUP BY is_user
+                        ) AS FP_AND_TR
+                        )::NUMERIC,0) AS prec
                     )
-                    /
-                    NULLIF(
-                    ( 
-                        (p.prec) + {sample_recall_result}
-                    ),0),5
-                ) AS f1
-                from precision p
-                """
+                    SELECT  
+                    p.prec,
+                    2*
+                    ROUND
+                    (
+                        (
+                            (p.prec)
+                            * {sample_recall_result}
+                        )
+                        /
+                        NULLIF(
+                        ( 
+                            (p.prec) + {sample_recall_result}
+                        ),0),5
+                    ) AS f1
+                    from precision p
+                    """
 
 
                 F1_q = f"""
@@ -680,6 +692,7 @@ class Pattern_Generator:
                       prov_version='existential',
                       s_rate_for_s=0.5,
                       s_max_size = 500,
+                      s_min_size = 50,
                       pattern_recall_threshold=0.3, 
                       numercial_attr_filter_method = 'y',
                       sample_repeatable = False,
@@ -717,6 +730,8 @@ class Pattern_Generator:
         need_weighted_sampling  = False
 
         recall_dicts = {}
+
+        sorted_stddv_dct = None
         # a dictionary of dictionary which could
         # store up to 2 dictionaries, 1 for "original" f1 version
         # the other one for "sample" f1 version
@@ -727,18 +742,65 @@ class Pattern_Generator:
         jg_apt_size = int(self.cur.fetchone()[0])
 
         sample_f1_jg_size=0
+        if(jg_apt_size!=0):
+            # based on f1 calcuation type set up recall dict and materialized apt to evaluate f1
+            if(f1_calculation_type=='s' or f1_calculation_type=='e'):
+                if(jg_apt_size>f1_calculation_min_size): # this decides that we need sampling
+                    sample_f1_jg_size = math.ceil(jg_apt_size * f1_calculation_sample_rate)
+                    if(jg_apt_size <= original_pt_size): # this means if we need weighted sampling
+                        sample_recall_dict = {}
+                        
+                        self.stats.startTimer('create_f1_sample_jg')
 
-        # based on f1 calcuation type set up recall dict and materialized apt to evaluate f1
-        if(f1_calculation_type=='s' or f1_calculation_type=='e'):
-            if(jg_apt_size>f1_calculation_min_size): # this decides that we need sampling
-                if(jg_apt_size <= original_pt_size): # this means if we need weighted sampling
+                        logger.debug(f"jg_apt_size : {jg_apt_size}")
+                        # logger.debug(f"sample_f1_jg_size")
+
+                        drop_f1_jg = f"""
+                        DROP MATERIALIZED VIEW IF EXISTS {jg_name}_fs CASCADE
+                        """
+                        self.cur.execute(drop_f1_jg)
+                        create_f1_jg_size = f"""
+                        CREATE MATERIALIZED VIEW {jg_name}_fs AS 
+                        (
+                        SELECT * FROM {jg_name}
+                        ORDER BY RANDOM()
+                        LIMIT {sample_f1_jg_size}
+                        )
+                        """
+                        self.cur.execute(create_f1_jg_size)
+                    
+                        q_tp_yes = f"""
+                        SELECT COUNT(DISTINCT pnumber)
+                        FROM {jg_name}_fs
+                        WHERE is_user='yes'
+                        """
+                        self.cur.execute(q_tp_yes)
+                        sample_recall_dict['yes'] = int(self.cur.fetchone()[0])
+
+                        q_tp_no = f"""
+                        SELECT COUNT(DISTINCT pnumber)
+                        FROM {jg_name}_fs
+                        WHERE is_user='no'
+                        """
+                        self.cur.execute(q_tp_no)
+                        sample_recall_dict['no'] = int(self.cur.fetchone()[0])
+
+                        self.stats.stopTimer('create_f1_sample_jg')
+
+                        recall_dicts['sample']=sample_recall_dict
+                        logger.debug(recall_dicts)
+                    
+                    else:
+
+                        recall_dicts['sample'] = {}
+                        need_weighted_sampling = True
+
+                else:
                     sample_recall_dict = {}
                     
                     self.stats.startTimer('create_f1_sample_jg')
 
                     sample_f1_jg_size = math.ceil(jg_apt_size * f1_calculation_sample_rate)
-                    logger.debug(f"jg_apt_size : {jg_apt_size}")
-                    # logger.debug(f"sample_f1_jg_size")
 
                     drop_f1_jg = f"""
                     DROP MATERIALIZED VIEW IF EXISTS {jg_name}_fs CASCADE
@@ -748,8 +810,6 @@ class Pattern_Generator:
                     CREATE MATERIALIZED VIEW {jg_name}_fs AS 
                     (
                     SELECT * FROM {jg_name}
-                    ORDER BY RANDOM()
-                    LIMIT {sample_f1_jg_size}
                     )
                     """
                     self.cur.execute(create_f1_jg_size)
@@ -773,172 +833,142 @@ class Pattern_Generator:
                     self.stats.stopTimer('create_f1_sample_jg')
 
                     recall_dicts['sample']=sample_recall_dict
-                    logger.debug(recall_dicts)
-                
-                else:
-
-                    recall_dicts['sample'] = {}
-                    need_weighted_sampling = True
-
-            else:
-                sample_recall_dict = {}
-                
-                self.stats.startTimer('create_f1_sample_jg')
-
-                sample_f1_jg_size = math.ceil(jg_apt_size * f1_calculation_sample_rate)
-
-                drop_f1_jg = f"""
-                DROP MATERIALIZED VIEW IF EXISTS {jg_name}_fs CASCADE
-                """
-                self.cur.execute(drop_f1_jg)
-                create_f1_jg_size = f"""
-                CREATE MATERIALIZED VIEW {jg_name}_fs AS 
-                (
-                SELECT * FROM {jg_name}
-                )
-                """
-                self.cur.execute(create_f1_jg_size)
-            
-                q_tp_yes = f"""
-                SELECT COUNT(DISTINCT pnumber)
-                FROM {jg_name}_fs
-                WHERE is_user='yes'
-                """
-                self.cur.execute(q_tp_yes)
-                sample_recall_dict['yes'] = int(self.cur.fetchone()[0])
-
-                q_tp_no = f"""
-                SELECT COUNT(DISTINCT pnumber)
-                FROM {jg_name}_fs
-                WHERE is_user='no'
-                """
-                self.cur.execute(q_tp_no)
-                sample_recall_dict['no'] = int(self.cur.fetchone()[0])
-
-                self.stats.stopTimer('create_f1_sample_jg')
-
-                recall_dicts['sample']=sample_recall_dict
 
 
-        original_recall_dict={}
+            original_recall_dict={}
 
-        q_tp_yes = f"""
-        SELECT COUNT(DISTINCT pnumber)
-        FROM {jg_name}
-        WHERE is_user='yes'
-        """
-        self.cur.execute(q_tp_yes)
-        original_recall_dict['yes'] = int(self.cur.fetchone()[0])
+            q_tp_yes = f"""
+            SELECT COUNT(DISTINCT pnumber)
+            FROM {jg_name}
+            WHERE is_user='yes'
+            """
+            self.cur.execute(q_tp_yes)
+            original_recall_dict['yes'] = int(self.cur.fetchone()[0])
 
-        q_tp_no = f"""
-        SELECT COUNT(DISTINCT pnumber)
-        FROM {jg_name}
-        WHERE is_user='no'
-        """
-        self.cur.execute(q_tp_no)
-        original_recall_dict['no'] = int(self.cur.fetchone()[0])
+            q_tp_no = f"""
+            SELECT COUNT(DISTINCT pnumber)
+            FROM {jg_name}
+            WHERE is_user='no'
+            """
+            self.cur.execute(q_tp_no)
+            original_recall_dict['no'] = int(self.cur.fetchone()[0])
 
-        recall_dicts['original'] = original_recall_dict
-
-
-        self.stats.startTimer('create_samples')
-        attrs_from_spec_node = set([k for k in renaming_dict[jg.spec_node_key]['columns']])
-
-        # logger.debug(renaming_dict)
-        # logger.debug(skip_cols)
-        # logger.debug(attrs_from_spec_node)
-
-        get_attrs_q = f"""
-        select atr.attname
-        from pg_class mv
-          join pg_namespace ns on mv.relnamespace = ns.oid
-          join pg_attribute atr 
-            on atr.attrelid = mv.oid 
-           and atr.attnum > 0 
-           and not atr.attisdropped
-        where mv.relkind = 'm'
-        and mv.relname = '{jg_name}'
-        """
-
-        self.cur.execute(get_attrs_q)
-        attrs = [x[0] for x in self.cur.fetchall()]
-
-        considered_attrs_s = [x for x in attrs if x not in skip_cols and re.search(r'{}_'.format(attr_alias), x)]
-        attrs_in_s = ','.join(considered_attrs_s)
-
-        # logger.debug(f'considered_attrs_s:{considered_attrs_s}')
-
-        considered_attrs_d = [x for x in attrs if (x not in skip_cols and re.search(r'{}_'.format(attr_alias), x)) 
-                              or (x=='is_user' or x=='pnumber')]
-
-        attrs_in_d = ','.join(considered_attrs_d) 
-
-        drop_prov_d = f"DROP MATERIALIZED VIEW IF EXISTS {jg_name}_d CASCADE;"
-        # logger.debug(drop_prov_d)
-        self.cur.execute(drop_prov_d)
-
-        drop_prov_s = f"DROP MATERIALIZED VIEW IF EXISTS {jg_name}_s CASCADE;"
-        # logger.debug(drop_prov_s)
-        self.cur.execute(drop_prov_s)
-
-        lca_sample_size = min(math.ceil(original_pt_size*s_rate_for_s), s_max_size)
-        logger.debug(f"sample size : {lca_sample_size}")
+            recall_dicts['original'] = original_recall_dict
 
 
-        if(lca_sample_size!=0):
-            # make sure jg result is not empty            
-            pattern_cond_attr_list = []
-            nominal_pattern_attr_list = []
-            ordinal_pattern_attr_list = []
+            self.stats.startTimer('create_samples')
+            attrs_from_spec_node = set([k for k in renaming_dict[jg.spec_node_key]['columns']])
 
-            for attr in considered_attrs_s:
-                if(renaming_dict['dtypes'][attr] == 'nominal'):
-                    one_attr_in_pattern = f"CASE WHEN l.{attr} = r.{attr} THEN l.{attr} ELSE NULL END AS {attr}"
-                    pattern_cond_attr_list.append(one_attr_in_pattern)
-                    nominal_pattern_attr_list.append(attr)
-                else:
-                    ordinal_pattern_attr_list.append(attr)
+            # logger.debug(renaming_dict)
+            # logger.debug(skip_cols)
+            # logger.debug(attrs_from_spec_node)
 
-            pattern_q_selection_clause = ",".join(pattern_cond_attr_list)
-            nominal_pattern_attr_clause = ",".join(nominal_pattern_attr_list)
-
-            sample_repeatable_clause = None
-            w_sample_attr = None
-
-            if(sample_repeatable):
-                sample_repeatable_clause = 'REPEATABLE({})'.format(seed)
-            else:
-                sample_repeatable_clause =''
-            system_sample_rate = int(s_rate_for_s*100)
-            
-            setseed_q = f"""
-            select setseed({seed})
+            get_attrs_q = f"""
+            select atr.attname
+            from pg_class mv
+              join pg_namespace ns on mv.relnamespace = ns.oid
+              join pg_attribute atr 
+                on atr.attrelid = mv.oid 
+               and atr.attnum > 0 
+               and not atr.attisdropped
+            where mv.relkind = 'm'
+            and mv.relname = '{jg_name}'
             """
 
-            if(prov_version=='fractional'):
-                prov_d_creation_q = f"""
-                CREATE MATERIALIZED VIEW {jg_name}_d AS
-                (
-                WITH d_{jg_name} AS 
-                  (
-                    SELECT {attrs_in_d}
-                    FROM {jg_name}
-                    ORDER BY RANDOM()
-                    LIMIT {lca_sample_size}
-                  ),
-                  prov_groups AS
-                  (
-                  SELECT is_user, pnumber, count(*) AS group_size 
-                  FROM d_{jg_name} 
-                  GROUP BY is_user,pnumber
-                  )
-                  SELECT d.*, ROUND(CAST(1 AS NUMERIC)/CAST(pg.group_size AS NUMERIC),5) AS prov_value 
-                  FROM d_{jg_name} d, prov_groups pg WHERE d.pnumber = pg.pnumber AND d.is_user=pg.is_user
-                );
+            self.cur.execute(get_attrs_q)
+            attrs = [x[0] for x in self.cur.fetchall()]
+
+            considered_attrs_s = [x for x in attrs if x not in skip_cols and re.search(r'{}_'.format(attr_alias), x)]
+            attrs_in_s = ','.join(considered_attrs_s)
+
+            # logger.debug(f'considered_attrs_s:{considered_attrs_s}')
+
+            considered_attrs_d = [x for x in attrs if (x not in skip_cols and re.search(r'{}_'.format(attr_alias), x)) 
+                                  or (x=='is_user' or x=='pnumber')]
+
+            attrs_in_d = ','.join(considered_attrs_d) 
+
+            drop_prov_d = f"DROP MATERIALIZED VIEW IF EXISTS {jg_name}_d CASCADE;"
+            # logger.debug(drop_prov_d)
+            self.cur.execute(drop_prov_d)
+
+            drop_prov_s = f"DROP MATERIALIZED VIEW IF EXISTS {jg_name}_s CASCADE;"
+            # logger.debug(drop_prov_s)
+            self.cur.execute(drop_prov_s)
+
+            lca_sample_size = max([min(math.ceil(original_pt_size*s_rate_for_s), s_max_size), s_min_size])
+            logger.debug(f"sample size : {lca_sample_size}")
+
+
+            if(lca_sample_size!=0):
+                # make sure jg result is not empty            
+                pattern_cond_attr_list = []
+                nominal_pattern_attr_list = []
+                ordinal_pattern_attr_list = []
+
+                for attr in considered_attrs_s:
+                    if(renaming_dict['dtypes'][attr] == 'nominal'):
+                        one_attr_in_pattern = f"CASE WHEN l.{attr} = r.{attr} THEN l.{attr} ELSE NULL END AS {attr}"
+                        pattern_cond_attr_list.append(one_attr_in_pattern)
+                        nominal_pattern_attr_list.append(attr)
+                    else:
+                        ordinal_pattern_attr_list.append(attr)
+
+                pattern_q_selection_clause = ",".join(pattern_cond_attr_list)
+                nominal_pattern_attr_clause = ",".join(nominal_pattern_attr_list)
+
+                sample_repeatable_clause = None
+                w_sample_attr = None
+
+                if(sample_repeatable):
+                    sample_repeatable_clause = 'REPEATABLE({})'.format(seed)
+                else:
+                    sample_repeatable_clause =''
+                system_sample_rate = int(s_rate_for_s*100)
+                
+                setseed_q = f"""
+                select setseed({seed})
                 """
-            else:
-                prov_d_creation_q = f"""
-                CREATE MATERIALIZED VIEW {jg_name}_d AS
+
+                if(prov_version=='fractional'):
+                    prov_d_creation_q = f"""
+                    CREATE MATERIALIZED VIEW {jg_name}_d AS
+                    (
+                    WITH d_{jg_name} AS 
+                      (
+                        SELECT {attrs_in_d}
+                        FROM {jg_name}
+                        ORDER BY RANDOM()
+                        LIMIT {lca_sample_size}
+                      ),
+                      prov_groups AS
+                      (
+                      SELECT is_user, pnumber, count(*) AS group_size 
+                      FROM d_{jg_name} 
+                      GROUP BY is_user,pnumber
+                      )
+                      SELECT d.*, ROUND(CAST(1 AS NUMERIC)/CAST(pg.group_size AS NUMERIC),5) AS prov_value 
+                      FROM d_{jg_name} d, prov_groups pg WHERE d.pnumber = pg.pnumber AND d.is_user=pg.is_user
+                    );
+                    """
+                else:
+                    prov_d_creation_q = f"""
+                    CREATE MATERIALIZED VIEW {jg_name}_d AS
+                    (
+                        SELECT {attrs_in_d}
+                        FROM {jg_name} 
+                        WHERE is_user = 'yes'
+                        ORDER BY RANDOM()
+                        LIMIT {lca_sample_size} 
+                    );
+                """
+
+                if(sample_repeatable):
+                    self.cur.execute(setseed_q)
+                self.cur.execute(prov_d_creation_q)
+
+                prov_s_creation_q = f"""
+                CREATE MATERIALIZED VIEW {jg_name}_s AS
                 (
                     SELECT {attrs_in_d}
                     FROM {jg_name} 
@@ -946,417 +976,299 @@ class Pattern_Generator:
                     ORDER BY RANDOM()
                     LIMIT {lca_sample_size} 
                 );
-            """
-
-            if(sample_repeatable):
-                self.cur.execute(setseed_q)
-            self.cur.execute(prov_d_creation_q)
-
-            prov_s_creation_q = f"""
-            CREATE MATERIALIZED VIEW {jg_name}_s AS
-            (
-                SELECT {attrs_in_d}
-                FROM {jg_name} 
-                WHERE is_user = 'yes'
-                ORDER BY RANDOM()
-                LIMIT {lca_sample_size} 
-            );
-            """
-            if(sample_repeatable):
-                self.cur.execute(setseed_q)
-
-            self.cur.execute(prov_s_creation_q)
-
-            self.stats.stopTimer('create_samples')
-            self.stats.startTimer('get_nominal_patterns')
-
-            pattern_creation_q = f"""
-            CREATE MATERIALIZED VIEW {jg_name}_p AS
-            WITH cp AS
-            (
-            SELECT 
-            {pattern_q_selection_clause}
-            FROM {jg_name}_d l, {jg_name}_s r
-            )
-            SELECT COUNT(*) AS pattern_freq, 
-            {nominal_pattern_attr_clause}
-            FROM cp
-            GROUP BY
-            {nominal_pattern_attr_clause}
-            ORDER BY pattern_freq DESC
-            limit 10;
-            """
-
-            get_nominal_patterns_q = f"""
-            SELECT {nominal_pattern_attr_clause} FROM {jg_name}_p;
-            """
-
-            # limit 10 patterns per jg for now
-
-            # logger.debug(pattern_creation_q)
-            self.cur.execute(pattern_creation_q)
-
-            nominal_pattern_df = pd.read_sql(get_nominal_patterns_q, self.conn)
-            # logger.debug(nominal_pattern_df)
-
-            nominal_pattern_dicts = nominal_pattern_df.to_dict('records')
-            # logger.debug(nominal_pattern_dicts)
-            self.stats.stopTimer('get_nominal_patterns')
-
-            nominal_pattern_dict_list = []
-
-            for n_pa in nominal_pattern_dicts:
-                n_pa_dict = {}
-                n_pa_dict['nominal_values'] = [(k, v) for k, v in n_pa.items() if (v is not None and not pd.isnull(v))]
-                if(n_pa_dict['nominal_values']):
-                    nominal_pattern_dict_list.append(n_pa_dict) 
-
-            if(need_weighted_sampling==True): 
-                # if need weighted sampling, we start by sampling for 
-                # nominal patterns only, and we choose most diverse 
-                # one as the weighting factor 
-
-                distinct_nominal_list = [f"COUNT(DISTINCT {x}) as cnt_{x}" for x in nominal_pattern_attr_list]
-                nominal_only_sample_q = f""" 
-                SELECT {','.join(distinct_nominal_list)}
-                FROM {jg_name}_p
                 """
-                self.cur.execute(nominal_only_sample_q)
-                distinct_cnts = self.cur.fetchone()
-                max_distinct_val = max(distinct_cnts)
-                i = distinct_cnts.index(max_distinct_val)
-
-                w_sample_attr = nominal_pattern_attr_list[i]
-
-                sample_jg_size = math.ceil(jg_apt_size * f1_calculation_sample_rate)
-
-                drop_w_nom_sample_q = f"""
-                DROP MATERIALIZED VIEW IF EXISTS {jg_name}_ws_nom CASCADE
-                """
-                self.cur.execute(drop_w_nom_sample_q)
-                create_f1_jg_size = f"""
-                CREATE MATERIALIZED VIEW {jg_name}_ws_nom AS 
-                WITH weight_factors
-                (SELECT {w_sample_attr} AS name, COUNT(*) AS cnt
-                FROM {jg_name}
-                GROUP BY {w_sample_attr}
-                )
-                SELECT j.* 
-                FROM {jg_name} j, weight_factors wf
-                WHERE j.name = wf.name
-                ORDER BY RANDOM() * wf.cnt 
-                LIMIT {sample_jg_size};
-                """
-                self.weighted_sample_views[jg_name] = {'jg_samples': [], 'ws_index':1}
-
-
-            if(numercial_attr_filter_method=='y'):
-
-                valid_patterns = [] # list of all the valid patterns that can be generated from this nominal pattern
-
-                # clustering + random forest to select important attributes 
-                # with a caveat in mind that at least one of the attributes
-                # comes from the "last node" specified in join graph 
-                # (either nominal or ordinal has to be in the patten)
-
-                self.stats.startTimer('numercial_attr_filter')
-
-                Q_cor = f"""
-                SELECT {','.join(ordinal_pattern_attr_list)}, is_user 
-                FROM {jg_name} 
-                ORDER BY RANDOM()
-                LIMIT 10000
-                """;
-
                 if(sample_repeatable):
                     self.cur.execute(setseed_q)
 
-                raw_df = pd.read_sql(Q_cor, self.conn)
-                cor_df = raw_df[ordinal_pattern_attr_list]
-                rf_input_vars = []
-                rep_from_last_node = []
-                correlation_dict = {}
+                self.cur.execute(prov_s_creation_q)
 
-                if(len(ordinal_pattern_attr_list)>=5): 
-                    # if the number of numeric attributes is not large
-                    # then dont need to do clustering 
+                self.stats.stopTimer('create_samples')
+                self.stats.startTimer('get_nominal_patterns')
 
-                    # do clustering first
+                pattern_creation_q = f"""
+                CREATE MATERIALIZED VIEW {jg_name}_p AS
+                WITH cp AS
+                (
+                SELECT 
+                {pattern_q_selection_clause}
+                FROM {jg_name}_d l, {jg_name}_s r
+                )
+                SELECT COUNT(*) AS pattern_freq, 
+                {nominal_pattern_attr_clause}
+                FROM cp
+                GROUP BY
+                {nominal_pattern_attr_clause}
+                ORDER BY pattern_freq DESC
+                limit 10;
+                """
 
-                    # remove constant
-                    cor_df = cor_df.loc[:, (cor_df != cor_df.iloc[0]).any()] 
+                get_nominal_patterns_q = f"""
+                SELECT {nominal_pattern_attr_clause} FROM {jg_name}_p;
+                """
 
-                    logger.debug(cor_df.head())
-                    variable_clustering = VarClusHi(cor_df, maxeigval2=1, maxclus=None)
-                    variable_clustering.varclus()
+                # limit 10 patterns per jg for now
 
-                    cluster_dict = variable_clustering.rsquare[['Cluster', 'Variable']].groupby('Cluster')['Variable'].apply(list).to_dict()
-                    # logger.debug(cluster_dict)
-                    # logger.debug(renaming_dict)
-                    for k,v in cluster_dict.items():
-                        cluster_dict[k] = [[x,0,0] for x in v]      
+                # logger.debug(pattern_creation_q)
+                self.cur.execute(pattern_creation_q)
 
-                    # entropy rank in each cluster to find the highest one 
-                    # as the training input variable "representing" the cluster
-                    # 3 elements list for each column, col[1] is for entropy, col[2] is flag indicating
-                    # if it is from the  last node
-                    # (from last node: 1 not from last node:0)
+                nominal_pattern_df = pd.read_sql(get_nominal_patterns_q, self.conn)
+                # logger.debug(nominal_pattern_df)
 
-                    # this is for storing the correlated attrs with representative
-                    
-                    # random forest input variables
-                    # logger.debug(attrs_from_spec_node)
-                    for k,v in cluster_dict.items():
-                        for col in v:
-                            value,counts = np.unique(cor_df[col[0]], return_counts=True)
-                            col[1] = entropy(counts)
-                            if(col[0] in attrs_from_spec_node):
-                                col[2]=1
-                        cluster_dict[k] = sorted(v, key = lambda x: (x[2],x[1],x[0]), reverse=True)
-                        representative_var_for_clust = cluster_dict[k][0][0]
-                        if(representative_var_for_clust in attrs_from_spec_node):
-                            rep_from_last_node.append(representative_var_for_clust)
-                        rf_input_vars.append(representative_var_for_clust)
-                        correlation_dict[representative_var_for_clust] = [cora[0] for cora in cluster_dict[k][1:]]
+                nominal_pattern_dicts = nominal_pattern_df.to_dict('records')
+                # logger.debug(nominal_pattern_dicts)
+                self.stats.stopTimer('get_nominal_patterns')
 
-                    logger.debug(correlation_dict)
+                nominal_pattern_dict_list = []
 
-                # finish clustering here
-                else:
-                    rf_input_vars = ordinal_pattern_attr_list
-                    rep_from_last_node = [r for r in rf_input_vars if r in attrs_from_spec_node]
-                    correlation_dict = {i : [] for i in rf_input_vars}
+                for n_pa in nominal_pattern_dicts:
+                    n_pa_dict = {}
+                    n_pa_dict['nominal_values'] = [(k, v) for k, v in n_pa.items() if (v is not None and not pd.isnull(v))]
+                    if(n_pa_dict['nominal_values']):
+                        nominal_pattern_dict_list.append(n_pa_dict) 
+
+                if(need_weighted_sampling==True): 
+                    # if need weighted sampling, we start by sampling for 
+                    # nominal patterns only, and we choose most diverse 
+                    # one as the weighting factor 
+
+                    distinct_nominal_list = [f"COUNT(DISTINCT {x}) as cnt_{x}" for x in nominal_pattern_attr_list]
+                    nominal_only_sample_q = f""" 
+                    SELECT {','.join(distinct_nominal_list)}
+                    FROM {jg_name}_p
+                    """
+                    self.cur.execute(nominal_only_sample_q)
+                    distinct_cnts = self.cur.fetchone()
+                    max_distinct_val = max(distinct_cnts)
+                    i = distinct_cnts.index(max_distinct_val)
+
+                    w_sample_attr = nominal_pattern_attr_list[i]
+
+                    sample_jg_size = math.ceil(jg_apt_size * f1_calculation_sample_rate)
+
+                    drop_w_nom_sample_q = f"""
+                    DROP MATERIALIZED VIEW IF EXISTS {jg_name}_ws_nom CASCADE
+                    """
+                    self.cur.execute(drop_w_nom_sample_q)
+                    create_f1_jg_size = f"""
+                    CREATE MATERIALIZED VIEW {jg_name}_ws_nom AS 
+                    WITH weight_factors AS
+                    (SELECT {w_sample_attr} AS name, COUNT(*) AS cnt
+                    FROM {jg_name}
+                    GROUP BY {w_sample_attr}
+                    )
+                    SELECT j.* 
+                    FROM {jg_name} j, weight_factors wf
+                    WHERE j.{w_sample_attr} = wf.name
+                    ORDER BY RANDOM() * wf.cnt DESC
+                    LIMIT {sample_jg_size};
+                    """
+                    self.cur.execute(create_f1_jg_size)
+
+                    nom_sample_dict = {}
+
+                    q_tp_yes = f"""
+                    SELECT COUNT(DISTINCT pnumber)
+                    FROM {jg_name}_ws_nom
+                    WHERE is_user='yes'
+                    """
+                    self.cur.execute(q_tp_yes)
+                    nom_sample_dict['yes'] = int(self.cur.fetchone()[0])
+
+                    q_tp_no = f"""
+                    SELECT COUNT(DISTINCT pnumber)
+                    FROM {jg_name}_ws_nom
+                    WHERE is_user='no'
+                    """
+                    self.cur.execute(q_tp_no)
+                    nom_sample_dict['no'] = int(self.cur.fetchone()[0])
 
 
-                rf_df = cor_df[rf_input_vars]
-                logger.debug(rf_df.head())
-                target = raw_df['is_user']
-                le = LabelEncoder()
-                y = le.fit(target)
-                y = le.transform(target)
-                forest = RandomForestClassifier(n_estimators=500, max_depth=10)
-                forest.fit(rf_df, y)
-                importances = [list(t) for t in zip(rf_df, forest.feature_importances_)]
-                importances = sorted(importances, key = lambda x: x[1], reverse=True)
-                logger.debug(importances)
+                    self.weighted_sample_views[jg_name] = {'jg_samples': [], 'ws_index':1, 'nominal_only_recall': nom_sample_dict}
+
+
+                if(numercial_attr_filter_method=='y'):
+
+                    valid_patterns = [] # list of all the valid patterns that can be generated from this nominal pattern
+
+                    # clustering + random forest to select important attributes 
+                    # with a caveat in mind that at least one of the attributes
+                    # comes from the "last node" specified in join graph 
+                    # (either nominal or ordinal has to be in the patten)
+
+                    self.stats.startTimer('numercial_attr_filter')
+
+                    Q_cor = f"""
+                    SELECT {','.join(ordinal_pattern_attr_list)}, is_user 
+                    FROM {jg_name} 
+                    ORDER BY RANDOM()
+                    LIMIT 10000
+                    """;
+
+                    if(sample_repeatable):
+                        self.cur.execute(setseed_q)
+
+                    raw_df = pd.read_sql(Q_cor, self.conn)
+                    cor_df = raw_df[ordinal_pattern_attr_list]
+                    rf_input_vars = []
+                    rep_from_last_node = []
+                    correlation_dict = {}
+
+                    if(len(ordinal_pattern_attr_list)>=5): 
+                        # if the number of numeric attributes is not large
+                        # then dont need to do clustering 
+
+                        # do clustering first
+
+                        # remove constant
+                        cor_df = cor_df.loc[:, (cor_df != cor_df.iloc[0]).any()] 
+
+                        logger.debug(cor_df.head())
+                        variable_clustering = VarClusHi(cor_df, maxeigval2=1, maxclus=None)
+                        variable_clustering.varclus()
+
+                        cluster_dict = variable_clustering.rsquare[['Cluster', 'Variable']].groupby('Cluster')['Variable'].apply(list).to_dict()
+                        # logger.debug(cluster_dict)
+                        # logger.debug(renaming_dict)
+                        for k,v in cluster_dict.items():
+                            cluster_dict[k] = [[x,0,0] for x in v]      
+
+                        # entropy rank in each cluster to find the highest one 
+                        # as the training input variable "representing" the cluster
+                        # 3 elements list for each column, col[1] is for entropy, col[2] is flag indicating
+                        # if it is from the  last node
+                        # (from last node: 1 not from last node:0)
+
+                        # this is for storing the correlated attrs with representative
+                        
+                        # random forest input variables
+                        # logger.debug(attrs_from_spec_node)
+                        for k,v in cluster_dict.items():
+                            for col in v:
+                                value,counts = np.unique(cor_df[col[0]], return_counts=True)
+                                col[1] = entropy(counts)
+                                if(col[0] in attrs_from_spec_node):
+                                    col[2]=1
+                            cluster_dict[k] = sorted(v, key = lambda x: (x[2],x[1],x[0]), reverse=True)
+                            representative_var_for_clust = cluster_dict[k][0][0]
+                            if(representative_var_for_clust in attrs_from_spec_node):
+                                rep_from_last_node.append(representative_var_for_clust)
+                            rf_input_vars.append(representative_var_for_clust)
+                            correlation_dict[representative_var_for_clust] = [cora[0] for cora in cluster_dict[k][1:]]
+
+                        logger.debug(correlation_dict)
+
+                    # finish clustering here
+                    else:
+                        rf_input_vars = ordinal_pattern_attr_list
+                        rep_from_last_node = [r for r in rf_input_vars if r in attrs_from_spec_node]
+                        correlation_dict = {i : [] for i in rf_input_vars}
+
+
+                    rf_df = cor_df[rf_input_vars]
+                    logger.debug(rf_df.head())
+                    target = raw_df['is_user']
+                    le = LabelEncoder()
+                    y = le.fit(target)
+                    y = le.transform(target)
+                    forest = RandomForestClassifier(n_estimators=500, max_depth=10)
+                    forest.fit(rf_df, y)
+                    importances = [list(t) for t in zip(rf_df, forest.feature_importances_)]
+                    importances = sorted(importances, key = lambda x: x[1], reverse=True)
+                    logger.debug(importances)
 
 
 
-                self.stats.stopTimer('numercial_attr_filter')
+                    self.stats.stopTimer('numercial_attr_filter')
 
-                num_feature_to_consider = math.ceil(num_numerical_attr_rate*user_assigned_num_pred_cap)
-                # construct dictionary for each nominal pattern with ordinal attributes
-                # add patterns that only include nominal attributes
+                    num_feature_to_consider = math.ceil(num_numerical_attr_rate*user_assigned_num_pred_cap)
+                    # construct dictionary for each nominal pattern with ordinal attributes
+                    # add patterns that only include nominal attributes
 
-                for npa in nominal_pattern_dict_list:
+                    for npa in nominal_pattern_dict_list:
 
-                    nominal_patterns = []
-                    cur_pattern_candidates = [] 
+                        nominal_patterns = []
+                        cur_pattern_candidates = [] 
 
-                    # initialize 2 patterns with categorical attrs only
-                    nominal_patterns.append({'join_graph':jg, 'recall':0, 'precision':0, 'nominal_values': npa['nominal_values'], 
-                        'correlated_attrs': {}, 'attrs_with_const': None, 'ordinal_values':[],
-                        'max_cluster_rank':-2, 'is_user':'yes'})
+                        # initialize 2 patterns with categorical attrs only
+                        nominal_patterns.append({'join_graph':jg, 'recall':0, 'precision':0, 'nominal_values': npa['nominal_values'], 
+                            'correlated_attrs': {}, 'attrs_with_const': None, 'ordinal_values':[],
+                            'max_cluster_rank':-2, 'is_user':'yes'})
 
-                    nominal_patterns.append({'join_graph':jg, 'recall':0, 'precision':0, 'nominal_values': npa['nominal_values'], 
-                        'correlated_attrs': {}, 'attrs_with_const': None, 'ordinal_values':[],
-                        'max_cluster_rank':-2, 'is_user':'no'})
+                        nominal_patterns.append({'join_graph':jg, 'recall':0, 'precision':0, 'nominal_values': npa['nominal_values'], 
+                            'correlated_attrs': {}, 'attrs_with_const': None, 'ordinal_values':[],
+                            'max_cluster_rank':-2, 'is_user':'no'})
 
-                    for n_pat in nominal_patterns:
-                        n_pat_processed, is_valid = self.get_fscore(prov_version=prov_version,
-                                                          f1_calculation_type=f1_calculation_type,
-                                                          pattern=n_pat,
-                                                          pattern_recall_threshold=pattern_recall_threshold,
-                                                          jg_name=jg_name,
-                                                          recall_dicts=recall_dicts,
-                                                          need_weighted_sampling=need_weighted_sampling,
-                                                          w_sample_attr=w_sample_attr,
-                                                          sample_size=sample_f1_jg_size)
-                        if(is_valid):
-                            cur_pattern_candidates.append(n_pat_processed)
+                        for n_pat in nominal_patterns:
+                            n_pat_processed, is_valid = self.get_fscore(prov_version=prov_version,
+                                                              f1_calculation_type=f1_calculation_type,
+                                                              pattern=n_pat,
+                                                              pattern_recall_threshold=pattern_recall_threshold,
+                                                              jg_name=jg_name,
+                                                              recall_dicts=recall_dicts,
+                                                              need_weighted_sampling=need_weighted_sampling,
+                                                              stddv_ranks_dict = None,
+                                                              w_sample_attr=w_sample_attr,
+                                                              sample_size=sample_f1_jg_size)
+                            if(is_valid):
+                                cur_pattern_candidates.append(n_pat_processed)
 
-                    if(cur_pattern_candidates):
-                        # if at least one nominal pattern passed the 
-                        # recall test then we continue to expand
+                        if(cur_pattern_candidates):
+                            # if at least one nominal pattern passed the 
+                            # recall test then we continue to expand
 
-                        self.stats.startTimer('enumerate_all_from_nominal_patterns')
-
-                        for npair in npa['nominal_values']:
-                            npa['ordinal_quartiles'] = {}
-                            nominal_where_cond_list = []
-                            if(isinstance(npair[1], datetime.date)): # temp_fix for date type
-                                logger.debug(npair) 
-                                continue
-                            nominal_where_cond_list.append("{}='{}'".format(npair[0],npair[1].replace("'","''")))
-
-                        for n in importances:
-                            nominal_where_clause = ' AND '.join(nominal_where_cond_list)
-                            # logger.debug(f"attribute: {n}")
-                            q_get_quartiles = f"""
-                            SELECT percentile_cont(0.25) WITHIN GROUP (ORDER BY {n[0]}) AS {n[0]} FROM {jg_name} WHERE {nominal_where_clause}
-                            UNION
-                            SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY {n[0]}) AS {n[0]} FROM {jg_name} WHERE {nominal_where_clause}
-                            UNION
-                            SELECT percentile_cont(0.75) WITHIN GROUP (ORDER BY {n[0]}) AS {n[0]} FROM {jg_name} WHERE {nominal_where_clause}
-                            """
-                            # logger.debug(q_get_quartiles)
-                            self.cur.execute(q_get_quartiles)
-
-                            npa['ordinal_quartiles'][n[0]] = [x[0] for x in self.cur.fetchall()]
-
-                        # logger.debug(npa['ordinal_quartiles'])
-
-                        attrs_with_const_set = set([x[0] for x in npa['nominal_values']])
-
-                        self.stats.stopTimer('enumerate_all_from_nominal_patterns')
-
-                        if(len(attrs_from_spec_node.intersection(attrs_with_const_set))>0): 
-                            # logger.debug("already has at least one attr from last node")
-                            
                             self.stats.startTimer('enumerate_all_from_nominal_patterns')
 
-                            # if nominal attrs already has at least one from last node: directly adding numerical attrs
-                            importance_feature_ranks = list(enumerate([x[0] for x in importances],0))
+                            for npair in npa['nominal_values']:
+                                npa['ordinal_quartiles'] = {}
+                                nominal_where_cond_list = []
+                                if(isinstance(npair[1], datetime.date)): # temp_fix for date type
+                                    logger.debug(npair) 
+                                    continue
+                                nominal_where_cond_list.append("{}='{}'".format(npair[0],npair[1].replace("'","''")))
 
-                            max_number_of_numerical_possible = len(importance_feature_ranks)
-                            # logger.debug(f"max_number_of_numerical_possible : {max_number_of_numerical_possible} ")
-
-                            if(max_number_of_numerical_possible<=num_feature_to_consider):
-                                # if the number of clusters are smaller than the desired 
-                                # number of numerical features, then consider all
-                                numerical_variable_candidates = importance_feature_ranks
-                            else:
-                                numerical_variable_candidates = importance_feature_ranks[0:num_feature_to_consider]
-
-                            if(need_weighted_sampling==True): # rank the variances
-
-                                num_names = [n[1] for n in numerical_variable_candidates]
-                                norm_stddv_num_list = [f"STDDV({x})::numeric/AVG({x}) as std_{x}" for x in num_names]
-
-                                num_cand_variance_q = f"""
-                                SELECT {','.join(norm_stddv_num_list)}
-                                FROM {jg_name}                                                                                                                                                                                                                                               
+                            for n in importances:
+                                nominal_where_clause = ' AND '.join(nominal_where_cond_list)
+                                # logger.debug(f"attribute: {n}")
+                                q_get_quartiles = f"""
+                                SELECT percentile_cont(0.25) WITHIN GROUP (ORDER BY {n[0]}) AS {n[0]} FROM {jg_name} WHERE {nominal_where_clause}
+                                UNION
+                                SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY {n[0]}) AS {n[0]} FROM {jg_name} WHERE {nominal_where_clause}
+                                UNION
+                                SELECT percentile_cont(0.75) WITHIN GROUP (ORDER BY {n[0]}) AS {n[0]} FROM {jg_name} WHERE {nominal_where_clause}
                                 """
+                                # logger.debug(q_get_quartiles)
+                                self.cur.execute(q_get_quartiles)
 
-                                logger.debug(num_cand_variance_q)
-                                self.cur.execute(num_cand_variance_q)
+                                npa['ordinal_quartiles'][n[0]] = [x[0] for x in self.cur.fetchall()]
 
-                                num_stddv_results = tuple(zip(num_names, list(self.fetchone())))
+                            # logger.debug(npa['ordinal_quartiles'])
 
-                                logger.debug(num_stddv_results)
-
-                                sorted_stddvs = sorted(num_stddv_results, key = lambda x: x[1])
-                                sorted_stddv_dct = {k[0]: v for v, k in enumerate(sorted_stddvs)}
-
-                            # logger.debug(numerical_variable_candidates)
-
-                            cur_number_of_numercial_attrs = 0
-
-                            if(max_number_of_numerical_possible<=user_assigned_num_pred_cap):
-                                user_assigned_num_pred_cap = max_number_of_numerical_possible
+                            attrs_with_const_set = set([x[0] for x in npa['nominal_values']])
 
                             self.stats.stopTimer('enumerate_all_from_nominal_patterns')
 
-                            # logger.debug(f"in has last node case: user_assigned_num_pred_cap: {user_assigned_num_pred_cap}")
-
-                            while(cur_pattern_candidates and cur_number_of_numercial_attrs<=user_assigned_num_pred_cap):
-                                good_candidates=[]
-
-                                for pc in cur_pattern_candidates:
-                                    pc_processed, is_valid = self.get_fscore(prov_version=prov_version,
-                                                                  f1_calculation_type=f1_calculation_type,
-                                                                  pattern=pc,
-                                                                  pattern_recall_threshold=pattern_recall_threshold,
-                                                                  jg_name=jg_name,
-                                                                  recall_dicts=recall_dicts,
-                                                                  need_weighted_sampling=need_weighted_sampling,
-                                                                  w_sample_attr=w_sample_attr,
-                                                                  sample_size=sample_f1_jg_size)
-                                    if(is_valid):
-                                        self.stats.startTimer('deepcopy')
-                                        val_pat = deepcopy(pc_processed)
-                                        self.stats.stopTimer('deepcopy')
-                                        # logger.debug(val_pat)
-                                        valid_patterns.append(val_pat)
-                                        good_candidates.append(pc_processed)
-
+                            if(len(attrs_from_spec_node.intersection(attrs_with_const_set))>0): 
+                                # logger.debug("already has at least one attr from last node")
+                                
                                 self.stats.startTimer('enumerate_all_from_nominal_patterns')
 
+                                # if nominal attrs already has at least one from last node: directly adding numerical attrs
+                                importance_feature_ranks = list(enumerate([x[0] for x in importances],0))
 
-                                cur_pattern_candidates = self.extend_valid_candidates(good_candidates,
-                                                                                      numerical_variable_candidates,
-                                                                                      npa['ordinal_quartiles'],
-                                                                                      correlation_dict)
-
-                                self.stats.stopTimer('enumerate_all_from_nominal_patterns')
-
-
-                                cur_number_of_numercial_attrs+=1
-
-                        else:
-                            if(rep_from_last_node):
-                                self.stats.startTimer('enumerate_all_from_nominal_patterns')
-
-                                # logger.debug(importances)
-                                special_rep_from_last_node = rep_from_last_node[0]
-                                # logger.debug(special_rep_from_last_node)
-                                importance_list = [x[0] for x in importances]
-                                importance_list.remove(special_rep_from_last_node)
-                                importance_feature_ranks = list(enumerate(importance_list,0))
-
-
-
-                                max_number_of_numerical_possible = len(importance_feature_ranks)+1
-
-                                # need to add a numerical attribute 
-                                #from last node first to ensure patterns are valid
-
-
-                                initial_candidates = self.extend_valid_candidates(cur_pattern_candidates,
-                                                                                  [(-1,special_rep_from_last_node)],
-                                                                                  npa['ordinal_quartiles'],
-                                                                                  correlation_dict)
-                                # logger.debug(f"initial_candidates: {initial_candidates}")
-
-                                self.stats.stopTimer('enumerate_all_from_nominal_patterns')
-
-
-                                cur_pattern_candidates = []
-
-                                # since this case categorical pattern havent included 
-                                # a single attribute from the last node yet, we need to 
-                                # add a special step to make sure every pattern
-                                # that is about to be generated will be "valid"
-
-                                for ic in initial_candidates:
-                                    ic_processed, is_valid = self.get_fscore(prov_version=prov_version,
-                                                                  f1_calculation_type=f1_calculation_type,
-                                                                  pattern=ic,
-                                                                  pattern_recall_threshold=pattern_recall_threshold,
-                                                                  jg_name=jg_name,
-                                                                  recall_dicts=recall_dicts,
-                                                                  need_weighted_sampling=need_weighted_sampling,
-                                                                  w_sample_attr=w_sample_attr,
-                                                                  sample_size=sample_f1_jg_size)
-                                    if(is_valid):
-                                        self.stats.startTimer('deepcopy')
-                                        val_pat = deepcopy(ic_processed)
-                                        self.stats.stopTimer('deepcopy')
-                                        valid_patterns.append(val_pat)
-                                        # logger.debug(val_pat)
-                                        cur_pattern_candidates.append(ic_processed)
+                                max_number_of_numerical_possible = len(importance_feature_ranks)
+                                # logger.debug(f"max_number_of_numerical_possible : {max_number_of_numerical_possible} ")
 
                                 if(max_number_of_numerical_possible<=num_feature_to_consider):
+                                    # if the number of clusters are smaller than the desired 
+                                    # number of numerical features, then consider all
                                     numerical_variable_candidates = importance_feature_ranks
                                 else:
                                     numerical_variable_candidates = importance_feature_ranks[0:num_feature_to_consider]
 
-                                cur_number_of_numercial_attrs = 1
-
                                 if(need_weighted_sampling==True): # rank the variances
 
                                     num_names = [n[1] for n in numerical_variable_candidates]
-                                    norm_stddv_num_list = [f"STDDV({x})::numeric/AVG({x}) as std_{x}" for x in num_names]
+                                    norm_stddv_num_list = [f"STDDEV({x})::numeric/AVG({x}) as std_{x}" for x in num_names]
 
                                     num_cand_variance_q = f"""
                                     SELECT {','.join(norm_stddv_num_list)}
@@ -1366,189 +1278,312 @@ class Pattern_Generator:
                                     logger.debug(num_cand_variance_q)
                                     self.cur.execute(num_cand_variance_q)
 
-                                    num_stddv_results = tuple(zip(num_names, list(self.fetchone())))
+                                    num_stddv_results = tuple(zip(num_names, list(self.cur.fetchone())))
 
                                     logger.debug(num_stddv_results)
 
                                     sorted_stddvs = sorted(num_stddv_results, key = lambda x: x[1])
                                     sorted_stddv_dct = {k[0]: v for v, k in enumerate(sorted_stddvs)}
 
+                                # logger.debug(numerical_variable_candidates)
+
+                                cur_number_of_numercial_attrs = 0
 
                                 if(max_number_of_numerical_possible<=user_assigned_num_pred_cap):
                                     user_assigned_num_pred_cap = max_number_of_numerical_possible
 
-                                # logger.debug(f"in no last node case: user_assigned_num_pred_cap: {user_assigned_num_pred_cap}")
+                                self.stats.stopTimer('enumerate_all_from_nominal_patterns')
+
+                                # logger.debug(f"in has last node case: user_assigned_num_pred_cap: {user_assigned_num_pred_cap}")
 
                                 while(cur_pattern_candidates and cur_number_of_numercial_attrs<=user_assigned_num_pred_cap):
-                                    
                                     good_candidates=[]
 
                                     for pc in cur_pattern_candidates:
+                                        pc_processed, is_valid = self.get_fscore(prov_version=prov_version,
+                                                                      f1_calculation_type=f1_calculation_type,
+                                                                      pattern=pc,
+                                                                      pattern_recall_threshold=pattern_recall_threshold,
+                                                                      jg_name=jg_name,
+                                                                      recall_dicts=recall_dicts,
+                                                                      stddv_ranks_dict=sorted_stddv_dct,
+                                                                      need_weighted_sampling=need_weighted_sampling,
+                                                                      w_sample_attr=w_sample_attr,
+                                                                      sample_size=sample_f1_jg_size)
+                                        if(is_valid):
+                                            self.stats.startTimer('deepcopy')
+                                            val_pat = deepcopy(pc_processed)
+                                            self.stats.stopTimer('deepcopy')
+                                            # logger.debug(val_pat)
+                                            valid_patterns.append(val_pat)
+                                            good_candidates.append(pc_processed)
 
-                                        self.stats.startTimer('enumerate_all_from_nominal_patterns')
-                                        new_candidates = self.extend_valid_candidates([pc],
-                                                                                       numerical_variable_candidates,
-                                                                                       npa['ordinal_quartiles'],
-                                                                                       correlation_dict)
-                                        self.stats.stopTimer('enumerate_all_from_nominal_patterns')
+                                    self.stats.startTimer('enumerate_all_from_nominal_patterns')
 
-                                        if(new_candidates):
-                                            for nc in new_candidates:
-                                                pc_processed, is_valid = self.get_fscore(prov_version=prov_version,
-                                                              f1_calculation_type=f1_calculation_type,
-                                                              pattern=nc,
-                                                              pattern_recall_threshold=pattern_recall_threshold,
-                                                              jg_name=jg_name,
-                                                              recall_dicts=recall_dicts,
-                                                              need_weighted_sampling=need_weighted_sampling,
-                                                              w_sample_attr=w_sample_attr,
-                                                              sample_size=sample_f1_jg_size)
 
-                                                if(is_valid):
-                                                    self.stats.startTimer('deepcopy')
-                                                    val_pat = deepcopy(pc_processed)
-                                                    self.stats.stopTimer('deepcopy')
-                                                    valid_patterns.append(val_pat)
-                                                    # logger.debug(val_pat)
-                                                    good_candidates.append(pc_processed)
+                                    cur_pattern_candidates = self.extend_valid_candidates(good_candidates,
+                                                                                          numerical_variable_candidates,
+                                                                                          npa['ordinal_quartiles'],
+                                                                                          correlation_dict)
 
-                                    cur_pattern_candidates = good_candidates
+                                    self.stats.stopTimer('enumerate_all_from_nominal_patterns')
+
+
                                     cur_number_of_numercial_attrs+=1
 
-                self.stats.params['n_p_pass_node_rule'] += len(valid_patterns)
+                            else:
+                                if(rep_from_last_node):
+                                    self.stats.startTimer('enumerate_all_from_nominal_patterns')
 
-                # logger.debug(valid_patterns)
-            else:
+                                    # logger.debug(importances)
+                                    special_rep_from_last_node = rep_from_last_node[0]
+                                    # logger.debug(special_rep_from_last_node)
+                                    importance_list = [x[0] for x in importances]
+                                    importance_list.remove(special_rep_from_last_node)
+                                    importance_feature_ranks = list(enumerate(importance_list,0))
 
-                valid_patterns = []
+                                    max_number_of_numerical_possible = len(importance_feature_ranks)+1
 
-                self.stats.startTimer('enumerate_all_from_nominal_patterns')
+                                    if(max_number_of_numerical_possible<=num_feature_to_consider):
+                                        numerical_variable_candidates = importance_feature_ranks
+                                    else:
+                                        numerical_variable_candidates = importance_feature_ranks[0:num_feature_to_consider]
 
-                patterns_passed_node_cond = []
-                # construct dictionary for each nominal pattern with ordinal attributes
-                for npa in nominal_pattern_dict_list:
-                    cur_number_numerical = 0
-                    # add patterns that only include nominal attributes
-                    patterns_passed_node_cond.append({'join_graph':jg, 'recall':0, 'precision':0, 
-                                                      'nominal_values': npa['nominal_values'], 
-                                                      'attrs_with_const':set([x[0] for x in npa['nominal_values']]),
-                                                      'is_user':'yes'})
+                                    cur_number_of_numercial_attrs = 1
 
-                    patterns_passed_node_cond.append({'join_graph':jg, 'recall':0, 'precision':0, 
-                                                      'nominal_values': npa['nominal_values'], 
-                                                      'attrs_with_const':set([x[0] for x in npa['nominal_values']]), 
-                                                      'is_user':'no'})
-                    
-                    npa['ordinal_quartiles'] = {}
+                                    if(need_weighted_sampling==True): # rank the variances
 
-                    nominal_where_cond_list = []
-                    
-                    for npair in npa['nominal_values']:
-                        # logger.debug(npair)
-                        nominal_where_cond_list.append("{}='{}'".format(npair[0],npair[1].replace("'","''")))
+                                        num_names = [n[1] for n in numerical_variable_candidates]
+                                        num_names.append(special_rep_from_last_node)
+                                        norm_stddv_num_list = [f"STDDEV({x})::numeric/AVG({x}) as std_{x}" for x in num_names]
 
-                    for n in ordinal_pattern_attr_list:
-                        nominal_where_clause = ' AND '.join(nominal_where_cond_list)
-                        # logger.debug(f"attribute: {n}")
-                        q_get_quartiles = f"""
-                        SELECT percentile_cont(0.25) WITHIN GROUP (ORDER BY {n}) AS {n} FROM {jg_name} WHERE {nominal_where_clause}
-                        UNION
-                        SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY {n}) AS {n} FROM {jg_name} WHERE {nominal_where_clause}
-                        UNION
-                        SELECT percentile_cont(0.75) WITHIN GROUP (ORDER BY {n}) AS {n} FROM {jg_name} WHERE {nominal_where_clause}
-                        """
-                        self.cur.execute(q_get_quartiles)
+                                        num_cand_variance_q = f"""
+                                        SELECT {','.join(norm_stddv_num_list)}
+                                        FROM {jg_name}                                                                                                                                                                                                                                               
+                                        """
 
-                        npa['ordinal_quartiles'][n] = [x[0] for x in self.cur.fetchall()]
+                                        logger.debug(num_cand_variance_q)
+                                        self.cur.execute(num_cand_variance_q)
 
-                    # patterns with one ordinal attribute
-                    ordi_one_attr = list(npa['ordinal_quartiles'])
-                    
-                    if(cur_number_numerical<user_assigned_num_pred_cap):
-                        cur_number_numerical+=1
-                        for one in ordi_one_attr:
-                            attrs_with_const_set = set([x[0] for x in npa['nominal_values']] + [one])
-                            # last node has to have an predicate attribute
-                            if(len( attrs_from_spec_node.intersection(attrs_with_const_set))>0):
-                                for val in npa['ordinal_quartiles'][one]:
-                                    for one_dir in ['>','<']:
-                                        # one_patt_with_ordi_dir_yes 
-                                        patterns_passed_node_cond.append({'join_graph':jg, 'recall':0, 'precision':0, 'nominal_values': npa['nominal_values'], 
-                                            'ordinal_values': [(one,one_dir,val)], 'attrs_with_const':attrs_with_const_set, 'is_user':'yes'})
-                                        # one_patt_with_ordi_dir_no 
-                                        patterns_passed_node_cond.append({'join_graph':jg, 'recall':0, 'precision':0, 'nominal_values': npa['nominal_values'], 
-                                            'ordinal_values': [(one,one_dir,val)], 'attrs_with_const':attrs_with_const_set , 'is_user':'no'})
+                                        num_stddv_results = tuple(zip(num_names, list(self.cur.fetchone())))
 
-                    if(cur_number_numerical<user_assigned_num_pred_cap):
-                        cur_number_numerical+=1
-                        ordi_two_attr_pairs = list(itertools.combinations(list(npa['ordinal_quartiles']),2))
-                        dir_combinations = list(itertools.product(['>', '<'], repeat=2))
-                        for n in ordi_two_attr_pairs:
-                            attrs_with_const_set = set([x[0] for x in npa['nominal_values']] + list(n))
-                            if(len(attrs_from_spec_node.intersection(attrs_with_const_set))>0):
-                                for val_pair in itertools.product(npa['ordinal_quartiles'][n[0]],npa['ordinal_quartiles'][n[1]]):
-                                    for one_dir in dir_combinations:
-                                        # two_patt_dicts_with_dir_yes
-                                        patterns_passed_node_cond.append({'join_graph':jg, 'recall':0, 'precision':0, 'nominal_values': npa['nominal_values'], 
-                                            'ordinal_values': list(zip(n,one_dir,val_pair)), 'attrs_with_const':attrs_with_const_set,  'is_user':'yes'})
-                                        # two_patt_dicts_with_dir_no
-                                        patterns_passed_node_cond.append({'join_graph':jg, 'recall':0, 'precision':0, 'nominal_values': npa['nominal_values'], 
-                                            'ordinal_values': list(zip(n,one_dir,val_pair)), 'attrs_with_const':attrs_with_const_set, 'is_user':'no'})
+                                        logger.debug(num_stddv_results)
 
-                    if(cur_number_numerical<user_assigned_num_pred_cap):
-                        cur_number_numerical+=1
-                        ordi_three_attr_pairs = list(itertools.combinations(list(npa['ordinal_quartiles']),3))
-                        dir_combinations = list(itertools.product(['>', '<'], repeat=3))
-                        # logger.debug(ordi_three_attr_pairs)
-                        for n in ordi_three_attr_pairs:
-                            # logger.debug(n)
-                            attrs_with_const_set = set([x[0] for x in npa['nominal_values']] + list(n))
-                            if(len(attrs_from_spec_node.intersection(attrs_with_const_set))>0):
-                                for val_pair in itertools.product(npa['ordinal_quartiles'][n[0]],npa['ordinal_quartiles'][n[1]],npa['ordinal_quartiles'][n[2]]):
-                                    if(len(patterns_passed_node_cond)>100000):
-                                        break
-                                    for one_dir in dir_combinations:
-                                        # three_patt_dicts_with_dir_yes
-                                        patterns_passed_node_cond.append({'join_graph':jg, 'recall':0, 'precision':0, 'nominal_values': npa['nominal_values'], 
-                                            'ordinal_values': list(zip(n,one_dir,val_pair)), 'attrs_with_const':attrs_with_const_set,  'is_user':'yes'})
-                                        # three_patt_dicts_with_dir_no
-                                        patterns_passed_node_cond.append({'join_graph':jg, 'recall':0, 'precision':0, 'nominal_values': npa['nominal_values'], 
-                                            'ordinal_values': list(zip(n,one_dir,val_pair)), 'attrs_with_const':attrs_with_const_set, 'is_user':'no'})
+                                        sorted_stddvs = sorted(num_stddv_results, key = lambda x: x[1])
+                                        sorted_stddv_dct = {k[0]: v for v, k in enumerate(sorted_stddvs)}
 
 
-                self.stats.params['n_p_pass_node_rule'] += len(patterns_passed_node_cond)
+                                    if(max_number_of_numerical_possible<=user_assigned_num_pred_cap):
+                                        user_assigned_num_pred_cap = max_number_of_numerical_possible
 
-                self.stats.stopTimer('enumerate_all_from_nominal_patterns')
-
-
-                for ppnc in patterns_passed_node_cond:
-                    pc_processed, is_valid = self.get_fscore(prov_version=prov_version,
-                                  f1_calculation_type=f1_calculation_type,
-                                  pattern=ppnc,
-                                  pattern_recall_threshold=pattern_recall_threshold,
-                                  jg_name=jg_name,
-                                  recall_dicts=recall_dicts,
-                                  need_weighted_sampling=need_weighted_sampling,
-                                  w_sample_attr=w_sample_attr,
-                                  sample_size=sample_f1_jg_size,
-                                  )
-                    if(is_valid):
-                        valid_patterns.append(pc_processed)
-
-            if(valid_patterns):
-                # logger.debug(f"number of valid patterns {len(valid_patterns)}")
-                for vp in valid_patterns:
-                    self.stats.startTimer('pattern_recover')
-                    vp_recovered = self.pattern_recover(renaming_dict, vp, user_questions_map)
-                    self.stats.params['n_p_pass_node_rule_and_recall_thresh']+=1
-                    self.stats.stopTimer('pattern_recover')
-                    self.pattern_pool.append(vp_recovered)
-                    self.pattern_by_jg[jg].append(vp_recovered)
+                                    # need to add a numerical attribute 
+                                    #from last node first to ensure patterns are valid
 
 
+                                    initial_candidates = self.extend_valid_candidates(cur_pattern_candidates,
+                                                                                      [(-1,special_rep_from_last_node)],
+                                                                                      npa['ordinal_quartiles'],
+                                                                                      correlation_dict)
+                                    # logger.debug(f"initial_candidates: {initial_candidates}")
+
+                                    self.stats.stopTimer('enumerate_all_from_nominal_patterns')
 
 
-            # for qualified_pat in random.choices(patterns_passed_node_cond, k=max(100, int(0.01*len(patterns_passed_node_cond)))):
+                                    cur_pattern_candidates = []
+
+                                    # since this case categorical pattern havent included 
+                                    # a single attribute from the last node yet, we need to 
+                                    # add a special step to make sure every pattern
+                                    # that is about to be generated will be "valid"
+
+                                    for ic in initial_candidates:
+                                        ic_processed, is_valid = self.get_fscore(prov_version=prov_version,
+                                                                      f1_calculation_type=f1_calculation_type,
+                                                                      pattern=ic,
+                                                                      pattern_recall_threshold=pattern_recall_threshold,
+                                                                      jg_name=jg_name,
+                                                                      recall_dicts=recall_dicts,
+                                                                      stddv_ranks_dict=sorted_stddv_dct,
+                                                                      need_weighted_sampling=need_weighted_sampling,
+                                                                      w_sample_attr=w_sample_attr,
+                                                                      sample_size=sample_f1_jg_size)
+                                        if(is_valid):
+                                            self.stats.startTimer('deepcopy')
+                                            val_pat = deepcopy(ic_processed)
+                                            self.stats.stopTimer('deepcopy')
+                                            valid_patterns.append(val_pat)
+                                            # logger.debug(val_pat)
+                                            cur_pattern_candidates.append(ic_processed)
+
+
+                                    # logger.debug(f"in no last node case: user_assigned_num_pred_cap: {user_assigned_num_pred_cap}")
+
+                                    while(cur_pattern_candidates and cur_number_of_numercial_attrs<=user_assigned_num_pred_cap):
+                                        
+                                        good_candidates=[]
+
+                                        for pc in cur_pattern_candidates:
+
+                                            self.stats.startTimer('enumerate_all_from_nominal_patterns')
+                                            new_candidates = self.extend_valid_candidates([pc],
+                                                                                           numerical_variable_candidates,
+                                                                                           npa['ordinal_quartiles'],
+                                                                                           correlation_dict)
+                                            self.stats.stopTimer('enumerate_all_from_nominal_patterns')
+
+                                            if(new_candidates):
+                                                for nc in new_candidates:
+                                                    pc_processed, is_valid = self.get_fscore(prov_version=prov_version,
+                                                                  f1_calculation_type=f1_calculation_type,
+                                                                  pattern=nc,
+                                                                  pattern_recall_threshold=pattern_recall_threshold,
+                                                                  jg_name=jg_name,
+                                                                  recall_dicts=recall_dicts,
+                                                                  stddv_ranks_dict=sorted_stddv_dct,
+                                                                  need_weighted_sampling=need_weighted_sampling,
+                                                                  w_sample_attr=w_sample_attr,
+                                                                  sample_size=sample_f1_jg_size)
+
+                                                    if(is_valid):
+                                                        self.stats.startTimer('deepcopy')
+                                                        val_pat = deepcopy(pc_processed)
+                                                        self.stats.stopTimer('deepcopy')
+                                                        valid_patterns.append(val_pat)
+                                                        # logger.debug(val_pat)
+                                                        good_candidates.append(pc_processed)
+
+                                        cur_pattern_candidates = good_candidates
+                                        cur_number_of_numercial_attrs+=1
+
+                    self.stats.params['n_p_pass_node_rule'] += len(valid_patterns)
+
+                    # logger.debug(valid_patterns)
+                else:
+
+                    valid_patterns = []
+
+                    self.stats.startTimer('enumerate_all_from_nominal_patterns')
+
+                    patterns_passed_node_cond = []
+                    # construct dictionary for each nominal pattern with ordinal attributes
+                    for npa in nominal_pattern_dict_list:
+                        cur_number_numerical = 0
+                        # add patterns that only include nominal attributes
+                        patterns_passed_node_cond.append({'join_graph':jg, 'recall':0, 'precision':0, 
+                                                          'nominal_values': npa['nominal_values'], 
+                                                          'attrs_with_const':set([x[0] for x in npa['nominal_values']]),
+                                                          'is_user':'yes'})
+
+                        patterns_passed_node_cond.append({'join_graph':jg, 'recall':0, 'precision':0, 
+                                                          'nominal_values': npa['nominal_values'], 
+                                                          'attrs_with_const':set([x[0] for x in npa['nominal_values']]), 
+                                                          'is_user':'no'})
+                        
+                        npa['ordinal_quartiles'] = {}
+
+                        nominal_where_cond_list = []
+                        
+                        for npair in npa['nominal_values']:
+                            # logger.debug(npair)
+                            nominal_where_cond_list.append("{}='{}'".format(npair[0],npair[1].replace("'","''")))
+
+                        for n in ordinal_pattern_attr_list:
+                            nominal_where_clause = ' AND '.join(nominal_where_cond_list)
+                            # logger.debug(f"attribute: {n}")
+                            q_get_quartiles = f"""
+                            SELECT percentile_cont(0.25) WITHIN GROUP (ORDER BY {n}) AS {n} FROM {jg_name} WHERE {nominal_where_clause}
+                            UNION
+                            SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY {n}) AS {n} FROM {jg_name} WHERE {nominal_where_clause}
+                            UNION
+                            SELECT percentile_cont(0.75) WITHIN GROUP (ORDER BY {n}) AS {n} FROM {jg_name} WHERE {nominal_where_clause}
+                            """
+                            self.cur.execute(q_get_quartiles)
+
+                            npa['ordinal_quartiles'][n] = [x[0] for x in self.cur.fetchall()]
+
+                        # patterns with one ordinal attribute
+                        ordi_one_attr = list(npa['ordinal_quartiles'])
+                        
+                        if(cur_number_numerical<user_assigned_num_pred_cap):
+                            cur_number_numerical+=1
+                            for one in ordi_one_attr:
+                                attrs_with_const_set = set([x[0] for x in npa['nominal_values']] + [one])
+                                # last node has to have an predicate attribute
+                                if(len( attrs_from_spec_node.intersection(attrs_with_const_set))>0):
+                                    for val in npa['ordinal_quartiles'][one]:
+                                        for one_dir in ['>','<']:
+                                            # one_patt_with_ordi_dir_yes 
+                                            patterns_passed_node_cond.append({'join_graph':jg, 'recall':0, 'precision':0, 'nominal_values': npa['nominal_values'], 
+                                                'ordinal_values': [(one,one_dir,val)], 'attrs_with_const':attrs_with_const_set, 'is_user':'yes'})
+                                            # one_patt_with_ordi_dir_no 
+                                            patterns_passed_node_cond.append({'join_graph':jg, 'recall':0, 'precision':0, 'nominal_values': npa['nominal_values'], 
+                                                'ordinal_values': [(one,one_dir,val)], 'attrs_with_const':attrs_with_const_set , 'is_user':'no'})
+
+                        if(cur_number_numerical<user_assigned_num_pred_cap):
+                            cur_number_numerical+=1
+                            ordi_two_attr_pairs = list(itertools.combinations(list(npa['ordinal_quartiles']),2))
+                            dir_combinations = list(itertools.product(['>', '<'], repeat=2))
+                            for n in ordi_two_attr_pairs:
+                                attrs_with_const_set = set([x[0] for x in npa['nominal_values']] + list(n))
+                                if(len(attrs_from_spec_node.intersection(attrs_with_const_set))>0):
+                                    for val_pair in itertools.product(npa['ordinal_quartiles'][n[0]],npa['ordinal_quartiles'][n[1]]):
+                                        for one_dir in dir_combinations:
+                                            # two_patt_dicts_with_dir_yes
+                                            patterns_passed_node_cond.append({'join_graph':jg, 'recall':0, 'precision':0, 'nominal_values': npa['nominal_values'], 
+                                                'ordinal_values': list(zip(n,one_dir,val_pair)), 'attrs_with_const':attrs_with_const_set,  'is_user':'yes'})
+                                            # two_patt_dicts_with_dir_no
+                                            patterns_passed_node_cond.append({'join_graph':jg, 'recall':0, 'precision':0, 'nominal_values': npa['nominal_values'], 
+                                                'ordinal_values': list(zip(n,one_dir,val_pair)), 'attrs_with_const':attrs_with_const_set, 'is_user':'no'})
+
+                        if(cur_number_numerical<user_assigned_num_pred_cap):
+                            cur_number_numerical+=1
+                            ordi_three_attr_pairs = list(itertools.combinations(list(npa['ordinal_quartiles']),3))
+                            dir_combinations = list(itertools.product(['>', '<'], repeat=3))
+                            # logger.debug(ordi_three_attr_pairs)
+                            for n in ordi_three_attr_pairs:
+                                # logger.debug(n)
+                                attrs_with_const_set = set([x[0] for x in npa['nominal_values']] + list(n))
+                                if(len(attrs_from_spec_node.intersection(attrs_with_const_set))>0):
+                                    for val_pair in itertools.product(npa['ordinal_quartiles'][n[0]],npa['ordinal_quartiles'][n[1]],npa['ordinal_quartiles'][n[2]]):
+                                        if(len(patterns_passed_node_cond)>100000):
+                                            break
+                                        for one_dir in dir_combinations:
+                                            # three_patt_dicts_with_dir_yes
+                                            patterns_passed_node_cond.append({'join_graph':jg, 'recall':0, 'precision':0, 'nominal_values': npa['nominal_values'], 
+                                                'ordinal_values': list(zip(n,one_dir,val_pair)), 'attrs_with_const':attrs_with_const_set,  'is_user':'yes'})
+                                            # three_patt_dicts_with_dir_no
+                                            patterns_passed_node_cond.append({'join_graph':jg, 'recall':0, 'precision':0, 'nominal_values': npa['nominal_values'], 
+                                                'ordinal_values': list(zip(n,one_dir,val_pair)), 'attrs_with_const':attrs_with_const_set, 'is_user':'no'})
+
+
+                    self.stats.params['n_p_pass_node_rule'] += len(patterns_passed_node_cond)
+
+                    self.stats.stopTimer('enumerate_all_from_nominal_patterns')
+
+
+                    for ppnc in patterns_passed_node_cond:
+                        pc_processed, is_valid = self.get_fscore(prov_version=prov_version,
+                                      f1_calculation_type=f1_calculation_type,
+                                      pattern=ppnc,
+                                      pattern_recall_threshold=pattern_recall_threshold,
+                                      jg_name=jg_name,
+                                      recall_dicts=recall_dicts,
+                                      need_weighted_sampling=need_weighted_sampling,
+                                      w_sample_attr=w_sample_attr,
+                                      sample_size=sample_f1_jg_size,
+                                      )
+                        if(is_valid):
+                            valid_patterns.append(pc_processed)
+
+                if(valid_patterns):
+                    # logger.debug(f"number of valid patterns {len(valid_patterns)}")
+                    for vp in valid_patterns:
+                        self.stats.startTimer('pattern_recover')
+                        vp_recovered = self.pattern_recover(renaming_dict, vp, user_questions_map)
+                        self.stats.params['n_p_pass_node_rule_and_recall_thresh']+=1
+                        self.stats.stopTimer('pattern_recover')
+                        self.pattern_pool.append(vp_recovered)
+                        self.pattern_by_jg[jg].append(vp_recovered)
 
 
 

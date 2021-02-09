@@ -177,8 +177,14 @@ class Join_Graph_Generator:
         for n in jg_candidate.graph_core:
             if(n.label!='PT'):
                 n.cond_keys.sort()
+                logger.debug(n.label)
+                logger.debug(n.cond_keys)
                 n.cond_keys_used.sort()
+                logger.debug(n.cond_keys_used)
+                logger.debug('\n')
                 if(set(n.cond_keys)!=set(n.cond_keys_used)):
+                    logger.debug('False!')
+                    logger.debug('\n')
                     return False
         return True
 
@@ -338,9 +344,11 @@ class Join_Graph_Generator:
                     valid_jgs.append(n)
             self.stats.stopTimer('jg_validtaion')
             valid_jgs.sort(key=lambda j: j.jg_number)
-            logger.debug(valid_jgs)
             # sort it to make sure jg materializer will see PT only first
             self.stats.params['valid_jgs']+=len(valid_jgs)
+            for v in valid_jgs:
+                logger.debug(v)
+                logger.debug(f"intermediate? {v.intermediate}")
             return valid_jgs
         else:
             pass
