@@ -79,12 +79,21 @@ def Create_Stats_Table(conn, stats_trackers, stats_relation_name, schema):
                              'id serial primary key,' +
                              attr +');')
 
-def InsertPatterns(conn, exp_desc, patterns, pattern_relation_name, schema):
+def InsertPatterns(conn, exp_desc, patterns, pattern_relation_name, schema, result_type='s'):
+
+  # result_type: 
+  #             s: sample type, use this for fastest results
+  #             o: evaluation type, will add sample_precision, sample_f1 as more info required
 
   # logger.debug(patterns[0:5])
 
   cur = conn.cursor()
-  cols = ['exp_desc', 'is_user', 'jg', 'jg_name', 'num_edges', 'p_desc', 'recall', 'precision', 'fscore', 'sample_recall']
+  if(result_type=='s'):
+    cols = ['exp_desc', 'is_user', 'jg', 'jg_name', 'num_edges', 'p_desc', 
+    'recall', 'precision', 'fscore', 'sample_recall']
+  else:
+    cols = ['exp_desc', 'is_user', 'jg', 'jg_name', 'num_edges', 'p_desc', 
+    'recall', 'precision', 'fscore', 'sample_recall', 'sample_precision', 'sample_F1']
   cols_with_types = ''
 
   for col in cols[:-1]:
@@ -106,16 +115,25 @@ def InsertPatterns(conn, exp_desc, patterns, pattern_relation_name, schema):
       cur_batch_size+=1
       p_print = p['desc'].replace("'","''")
       jg_print = str(p['join_graph']).replace("'","''")
-      patterns_to_insert.append(f"('{exp_desc}', '{p['is_user']}', '{jg_print}', '{p['jg_name']}', '{p['num_edges']}', '{p_print}', \
-        '{p['recall']}', '{p['precision']}','{p['F1']}','{p['sample_recall']}')")
+      if(result_type!='e'):
+        patterns_to_insert.append(f"('{exp_desc}', '{p['is_user']}', '{jg_print}', '{p['jg_name']}', '{p['num_edges']}', '{p_print}', \
+          '{p['recall']}', '{p['precision']}','{p['F1']}','{p['sample_recall']}')")
+      else:
+        patterns_to_insert.append(f"('{exp_desc}', '{p['is_user']}', '{jg_print}', '{p['jg_name']}', '{p['num_edges']}', '{p_print}', \
+          '{p['recall']}', '{p['precision']}','{p['F1']}','{p['sample_recall']}', '{p['sample_precision']}', '{p['sample_F1']}')")
+
       continue
     else:
       cur.execute(
           'INSERT INTO ' + schema + '.' + pattern_relation_name + ' ('+ ','.join(cols) +')' + ' values '+ ', '.join(patterns_to_insert)
           )
       patterns_to_insert = []
-      patterns_to_insert.append(f"('{exp_desc}', '{p['is_user']}', '{jg_print}', '{p['jg_name']}', '{p['num_edges']}', '{p_print}', \
-        '{p['recall']}', '{p['precision']}','{p['F1']}','{p['sample_recall']}')")
+      if(result_type!='e'):
+        patterns_to_insert.append(f"('{exp_desc}', '{p['is_user']}', '{jg_print}', '{p['jg_name']}', '{p['num_edges']}', '{p_print}', \
+          '{p['recall']}', '{p['precision']}','{p['F1']}','{p['sample_recall']}')")
+      else:
+        patterns_to_insert.append(f"('{exp_desc}', '{p['is_user']}', '{jg_print}', '{p['jg_name']}', '{p['num_edges']}', '{p_print}', \
+          '{p['recall']}', '{p['precision']}','{p['F1']}','{p['sample_recall']}', '{p['sample_precision']}', '{p['sample_F1']}')")
 
       cur_batch_size=1
 
@@ -230,7 +248,7 @@ def run_experiment(result_schema,
     sg, attr_dict = scj.generate_graph(G)
     pg = provenance_getter(conn = conn, gprom_wrapper = w, db_dict=attr_dict)
         
-    pt_size, pt_dict, pt_relations = pg.gen_provenance_table(query=user_query[0],
+    user_pt_size, pt_dict, pt_relations = pg.gen_provenance_table(query=user_query[0],
                                                     user_questions=user_questions, 
                                                     user_specified_attrs=user_specified_attrs)
 
@@ -256,6 +274,7 @@ def run_experiment(result_schema,
       for n in valid_result:
         jgm.stats.startTimer('materialize_jg')
         cost_estimate, renaming_dict, apt_q = jgm.materialize_jg(n)
+        logger.debug(n.ignored_attrs)
         if(apt_q is not None):
           n.cost = cost_estimate
           n.apt_create_q = apt_q
@@ -269,11 +288,10 @@ def run_experiment(result_schema,
       
       jg_cnt=1
 
-
       for vr in valid_result:
         logger.debug(f'we are on join graph number {jg_cnt}')
         jg_cnt+=1
-        logger.debug(v)
+        logger.debug(vr)
         drop_if_exist_jg_view = "DROP MATERIALIZED VIEW IF EXISTS {} CASCADE;".format('jg_{}'.format(vr.jg_number))
         jg_query_view = "CREATE MATERIALIZED VIEW {} AS {}".format('jg_{}'.format(vr.jg_number), vr.apt_create_q)
         jgm.cur.execute(drop_if_exist_jg_view)
@@ -286,8 +304,7 @@ def run_experiment(result_schema,
                           s_rate_for_s=sample_rate_for_s,
                           pattern_recall_threshold=min_recall_threshold,
                           numercial_attr_filter_method=numercial_attr_filter_method,
-                          max_sample_factor=max_sample_factor,
-                          original_pt_size=pt_size,
+                          original_pt_size=user_pt_size,
                           user_questions_map=user_questions_map,
                           f1_calculation_type=f1_calculation_type,
                           f1_calculation_sample_rate=f1_sample_rate,
@@ -335,8 +352,7 @@ def run_experiment(result_schema,
                               s_rate_for_s=sample_rate_for_s,
                               pattern_recall_threshold=min_recall_threshold,
                               numercial_attr_filter_method = numercial_attr_filter_method,
-                              max_sample_factor = max_sample_factor,
-                              original_pt_size = pt_size,
+                              original_pt_size = user_pt_size,
                               user_questions_map = user_questions_map,
                               f1_calculation_type = f1_calculation_type,
                               f1_calculation_sample_rate=f1_sample_rate,
@@ -368,9 +384,9 @@ def run_experiment(result_schema,
 
     Create_Stats_Table(conn=conn, stats_trackers=stats_trackers, stats_relation_name='time_and_params', schema=result_schema)
     InsertStats(conn=conn, stats_trackers=stats_trackers, stats_relation_name='time_and_params', schema=result_schema)
-    InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=patterns_all, pattern_relation_name='patterns', schema=result_schema)
-    InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=top_k_from_each_jg, pattern_relation_name='topk_from_each_jg', schema=result_schema)
-    InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=topk_from_top_jgs, pattern_relation_name='topk_patterns_from_top_jgs', schema=result_schema)
+    InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=patterns_all, pattern_relation_name='patterns', schema=result_schema, result_type=f1_calculation_type)
+    InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=top_k_from_each_jg, pattern_relation_name='topk_from_each_jg', schema=result_schema, result_type=f1_calculation_type)
+    InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=topk_from_top_jgs, pattern_relation_name='topk_patterns_from_top_jgs', schema=result_schema, result_type=f1_calculation_type)
     conn.close()
 
 
@@ -443,20 +459,20 @@ if __name__ == '__main__':
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-  # user_query = "provenance of (select count(*) as win, s.season_name from team t, game g, season s where t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' group by s.season_name);"
-  # u_query = (user_query, 'n1')
-  # u_question =["season_name='2015-16'","season_name='2012-13'"]
-  # user_specified_attrs = [('team','team'),('season','season_name')]
+  user_query = "provenance of (select count(*) as win, s.season_name from team t, game g, season s where t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' group by s.season_name);"
+  u_query = (user_query, 'n1')
+  u_question =["season_name='2015-16'","season_name='2012-13'"]
+  user_specified_attrs = [('team','team'),('season','season_name')]
 
   # user_query = 'provenance of (select insurance, 1.0*SUM(hospital_expire_flag)/count(*) as death_rate from admissions group by insurance);'
   # u_query = (user_query, 'n1')
   # u_question =["insurance='Government'","insurance='Self Pay'"]
   # user_specified_attrs = [('admissions','insurance')]
 
-  user_query = 'provenance of (select insurance, 1.0*SUM(hospital_expire_flag)/count(*) as death_rate from admissions group by insurance);'
-  u_query = (user_query, 'medicare vs private')
-  u_question =["insurance='Private'","insurance='Medicare'"]
-  user_specified_attrs = [('admissions',  'insurance'), ('admissions', 'hospital_expire_flag')]
+  # user_query = 'provenance of (select insurance, 1.0*SUM(hospital_expire_flag)/count(*) as death_rate from admissions group by insurance);'
+  # u_query = (user_query, 'medicare vs private')
+  # u_question =["insurance='Private'","insurance='Medicare'"]
+  # user_specified_attrs = [('admissions',  'insurance'), ('admissions', 'hospital_expire_flag')]
 
   max_sample_factor = 2
 
@@ -480,8 +496,8 @@ if __name__ == '__main__':
     result_schema = result_schema,
     user_query = u_query,
     user_questions=u_question,
-    user_questions_map = {'yes':'Private', 'no':'Medicare'},
-    # user_questions_map = {'yes':'2015-16', 'no':'2012-13'},
+    # user_questions_map = {'yes':'Private', 'no':'Medicare'},
+    user_questions_map = {'yes':'2015-16', 'no':'2012-13'},
     user_specified_attrs=user_specified_attrs,
     user_name=args.user_name,
     password=args.password,

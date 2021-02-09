@@ -54,7 +54,7 @@ class provenance_getter:
 
 		code, output = self.gprom_wrapper.runQuery(query)
 		logger.debug(output)
-		original_pt_size = 0
+		user_pt_size = 0
 
 		if(code == 0):
 			drop_original_view_query = "DROP VIEW IF EXISTS original_pt CASCADE;"
@@ -66,7 +66,7 @@ class provenance_getter:
 			self.conn.commit()
 			size_original_pt_q = f"SELECT COUNT(*) FROM original_pt"
 			self.cur.execute(size_original_pt_q)
-			original_pt_size = int(self.cur.fetchone()[0])
+			user_pt_size = int(self.cur.fetchone()[0])
 
 			original_prov_df = pd.read_sql(gen_original_pt_query, self.conn)
 		else:
@@ -182,14 +182,18 @@ class provenance_getter:
 				)
 				"""
 
+			q_pt_size = "SELECT COUNT(*) FROM pt;"
+
 			# logger.debug(APT_view)
 			self.cur.execute(drop_PT_view_query)
 			self.cur.execute(APT_view)
 			self.conn.commit()
 
+			self.cur.execute(q_pt_size)
+			user_pt_size = int(self.cur.fetchone()[0])
 		else:
 			logger.debug("there was an error for updated query prov: \n" + output_updated)
 
 
-		return original_pt_size, pt_dict, rels
+		return user_pt_size, pt_dict, rels
 

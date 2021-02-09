@@ -112,12 +112,12 @@ class Join_Graph_Materializer:
         """
         
         errcode, outoput_raw = self.gwrapper.runQuery(query, ec_options=True)
-        logger.debug(query)
+        # logger.debug(query)
         outoput = outoput_raw.decode("utf-8")
         reg_rc_line = re.compile(r'EC T_ProjectionOperator.*\nList size [0-9]+\n({.*})')
         rc_line = reg_rc_line.search(outoput).group(1)
         res = re.findall(r'(\{.*?\})', rc_line)
-        logger.debug(res)
+        # logger.debug(res)
 
         return [x.strip('{}').split(' ') for x in res]
 
@@ -167,7 +167,7 @@ class Join_Graph_Materializer:
                 for index in sorted(index_to_del, reverse=True):
                     del jg_ec[index]   
         ret = [list(set(r)) for r in res]
-        logger.debug(ret)
+        # logger.debug(ret)
         return ret
 
 
@@ -182,7 +182,7 @@ class Join_Graph_Materializer:
         """
 
         # logger.debug(self.db_dict)
-        logger.debug(jg_rename_dict)
+        # logger.debug(jg_rename_dict)
 
         if(self.pt_ec is None):
             pt_raw_ec = self.gen_ec(self.user_query)
@@ -191,12 +191,12 @@ class Join_Graph_Materializer:
             # only need to do this once since every jg will have the same 
             # mapping scheme for PT node 
 
-        logger.debug(self.pt_ec)
+        # logger.debug(self.pt_ec)
         
         jg_target_ec = [x for x in self.gen_ec(jg_target_query)
             if x!="pnumber" and x!="is_user"]
         
-        logger.debug(jg_target_ec)
+        # logger.debug(jg_target_ec)
 
         jg_target_ec = self.modifiy_jg_ec(jg_target_ec, self.pt_ec)
 
@@ -239,8 +239,8 @@ class Join_Graph_Materializer:
                     # logger.debug(ec_df)
                     ec_df = ec_df.groupby(['table_identity','table'])['original_attr_name'].apply(list).apply(sorted).reset_index()
                     ec_df = ec_df[ec_df['table_identity'].str.contains(",")]
-                    logger.debug('^^^^^^^final ec_df^^^^^^^^')
-                    logger.debug(ec_df)
+                    # logger.debug('^^^^^^^final ec_df^^^^^^^^')
+                    # logger.debug(ec_df)
                     if(not ec_df.empty):
                         for index, row in ec_df.iterrows():
                             if(','.join(self.db_dict[row['table']]['p_key'])==','.join(row['original_attr_name'])):
@@ -273,7 +273,7 @@ class Join_Graph_Materializer:
 
         self.stats.stopTimer('renaming')
 
-        logger.debug(self.db_dict)
+        # logger.debug(self.db_dict)
         # now generate the query to output the augmented provenance table
 
         # first, we need to rename the join conditions 
@@ -339,9 +339,8 @@ class Join_Graph_Materializer:
                     # if(self.db_dict['PT']['user_attrs']):
                     join_graph.ignored_attrs.extend([kk for kk,vk in renaming_dict[1]['columns'].items() 
                         if vk in PT_key_attributes])
-                    join_graph.ignored_attrs.extend([k for k,v in renaming_dict[1]['columns'].items()
-                        if v in self.db_dict['PT']['user_attrs']])
-
+                    join_graph.ignored_attrs.extend([kr for kr,ko in renaming_dict[1]['columns'].items()
+                        if ko in self.db_dict['PT']['user_attrs']])
                 else:
                     node1_key_attributes = self.db_dict[node1.label]['p_key']
 
@@ -354,16 +353,16 @@ class Join_Graph_Materializer:
                                     if v1 in node1_key_attributes])
                                 break
 
-                    node2_key_attributes = self.db_dict[node2.label]['p_key']
+                node2_key_attributes = self.db_dict[node2.label]['p_key']
 
-                    for k,v in renaming_dict.items():
-                        if(k=='max_rel_index' or k=='max_attr_index' or k=='dtypes'):
-                            continue
-                        else:
-                            if(v['renamed_rel']==node2_renamed):
-                                join_graph.ignored_attrs.extend([k2 for k2,v2 in v['columns'].items() 
-                                    if v2 in node2_key_attributes])
-                                break
+                for k,v in renaming_dict.items():
+                    if(k=='max_rel_index' or k=='max_attr_index' or k=='dtypes'):
+                        continue
+                    else:
+                        if(v['renamed_rel']==node2_renamed):
+                            join_graph.ignored_attrs.extend([k2 for k2,v2 in v['columns'].items() 
+                                if v2 in node2_key_attributes])
+                            break
 
                 cond[0] = re.sub(r'\b{}[.]'.format(node1_original), 
                                                    f'{node1_renamed}.', 
@@ -401,8 +400,8 @@ class Join_Graph_Materializer:
                                                                  " AND ".join(where_clause_tokens)
                                                                  )
         if(not self.non_redundant_check(query, renaming_dict)):
-            logger.debug("@@@@ a redundant jg @@@@@@@@@")
-            logger.debug(query)
+            # logger.debug("@@@@ a redundant jg @@@@@@@@@")
+            # logger.debug(query)
             query = None
 
         self.stats.stopTimer('compose_query')

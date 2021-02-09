@@ -218,12 +218,11 @@ class Schema_Graph_Generator:
 		for table in attr_dict:
 			p_key_list = copy.deepcopy(attr_dict[table]['p_key'])
 			for cond_dict in edge_info_dict:
-				if(cond_dict['p_table']==table):
-					if(cond_dict['p_key'] in p_key_list):
-						p_key_list.remove(cond_dict['p_key'])
-				if(cond_dict['f_table']==table):
-					if(cond_dict['f_key'] in p_key_list):
-						p_key_list.remove(cond_dict['p_key'])
+				for t in cond_dict['key_dict']:
+					if(table==t):
+						for k in cond_dict['key_dict'][t]:
+							if(k in p_key_list):
+								p_key_list.remove(k)
 			attr_dict[table]['edge_keys'] = list(set(attr_dict[table]['p_key'])-set(p_key_list))
 
 		logger.debug(attr_dict)

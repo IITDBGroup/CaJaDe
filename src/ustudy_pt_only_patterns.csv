@@ -1,0 +1,15 @@
+jg,p_desc,is_user,p,r,f1
+join_graph_details : ,PT_1.prov_season_season__type=regular season,2015-16,0.61,1,0.76
+join_graph_details : ,"PT_1.prov_game_away__points>96.75,PT_1.prov_season_season__type=regular season",2015-16,0.68,0.84,0.75
+join_graph_details : ,"PT_1.prov_game_away__points>104.0,PT_1.prov_season_season__type=regular season",2015-16,0.78,0.62,0.69
+join_graph_details : ,"PT_1.prov_game_away__points<112.0,PT_1.prov_season_season__type=regular season",2012-13,0.49,0.89,0.63
+join_graph_details : ,"PT_1.prov_game_away__points<104.0,PT_1.prov_season_season__type=regular season",2012-13,0.54,0.66,0.6
+join_graph_details : ,PT_1.prov_season_season__type=regular season,2012-13,0.39,1,0.56
+join_graph_details : ,"PT_1.prov_game_away__points<112.0,PT_1.prov_season_season__type=regular season",2015-16,0.51,0.6,0.55
+join_graph_details : ,"PT_1.prov_game_away__points>112.0,PT_1.prov_season_season__type=regular season",2015-16,0.83,0.33,0.47
+join_graph_details : ,"PT_1.prov_game_away__points<96.75,PT_1.prov_season_season__type=regular season",2012-13,0.6,0.38,0.47
+join_graph_details : ,"PT_1.prov_game_away__points>96.75,PT_1.prov_season_season__type=regular season",2012-13,0.32,0.62,0.42
+join_graph_details : ,"PT_1.prov_game_away__points<104.0,PT_1.prov_season_season__type=regular season",2015-16,0.46,0.36,0.4
+join_graph_details : ,"PT_1.prov_game_away__points>104.0,PT_1.prov_season_season__type=regular season",2012-13,0.22,0.28,0.25
+join_graph_details : ,"PT_1.prov_game_away__points<96.75,PT_1.prov_season_season__type=regular season",2015-16,0.4,0.16,0.23
+join_graph_details : ,"PT_1.prov_game_away__points>112.0,PT_1.prov_season_season__type=regular season",2012-13,0.17,0.11,0.13

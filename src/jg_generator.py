@@ -78,6 +78,7 @@ class Join_Graph:
 
         apt_create_q: query to create augmented provenance table
         """
+        
         self.jg_number = jg_number
         self.graph_core = graph_core
         self.ignored_attrs = []
@@ -88,6 +89,7 @@ class Join_Graph:
         self.renaming_dict = None
         self.apt_create_q = None
         self.redundant = False
+
 
     def __repr__(self):
 
