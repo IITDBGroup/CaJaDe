@@ -196,6 +196,7 @@ def run_experiment(result_schema,
                    min_recall_threshold,
                    numercial_attr_filter_method,
                    f1_sample_rate,
+                   f1_sample_type,
                    exclude_high_cost_jg = (False, 'f'),
                    f1_calculation_type = 'o',
                    user_assigned_max_num_pred = 3,
@@ -223,6 +224,7 @@ def run_experiment(result_schema,
     statstracker.params['f1_calculation_type'] = "'{}'".format(f1_calculation_type)
     statstracker.params['f1_sample_rate'] = "'{}'".format(f1_sample_rate)
     statstracker.params['f1_min_sample_size_threshold'] = "'{}'".format(f1_min_sample_size_threshold)
+    statstracker.params['f1_sample_type'] = "'{}'".format(f1_sample_type)
 
 
     exp_desc = '__'.join([user_query[1], dbname, str(sample_rate_for_s), 
@@ -280,8 +282,9 @@ def run_experiment(result_schema,
         logger.debug(vr.intermediate)
         logger.debug('\n')
 
+
+      jgm.stats.startTimer('materialize_jg')
       for n in valid_result:
-        jgm.stats.startTimer('materialize_jg')
         cost_estimate, renaming_dict, apt_q = jgm.materialize_jg(n)
         logger.debug(n.ignored_attrs)
         if(apt_q is not None):
@@ -291,6 +294,8 @@ def run_experiment(result_schema,
         else:
           n.redundant = True
           continue
+      jgm.stats.stopTimer('materialize_jg')
+
           
       valid_result = [v for v in valid_result if not v.redundant]
       logger.debug(f'we found {len(valid_result)} valid join graphs, now materializing and generating patterns')
@@ -298,6 +303,7 @@ def run_experiment(result_schema,
       jg_cnt=1
 
       for vr in valid_result:
+        jgm.stats.startTimer('materialize_jg')
         logger.debug(f'we are on join graph number {jg_cnt}')
         jg_cnt+=1
         logger.debug(vr)
@@ -316,6 +322,7 @@ def run_experiment(result_schema,
                           original_pt_size=user_pt_size,
                           user_questions_map=user_questions_map,
                           f1_calculation_type=f1_calculation_type,
+                          f1_sample_type = f1_sample_type,
                           f1_calculation_sample_rate=f1_sample_rate,
                           f1_calculation_min_size=f1_min_sample_size_threshold,
                           user_assigned_num_pred_cap=user_assigned_max_num_pred
@@ -327,15 +334,18 @@ def run_experiment(result_schema,
       cost_estimate_dict = {i:[] for i in range(0,maximum_edges+1)}
       # logger.debug(cost_estimate_dict)
       for vr in valid_result:
-            cost_estimate, renaming_dict, apt_q = jgm.materialize_jg(vr,cost_estimate=True)
-            if(apt_q is not None):
-              vr.cost = cost_estimate
-              vr.apt_create_q = apt_q
-              vr.renaming_dict = renaming_dict
-              cost_estimate_dict[vr.num_edges].append(vr.cost)
-            else:
-              vr.redundant=True
-              continue
+        jgm.stats.startTimer('materialize_jg')
+        cost_estimate, renaming_dict, apt_q = jgm.materialize_jg(vr,cost_estimate=True)
+        if(apt_q is not None):
+          vr.cost = cost_estimate
+          vr.apt_create_q = apt_q
+          vr.renaming_dict = renaming_dict
+          cost_estimate_dict[vr.num_edges].append(vr.cost)
+        else:
+          vr.redundant=True
+          continue
+        jgm.stats.stopTimer('materialize_jg')
+
       valid_result = [v for v in valid_result if not v.redundant]
 
       avg_cost_estimate_by_num_edges = {k:mean(v) for k,v in cost_estimate_dict.items()}
@@ -365,6 +375,7 @@ def run_experiment(result_schema,
                               user_questions_map = user_questions_map,
                               f1_calculation_type = f1_calculation_type,
                               f1_calculation_sample_rate=f1_sample_rate,
+                              f1_sample_type = f1_sample_type,
                               f1_calculation_min_size=f1_min_sample_size_threshold,
                               user_assigned_num_pred_cap=user_assigned_max_num_pred
                               )
@@ -423,6 +434,9 @@ if __name__ == '__main__':
 
   parser.add_argument('-F','--f1_sample_rate', metavar="\b", type=float, default=1.0, 
     help='Sample rate of apt when calculating the f1 score (default: %(default)s)')
+
+  parser.add_argument('-w','--f1_sample_type', metavar="\b", type=str, default='weighted', 
+    help='Sample type of apt when calculating the f1 score (default: %(default)s)')
 
   parser.add_argument('-o','--optimized', metavar="\b", type=str, default='y', 
     help='use opt or not (y: yes, n: no), (default: %(default)s)')
@@ -522,6 +536,7 @@ if __name__ == '__main__':
     exclude_high_cost_jg=exclude_high_cost_jg,
     f1_calculation_type =args.f1_calc_type,
     f1_sample_rate = args.f1_sample_rate,
+    f1_sample_type = args.f1_sample_type,
     f1_min_sample_size_threshold=1000,
     )
   # logger.debug('\n\n')

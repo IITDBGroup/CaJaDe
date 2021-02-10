@@ -330,8 +330,8 @@ class Join_Graph_Generator:
                     prev_jg_set = new_jgs
                     generated_jg_set.extend(new_jgs)
                 cur_jg_size+=1
-                
             self.stats.stopTimer('jg_enumeration')
+            
             self.stats.params['number_of_jgs']+=len(generated_jg_set)
             self.stats.startTimer('jg_hashing')
             jg_hash_table = self.hash_jgs(generated_jg_set)
@@ -346,9 +346,9 @@ class Join_Graph_Generator:
             valid_jgs.sort(key=lambda j: j.jg_number)
             # sort it to make sure jg materializer will see PT only first
             self.stats.params['valid_jgs']+=len(valid_jgs)
-            for v in valid_jgs:
-                logger.debug(v)
-                logger.debug(f"intermediate? {v.intermediate}")
+            # for v in valid_jgs:
+            #     logger.debug(v)
+            #     logger.debug(f"intermediate? {v.intermediate}")
             return valid_jgs
         else:
             pass

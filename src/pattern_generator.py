@@ -24,8 +24,8 @@ class PatternGeneratorStats(ExecStats):
     Statistics gathered during mining
     """
 
-    TIMERS = {'create_samples',
-              'get_nominal_patterns',
+    TIMERS = {'create_samples_for_lca',
+              'get_nominal_patterns_by_lca',
               'enumerate_all_from_nominal_patterns',
               'validate_patterns_recall_constraint',
               'run_F1_query',
@@ -406,7 +406,6 @@ class Pattern_Generator:
                 n_value = nt[1].replace("'","''")
                 where_cond_list.append(f"{nt[0]}='{n_value}'")
 
-
         pattern_conditions = " AND ".join(where_cond_list)
         where_cond_list.append(f"is_user='{pattern['is_user']}'")
         true_positive_conditions = " AND ".join(where_cond_list)
@@ -696,6 +695,7 @@ class Pattern_Generator:
                       pattern_recall_threshold=0.3, 
                       numercial_attr_filter_method = 'y',
                       sample_repeatable = False,
+                      f1_sample_type = 'weighted',
                       seed = 0.5,
                       f1_calculation_type = 'o',
                       f1_calculation_sample_rate = 0.3,
@@ -747,7 +747,7 @@ class Pattern_Generator:
             if(f1_calculation_type=='s' or f1_calculation_type=='e'):
                 if(jg_apt_size>f1_calculation_min_size): # this decides that we need sampling
                     sample_f1_jg_size = math.ceil(jg_apt_size * f1_calculation_sample_rate)
-                    if(jg_apt_size <= original_pt_size): # this means if we need weighted sampling
+                    if(jg_apt_size <= original_pt_size or f1_sample_type!='weighted'): # this means if we need weighted sampling
                         sample_recall_dict = {}
                         
                         self.stats.startTimer('create_f1_sample_jg')
@@ -856,7 +856,7 @@ class Pattern_Generator:
             recall_dicts['original'] = original_recall_dict
 
 
-            self.stats.startTimer('create_samples')
+            self.stats.startTimer('create_samples_for_lca')
             attrs_from_spec_node = set([k for k in renaming_dict[jg.spec_node_key]['columns']])
 
             # logger.debug(renaming_dict)
@@ -982,8 +982,8 @@ class Pattern_Generator:
 
                 self.cur.execute(prov_s_creation_q)
 
-                self.stats.stopTimer('create_samples')
-                self.stats.startTimer('get_nominal_patterns')
+                self.stats.stopTimer('create_samples_for_lca')
+                self.stats.startTimer('get_nominal_patterns_by_lca')
 
                 pattern_creation_q = f"""
                 CREATE MATERIALIZED VIEW {jg_name}_p AS
@@ -1016,7 +1016,7 @@ class Pattern_Generator:
 
                 nominal_pattern_dicts = nominal_pattern_df.to_dict('records')
                 # logger.debug(nominal_pattern_dicts)
-                self.stats.stopTimer('get_nominal_patterns')
+                self.stats.stopTimer('get_nominal_patterns_by_lca')
 
                 nominal_pattern_dict_list = []
 
@@ -1584,6 +1584,10 @@ class Pattern_Generator:
                         self.stats.stopTimer('pattern_recover')
                         self.pattern_pool.append(vp_recovered)
                         self.pattern_by_jg[jg].append(vp_recovered)
+            else:
+                self.stats.stopTimer('create_samples')
+
+
 
 
 
