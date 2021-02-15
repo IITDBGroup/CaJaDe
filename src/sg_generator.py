@@ -202,14 +202,14 @@ class Schema_Graph_Generator:
 
 		# logger.debug(edge_info)
 		edge_info_dict = edge_info.to_dict(orient='records')
-		logger.debug(edge_info_dict)
+		# logger.debug(edge_info_dict)
 
 		for d in edge_info_dict:
 			graph.add_edge(d['f_table'], d['p_table'], condition=d['condition_str'], key_dict=d['key_dict'], 
 				p_table=d['p_table'],f_table=d['f_table'])
 
 
-		logger.debug(attr_dict)
+		# logger.debug(attr_dict)
 
 		# create an 'edge_keys' to be used to check for 
 		# fulfillment of join conditions in validation of
@@ -217,15 +217,21 @@ class Schema_Graph_Generator:
 
 		for table in attr_dict:
 			p_key_list = copy.deepcopy(attr_dict[table]['p_key'])
+			cond_key_besides_pkey = []
 			for cond_dict in edge_info_dict:
 				for t in cond_dict['key_dict']:
 					if(table==t):
 						for k in cond_dict['key_dict'][t]:
 							if(k in p_key_list):
 								p_key_list.remove(k)
-			attr_dict[table]['edge_keys'] = list(set(attr_dict[table]['p_key'])-set(p_key_list))
+							elif(k not in attr_dict[table]['p_key']):
+								# logger.debug('key not from pkey')
+								# logger.debug(table)
+								# logger.debug(k)
+								cond_key_besides_pkey.append(k)
+			attr_dict[table]['edge_keys'] = list((set(attr_dict[table]['p_key'])-set(p_key_list))|set(cond_key_besides_pkey))
 
-		logger.debug(attr_dict)
+		# logger.debug(attr_dict)
 
 
 		return graph, attr_dict

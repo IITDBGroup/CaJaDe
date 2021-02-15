@@ -8,7 +8,7 @@ def run_command(command):
                          shell=True)
     # This ensures the process has completed, AND sets the 'returncode' attr
     while p.poll() is None:
-      print('we are here!')
+      # print('we are here!')
       sleep(.1) # sleep until finished
     # Read buffers
     err = p.stderr.read()
@@ -63,7 +63,7 @@ class GProMWrapper:
         gprom_cmd+=['-query', quotedQuery]
         # create one string
         gprom_cmd=' '.join(map(str,gprom_cmd))
-        print(gprom_cmd)
+        # print(gprom_cmd)
         return gprom_cmd
 
    def executeAndCollectErrors(self,query,errorloglevel=3,mode='sql',frontend='',inputdb='', ec_options=False):
@@ -71,6 +71,7 @@ class GProMWrapper:
        runFrontend=frontend
        runOptions=inputdb
        orig_cmd=self.constructCommand(query,plugins=runPlugins,frontend=runFrontend,options=runOptions, ec_options=ec_options)
+       # print(orig_cmd)
        err, std, errcode = run_command(orig_cmd)
        # if errcode != 0:
        #     debug_cmd=self.constructCommand(query,errorloglevel,plugins=runPlugins,frontend=runFrontend,options=runOptions, ec_options=ec_options)
@@ -110,6 +111,7 @@ class GProMWrapper:
 
    def runQuery (self,query,mode='sql',frontend='', ec_options=False):
        errcode, output = self.executeAndCollectErrors(query,mode=mode,frontend=frontend, ec_options=ec_options)
+       # print("runQuery: " + str(output))
        return errcode, output
 
    def printHelp (self):

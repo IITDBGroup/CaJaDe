@@ -19,7 +19,7 @@ from statistics import mean
 import argparse
 from datetime import datetime
 from time import strftime
-
+from query_workloads import mimic_workloads
 
 logger = logging.getLogger(__name__)
 
@@ -29,11 +29,10 @@ class ExperimentParams(ExecStats):
     Statistics gathered during mining
     """
 
-    PARAMS = {'result_schema', # this should align with the push
+    PARAMS = {'result_schema',
               'user_questions',
               'dbname',
               'sample_rate_for_s',
-              'max_sample_factor',
               'maximum_edges',
               'min_recall_threshold',
               'numercial_attr_filter_method',
@@ -69,10 +68,10 @@ def Create_Stats_Table(conn, stats_trackers, stats_relation_name, schema):
 
     stats_list = timers_list+counters_list+params_list+['total']
         
-    for stat in stats_list[:-1]:
+    for stat in stats_list:
         attr += stat+' varchar,'
 
-    attr+=stats_list[-1]+' varchar'
+    attr+='exp_desc varchar'
 
     
     cur.execute('create table IF NOT EXISTS ' + schema + '.' + stats_relation_name + ' (' +
@@ -83,17 +82,15 @@ def InsertPatterns(conn, exp_desc, patterns, pattern_relation_name, schema, resu
 
   # result_type: 
   #             s: sample type, use this for fastest results
-  #             o: evaluation type, will add sample_precision, sample_f1 as more info required
+  #             e: evaluation type, will add sample_precision, sample_f1 as more info required
 
   # logger.debug(patterns[0:5])
 
   cur = conn.cursor()
-  if(result_type=='s'):
-    cols = ['exp_desc', 'is_user', 'jg', 'jg_name', 'num_edges', 'p_desc', 
-    'recall', 'precision', 'fscore', 'sample_recall']
-  else:
-    cols = ['exp_desc', 'is_user', 'jg', 'jg_name', 'num_edges', 'p_desc', 
-    'recall', 'precision', 'fscore', 'sample_recall', 'sample_precision', 'sample_F1']
+
+  cols = ['exp_desc', 'is_user', 'jg', 'jg_name', 'num_edges', 'p_desc', 
+  'recall', 'precision', 'fscore', 'sample_recall', 'sample_precision', 'sample_F1']
+
   cols_with_types = ''
 
   for col in cols[:-1]:
@@ -115,25 +112,30 @@ def InsertPatterns(conn, exp_desc, patterns, pattern_relation_name, schema, resu
       cur_batch_size+=1
       p_print = p['desc'].replace("'","''")
       jg_print = str(p['join_graph']).replace("'","''")
-      if(result_type!='e'):
+      if(result_type=='s'):
         patterns_to_insert.append(f"('{exp_desc}', '{p['is_user']}', '{jg_print}', '{p['jg_name']}', '{p['num_edges']}', '{p_print}', \
-          '{p['recall']}', '{p['precision']}','{p['F1']}','{p['sample_recall']}')")
-      else:
+          '{p['recall']}', '{p['precision']}','{p['F1']}', '', '', '')")
+      elif(result_type=='e'):
         patterns_to_insert.append(f"('{exp_desc}', '{p['is_user']}', '{jg_print}', '{p['jg_name']}', '{p['num_edges']}', '{p_print}', \
           '{p['recall']}', '{p['precision']}','{p['F1']}','{p['sample_recall']}', '{p['sample_precision']}', '{p['sample_F1']}')")
-
-      continue
+      else:
+        patterns_to_insert.append(f"('{exp_desc}', '{p['is_user']}', '{jg_print}', '', '{p['num_edges']}', '{p_print}', \
+          '{p['recall']}', '{p['precision']}','','', '', '')")
     else:
       cur.execute(
           'INSERT INTO ' + schema + '.' + pattern_relation_name + ' ('+ ','.join(cols) +')' + ' values '+ ', '.join(patterns_to_insert)
           )
       patterns_to_insert = []
-      if(result_type!='e'):
+      if(result_type=='s'):
         patterns_to_insert.append(f"('{exp_desc}', '{p['is_user']}', '{jg_print}', '{p['jg_name']}', '{p['num_edges']}', '{p_print}', \
-          '{p['recall']}', '{p['precision']}','{p['F1']}','{p['sample_recall']}')")
-      else:
+          '{p['recall']}', '{p['precision']}','{p['F1']}', '', '', '')")
+      elif(result_type=='e'):
         patterns_to_insert.append(f"('{exp_desc}', '{p['is_user']}', '{jg_print}', '{p['jg_name']}', '{p['num_edges']}', '{p_print}', \
           '{p['recall']}', '{p['precision']}','{p['F1']}','{p['sample_recall']}', '{p['sample_precision']}', '{p['sample_F1']}')")
+      else:
+        patterns_to_insert.append(f"('{exp_desc}', '{p['is_user']}', '{jg_print}', '', '{p['num_edges']}', '{p_print}', \
+          '{p['recall']}', '{p['precision']}','','', '', '')")
+
 
       cur_batch_size=1
 
@@ -143,7 +145,7 @@ def InsertPatterns(conn, exp_desc, patterns, pattern_relation_name, schema, resu
         )        
 
 
-def InsertStats(conn, stats_trackers, stats_relation_name, schema):
+def InsertStats(conn, stats_trackers, stats_relation_name, schema, exp_desc):
 
     timers_vals = []
     counters_vals = []
@@ -161,7 +163,7 @@ def InsertStats(conn, stats_trackers, stats_relation_name, schema):
         counters_attrs.extend(list(stats_tracker.counters))
         params_attrs.extend(list(stats_tracker.params))
 
-    attr_list = timers_attrs+counters_attrs+params_attrs+['total']
+    attr_list = timers_attrs+counters_attrs+params_attrs+['total','exp_desc']
     attrs = ','.join(attr_list)
 
     for stats_tracker in stats_trackers:
@@ -171,7 +173,7 @@ def InsertStats(conn, stats_trackers, stats_relation_name, schema):
         counters_vals.extend([str(x) for x in stats_tracker.counters.values()])
         params_vals.extend([str(x) for x in stats_tracker.params.values()])
 
-    values = ','.join(timers_vals+counters_vals+params_vals+[str(total_time)])
+    values = ','.join(timers_vals+counters_vals+params_vals+[str(total_time)]+[f"'{exp_desc}'"])
     # logger.debug(f'InsertStats: {values}')
 
     cur = conn.cursor()
@@ -192,6 +194,8 @@ def run_experiment(result_schema,
                    port,
                    dbname, 
                    sample_rate_for_s,
+                   lca_s_max_size,
+                   lca_s_min_size,
                    maximum_edges,
                    min_recall_threshold,
                    numercial_attr_filter_method,
@@ -201,7 +205,7 @@ def run_experiment(result_schema,
                    f1_calculation_type = 'o',
                    user_assigned_max_num_pred = 3,
                    f1_min_sample_size_threshold=100,
-                   max_sample_factor=5, 
+                   lca_eval_mode=False,
                    statstracker=ExperimentParams()):
     
     # f1_calculation_type: "o": evaluate on original materialized jg
@@ -219,7 +223,9 @@ def run_experiment(result_schema,
     statstracker.params['maximum_edges']="'{}'".format(maximum_edges)
     statstracker.params['min_recall_threshold']="'{}'".format(min_recall_threshold)
     statstracker.params['numercial_attr_filter_method']= "'{}'".format(numercial_attr_filter_method)
-    statstracker.params['max_sample_factor'] = "'{}'".format(max_sample_factor)
+    statstracker.params['lca_s_max_size']="'{}'".format(lca_s_max_size)
+    statstracker.params['lca_s_min_size']="'{}'".format(lca_s_min_size)
+    statstracker.params['just_lca'] = "{}".format(str(lca_eval_mode))
     statstracker.params['exclude_high_cost_jg'] = "'{}'".format(exclude_high_cost_jg[1])
     statstracker.params['f1_calculation_type'] = "'{}'".format(f1_calculation_type)
     statstracker.params['f1_sample_rate'] = "'{}'".format(f1_sample_rate)
@@ -227,8 +233,8 @@ def run_experiment(result_schema,
     statstracker.params['f1_sample_type'] = "'{}'".format(f1_sample_type)
 
 
-    exp_desc = '__'.join([user_query[1], dbname, str(sample_rate_for_s), 
-                str(max_sample_factor), str(maximum_edges), str(min_recall_threshold), str(numercial_attr_filter_method), 
+    exp_desc = '__'.join([user_query[1], dbname, str(sample_rate_for_s), str(lca_s_max_size), str(lca_s_min_size), str(lca_eval_mode),
+                str(maximum_edges), str(min_recall_threshold), str(numercial_attr_filter_method), 
                 exclude_high_cost_jg[1], str(f1_calculation_type), str(f1_sample_rate), str(f1_min_sample_size_threshold)])
 
 
@@ -277,16 +283,16 @@ def run_experiment(result_schema,
     if(exclude_high_cost_jg[0]==False):
       valid_result = [v for v in valid_result if not v.intermediate]
       logger.debug(f"after filtering out intermediate we have {len(valid_result)} valid jgs \n")
-      for vr in valid_result:
-        logger.debug(vr)
-        logger.debug(vr.intermediate)
-        logger.debug('\n')
+      # for vr in valid_result:
+      #   logger.debug(vr)
+      #   logger.debug(vr.intermediate)
+      #   logger.debug('\n')
 
 
       jgm.stats.startTimer('materialize_jg')
       for n in valid_result:
         cost_estimate, renaming_dict, apt_q = jgm.materialize_jg(n)
-        logger.debug(n.ignored_attrs)
+        # logger.debug(n.ignored_attrs)
         if(apt_q is not None):
           n.cost = cost_estimate
           n.apt_create_q = apt_q
@@ -311,15 +317,21 @@ def run_experiment(result_schema,
         jg_query_view = "CREATE MATERIALIZED VIEW {} AS {}".format('jg_{}'.format(vr.jg_number), vr.apt_create_q)
         jgm.cur.execute(drop_if_exist_jg_view)
         jgm.cur.execute(jg_query_view)
+        apt_size_query = f"SELECT count(*) FROM jg_{vr.jg_number}"
+        jgm.cur.execute(apt_size_query)
+        apt_size = int(jgm.cur.fetchone()[0])
         jgm.stats.stopTimer('materialize_jg')
         pgen.gen_patterns(jg=vr,
                           jg_name=f"jg_{vr.jg_number}", 
                           renaming_dict=vr.renaming_dict, 
                           skip_cols=vr.ignored_attrs, 
                           s_rate_for_s=sample_rate_for_s,
+                          lca_s_max_size = lca_s_max_size,
+                          lca_s_min_size = lca_s_min_size,
+                          just_lca = lca_eval_mode,
                           pattern_recall_threshold=min_recall_threshold,
                           numercial_attr_filter_method=numercial_attr_filter_method,
-                          original_pt_size=user_pt_size,
+                          original_pt_size=apt_size,
                           user_questions_map=user_questions_map,
                           f1_calculation_type=f1_calculation_type,
                           f1_sample_type = f1_sample_type,
@@ -364,14 +376,20 @@ def run_experiment(result_schema,
             jgm.cur.execute(drop_if_exist_jg_view)
             jgm.cur.execute(jg_query_view)
             jgm.stats.stopTimer('materialize_jg')
+            apt_size_query = f"SELECT count(*) FROM jg_{vr.jg_number}"
+            jgm.cur.execute(apt_size_query)
+            apt_size = int(jgm.cur.fetchone()[0])
             pgen.gen_patterns(jg=n,
                               jg_name=f"jg_{n.jg_number}", 
                               renaming_dict=n.renaming_dict, 
                               skip_cols=n.ignored_attrs, 
                               s_rate_for_s=sample_rate_for_s,
+                              lca_s_max_size = lca_s_max_size,
+                              lca_s_min_size = lca_s_min_size,
+                              just_lca = lca_eval_mode,
                               pattern_recall_threshold=min_recall_threshold,
                               numercial_attr_filter_method = numercial_attr_filter_method,
-                              original_pt_size = user_pt_size,
+                              original_pt_size = apt_size,
                               user_questions_map = user_questions_map,
                               f1_calculation_type = f1_calculation_type,
                               f1_calculation_sample_rate=f1_sample_rate,
@@ -384,18 +402,23 @@ def run_experiment(result_schema,
 
       jgg.stats.params['valid_jgs_cost_high']=len(not_cost_friendly_jgs)
 
-    ranked_pattern_by_jg = pgen.rank_patterns(ranking_type = 'by_jg')
+    if(lca_eval_mode):
+      patterns_all = pgen.pattern_pool
+    else:
+      ranked_pattern_by_jg = pgen.rank_patterns(ranking_type = 'by_jg')
 
-    top_k_from_each_jg = []
+      top_k_from_each_jg = []
 
-    for k,v in ranked_pattern_by_jg.items():
-      # logger.debug(v)
-      if(v):
-        top_k_from_each_jg.extend(pgen.pattern_diversification(v))
+      for k,v in ranked_pattern_by_jg.items():
+        # logger.debug(v)
+        if(v):
+          top_k_from_each_jg.extend(pgen.pattern_diversification(v))
 
-    topk_from_top_jgs = pgen.topk_jg_patterns(num_jg=5, k_p=5, sortby='entropy')
+      topk_from_top_jgs = pgen.topk_jg_patterns(num_jg=5, k_p=5, sortby='entropy')
 
-    patterns_all = pgen.rank_patterns(ranking_type = 'global')
+      global_rankings = sorted(top_k_from_each_jg, key = lambda p: p['F1'], reverse=True)
+
+      patterns_all = pgen.rank_patterns(ranking_type = 'global')
 
     logger.debug(f'total number of patterns {len(patterns_all)}')
 
@@ -403,10 +426,13 @@ def run_experiment(result_schema,
     stats_trackers = [jgg.stats, jgm.stats, pgen.stats, statstracker]
 
     Create_Stats_Table(conn=conn, stats_trackers=stats_trackers, stats_relation_name='time_and_params', schema=result_schema)
-    InsertStats(conn=conn, stats_trackers=stats_trackers, stats_relation_name='time_and_params', schema=result_schema)
-    InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=patterns_all, pattern_relation_name='patterns', schema=result_schema, result_type=f1_calculation_type)
-    InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=top_k_from_each_jg, pattern_relation_name='topk_from_each_jg', schema=result_schema, result_type=f1_calculation_type)
-    InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=topk_from_top_jgs, pattern_relation_name='topk_patterns_from_top_jgs', schema=result_schema, result_type=f1_calculation_type)
+    InsertStats(conn=conn, stats_trackers=stats_trackers, stats_relation_name='time_and_params', schema=result_schema, exp_desc=exp_desc)
+    if(lca_eval_mode):
+      InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=patterns_all, pattern_relation_name='patterns', schema=result_schema, result_type='l')
+    if(not lca_eval_mode):
+      InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=patterns_all, pattern_relation_name='patterns', schema=result_schema, result_type=f1_calculation_type)
+      InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=global_rankings, pattern_relation_name='global_results', schema=result_schema, result_type=f1_calculation_type)
+      InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=topk_from_top_jgs, pattern_relation_name='topk_patterns_from_top_jgs', schema=result_schema, result_type=f1_calculation_type)
     conn.close()
 
 
@@ -444,17 +470,17 @@ if __name__ == '__main__':
   parser.add_argument('-i','--ignore_expensive', metavar="\b", type=str, default='true', 
     help='skip expensive jg or not, (default: %(default)s)')
 
-  parser.add_argument('-s','--db_size', metavar="\b", type=float, default=1.0, 
-    help='scale factor of database, (default: %(default)s)')
-
   parser.add_argument('-m','--min_recall_threshold', metavar="\b", type=float, default=0.5, 
     help='recall threshold when calculating f1 score (default: %(default)s)')
 
   parser.add_argument('-r','--sample_rate_for_lca', metavar="\b", type=float, default=0.05, 
   help='sample rate for lca (default: %(default)s)')
 
-  parser.add_argument('-f','--sample_factor_for_lca', metavar="\b", type=float, default=2, 
-  help='sample factor for lca (default: %(default)s)')
+  parser.add_argument('-s','--min_lca_s_size', metavar="\b", type=int, default=50,
+    help='min size of sample used for lca cross product (default: %(default)s)')
+
+  parser.add_argument('-S','--max_lca_s_size', metavar="\b", type=int, default=500,
+   help='min size of sample used for lca cross product (default: %(default)s)')
 
   parser.add_argument('-H','--db_host', metavar="\b", type=str, default='localhost',
     help='database host, (default: %(default)s)')
@@ -467,6 +493,12 @@ if __name__ == '__main__':
 
   parser.add_argument('-t','--f1_calc_type', metavar="\b", type=str, default='s',
     help='f1 score type (s sample, o original, e: evaluate_sample) (default: %(default)s)')
+
+  parser.add_argument('-W','--workloads', metavar="\b", type=str, default='false',
+    help='using questions from workloads? (default: %(default)s)')
+
+  parser.add_argument('-L','--evaluate_lca_mode', metavar='\b', type=str, default='false',
+    help='generate LCA results only, will not generate pattern results, (default: %(default)s)')
   
   requiredNamed = parser.add_argument_group('required named arguments')
 
@@ -480,24 +512,29 @@ if __name__ == '__main__':
     help='database name (required)')
 
 
+
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
   user_query = "provenance of (select count(*) as win, s.season_name from team t, game g, season s where t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' group by s.season_name);"
-  u_query = (user_query, 'n1')
+  u_query = (user_query, 'gsw wins : 15 vs 12')
   u_question =["season_name='2015-16'","season_name='2012-13'"]
   user_specified_attrs = [('team','team'),('season','season_name')]
 
   # user_query = 'provenance of (select insurance, 1.0*SUM(hospital_expire_flag)/count(*) as death_rate from admissions group by insurance);'
-  # u_query = (user_query, 'n1')
+  # u_query = (user_query, 'death rate: gov vs self')
   # u_question =["insurance='Government'","insurance='Self Pay'"]
   # user_specified_attrs = [('admissions','insurance')]
 
   # user_query = 'provenance of (select insurance, 1.0*SUM(hospital_expire_flag)/count(*) as death_rate from admissions group by insurance);'
-  # u_query = (user_query, 'medicare vs private')
+  # u_query = (user_query, 'death rate: medicare vs private')
   # u_question =["insurance='Private'","insurance='Medicare'"]
   # user_specified_attrs = [('admissions',  'insurance'), ('admissions', 'hospital_expire_flag')]
 
-  max_sample_factor = 2
+  # user_query = 'provenance of (select insurance, avg(hospital_stay_length) as avg_los, count(*) as cnt from admissions group by insurance);'
+  # u_query = (user_query, 'los: self pay vs private')
+  # u_question =["insurance='Government'","insurance='Self Pay'"]
+  # user_specified_attrs = [('admissions',  'insurance'), ('admissions', 'hospital_stay_length')]
+
 
   args=parser.parse_args()
 
@@ -514,29 +551,65 @@ if __name__ == '__main__':
   else:
     exclude_high_cost_jg = (False, 'f')
 
+  if(args.evaluate_lca_mode=='false'):
+    eval_lca = False
+  else:
+    eval_lca = True
 
-  run_experiment(
-    result_schema = result_schema,
-    user_query = u_query,
-    user_questions=u_question,
-    # user_questions_map = {'yes':'Private', 'no':'Medicare'},
-    user_questions_map = {'yes':'2015-16', 'no':'2012-13'},
-    user_specified_attrs=user_specified_attrs,
-    user_name=args.user_name,
-    password=args.password,
-    host=args.db_host,
-    port=args.port,
-    dbname=args.db_name, 
-    sample_rate_for_s=args.sample_rate_for_lca,
-    max_sample_factor=args.sample_factor_for_lca, 
-    maximum_edges=args.maximum_edges,
-    min_recall_threshold=args.min_recall_threshold,
-    numercial_attr_filter_method=args.optimized,
-    user_assigned_max_num_pred = 2,
-    exclude_high_cost_jg=exclude_high_cost_jg,
-    f1_calculation_type =args.f1_calc_type,
-    f1_sample_rate = args.f1_sample_rate,
-    f1_sample_type = args.f1_sample_type,
-    f1_min_sample_size_threshold=1000,
-    )
-  # logger.debug('\n\n')
+
+  if(args.workloads=='false'):
+    run_experiment(
+      result_schema = result_schema,
+      user_query = u_query,
+      user_questions=u_question,
+      # user_questions_map = {'yes':'Government', 'no':'Self Pay'},
+      # user_questions_map = {'yes':'Private', 'no':'Self Pay'},
+      # user_questions_map = {'yes':'Private', 'no':'Medicare'},
+      user_questions_map = {'yes':'2015-16', 'no':'2012-13'},
+      user_specified_attrs=user_specified_attrs,
+      user_name=args.user_name,
+      password=args.password,
+      host=args.db_host,
+      port=args.port,
+      dbname=args.db_name, 
+      sample_rate_for_s=args.sample_rate_for_lca,
+      lca_s_max_size=args.max_lca_s_size,
+      lca_s_min_size=args.min_lca_s_size, 
+      maximum_edges=args.maximum_edges,
+      min_recall_threshold=args.min_recall_threshold,
+      numercial_attr_filter_method=args.optimized,
+      user_assigned_max_num_pred = 2,
+      exclude_high_cost_jg=exclude_high_cost_jg,
+      f1_calculation_type =args.f1_calc_type,
+      f1_sample_rate = args.f1_sample_rate,
+      f1_sample_type = args.f1_sample_type,
+      f1_min_sample_size_threshold=1000,
+      lca_eval_mode=eval_lca,
+      )
+  else:
+    for w in mimic_workloads:
+      run_experiment(
+        result_schema = result_schema,
+        user_query = w['uquery'],
+        user_questions= w['question'],
+        user_questions_map = w['umap'],
+        user_specified_attrs=w['uattrs'],
+        user_name=args.user_name,
+        password=args.password,
+        host=args.db_host,
+        port=args.port,
+        dbname=args.db_name, 
+        sample_rate_for_s=args.sample_rate_for_lca,
+        lca_s_max_size=args.max_lca_s_size,
+        lca_s_min_size=args.min_lca_s_size, 
+        maximum_edges=args.maximum_edges,
+        min_recall_threshold=args.min_recall_threshold,
+        numercial_attr_filter_method=args.optimized,
+        user_assigned_max_num_pred = 2,
+        exclude_high_cost_jg=exclude_high_cost_jg,
+        f1_calculation_type =args.f1_calc_type,
+        f1_sample_rate = args.f1_sample_rate,
+        f1_sample_type = args.f1_sample_type,
+        f1_min_sample_size_threshold=1000,
+        lca_eval_mode=eval_lca,
+        )
