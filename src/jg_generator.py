@@ -148,6 +148,8 @@ class Join_Graph_Generator:
         """
 
         remaining_conditions = {}
+
+        # logger.debug(jg_candidate)
         
         for n1, n2, cond in jg_candidate.graph_core.edges.data('condition'):
             if(n1.label=='PT'):
@@ -177,14 +179,14 @@ class Join_Graph_Generator:
         for n in jg_candidate.graph_core:
             if(n.label!='PT'):
                 n.cond_keys.sort()
-                logger.debug(n.label)
-                logger.debug(n.cond_keys)
+                # logger.debug(n.label)
+                # logger.debug(n.cond_keys)
                 n.cond_keys_used.sort()
-                logger.debug(n.cond_keys_used)
-                logger.debug('\n')
+                # logger.debug(n.cond_keys_used)
+                # logger.debug('\n')
                 if(set(n.cond_keys)!=set(n.cond_keys_used)):
-                    logger.debug('False!')
-                    logger.debug('\n')
+                    # logger.debug('False!')
+                    # logger.debug('\n')
                     return False
         return True
 

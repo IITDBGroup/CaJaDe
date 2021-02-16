@@ -110,7 +110,7 @@ class Join_Graph_Materializer:
         whose renaming results will be universal renaming 
         scheme for the other jgs  
         """
-        
+        # logger.debug(query)
         errcode, outoput_raw = self.gwrapper.runQuery(query, ec_options=True)
         # logger.debug(query)
         outoput = outoput_raw.decode("utf-8")

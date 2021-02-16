@@ -61,6 +61,7 @@ class provenance_getter:
 			gen_original_pt_query = output.decode("utf-8")
 			# logger.debug(f'gen_original_pt_query:\n {gen_original_pt_query}')
 			original_PT_view = f"CREATE VIEW original_pt AS {gen_original_pt_query};"
+			# logger.debug(original_PT_view)
 			self.cur.execute(drop_original_view_query)
 			self.cur.execute(original_PT_view)
 			self.conn.commit()
