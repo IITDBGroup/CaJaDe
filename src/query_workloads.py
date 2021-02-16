@@ -3,11 +3,11 @@
 # Q1:
 
 mimic_question_dict_1 = {}
-mimic_uq1 = "provenance of (select count(*), chapter from diagnoses group by chapter);"
+mimic_uq1 = "provenance of (select count(*) as cnt, chapter from diagnoses group by chapter);"
 mimic_question_dict_1['uquery'] = (mimic_uq1, 'mimic_qw_q1_chapter_7_vs_chapter_11')
 mimic_question_dict_1['question'] =["chapter='7'","chapter='11'"]
 mimic_question_dict_1['uattrs'] = [('diagnoses','chapter')]
-mimic_question_dict_1['umap']= {'yes':'7', 'no':'11'},
+mimic_question_dict_1['umap']= {'yes':'7', 'no':'11'}
 
 # --  count  | chapter 
 # -- --------+---------
@@ -35,7 +35,7 @@ mimic_question_dict_1['umap']= {'yes':'7', 'no':'11'},
 
 # Q2:
 mimic_question_dict_2 = {}
-mimic_uq2 = "'provenance of (select insurance, 1.0*SUM(hospital_expire_flag)/count(*) as death_rate from admissions group by insurance);"
+mimic_uq2 = "provenance of (select insurance, 1.0*SUM(hospital_expire_flag)/count(*) as death_rate from admissions group by insurance);"
 mimic_question_dict_2['uquery'] = (mimic_uq2, 'mimic_qw_q2_selfpay_vs_private')
 mimic_question_dict_2['question'] =["insurance='Self Pay'","insurance='Private'"]
 mimic_question_dict_2['uattrs'] = [('admissions','insurance')]
@@ -52,11 +52,11 @@ mimic_question_dict_2['umap'] = {'yes':'Self Pay', 'no':'Private'}
 
 # Q3:
 mimic_question_dict_3 = {}
-mimic_uq3 = "'provenance of (select count(*), los_group from icustays group by los_group);"
+mimic_uq3 = "provenance of (select count(*) as cnt, los_group from icustays group by los_group);"
 mimic_question_dict_3['uquery'] = (mimic_uq3, 'mimic_qw_q3_los')
 mimic_question_dict_3['question'] =["los_group='x>8'","los_group='0-1'"]
 mimic_question_dict_3['uattrs'] = [('icustays','los_group')]
-mimic_question_dict_3['umap'] = {'yes':'x>8', 'no':'0-1'},
+mimic_question_dict_3['umap'] = {'yes':'x>8', 'no':'0-1'}
 
 #  count | los_group 
 # -------+-----------
@@ -69,13 +69,12 @@ mimic_question_dict_3['umap'] = {'yes':'x>8', 'no':'0-1'},
 
 # Q4:
 mimic_question_dict_4 = {}
-mimic_uq4 = "provenance of (select count(*), chapter from procedures group by chapter);"
+mimic_uq4 = "provenance of (select count(*) as cnt, chapter from procedures group by chapter);"
 mimic_question_dict_4['uquery'] = (mimic_uq4, 'mimic_qw_q4_procedures')
 mimic_question_dict_4['question'] =["chapter='16'","chapter='14'"]
 mimic_question_dict_4['uattrs'] = [('procedures','chapter')]
-mimic_question_dict_4['umap']= {'yes':'16', 'no':'14'},
+mimic_question_dict_4['umap']= {'yes':'16', 'no':'14'}
 
-#   cnt  | chapter 
 # -------+---------
 #     37 | 3A
 #     64 | 4
@@ -153,5 +152,5 @@ mimic_question_dict_5['umap']= {'yes':'ASIAN', 'no':'HISPANIC OR LATINO'}
 
 mimic_workloads = [mimic_question_dict_1,mimic_question_dict_2,mimic_question_dict_3,mimic_question_dict_4, mimic_question_dict_5]
 
-print(mimic_workloads)
+# print(mimic_workloads)
 # 5 queries / questions from NBA

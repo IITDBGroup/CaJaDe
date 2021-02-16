@@ -1,0 +1,167 @@
+
+# count rows 
+
+with rowcnt as (
+
+SELECT nspname || '.' || relname AS "relation",
+pg_size_pretty(pg_total_relation_size(C.oid)) AS "total_size",
+reltuples AS row_estimate
+FROM pg_class C
+LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace)
+WHERE nspname NOT IN ('pg_catalog', 'information_schema')
+AND C.relkind <> 'i'
+AND nspname !~ '^pg_toast'
+ORDER BY pg_total_relation_size(C.oid)
+
+) select sum(row_estimate) from rowcnt;
+
+
+# create different db size 
+
+MIMIC: 
+
+pg_dump -U japerev -s mimic_rev > mimic_schema.sql
+
+psql -p 5433 -U japerev -d mimic_rev_01 < mimic_schema.sql 
+
+
+
+------01------
+create materialized view patients_01 as (select * from patients order by random() limit 4652);
+create materialized view patients_admission_info_01 as (select pa.* from patients_admit_info pa, patients_01 p where p.subject_id = pa.subject_id);
+create materialized view admissions_01 as (select ad.* from admissions ad, patients_admission_info_01 pa where ad.hadm_id = pa.hadm_id);
+create materialized view diagnoses_01 as (select di.* from diagnoses di, admissions_01 ad, patients_01 p where di.subject_id = p.subject_id and di.hadm_id=ad.hadm_id);
+create materialized view icustays_01 as (select i.* from icustays i, admissions_01 ad, patients_01 p where i.subject_id = p.subject_id and i.hadm_id=ad.hadm_id);
+create materialized view procedures_01 as (select pr.* from procedures pr, admissions_01 ad, patients_01 p where pr.subject_id = p.subject_id and pr.hadm_id=ad.hadm_id);
+
+
+
+\copy (SELECT * FROM patients_01) to 'patients_01.csv' csv header;
+\copy (SELECT * FROM patients_admission_info_01) to 'patients_admission_info_01.csv' csv header;
+\copy (SELECT * FROM admissions_01) to 'admissions_01.csv' csv header;
+\copy (SELECT * FROM diagnoses_01) to 'diagnoses_01.csv' csv header;
+\copy (SELECT * FROM icustays_01) to 'icustays_01.csv' csv header;
+\copy (SELECT * FROM procedures_01) to 'procedures_01.csv' csv header;
+
+
+\copy patients FROM 'patients_01.csv' csv header;
+\copy admissions FROM 'admissions_01.csv' csv header;
+\copy diagnoses FROM 'diagnoses_01.csv' csv header;
+\copy icustays FROM 'icustays_01.csv' csv header;
+\copy procedures FROM 'procedures_01.csv' csv header;
+\copy patients_admit_info FROM 'patients_admission_info_01.csv' csv header;
+
+
+
+--------05-------
+psql -p 5433 -U japerev -d mimic_rev_05 < mimic_schema.sql 
+
+
+create materialized view patients_05 as (select * from patients order by random() limit 23260);
+create materialized view patients_admission_info_05 as (select pa.* from patients_admit_info pa, patients_05 p where p.subject_id = pa.subject_id);
+create materialized view admissions_05 as (select ad.* from admissions ad, patients_admission_info_05 pa where ad.hadm_id = pa.hadm_id);
+create materialized view diagnoses_05 as (select di.* from diagnoses di, admissions_05 ad, patients_05 p where di.subject_id = p.subject_id and di.hadm_id=ad.hadm_id);
+create materialized view icustays_05 as (select i.* from icustays i, admissions_05 ad, patients_05 p where i.subject_id = p.subject_id and i.hadm_id=ad.hadm_id);
+create materialized view procedures_05 as (select pr.* from procedures pr, admissions_05 ad, patients_05 p where pr.subject_id = p.subject_id and pr.hadm_id=ad.hadm_id);
+
+
+
+\copy (SELECT * FROM patients_05) to 'patients_05.csv' csv header;
+\copy (SELECT * FROM patients_admission_info_05) to 'patients_admission_info_05.csv' csv header;
+\copy (SELECT * FROM admissions_05) to 'admissions_05.csv' csv header;
+\copy (SELECT * FROM diagnoses_05) to 'diagnoses_05.csv' csv header;
+\copy (SELECT * FROM icustays_05) to 'icustays_05.csv' csv header;
+\copy (SELECT * FROM procedures_05) to 'procedures_05.csv' csv header;
+
+
+\copy patients FROM 'patients_05.csv' csv header;
+\copy admissions FROM 'admissions_05.csv' csv header;
+\copy diagnoses FROM 'diagnoses_05.csv' csv header;
+\copy icustays FROM 'icustays_05.csv' csv header;
+\copy procedures FROM 'procedures_05.csv' csv header;
+\copy patients_admit_info FROM 'patients_admission_info_05.csv' csv header;
+
+
+--------2----------
+insert into patients select subject_id+99999,gender,dob,dod,dod_hosp,dod_ssn from patients;
+
+insert into admissions select hadm_id+199999,admittime,dischtime,deathtime,admission_type,admission_location,discharge_location,insurance,marital_status,edregtime,edouttime,diagnosis,hospital_expire_flag,hospital_stay_length from admissions;
+
+insert into patients_admit_info select subject_id+99999,hadm_id+199999,age,language,religion,ethnicity from patients_admit_info;
+
+insert into diagnoses select subject_id+99999,hadm_id+199999,seq_num,icd9_code,chapter from diagnoses;
+
+insert into icustays select subject_id+99999,hadm_id+199999,icustay_id,dbsource,first_careunit,last_careunit,first_wardid,last_wardid,intime,outtime,los,los_group from icustays
+
+insert into procedures select subject_id+99999,hadm_id+199999,seq_num,icd9_code,chapter from procedures
+
+
+--------4-----------
+
+insert into patients select subject_id+99999,gender,dob,dod,dod_hosp,dod_ssn from patients;
+
+insert into admissions select hadm_id+199999,admittime,dischtime,deathtime,admission_type,admission_location,discharge_location,insurance,marital_status,edregtime,edouttime,diagnosis,hospital_expire_flag,hospital_stay_length from admissions;
+
+insert into patients_admit_info select subject_id+99999,hadm_id+199999,age,language,religion,ethnicity from patients_admit_info;
+
+insert into diagnoses select subject_id+99999,hadm_id+199999,seq_num,icd9_code,chapter from diagnoses;
+
+insert into icustays select subject_id+99999,hadm_id+199999,icustay_id,dbsource,first_careunit,last_careunit,first_wardid,last_wardid,intime,outtime,los,los_group from icustays;
+
+insert into procedures select subject_id+99999,hadm_id+199999,seq_num,icd9_code,chapter from procedures;
+
+
+insert into patients select subject_id+199998,gender,dob,dod,dod_hosp,dod_ssn from patients;
+
+insert into admissions select hadm_id+399998,admittime,dischtime,deathtime,admission_type,admission_location,discharge_location,insurance,marital_status,edregtime,edouttime,diagnosis,hospital_expire_flag,hospital_stay_length from admissions;
+
+insert into patients_admit_info select subject_id+199998,hadm_id+399998,age,language,religion,ethnicity from patients_admit_info;
+
+insert into diagnoses select subject_id+199998,hadm_id+399998,seq_num,icd9_code,chapter from diagnoses;
+
+insert into icustays select subject_id+199998,hadm_id+399998,icustay_id,dbsource,first_careunit,last_careunit,first_wardid,last_wardid,intime,outtime,los,los_group from icustays;
+
+insert into procedures select subject_id+199998,hadm_id+399998,seq_num,icd9_code,chapter from procedures;
+
+
+--------8-----------
+
+insert into patients select subject_id+99999,gender,dob,dod,dod_hosp,dod_ssn from patients;
+
+insert into admissions select hadm_id+199999,admittime,dischtime,deathtime,admission_type,admission_location,discharge_location,insurance,marital_status,edregtime,edouttime,diagnosis,hospital_expire_flag,hospital_stay_length from admissions;
+
+insert into patients_admit_info select subject_id+99999,hadm_id+199999,age,language,religion,ethnicity from patients_admit_info;
+
+insert into diagnoses select subject_id+99999,hadm_id+199999,seq_num,icd9_code,chapter from diagnoses;
+
+insert into icustays select subject_id+99999,hadm_id+199999,icustay_id,dbsource,first_careunit,last_careunit,first_wardid,last_wardid,intime,outtime,los,los_group from icustays;
+
+insert into procedures select subject_id+99999,hadm_id+199999,seq_num,icd9_code,chapter from procedures;
+
+
+insert into patients select subject_id+199998,gender,dob,dod,dod_hosp,dod_ssn from patients;
+
+insert into admissions select hadm_id+399998,admittime,dischtime,deathtime,admission_type,admission_location,discharge_location,insurance,marital_status,edregtime,edouttime,diagnosis,hospital_expire_flag,hospital_stay_length from admissions;
+
+insert into patients_admit_info select subject_id+199998,hadm_id+399998,age,language,religion,ethnicity from patients_admit_info;
+
+insert into diagnoses select subject_id+199998,hadm_id+399998,seq_num,icd9_code,chapter from diagnoses;
+
+insert into icustays select subject_id+199998,hadm_id+399998,icustay_id,dbsource,first_careunit,last_careunit,first_wardid,last_wardid,intime,outtime,los,los_group from icustays;
+
+insert into procedures select subject_id+199998,hadm_id+399998,seq_num,icd9_code,chapter from procedures;
+	
+
+insert into patients select subject_id+399996,gender,dob,dod,dod_hosp,dod_ssn from patients;
+
+insert into admissions select hadm_id+799996,admittime,dischtime,deathtime,admission_type,admission_location,discharge_location,insurance,marital_status,edregtime,edouttime,diagnosis,hospital_expire_flag,hospital_stay_length from admissions;
+
+insert into patients_admit_info select subject_id+399996,hadm_id+799996,age,language,religion,ethnicity from patients_admit_info;
+
+insert into diagnoses select subject_id+399996,hadm_id+799996,seq_num,icd9_code,chapter from diagnoses;
+
+insert into icustays select subject_id+399996,hadm_id+799996,icustay_id,dbsource,first_careunit,last_careunit,first_wardid,last_wardid,intime,outtime,los,los_group from icustays;
+
+insert into procedures select subject_id+399996,hadm_id+799996,seq_num,icd9_code,chapter from procedures;
+
+pg_dump -U japerev nba_rev > nba_rev.sql
