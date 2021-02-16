@@ -24,22 +24,19 @@ class PatternGeneratorStats(ExecStats):
     Statistics gathered during mining
     """
 
-    TIMERS = {'create_samples_for_lca',
-              'get_nominal_patterns_by_lca',
-              'enumerate_all_from_nominal_patterns',
-              'validate_patterns_recall_constraint',
+    TIMERS = {'LCA',
+              'refinment',
+              'check_recall',
               'run_F1_query',
-              'numercial_attr_filter',
+              'feature_reduct',
               'pattern_recover',
               'rank_patterns',
-              'deepcopy',
-              'create_f1_sample_jg'
+              'f1_sample'
               }
 
-    PARAMS = {'n_p_pass_node_rule',
-              'n_p_pass_node_rule_and_recall_thresh',
-              'sample_evaluate_pattern_cnt',
-              'sample_misclassification_cnt', 
+    PARAMS = {'n_p_pass_node_rule_and_recall_thresh',
+              'eval_pat_cnt',
+              'pat_misclass_cnt',
               # use this only when you want to measure effectiveness of sampling on fscore
               'error_sum_of_squares'
               # use this only when you want to measure effectiveness of sampling on fscore
@@ -163,9 +160,9 @@ class Pattern_Generator:
     def pattern_diversification(self, 
                             pattern_pool,
                             k=5, 
-                            same_attr_weight=-1, # punish patterns sharing same attribute
+                            same_attr_weight=-0.3, # punish patterns sharing same attribute
                             diff_attr_weight= 1, # encourage more diverse attribute 
-                            diff_val_weight=0.3, # must be smaller than 1
+                            diff_val_weight=0.7, # must be smaller than 1
                             same_val_weight=2, # punish same attr and same value,
                             pass_thresh=0.3 # must be smaller than 1 
                             ):
@@ -220,8 +217,8 @@ class Pattern_Generator:
             if(min_sim>=pass_thresh_score):
                 res.append(pat)
                 num_patterns+=1
-                # if(num_patterns==k):
-                #     break
+                if(num_patterns==k):
+                    break
 
         # logger.debug(res)
         print('\n')
@@ -266,11 +263,9 @@ class Pattern_Generator:
                 if(n[0]>pte['max_cluster_rank']):
                     for val in numerical_quartiles[n[1]]:
                         for one_dir in ['>','<']:
-                            self.stats.startTimer('deepcopy')
                             new_ordinal_values = deepcopy(pte['ordinal_values'])
                             new_ordinal_values.append((n[1],one_dir,val))
                             new_correlated_attrs = deepcopy(pte['correlated_attrs'])
-                            self.stats.stopTimer('deepcopy')
                             new_correlated_attrs[n[1]] = deepcopy(correlation_dict[n[1]])  
                             is_user=deepcopy(pte['is_user'])
                             # one_patt_with_ordi_dir_yes 
@@ -315,6 +310,8 @@ class Pattern_Generator:
 
             view_number = self.weighted_sample_views[jg_name]['ws_index']
 
+            self.stats.startTimer('f1_sample')
+
             new_ws = f"{jg_name}_ws_{view_number}"
             drop_jg_ws_q = f"""
             DROP MATERIALIZED VIEW IF EXISTS {new_ws} CASCADE
@@ -338,6 +335,8 @@ class Pattern_Generator:
             logger.debug(jg_new_ws_q)
 
             self.cur.execute(jg_new_ws_q)
+
+            self.stats.stopTimer('f1_sample')
 
             self.weighted_sample_views[jg_name]['ws_index']+=1
 
@@ -391,7 +390,6 @@ class Pattern_Generator:
             f1_calculation_type='o'
         # logger.debug(pattern)
 
-        self.stats.startTimer('validate_patterns_recall_constraint')
         where_cond_list = []
         if('ordinal_values' in pattern):
             for ot in pattern['ordinal_values']:
@@ -522,14 +520,17 @@ class Pattern_Generator:
                 """
 
             if(f1_calculation_type=='o' or f1_calculation_type=='e'):
+                self.stats.startTimer('check_recall')
                 self.cur.execute(check_original_recall_threshold_q)
                 original_recall_result = self.cur.fetchone()[0]
                 if(original_recall_result is None):
                     original_recall_result = 0
                 else:
                     original_recall_result = float(original_recall_result)
+                self.stats.stopTimer('check_recall')
 
             if(f1_calculation_type=='e' or f1_calculation_type=='s'):
+                self.stats.startTimer('check_recall')
                 self.cur.execute(check_sample_recall_threshold_q)
                 sample_recall_result = self.cur.fetchone()[0]
                 if(sample_recall_result is None):
@@ -537,13 +538,14 @@ class Pattern_Generator:
                 else:
                     sample_recall_result = float(sample_recall_result)
                 pattern['sample_recall'] = sample_recall_result
+                self.stats.stopTimer('check_recall')
 
             if(f1_calculation_type=='e'):
                 # check if missclassify
-                self.stats.params['sample_evaluate_pattern_cnt']+=1
+                self.stats.params['eval_pat_cnt']+=1
                 if((original_recall_result<pattern_recall_threshold and sample_recall_result>pattern_recall_threshold)\
                     or (original_recall_result>pattern_recall_threshold and sample_recall_result<pattern_recall_threshold)):
-                    self.stats.params['sample_misclassification_cnt']+=1
+                    self.stats.params['eval_pat_cnt']+=1
                 self.stats.params['error_sum_of_squares'] += (original_recall_result-sample_recall_result)**2
             
             if(f1_calculation_type=='o' or f1_calculation_type=='e'):
@@ -552,11 +554,9 @@ class Pattern_Generator:
                 recall_result=sample_recall_result
 
             if(recall_result<pattern_recall_threshold and f1_calculation_type!='e'):
-                self.stats.stopTimer('validate_patterns_recall_constraint')
                 return pattern, False
             else:
                 pattern['recall'] = recall_result
-                self.stats.stopTimer('validate_patterns_recall_constraint')
                 
                 if(f1_calculation_type!='o'):
                     sample_F1_q = f"""
@@ -643,8 +643,8 @@ class Pattern_Generator:
                 F1_q = sample_F1_q
 
             self.cur.execute(F1_q)
-            self.stats.stopTimer('run_F1_query')
             result = self.cur.fetchone()
+            self.stats.stopTimer('run_F1_query')
             prec,f1 = result[0], result[1]
 
             if(f1 is None):
@@ -663,8 +663,9 @@ class Pattern_Generator:
                 self.stats.startTimer('run_F1_query')
                 # logger.debug(F1_q)
                 self.cur.execute(sample_F1_q)
-                self.stats.stopTimer('run_F1_query')
                 sample_result = self.cur.fetchone()
+                self.stats.stopTimer('run_F1_query')
+
                 sample_prec,sample_f1 = sample_result[0], sample_result[1]
 
                 if(sample_f1 is None):
@@ -686,12 +687,13 @@ class Pattern_Generator:
                       renaming_dict, 
                       skip_cols,
                       user_questions_map,
+                      user_pt_size,
                       original_pt_size,
                       attr_alias='a',
                       prov_version='existential',
                       s_rate_for_s=0.5,
-                      lca_s_max_size = 500,
-                      lca_s_min_size = 50,
+                      lca_s_max_size = 1000,
+                      lca_s_min_size = 100,
                       just_lca = False,
                       pattern_recall_threshold=0.3, 
                       numercial_attr_filter_method = 'y',
@@ -747,11 +749,13 @@ class Pattern_Generator:
             # based on f1 calcuation type set up recall dict and materialized apt to evaluate f1
             if(f1_calculation_type=='s' or f1_calculation_type=='e'):
                 if(jg_apt_size>f1_calculation_min_size): # this decides that we need sampling
+                    logger.debug(f"jg_apt_size: {jg_apt_size}")
                     sample_f1_jg_size = math.ceil(jg_apt_size * f1_calculation_sample_rate)
-                    if(jg_apt_size <= original_pt_size or f1_sample_type!='weighted'): # this means if we need weighted sampling
+                    if(jg_apt_size <= user_pt_size or f1_sample_type!='weighted'): # this means if we need weighted sampling
+                        logger.debug('uniform sampling!')
                         sample_recall_dict = {}
                         
-                        self.stats.startTimer('create_f1_sample_jg')
+                        self.stats.startTimer('f1_sample')
 
                         # logger.debug(f"jg_apt_size : {jg_apt_size}")
                         # logger.debug(f"sample_f1_jg_size")
@@ -786,20 +790,20 @@ class Pattern_Generator:
                         self.cur.execute(q_tp_no)
                         sample_recall_dict['no'] = int(self.cur.fetchone()[0])
 
-                        self.stats.stopTimer('create_f1_sample_jg')
+                        self.stats.stopTimer('f1_sample')
 
                         recall_dicts['sample']=sample_recall_dict
                         # logger.debug(recall_dicts)
                     
                     else:
-
+                        logger.debug('weighted sampling!')
                         recall_dicts['sample'] = {}
                         need_weighted_sampling = True
 
                 else:
                     sample_recall_dict = {}
                     
-                    self.stats.startTimer('create_f1_sample_jg')
+                    self.stats.startTimer('f1_sample')
 
                     sample_f1_jg_size = math.ceil(jg_apt_size * f1_calculation_sample_rate)
 
@@ -831,7 +835,7 @@ class Pattern_Generator:
                     self.cur.execute(q_tp_no)
                     sample_recall_dict['no'] = int(self.cur.fetchone()[0])
 
-                    self.stats.stopTimer('create_f1_sample_jg')
+                    self.stats.stopTimer('f1_sample')
 
                     recall_dicts['sample']=sample_recall_dict
 
@@ -857,7 +861,7 @@ class Pattern_Generator:
             recall_dicts['original'] = original_recall_dict
 
 
-            self.stats.startTimer('create_samples_for_lca')
+            self.stats.startTimer('LCA')
             attrs_from_spec_node = set([k for k in renaming_dict[jg.spec_node_key]['columns']])
 
             logger.debug(renaming_dict['dtypes'])
@@ -932,7 +936,7 @@ class Pattern_Generator:
                 select setseed({seed})
                 """
 
-                if(prov_version=='fractional'):
+                if(prov_version=='fractional'): # Dont use this, not working...
                     prov_d_creation_q = f"""
                     CREATE MATERIALIZED VIEW {jg_name}_d AS
                     (
@@ -982,9 +986,6 @@ class Pattern_Generator:
 
                 self.cur.execute(prov_s_creation_q)
 
-                self.stats.stopTimer('create_samples_for_lca')
-                self.stats.startTimer('get_nominal_patterns_by_lca')
-
                 pattern_creation_q = f"""
                 CREATE MATERIALIZED VIEW {jg_name}_p AS
                 WITH cp AS
@@ -1001,7 +1002,6 @@ class Pattern_Generator:
                 ORDER BY pattern_freq DESC
                 limit 10;
                 """
-
                 get_nominal_patterns_q = f"""
                 SELECT {nominal_pattern_attr_clause} FROM {jg_name}_p;
                 """
@@ -1011,12 +1011,13 @@ class Pattern_Generator:
                 # logger.debug(pattern_creation_q)
                 self.cur.execute(pattern_creation_q)
 
+                self.stats.stopTimer('LCA')
+
                 nominal_pattern_df = pd.read_sql(get_nominal_patterns_q, self.conn)
                 logger.debug(nominal_pattern_df)
 
                 nominal_pattern_dicts = nominal_pattern_df.to_dict('records')
                 # logger.debug(nominal_pattern_dicts)
-                self.stats.stopTimer('get_nominal_patterns_by_lca')
 
                 nominal_pattern_dict_list = []
 
@@ -1031,6 +1032,7 @@ class Pattern_Generator:
                     # nominal patterns only, and we choose most diverse 
                     # one as the weighting factor 
 
+                    self.stats.startTimer('f1_sample')
                     distinct_nominal_list = [f"COUNT(DISTINCT {x}) as cnt_{x}" for x in nominal_pattern_attr_list]
                     nominal_only_sample_q = f""" 
                     SELECT {','.join(distinct_nominal_list)}
@@ -1064,6 +1066,7 @@ class Pattern_Generator:
                     """
                     logger.debug(create_f1_jg_size)
                     self.cur.execute(create_f1_jg_size)
+                    self.stats.stopTimer('f1_sample')
 
                     nom_sample_dict = {}
 
@@ -1095,7 +1098,7 @@ class Pattern_Generator:
                         # comes from the "last node" specified in join graph 
                         # (either nominal or ordinal has to be in the patten)
 
-                        self.stats.startTimer('numercial_attr_filter')
+                        self.stats.startTimer('feature_reduct')
 
                         Q_cor = f"""
                         SELECT {','.join(ordinal_pattern_attr_list)}, is_user 
@@ -1178,7 +1181,7 @@ class Pattern_Generator:
 
 
 
-                        self.stats.stopTimer('numercial_attr_filter')
+                        self.stats.stopTimer('feature_reduct')
 
                         num_feature_to_consider = math.ceil(num_numerical_attr_rate*user_assigned_num_pred_cap)
                         # construct dictionary for each nominal pattern with ordinal attributes
@@ -1216,7 +1219,7 @@ class Pattern_Generator:
                                 # if at least one nominal pattern passed the 
                                 # recall test then we continue to expand
 
-                                self.stats.startTimer('enumerate_all_from_nominal_patterns')
+                                self.stats.startTimer('refinment')
 
                                 nominal_where_cond_list = []
 
@@ -1246,12 +1249,12 @@ class Pattern_Generator:
 
                                 attrs_with_const_set = set([x[0] for x in npa['nominal_values']])
 
-                                self.stats.stopTimer('enumerate_all_from_nominal_patterns')
+                                self.stats.stopTimer('refinment')
 
                                 if(len(attrs_from_spec_node.intersection(attrs_with_const_set))>0): 
                                     # logger.debug("already has at least one attr from last node")
                                     
-                                    self.stats.startTimer('enumerate_all_from_nominal_patterns')
+                                    self.stats.startTimer('refinment')
 
                                     # if nominal attrs already has at least one from last node: directly adding numerical attrs
                                     importance_feature_ranks = list(enumerate([x[0] for x in importances],0))
@@ -1293,7 +1296,7 @@ class Pattern_Generator:
                                     if(max_number_of_numerical_possible<=user_assigned_num_pred_cap):
                                         user_assigned_num_pred_cap = max_number_of_numerical_possible
 
-                                    self.stats.stopTimer('enumerate_all_from_nominal_patterns')
+                                    self.stats.stopTimer('refinment')
 
                                     # logger.debug(f"in has last node case: user_assigned_num_pred_cap: {user_assigned_num_pred_cap}")
 
@@ -1312,14 +1315,12 @@ class Pattern_Generator:
                                                                           w_sample_attr=w_sample_attr,
                                                                           sample_size=sample_f1_jg_size)
                                             if(is_valid):
-                                                self.stats.startTimer('deepcopy')
                                                 val_pat = deepcopy(pc_processed)
-                                                self.stats.stopTimer('deepcopy')
                                                 # logger.debug(val_pat)
                                                 valid_patterns.append(val_pat)
                                                 good_candidates.append(pc_processed)
 
-                                        self.stats.startTimer('enumerate_all_from_nominal_patterns')
+                                        self.stats.startTimer('refinment')
 
 
                                         cur_pattern_candidates = self.extend_valid_candidates(good_candidates,
@@ -1327,14 +1328,14 @@ class Pattern_Generator:
                                                                                               npa['ordinal_quartiles'],
                                                                                               correlation_dict)
 
-                                        self.stats.stopTimer('enumerate_all_from_nominal_patterns')
+                                        self.stats.stopTimer('refinment')
 
 
                                         cur_number_of_numercial_attrs+=1
 
                                 else:
                                     if(rep_from_last_node):
-                                        self.stats.startTimer('enumerate_all_from_nominal_patterns')
+                                        self.stats.startTimer('refinment')
 
                                         # logger.debug(importances)
                                         special_rep_from_last_node = rep_from_last_node[0]
@@ -1387,7 +1388,7 @@ class Pattern_Generator:
                                                                                           correlation_dict)
                                         # logger.debug(f"initial_candidates: {initial_candidates}")
 
-                                        self.stats.stopTimer('enumerate_all_from_nominal_patterns')
+                                        self.stats.stopTimer('refinment')
 
 
                                         cur_pattern_candidates = []
@@ -1409,9 +1410,7 @@ class Pattern_Generator:
                                                                           w_sample_attr=w_sample_attr,
                                                                           sample_size=sample_f1_jg_size)
                                             if(is_valid):
-                                                self.stats.startTimer('deepcopy')
                                                 val_pat = deepcopy(ic_processed)
-                                                self.stats.stopTimer('deepcopy')
                                                 valid_patterns.append(val_pat)
                                                 # logger.debug(val_pat)
                                                 cur_pattern_candidates.append(ic_processed)
@@ -1425,12 +1424,12 @@ class Pattern_Generator:
 
                                             for pc in cur_pattern_candidates:
 
-                                                self.stats.startTimer('enumerate_all_from_nominal_patterns')
+                                                self.stats.startTimer('refinment')
                                                 new_candidates = self.extend_valid_candidates([pc],
                                                                                                numerical_variable_candidates,
                                                                                                npa['ordinal_quartiles'],
                                                                                                correlation_dict)
-                                                self.stats.stopTimer('enumerate_all_from_nominal_patterns')
+                                                self.stats.stopTimer('refinment')
 
                                                 if(new_candidates):
                                                     for nc in new_candidates:
@@ -1446,17 +1445,13 @@ class Pattern_Generator:
                                                                       sample_size=sample_f1_jg_size)
 
                                                         if(is_valid):
-                                                            self.stats.startTimer('deepcopy')
                                                             val_pat = deepcopy(pc_processed)
-                                                            self.stats.stopTimer('deepcopy')
                                                             valid_patterns.append(val_pat)
                                                             # logger.debug(val_pat)
                                                             good_candidates.append(pc_processed)
 
                                             cur_pattern_candidates = good_candidates
                                             cur_number_of_numercial_attrs+=1
-
-                        self.stats.params['n_p_pass_node_rule'] += len(valid_patterns)
 
                         # logger.debug(valid_patterns)
                     else:
@@ -1494,7 +1489,7 @@ class Pattern_Generator:
                 else:
                     if(ordinal_pattern_attr_list and not just_lca):
 
-                        self.stats.startTimer('enumerate_all_from_nominal_patterns')
+                        self.stats.startTimer('refinment')
 
                         patterns_passed_node_cond = []
                         # construct dictionary for each nominal pattern with ordinal attributes
@@ -1587,10 +1582,7 @@ class Pattern_Generator:
                                                 patterns_passed_node_cond.append({'join_graph':jg, 'recall':0, 'precision':0, 'nominal_values': npa['nominal_values'], 
                                                     'ordinal_values': list(zip(n,one_dir,val_pair)), 'attrs_with_const':attrs_with_const_set, 'is_user':'no'})
 
-
-                        self.stats.params['n_p_pass_node_rule'] += len(patterns_passed_node_cond)
-
-                        self.stats.stopTimer('enumerate_all_from_nominal_patterns')
+                        self.stats.stopTimer('refinment')
 
 
                         for ppnc in patterns_passed_node_cond:

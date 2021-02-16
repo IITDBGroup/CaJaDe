@@ -112,7 +112,7 @@ def InsertPatterns(conn, exp_desc, patterns, pattern_relation_name, schema, resu
       cur_batch_size+=1
       p_print = p['desc'].replace("'","''")
       jg_print = str(p['join_graph']).replace("'","''")
-      if(result_type=='s'):
+      if(result_type=='s' or result_type=='o'):
         patterns_to_insert.append(f"('{exp_desc}', '{p['is_user']}', '{jg_print}', '{p['jg_name']}', '{p['num_edges']}', '{p_print}', \
           '{p['recall']}', '{p['precision']}','{p['F1']}', '', '', '')")
       elif(result_type=='e'):
@@ -126,7 +126,7 @@ def InsertPatterns(conn, exp_desc, patterns, pattern_relation_name, schema, resu
           'INSERT INTO ' + schema + '.' + pattern_relation_name + ' ('+ ','.join(cols) +')' + ' values '+ ', '.join(patterns_to_insert)
           )
       patterns_to_insert = []
-      if(result_type=='s'):
+      if(result_type=='s' or result_type=='o'):
         patterns_to_insert.append(f"('{exp_desc}', '{p['is_user']}', '{jg_print}', '{p['jg_name']}', '{p['num_edges']}', '{p_print}', \
           '{p['recall']}', '{p['precision']}','{p['F1']}', '', '', '')")
       elif(result_type=='e'):
@@ -331,6 +331,7 @@ def run_experiment(result_schema,
                           just_lca = lca_eval_mode,
                           pattern_recall_threshold=min_recall_threshold,
                           numercial_attr_filter_method=numercial_attr_filter_method,
+                          user_pt_size=user_pt_size,
                           original_pt_size=apt_size,
                           user_questions_map=user_questions_map,
                           f1_calculation_type=f1_calculation_type,
@@ -389,6 +390,7 @@ def run_experiment(result_schema,
                               just_lca = lca_eval_mode,
                               pattern_recall_threshold=min_recall_threshold,
                               numercial_attr_filter_method = numercial_attr_filter_method,
+                              user_pt_size=user_pt_size,
                               original_pt_size = apt_size,
                               user_questions_map = user_questions_map,
                               f1_calculation_type = f1_calculation_type,
@@ -464,6 +466,9 @@ if __name__ == '__main__':
   parser.add_argument('-w','--f1_sample_type', metavar="\b", type=str, default='weighted', 
     help='Sample type of apt when calculating the f1 score (default: %(default)s)')
 
+  parser.add_argument('-z','--f1_sample_thresh', metavar="\b", type=int, default=100, 
+    help='Sample threshold of APT, only sample if apt bigger than this (default: %(default)s)')
+
   parser.add_argument('-o','--optimized', metavar="\b", type=str, default='y', 
     help='use opt or not (y: yes, n: no), (default: %(default)s)')
 
@@ -476,10 +481,10 @@ if __name__ == '__main__':
   parser.add_argument('-r','--sample_rate_for_lca', metavar="\b", type=float, default=0.05, 
   help='sample rate for lca (default: %(default)s)')
 
-  parser.add_argument('-s','--min_lca_s_size', metavar="\b", type=int, default=50,
+  parser.add_argument('-s','--min_lca_s_size', metavar="\b", type=int, default=100,
     help='min size of sample used for lca cross product (default: %(default)s)')
 
-  parser.add_argument('-S','--max_lca_s_size', metavar="\b", type=int, default=500,
+  parser.add_argument('-S','--max_lca_s_size', metavar="\b", type=int, default=1000,
    help='min size of sample used for lca cross product (default: %(default)s)')
 
   parser.add_argument('-H','--db_host', metavar="\b", type=str, default='localhost',
@@ -583,7 +588,7 @@ if __name__ == '__main__':
       f1_calculation_type =args.f1_calc_type,
       f1_sample_rate = args.f1_sample_rate,
       f1_sample_type = args.f1_sample_type,
-      f1_min_sample_size_threshold=1000,
+      f1_min_sample_size_threshold=args.f1_sample_thresh,
       lca_eval_mode=eval_lca,
       )
   else:
@@ -610,6 +615,6 @@ if __name__ == '__main__':
         f1_calculation_type =args.f1_calc_type,
         f1_sample_rate = args.f1_sample_rate,
         f1_sample_type = args.f1_sample_type,
-        f1_min_sample_size_threshold=1000,
+        f1_min_sample_size_threshold=args.f1_sample_thresh,
         lca_eval_mode=eval_lca,
         )
