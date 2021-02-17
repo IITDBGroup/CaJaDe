@@ -154,3 +154,48 @@ mimic_workloads = [mimic_question_dict_1,mimic_question_dict_2,mimic_question_di
 
 # print(mimic_workloads)
 # 5 queries / questions from NBA
+
+# Q1
+nba_question_dict_1 = {}
+nba_uq1 = "provenance of (select avg(points), season_name from player natural join player_game_stats natural join game natural join season where player_name='Draymond Green' group by season_name);"
+nba_question_dict_1['uquery'] = (nbaq1, 'nba_qw_q1_green_pts')
+nba_question_dict_1['question'] =["season_name='2015-16'","season_name='2016-17'"]
+nba_question_dict_1['uattrs'] = [('season','season_name'), ('player','player_name')]
+nba_question_dict_1['umap']= {'yes':'2015-16', 'no':'2016-17'}
+
+nba_workloads = [nba_question_dict_1]
+
+# # Q2
+# nba_question_dict_2 = {}
+# nba_uq2 = "provenance of (select count(*) as cnt, ethnicity from patients_admit_info group by ethnicity);"
+# nba_question_dict_2['uquery'] = (nbaq2, 'nba_qw_q2_ethnicity')
+# nba_question_dict_2['question'] =["ethnicity='ASIAN'","ethnicity='HISPANIC OR LATINO'"]
+# nba_question_dict_2['uattrs'] = [('patients_admit_info','ethnicity')]
+# nba_question_dict_2['umap']= {'yes':'ASIAN', 'no':'HISPANIC OR LATINO'}
+
+
+# #Q3
+# nba_question_dict_3 = {}
+# nba_uq3 = "provenance of (select count(*) as cnt, ethnicity from patients_admit_info group by ethnicity);"
+# nba_question_dict_3['uquery'] = (nbaq3, 'nba_qw_q3_ethnicity')
+# nba_question_dict_3['question'] =["ethnicity='ASIAN'","ethnicity='HISPANIC OR LATINO'"]
+# nba_question_dict_3['uattrs'] = [('patients_admit_info','ethnicity')]
+# nba_question_dict_3['umap']= {'yes':'ASIAN', 'no':'HISPANIC OR LATINO'}
+
+
+# #4
+# nba_question_dict_3 = {}
+# nba_u4 = "provenance of (select count(*) as cnt, ethnicity from patients_admit_info group by ethnicity);"
+# nba_question_dict_3['uquery'] = (nba4, 'nba_qw_4_ethnicity')
+# nba_question_dict_3['question'] =["ethnicity='ASIAN'","ethnicity='HISPANIC OR LATINO'"]
+# nba_question_dict_3['uattrs'] = [('patients_admit_info','ethnicity')]
+# nba_question_dict_3['umap']= {'yes':'ASIAN', 'no':'HISPANIC OR LATINO'}
+
+
+# #Q5
+# nba_question_dict_3 = {}
+# nba_uq3 = "provenance of (select count(*) as cnt, ethnicity from patients_admit_info group by ethnicity);"
+# nba_question_dict_3['uquery'] = (nbaq3, 'nba_qw_q3_ethnicity')
+# nba_question_dict_3['question'] =["ethnicity='ASIAN'","ethnicity='HISPANIC OR LATINO'"]
+# nba_question_dict_3['uattrs'] = [('patients_admit_info','ethnicity')]
+# nba_question_dict_3['umap']= {'yes':'ASIAN', 'no':'HISPANIC OR LATINO'}
