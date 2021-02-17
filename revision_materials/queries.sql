@@ -134,3 +134,10 @@ num_attrs
 from lca_jg_1.result
 )  
 ) r order by result_schema, id
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+
+-- NDCG measure
+

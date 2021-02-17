@@ -290,7 +290,7 @@ class Pattern_Generator:
               3: if no appropriate jg sample can be found, then create
                  a view and then return
         """
-
+        # logger.debug(pattern)
         if(not pattern['ordinal_values']):
             # if no numeric attribute is involved
             return self.weighted_sample_views[jg_name]['nominal_only_recall'], f"{jg_name}_ws_nom"
@@ -1492,18 +1492,40 @@ class Pattern_Generator:
                         self.stats.startTimer('refinment')
 
                         patterns_passed_node_cond = []
+
+                        if(need_weighted_sampling==True): # rank the variances
+                            # logger.debug(ordinal_pattern_attr_list)
+                            norm_stddv_num_list = [f"STDDEV({x})::numeric/AVG({x}) as std_{x}" for x in ordinal_pattern_attr_list]
+                            num_cand_variance_q = f"""
+                            SELECT {','.join(norm_stddv_num_list)}
+                            FROM {jg_name}                                                                                                                                                                                                                                               
+                            """
+
+                            # logger.debug(num_cand_variance_q)
+                            self.cur.execute(num_cand_variance_q)
+
+                            num_stddv_results = tuple(zip(ordinal_pattern_attr_list, list(self.cur.fetchone())))
+
+                            # logger.debug(num_stddv_results)
+
+                            sorted_stddvs = sorted(num_stddv_results, key = lambda x: x[1])
+                            sorted_stddv_dct = {k[0]: v for v, k in enumerate(sorted_stddvs)}
+
                         # construct dictionary for each nominal pattern with ordinal attributes
                         for npa in nominal_pattern_dict_list:
                             cur_number_numerical = 0
                             # add patterns that only include nominal attributes
+
                             patterns_passed_node_cond.append({'join_graph':jg, 'recall':0, 'precision':0, 
                                                               'nominal_values': npa['nominal_values'], 
                                                               'attrs_with_const':set([x[0] for x in npa['nominal_values']]),
+                                                              'ordinal_values':[],
                                                               'is_user':'yes'})
 
                             patterns_passed_node_cond.append({'join_graph':jg, 'recall':0, 'precision':0, 
                                                               'nominal_values': npa['nominal_values'], 
                                                               'attrs_with_const':set([x[0] for x in npa['nominal_values']]), 
+                                                              'ordinal_values':[],
                                                               'is_user':'no'})
                             
                             npa['ordinal_quartiles'] = {}
@@ -1511,6 +1533,10 @@ class Pattern_Generator:
                             nominal_where_cond_list = []
                             
                             for npair in npa['nominal_values']:
+                                npa['ordinal_quartiles'] = {}
+                                if(isinstance(npair[1], datetime.date)): # temp_fix for date type
+                                    # logger.debug(npair) 
+                                    continue
                                 # logger.debug(npair)
                                 nominal_where_cond_list.append("{}='{}'".format(npair[0],npair[1].replace("'","''")))
 
@@ -1592,6 +1618,7 @@ class Pattern_Generator:
                                           pattern_recall_threshold=pattern_recall_threshold,
                                           jg_name=jg_name,
                                           recall_dicts=recall_dicts,
+                                          stddv_ranks_dict=sorted_stddv_dct,
                                           need_weighted_sampling=need_weighted_sampling,
                                           w_sample_attr=w_sample_attr,
                                           sample_size=sample_f1_jg_size,
