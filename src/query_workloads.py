@@ -155,6 +155,7 @@ mimic_workloads = [mimic_question_dict_1,mimic_question_dict_2,mimic_question_di
 # print(mimic_workloads)
 # 5 queries / questions from NBA
 
+
 # Q1
 nba_question_dict_1 = {}
 nba_uq1 = "provenance of (select avg(points), season_name from player natural join player_game_stats natural join game natural join season where player_name='Draymond Green' group by season_name);"
@@ -199,3 +200,4 @@ nba_workloads = [nba_question_dict_1]
 # nba_question_dict_3['question'] =["ethnicity='ASIAN'","ethnicity='HISPANIC OR LATINO'"]
 # nba_question_dict_3['uattrs'] = [('patients_admit_info','ethnicity')]
 # nba_question_dict_3['umap']= {'yes':'ASIAN', 'no':'HISPANIC OR LATINO'}
+

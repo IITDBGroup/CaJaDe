@@ -19,7 +19,7 @@ from statistics import mean
 import argparse
 from datetime import datetime
 from time import strftime
-from query_workloads import mimic_workloads
+from query_workloads import mimic_workloads, nba_workloads
 
 logger = logging.getLogger(__name__)
 
@@ -361,46 +361,48 @@ def run_experiment(result_schema,
 
       valid_result = [v for v in valid_result if not v.redundant]
 
-      avg_cost_estimate_by_num_edges = {k:mean(v) for k,v in cost_estimate_dict.items()}
+      logger.debug(cost_estimate_dict)
+
+      avg_cost_estimate_by_num_edges = {k:mean(v) for k,v in cost_estimate_dict.items() if v}
+      logger.debug(avg_cost_estimate_by_num_edges)
       logger.debug(f'we found {len(valid_result)} valid join graphs, now materializing and generating patterns')
       jg_cnt=1
       for n in valid_result:
         logger.debug(f'we are on join graph number {jg_cnt}')
         logger.debug(n)
         jg_cnt+=1
-        if(n.intermediate==False):
-          if(n.cost<=avg_cost_estimate_by_num_edges[n.num_edges]*1.5 and not n.redundant):
-            cost_friendly_jgs.append(n) 
-            jgm.stats.startTimer('materialize_jg')
-            drop_if_exist_jg_view = "DROP MATERIALIZED VIEW IF EXISTS {} CASCADE;".format('jg_{}'.format(n.jg_number))
-            jg_query_view = "CREATE MATERIALIZED VIEW {} AS {}".format('jg_{}'.format(n.jg_number), n.apt_create_q)
-            jgm.cur.execute(drop_if_exist_jg_view)
-            jgm.cur.execute(jg_query_view)
-            jgm.stats.stopTimer('materialize_jg')
-            apt_size_query = f"SELECT count(*) FROM jg_{vr.jg_number}"
-            jgm.cur.execute(apt_size_query)
-            apt_size = int(jgm.cur.fetchone()[0])
-            pgen.gen_patterns(jg=n,
-                              jg_name=f"jg_{n.jg_number}", 
-                              renaming_dict=n.renaming_dict, 
-                              skip_cols=n.ignored_attrs, 
-                              s_rate_for_s=sample_rate_for_s,
-                              lca_s_max_size = lca_s_max_size,
-                              lca_s_min_size = lca_s_min_size,
-                              just_lca = lca_eval_mode,
-                              pattern_recall_threshold=min_recall_threshold,
-                              numercial_attr_filter_method = numercial_attr_filter_method,
-                              user_pt_size=user_pt_size,
-                              original_pt_size = apt_size,
-                              user_questions_map = user_questions_map,
-                              f1_calculation_type = f1_calculation_type,
-                              f1_calculation_sample_rate=f1_sample_rate,
-                              f1_sample_type = f1_sample_type,
-                              f1_calculation_min_size=f1_min_sample_size_threshold,
-                              user_assigned_num_pred_cap=user_assigned_max_num_pred
-                              )
-          else:
-            not_cost_friendly_jgs.append(n)
+        if(n.cost<=avg_cost_estimate_by_num_edges[n.num_edges]):
+          cost_friendly_jgs.append(n) 
+          jgm.stats.startTimer('materialize_jg')
+          drop_if_exist_jg_view = "DROP MATERIALIZED VIEW IF EXISTS {} CASCADE;".format('jg_{}'.format(n.jg_number))
+          jg_query_view = "CREATE MATERIALIZED VIEW {} AS {}".format('jg_{}'.format(n.jg_number), n.apt_create_q)
+          jgm.cur.execute(drop_if_exist_jg_view)
+          jgm.cur.execute(jg_query_view)
+          jgm.stats.stopTimer('materialize_jg')
+          apt_size_query = f"SELECT count(*) FROM jg_{n.jg_number}"
+          jgm.cur.execute(apt_size_query)
+          apt_size = int(jgm.cur.fetchone()[0])
+          pgen.gen_patterns(jg=n,
+                            jg_name=f"jg_{n.jg_number}", 
+                            renaming_dict=n.renaming_dict, 
+                            skip_cols=n.ignored_attrs, 
+                            s_rate_for_s=sample_rate_for_s,
+                            lca_s_max_size = lca_s_max_size,
+                            lca_s_min_size = lca_s_min_size,
+                            just_lca = lca_eval_mode,
+                            pattern_recall_threshold=min_recall_threshold,
+                            numercial_attr_filter_method = numercial_attr_filter_method,
+                            user_pt_size=user_pt_size,
+                            original_pt_size = apt_size,
+                            user_questions_map = user_questions_map,
+                            f1_calculation_type = f1_calculation_type,
+                            f1_calculation_sample_rate=f1_sample_rate,
+                            f1_sample_type = f1_sample_type,
+                            f1_calculation_min_size=f1_min_sample_size_threshold,
+                            user_assigned_num_pred_cap=user_assigned_max_num_pred
+                          )
+        else:
+          not_cost_friendly_jgs.append(n)
 
       jgg.stats.params['valid_jgs_cost_high']=len(not_cost_friendly_jgs)
 
@@ -592,7 +594,7 @@ if __name__ == '__main__':
       lca_eval_mode=eval_lca,
       )
   else:
-    for w in mimic_workloads:
+    for w in nba_workloads:
       run_experiment(
         result_schema = result_schema,
         user_query = w['uquery'],
@@ -618,3 +620,30 @@ if __name__ == '__main__':
         f1_min_sample_size_threshold=args.f1_sample_thresh,
         lca_eval_mode=eval_lca,
         )
+
+    # for w in mimic_workloads:
+    #   run_experiment(
+    #     result_schema = result_schema,
+    #     user_query = w['uquery'],
+    #     user_questions= w['question'],
+    #     user_questions_map = w['umap'],
+    #     user_specified_attrs=w['uattrs'],
+    #     user_name=args.user_name,
+    #     password=args.password,
+    #     host=args.db_host,
+    #     port=args.port,
+    #     dbname=args.db_name, 
+    #     sample_rate_for_s=args.sample_rate_for_lca,
+    #     lca_s_max_size=args.max_lca_s_size,
+    #     lca_s_min_size=args.min_lca_s_size, 
+    #     maximum_edges=args.maximum_edges,
+    #     min_recall_threshold=args.min_recall_threshold,
+    #     numercial_attr_filter_method=args.optimized,
+    #     user_assigned_max_num_pred = 2,
+    #     exclude_high_cost_jg=exclude_high_cost_jg,
+    #     f1_calculation_type =args.f1_calc_type,
+    #     f1_sample_rate = args.f1_sample_rate,
+    #     f1_sample_type = args.f1_sample_type,
+    #     f1_min_sample_size_threshold=args.f1_sample_thresh,
+    #     lca_eval_mode=eval_lca,
+    #     )

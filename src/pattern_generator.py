@@ -864,7 +864,9 @@ class Pattern_Generator:
             self.stats.startTimer('LCA')
             attrs_from_spec_node = set([k for k in renaming_dict[jg.spec_node_key]['columns']])
 
-            logger.debug(renaming_dict['dtypes'])
+            logger.debug(f"jg_name: {jg_name}")
+            logger.debug(renaming_dict)
+
             # logger.debug(skip_cols)
             # logger.debug(attrs_from_spec_node)
 
@@ -1158,11 +1160,15 @@ class Pattern_Generator:
                                 rf_input_vars.append(representative_var_for_clust)
                                 correlation_dict[representative_var_for_clust] = [cora[0] for cora in cluster_dict[k][1:]]
 
-                            logger.debug(correlation_dict)
+                            logger.debug("lagrge number of num attrs")
+                            logger.debug(rf_input_vars)
+                        # logger.debug(correlation_dict)
 
                         # finish clustering here
                         else:
                             rf_input_vars = ordinal_pattern_attr_list
+                            logger.debug("smaller number of num attrs!!!!!!")
+                            logger.debug(rf_input_vars)
                             rep_from_last_node = [r for r in rf_input_vars if r in attrs_from_spec_node]
                             correlation_dict = {i : [] for i in rf_input_vars}
 
