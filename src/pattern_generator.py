@@ -163,7 +163,7 @@ class Pattern_Generator:
                             same_attr_weight=-0.3, # punish patterns sharing same attribute
                             diff_attr_weight= 1, # encourage more diverse attribute 
                             diff_val_weight=0.7, # must be smaller than 1
-                            same_val_weight=2, # punish same attr and same value,
+                            same_val_weight=-2, # punish same attr and same value,
                             pass_thresh=0.3 # must be smaller than 1 
                             ):
         # record patterns' info as new patterns being added and everytime a new pattern 

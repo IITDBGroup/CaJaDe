@@ -25,6 +25,14 @@ def calc_ndcg(conn, schema):
 	edges = [1,2,3]
 
 	for e in edges:
+		gt_query = f"""SELECT count(*) as gt_cnt
+		FROM {schema}.time_and_params t, {schema}.global_results p
+		WHERE t.exp_desc = p.exp_desc AND t.maximum_edges = '{e}'
+		AND t.f1_calculation_type = 'o'"""
+		df_gt_count = pd.read_sql(gt_query, conn)
+		print(df_gt_count)
+		gt_cnt = df_gt_count['gt_cnt'].to_list()[0]
+
 		for s in sample_rates:
 			fetch_q = f"""
 			WITH sample_result AS 
@@ -74,6 +82,8 @@ def calc_ndcg(conn, schema):
 			)
 			order by tf, id
 			"""
+			
+			#print(fetch_q)
 
 			row_dict = {}
 
@@ -83,7 +93,8 @@ def calc_ndcg(conn, schema):
 			slist = dfts['s_f1'].to_list()
 			tarray = np.asarray([tlist])
 			sarray = np.asarray([slist])
-			score = ndcg_score(tarray, sarray)
+			# score = ndcg_score(tarray, sarray, k=gt_cnt)
+			score = len(list(filter(lambda x: x > 0, slist[:gt_cnt]))) / gt_cnt
 			row_dict['ndcg_score'] = score
 
 			param_q = f"""
@@ -119,11 +130,11 @@ def calc_ndcg(conn, schema):
 
 if __name__ == '__main__':
 
-	# conn = psycopg2.connect(f"dbname=mimic_rev user=japerev port=5433")
-	# result = calc_ndcg(conn=conn, schema='f1_sample_rate_startsize_100')
-
-	conn = psycopg2.connect(f"dbname=nba_rev user=japerev port=5433")
+	conn = psycopg2.connect(f"dbname=mimic_rev user=japerev port=5433")
 	result = calc_ndcg(conn=conn, schema='f1_sample_rate_startsize_100')
+
+#	conn = psycopg2.connect(f"dbname=nba_rev user=japerev port=5433")
+#	result = calc_ndcg(conn=conn, schema='f1_sample_rate_startsize_100')
 
 
 	print(result)

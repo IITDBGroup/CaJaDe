@@ -347,7 +347,6 @@ class Join_Graph_Generator:
             self.stats.stopTimer('jg_validtaion')
             valid_jgs.sort(key=lambda j: j.jg_number)
             # sort it to make sure jg materializer will see PT only first
-            self.stats.params['valid_jgs']+=len(valid_jgs)
             # for v in valid_jgs:
             #     logger.debug(v)
             #     logger.debug(f"intermediate? {v.intermediate}")
