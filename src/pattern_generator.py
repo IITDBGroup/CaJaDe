@@ -15,6 +15,7 @@ from sklearn.preprocessing import LabelEncoder
 from copy import deepcopy
 import datetime
 import heapq
+from operator import itemgetter
 
 
 logger = logging.getLogger(__name__)
@@ -161,8 +162,6 @@ class Pattern_Generator:
                             pattern_pool,
                             k=5, 
                             same_attr_weight=-0.3, # punish patterns sharing same attribute
-                            diff_attr_weight= 1, # encourage more diverse attribute 
-                            diff_val_weight=0.7, # must be smaller than 1
                             same_val_weight=-2, # punish same attr and same value,
                             pass_thresh=0.3 # must be smaller than 1 
                             ):
@@ -182,46 +181,33 @@ class Pattern_Generator:
         # add the highest ranked pattern in terms
         # of fscore as the starting point 
 
-        for i in range(1, len(pattern_pool)):
-            pat = pattern_pool[i]
-            p_print = pat['desc'].replace("'","''")
-            # logger.debug(p_print)
-            scores = [] 
-            pass_thresh_score = pass_thresh*pat['F1']
-            # logger.debug(f"pass_thresh_score : {pass_thresh_score}")
-            # similarity scores compared with the 
-            # patterns in current res
-            # logger.debug(res)
-            for r in res:
-                repeated_attrs = []
-                diff_attrs = []
+        while(num_patterns<k and len(pattern_pool)>=k):
+            for i in range(len(pattern_pool)):
+                pat = pattern_pool[i]
+                p_print = pat['desc'].replace("'","''")
+                scores = [] 
+                for r in res:
+                    repeated_attrs = []
+                    diff_attrs = []
 
-                for pk,pv in pat['tokens'].items():
-                    if(pk in r['tokens']):
-                        # logger.debug(f"{pk}={pv}")
-                        # logger.debug(f"{r['tokens'][pk]}")
-                        if(pv == r['tokens'][pk]):
-                            repeated_attrs.append(same_val_weight)
+                    for pk,pv in pat['tokens'].items():
+                        if(pk in r['tokens']):
+                            if(pv == r['tokens'][pk]):
+                                repeated_attrs.append(same_val_weight)
+                            else:
+                                repeated_attrs.append(same_attr_weight)
                         else:
-                            repeated_attrs.append(diff_val_weight)
-                    else:
-                        diff_attrs.append(diff_attr_weight)
+                            diff_attrs.append(1)
 
-                scores.append(pat['F1']+(sum(repeated_attrs)*same_attr_weight
-                    +sum(diff_attrs)*diff_attr_weight)/len(pat['tokens']))
-                # logger.debug(f"{pat['F1']} + (sum{repeated_attrs}*{same_attr_weight}+sum{diff_attrs}*{diff_attr_weight})/{len(pat['tokens'])}")
+                    scores.append(pat['F1']+(sum(repeated_attrs)+sum(diff_attrs))/len(pat['tokens']))
 
-            min_sim = min(scores)
-            # logger.debug(f"min_sim: {min_sim}")
+                pat['diverse_score'] = min(scores)
+                # logger.debug(f"min_sim: {min_sim}")
 
-            if(min_sim>=pass_thresh_score):
-                res.append(pat)
-                num_patterns+=1
-                if(num_patterns==k):
-                    break
+            pat_toadd = sorted(pattern_pool, key=itemgetter('diverse_score'),reverse = True)[0]
+            res.append(pat_toadd)
+            num_patterns+=1
 
-        # logger.debug(res)
-        print('\n')
         return res 
 
     def rank_patterns(self, ranking_type='global'):
