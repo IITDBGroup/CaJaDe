@@ -289,7 +289,9 @@ class Join_Graph_Generator:
                 if(attrs_from_node2==keys_from_node2):
                     new_jg.intermediate = True
                 else:
+                    new_jg.intermediate = False
                     new_jg.spec_node_key = node2.key
+
                 new_jg.graph_core.graph['max_node_key']+=1
                 new_jg.graph_core.add_edge(node1, node2, condition=cond_to_add)
                 new_jgs.append(new_jg)

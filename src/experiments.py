@@ -46,38 +46,53 @@ class ExperimentParams(ExecStats):
 
 
 def Create_Stats_Table(conn, stats_trackers, stats_relation_name, schema):
+  """
+  stats_trackers: a list of objects keep tracking of the stats from experiment
+  stats_relation_name: the relation name storing the stats, needs to be re-created if number of attrs change
+  schema: the schema where stats_relation located in
+  """
+  cur = conn.cursor()
 
-    """
-    stats_trackers: a list of objects keep tracking of the stats from experiment
-    stats_relation_name: the relation name storing the stats, needs to be re-created if number of attrs change
-    schema: the schema where stats_relation located in
-    """
-    cur = conn.cursor()
+  cur.execute('CREATE SCHEMA IF NOT EXISTS '+schema)
 
-    cur.execute('CREATE SCHEMA IF NOT EXISTS '+schema)
+  attr = ''
 
-    attr = ''
+  timers_list = []
+  counters_list = []
+  params_list = []
 
-    timers_list = []
-    counters_list = []
-    params_list = []
+  for stats_tracker in stats_trackers:
+      timers_list.extend(list(stats_tracker.time))
+      counters_list.extend(list(stats_tracker.counters))
+      params_list.extend(list(stats_tracker.params))
 
-    for stats_tracker in stats_trackers:
-        timers_list.extend(list(stats_tracker.time))
-        counters_list.extend(list(stats_tracker.counters))
-        params_list.extend(list(stats_tracker.params))
+  stats_list = timers_list+counters_list+params_list+['total']
+      
+  for stat in stats_list:
+      attr += stat+' varchar,'
 
-    stats_list = timers_list+counters_list+params_list+['total']
-        
-    for stat in stats_list:
-        attr += stat+' varchar,'
+  attr+='exp_desc varchar'
 
-    attr+='exp_desc varchar'
+  
+  cur.execute('create table IF NOT EXISTS ' + schema + '.' + stats_relation_name + ' (' +
+                           'id serial primary key,' +
+                           attr +');')
 
-    
-    cur.execute('create table IF NOT EXISTS ' + schema + '.' + stats_relation_name + ' (' +
-                             'id serial primary key,' +
-                             attr +');')
+def Create_jg_time_stats(conn, stats_relation_name, schema):
+
+  cur = conn.cursor()
+
+  cur.execute('CREATE SCHEMA IF NOT EXISTS ' + schema)
+
+  cur.execute('create table IF NOT EXISTS ' + schema + '.' + stats_relation_name + ' (' +
+                           'id serial primary key, exp_desc text, jg text, timecost float);')
+
+
+def Insert_jg_time_stats(conn, jg_time_dict, stats_relation_name, schema, exp_desc):
+  cur = conn.cursor()
+  for k,v in jg_time_dict.items():
+    logger.debug(f"INSERT INTO {schema}.{stats_relation_name}(exp_desc, jg, timecost) VALUES ('{exp_desc}', '{str(k)}', {str(v)})")
+    cur.execute(f"INSERT INTO {schema}.{stats_relation_name}(exp_desc, jg, timecost) VALUES ('{exp_desc}', '{str(k)}', {str(v)})")
 
 def InsertPatterns(conn, exp_desc, patterns, pattern_relation_name, schema, result_type='s'):
 
@@ -276,13 +291,22 @@ def run_experiment(result_schema,
     pgen = Pattern_Generator(conn) 
 
     pattern_ranked_within_jg = {}
+    jg_individual_times_dict = {}
 
     cost_friendly_jgs = []
     not_cost_friendly_jgs = []
 
 
     if(exclude_high_cost_jg[0]==False):
+      logger.debug("DO include high cost jg!!!!!!!!!!!!!")
+      logger.debug(f"before filtering intermediate, we have {len(valid_result)} jgs")
+
+      intermediate_jgs = [v for v in valid_result if v.intermediate]
       valid_result = [v for v in valid_result if not v.intermediate]
+      
+      for ijg in intermediate_jgs:
+        logger.debug(ijg)
+
       logger.debug(f"after filtering out intermediate we have {len(valid_result)} valid jgs \n")
 
 
@@ -299,18 +323,21 @@ def run_experiment(result_schema,
           continue
       jgm.stats.stopTimer('materialize_jg')
 
-          
+      logger.debug(f"before filtering redundant, we have {len(valid_result)} jgs")
       valid_result = [v for v in valid_result if not v.redundant]
       jgg.stats.params['valid_jgs']=len(valid_result)
+      logger.debug(f"after filtering out redundant we have {len(valid_result)} valid jgs \n")
+
       logger.debug(f'we found {len(valid_result)} valid join graphs, now materializing and generating patterns')
       
       jg_cnt=1
 
       for vr in valid_result:
+        jg_individual_times_dict[vr] = 0
         jgm.stats.startTimer('materialize_jg')
         logger.debug(f'we are on join graph number {jg_cnt}')
         jg_cnt+=1
-        logger.debug(vr)
+        # logger.debug(vr)
         drop_if_exist_jg_view = "DROP MATERIALIZED VIEW IF EXISTS {} CASCADE;".format('jg_{}'.format(vr.jg_number))
         jg_query_view = "CREATE MATERIALIZED VIEW {} AS {}".format('jg_{}'.format(vr.jg_number), vr.apt_create_q)
         jgm.cur.execute(drop_if_exist_jg_view)
@@ -319,6 +346,7 @@ def run_experiment(result_schema,
         jgm.cur.execute(apt_size_query)
         apt_size = int(jgm.cur.fetchone()[0])
         jgm.stats.stopTimer('materialize_jg')
+        pgen.stats.startTimer('per_jg_timer')
         pgen.gen_patterns(jg=vr,
                             jg_name=f"jg_{vr.jg_number}", 
                             renaming_dict=vr.renaming_dict, 
@@ -338,8 +366,10 @@ def run_experiment(result_schema,
                             f1_calculation_min_size=f1_min_sample_size_threshold,
                             user_assigned_num_pred_cap=user_assigned_max_num_pred
                             )
-          # statstracker.stopTimer('one_jg_timer')
-          # break
+        pgen.stats.stopTimer('per_jg_timer')
+        jg_individual_times_dict[vr] = pgen.stats.time['per_jg_timer']
+        pgen.stats.resetTimer('per_jg_timer')
+      logger.debug(jg_individual_times_dict)
     else:
       # cost_estimate_dict 
       valid_result = [v for v in valid_result if not v.intermediate]
@@ -372,6 +402,8 @@ def run_experiment(result_schema,
         logger.debug(n)
         jg_cnt+=1
         if(n.cost<=avg_cost_estimate_by_num_edges[n.num_edges]):
+          jg_individual_times_dict[n] = 0
+
           jgg.stats.params['valid_jgs']+=1
           cost_friendly_jgs.append(n) 
           jgm.stats.startTimer('materialize_jg')
@@ -402,6 +434,10 @@ def run_experiment(result_schema,
                             f1_calculation_min_size=f1_min_sample_size_threshold,
                             user_assigned_num_pred_cap=user_assigned_max_num_pred
                           )
+
+          pgen.stats.stopTimer('per_jg_timer')
+          jg_individual_times_dict[vr] = pgen.stats.time['per_jg_timer']
+          pgen.stats.resetTimer('per_jg_timer')
         else:
           not_cost_friendly_jgs.append(n)
 
@@ -435,6 +471,8 @@ def run_experiment(result_schema,
     if(lca_eval_mode):
       InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=patterns_all, pattern_relation_name='patterns', schema=result_schema, result_type='l')
     if(not lca_eval_mode):
+      Create_jg_time_stats(conn=conn, stats_relation_name='jgs_time_dist', schema=result_schema)
+      Insert_jg_time_stats(conn=conn, jg_time_dict=jg_individual_times_dict, stats_relation_name ='jgs_time_dist', schema=result_schema, exp_desc=exp_desc)
       InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=patterns_all, pattern_relation_name='patterns', schema=result_schema, result_type=f1_calculation_type)
       InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=global_rankings, pattern_relation_name='global_results', schema=result_schema, result_type=f1_calculation_type)
       InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=topk_from_top_jgs, pattern_relation_name='topk_patterns_from_top_jgs', schema=result_schema, result_type=f1_calculation_type)

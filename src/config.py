@@ -9,7 +9,7 @@ file_formatter = logging.Formatter('%(levelname)s %(asctime)s[%(filename)s:%(fun
 console_handler = logging.StreamHandler()
 console_handler.setFormatter(stream_formatter)
 
-file_handler=logging.FileHandler('log_general.txt', 'w')
+file_handler=logging.FileHandler('log_general.txt', 'a')
 file_handler.setFormatter(file_formatter)
 
 root = logging.getLogger()

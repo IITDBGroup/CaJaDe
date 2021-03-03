@@ -32,7 +32,8 @@ class PatternGeneratorStats(ExecStats):
               'feature_reduct',
               'pattern_recover',
               'rank_patterns',
-              'f1_sample'
+              'f1_sample',
+              'per_jg_timer'
               }
 
     PARAMS = {'n_p_pass_node_rule_and_recall_thresh',
@@ -184,7 +185,6 @@ class Pattern_Generator:
         while(num_patterns<k and len(pattern_pool)>=k):
             for i in range(len(pattern_pool)):
                 pat = pattern_pool[i]
-                p_print = pat['desc'].replace("'","''")
                 scores = [] 
                 for r in res:
                     repeated_attrs = []
@@ -318,7 +318,7 @@ class Pattern_Generator:
             ORDER BY RANDOM() * w.cnt * w.sdv DESC
             LIMIT {sample_size}; 
             """
-            logger.debug(jg_new_ws_q)
+            # logger.debug(jg_new_ws_q)
 
             self.cur.execute(jg_new_ws_q)
 
@@ -539,7 +539,7 @@ class Pattern_Generator:
             else:
                 recall_result=sample_recall_result
 
-            if(recall_result<pattern_recall_threshold and f1_calculation_type!='e'):
+            if(recall_result<=pattern_recall_threshold and f1_calculation_type!='e'):
                 return pattern, False
             else:
                 pattern['recall'] = recall_result
@@ -735,10 +735,10 @@ class Pattern_Generator:
             # based on f1 calcuation type set up recall dict and materialized apt to evaluate f1
             if(f1_calculation_type=='s' or f1_calculation_type=='e'):
                 if(jg_apt_size>f1_calculation_min_size): # this decides that we need sampling
-                    logger.debug(f"jg_apt_size: {jg_apt_size}")
+                    # logger.debug(f"jg_apt_size: {jg_apt_size}")
                     sample_f1_jg_size = math.ceil(jg_apt_size * f1_calculation_sample_rate)
                     if(jg_apt_size <= user_pt_size or f1_sample_type!='weighted'): # this means if we need weighted sampling
-                        logger.debug('uniform sampling!')
+                        # logger.debug('uniform sampling!')
                         sample_recall_dict = {}
                         
                         self.stats.startTimer('f1_sample')
@@ -850,8 +850,8 @@ class Pattern_Generator:
             self.stats.startTimer('LCA')
             attrs_from_spec_node = set([k for k in renaming_dict[jg.spec_node_key]['columns']])
 
-            logger.debug(f"jg_name: {jg_name}")
-            logger.debug(renaming_dict)
+            # logger.debug(f"jg_name: {jg_name}")
+            # logger.debug(renaming_dict)
 
             # logger.debug(skip_cols)
             # logger.debug(attrs_from_spec_node)
@@ -874,7 +874,7 @@ class Pattern_Generator:
             considered_attrs_s = [x for x in attrs if x not in skip_cols and re.search(r'{}_'.format(attr_alias), x)]
             attrs_in_s = ','.join(considered_attrs_s)
 
-            logger.debug(f'considered_attrs_s:{considered_attrs_s}')
+            # logger.debug(f'considered_attrs_s:{considered_attrs_s}')
 
             considered_attrs_d = [x for x in attrs if (x not in skip_cols and re.search(r'{}_'.format(attr_alias), x)) 
                                   or (x=='is_user' or x=='pnumber')]
@@ -890,7 +890,7 @@ class Pattern_Generator:
             self.cur.execute(drop_prov_s)
 
             lca_sample_size = max([min(math.ceil(original_pt_size*s_rate_for_s), lca_s_max_size), lca_s_min_size])
-            logger.debug(f"sample size : {lca_sample_size}")
+            # logger.debug(f"sample size : {lca_sample_size}")
 
 
 
@@ -1002,7 +1002,7 @@ class Pattern_Generator:
                 self.stats.stopTimer('LCA')
 
                 nominal_pattern_df = pd.read_sql(get_nominal_patterns_q, self.conn)
-                logger.debug(nominal_pattern_df)
+                # logger.debug(nominal_pattern_df)
 
                 nominal_pattern_dicts = nominal_pattern_df.to_dict('records')
                 # logger.debug(nominal_pattern_dicts)
@@ -1052,7 +1052,7 @@ class Pattern_Generator:
                     ORDER BY RANDOM() * wf.cnt DESC
                     LIMIT {sample_jg_size};
                     """
-                    logger.debug(create_f1_jg_size)
+                    # logger.debug(create_f1_jg_size)
                     self.cur.execute(create_f1_jg_size)
                     self.stats.stopTimer('f1_sample')
 
@@ -1146,8 +1146,8 @@ class Pattern_Generator:
                                 rf_input_vars.append(representative_var_for_clust)
                                 correlation_dict[representative_var_for_clust] = [cora[0] for cora in cluster_dict[k][1:]]
 
-                            logger.debug("lagrge number of num attrs")
-                            logger.debug(rf_input_vars)
+                            # logger.debug("lagrge number of num attrs")
+                            # logger.debug(rf_input_vars)
                         # logger.debug(correlation_dict)
 
                         # finish clustering here
@@ -1590,8 +1590,8 @@ class Pattern_Generator:
                                     attrs_with_const_set = set([x[0] for x in npa['nominal_values']] + list(n))
                                     if(len(attrs_from_spec_node.intersection(attrs_with_const_set))>0):
                                         for val_pair in itertools.product(npa['ordinal_quartiles'][n[0]],npa['ordinal_quartiles'][n[1]],npa['ordinal_quartiles'][n[2]]):
-                                            if(len(patterns_passed_node_cond)>100000):
-                                                break
+                                            # if(len(patterns_passed_node_cond)>1000000):
+                                            #     break
                                             for one_dir in dir_combinations:
                                                 # three_patt_dicts_with_dir_yes
                                                 patterns_passed_node_cond.append({'join_graph':jg, 'recall':0, 'precision':0, 'nominal_values': npa['nominal_values'], 

@@ -47,6 +47,9 @@ class ExecStats:
         self.numcalls[name]+=1
         #log.debug("numcalls: %d", self.numcalls[name])
 
+    def resetTimer(self, name):
+        self.time[name] = 0
+
     def stopTimer(self, name):
         measuredTime = time() - self.timer[name]
         #log.debug("timer %s ran for %f secs", name, measuredTime)
