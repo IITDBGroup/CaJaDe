@@ -71,7 +71,7 @@ def Create_Stats_Table(conn, stats_trackers, stats_relation_name, schema):
   for stat in stats_list:
       attr += stat+' varchar,'
 
-  attr+='exp_desc varchar'
+  attr+='exp_desc varchar, exp_time varchar'
 
   
   cur.execute('create table IF NOT EXISTS ' + schema + '.' + stats_relation_name + ' (' +
@@ -85,16 +85,16 @@ def Create_jg_time_stats(conn, stats_relation_name, schema):
   cur.execute('CREATE SCHEMA IF NOT EXISTS ' + schema)
 
   cur.execute('create table IF NOT EXISTS ' + schema + '.' + stats_relation_name + ' (' +
-                           'id serial primary key, exp_desc text, jg text, timecost float);')
+                           'id serial primary key, exp_time text, exp_desc text, jg text, timecost float);')
 
 
-def Insert_jg_time_stats(conn, jg_time_dict, stats_relation_name, schema, exp_desc):
+def Insert_jg_time_stats(conn, jg_time_dict, stats_relation_name, schema, exp_time, exp_desc):
   cur = conn.cursor()
   for k,v in jg_time_dict.items():
-    logger.debug(f"INSERT INTO {schema}.{stats_relation_name}(exp_desc, jg, timecost) VALUES ('{exp_desc}', '{str(k)}', {str(v)})")
-    cur.execute(f"INSERT INTO {schema}.{stats_relation_name}(exp_desc, jg, timecost) VALUES ('{exp_desc}', '{str(k)}', {str(v)})")
+    # logger.debug(f"INSERT INTO {schema}.{stats_relation_name}(exp_time, exp_desc, jg, timecost) VALUES ('{exp_time}', '{exp_desc}', '{str(k)}', {str(v)})")
+    cur.execute(f"INSERT INTO {schema}.{stats_relation_name}(exp_time, exp_desc, jg, timecost) VALUES ('{exp_time}', '{exp_desc}', '{str(k)}', {str(v)})")
 
-def InsertPatterns(conn, exp_desc, patterns, pattern_relation_name, schema, result_type='s'):
+def InsertPatterns(conn, exp_desc, patterns, pattern_relation_name, schema, exp_time, result_type='s'):
 
   # result_type: 
   #             s: sample type, use this for fastest results
@@ -104,7 +104,7 @@ def InsertPatterns(conn, exp_desc, patterns, pattern_relation_name, schema, resu
 
   cur = conn.cursor()
 
-  cols = ['exp_desc', 'is_user', 'jg', 'jg_name', 'num_edges', 'p_desc', 
+  cols = ['exp_time', 'exp_desc', 'is_user', 'jg', 'jg_details', 'jg_name', 'num_edges', 'p_desc', 
   'recall', 'precision', 'fscore', 'sample_recall', 'sample_precision', 'sample_F1']
 
   cols_with_types = ''
@@ -128,14 +128,15 @@ def InsertPatterns(conn, exp_desc, patterns, pattern_relation_name, schema, resu
       cur_batch_size+=1
       p_print = p['desc'].replace("'","''")
       jg_print = str(p['join_graph']).replace("'","''")
+      jg_details = repr(p['join_graph']).replace("'", "''")
       if(result_type=='s' or result_type=='o'):
-        patterns_to_insert.append(f"('{exp_desc}', '{p['is_user']}', '{jg_print}', '{p['jg_name']}', '{p['num_edges']}', '{p_print}', \
+        patterns_to_insert.append(f"('{exp_time}','{exp_desc}', '{p['is_user']}', '{jg_print}', '{jg_details}', '{p['jg_name']}', '{p['num_edges']}', '{p_print}', \
           '{p['recall']}', '{p['precision']}','{p['F1']}', '', '', '')")
       elif(result_type=='e'):
-        patterns_to_insert.append(f"('{exp_desc}', '{p['is_user']}', '{jg_print}', '{p['jg_name']}', '{p['num_edges']}', '{p_print}', \
+        patterns_to_insert.append(f"('{exp_time}','{exp_desc}', '{p['is_user']}', '{jg_print}', '{jg_details}', '{p['jg_name']}', '{p['num_edges']}', '{p_print}', \
           '{p['recall']}', '{p['precision']}','{p['F1']}','{p['sample_recall']}', '{p['sample_precision']}', '{p['sample_F1']}')")
       else:
-        patterns_to_insert.append(f"('{exp_desc}', '{p['is_user']}', '{jg_print}', '', '{p['num_edges']}', '{p_print}', \
+        patterns_to_insert.append(f"('{exp_time}','{exp_desc}', '{p['is_user']}', '{jg_print}', '', '{p['num_edges']}', '{p_print}', \
           '{p['recall']}', '{p['precision']}','','', '', '')")
     else:
       cur.execute(
@@ -143,13 +144,13 @@ def InsertPatterns(conn, exp_desc, patterns, pattern_relation_name, schema, resu
           )
       patterns_to_insert = []
       if(result_type=='s' or result_type=='o'):
-        patterns_to_insert.append(f"('{exp_desc}', '{p['is_user']}', '{jg_print}', '{p['jg_name']}', '{p['num_edges']}', '{p_print}', \
+        patterns_to_insert.append(f"('{exp_time}','{exp_desc}', '{p['is_user']}', '{jg_print}', '{jg_details}', '{p['jg_name']}', '{p['num_edges']}', '{p_print}', \
           '{p['recall']}', '{p['precision']}','{p['F1']}', '', '', '')")
       elif(result_type=='e'):
-        patterns_to_insert.append(f"('{exp_desc}', '{p['is_user']}', '{jg_print}', '{p['jg_name']}', '{p['num_edges']}', '{p_print}', \
+        patterns_to_insert.append(f"('{exp_time}','{exp_desc}', '{p['is_user']}', '{jg_print}', '{jg_details}', '{p['jg_name']}', '{p['num_edges']}', '{p_print}', \
           '{p['recall']}', '{p['precision']}','{p['F1']}','{p['sample_recall']}', '{p['sample_precision']}', '{p['sample_F1']}')")
       else:
-        patterns_to_insert.append(f"('{exp_desc}', '{p['is_user']}', '{jg_print}', '', '{p['num_edges']}', '{p_print}', \
+        patterns_to_insert.append(f"('{exp_time}','{exp_desc}', '{p['is_user']}', '{jg_print}', '{jg_details}', '', '{p['num_edges']}', '{p_print}', \
           '{p['recall']}', '{p['precision']}','','', '', '')")
 
 
@@ -161,7 +162,7 @@ def InsertPatterns(conn, exp_desc, patterns, pattern_relation_name, schema, resu
         )        
 
 
-def InsertStats(conn, stats_trackers, stats_relation_name, schema, exp_desc):
+def InsertStats(conn, stats_trackers, stats_relation_name, schema, exp_time, exp_desc):
 
     timers_vals = []
     counters_vals = []
@@ -179,7 +180,7 @@ def InsertStats(conn, stats_trackers, stats_relation_name, schema, exp_desc):
         counters_attrs.extend(list(stats_tracker.counters))
         params_attrs.extend(list(stats_tracker.params))
 
-    attr_list = timers_attrs+counters_attrs+params_attrs+['total','exp_desc']
+    attr_list = timers_attrs+counters_attrs+params_attrs+['total','exp_desc','exp_time']
     attrs = ','.join(attr_list)
 
     for stats_tracker in stats_trackers:
@@ -189,7 +190,7 @@ def InsertStats(conn, stats_trackers, stats_relation_name, schema, exp_desc):
         counters_vals.extend([str(x) for x in stats_tracker.counters.values()])
         params_vals.extend([str(x) for x in stats_tracker.params.values()])
 
-    values = ','.join(timers_vals+counters_vals+params_vals+[str(total_time)]+[f"'{exp_desc}'"])
+    values = ','.join(timers_vals+counters_vals+params_vals+[f"'{str(total_time)}', '{exp_desc}', '{exp_time}'"])
     # logger.debug(f'InsertStats: {values}')
 
     cur = conn.cursor()
@@ -369,7 +370,7 @@ def run_experiment(result_schema,
         pgen.stats.stopTimer('per_jg_timer')
         jg_individual_times_dict[vr] = pgen.stats.time['per_jg_timer']
         pgen.stats.resetTimer('per_jg_timer')
-      logger.debug(jg_individual_times_dict)
+      # logger.debug(jg_individual_times_dict)
     else:
       # cost_estimate_dict 
       valid_result = [v for v in valid_result if not v.intermediate]
@@ -466,16 +467,17 @@ def run_experiment(result_schema,
     # collect stats 
     stats_trackers = [jgg.stats, jgm.stats, pgen.stats, statstracker]
 
+    exp_time = datetime.now().strftime("%Y_%m_%d_%M_%S")
     Create_Stats_Table(conn=conn, stats_trackers=stats_trackers, stats_relation_name='time_and_params', schema=result_schema)
-    InsertStats(conn=conn, stats_trackers=stats_trackers, stats_relation_name='time_and_params', schema=result_schema, exp_desc=exp_desc)
+    InsertStats(conn=conn, stats_trackers=stats_trackers, stats_relation_name='time_and_params', schema=result_schema, exp_time=exp_time, exp_desc=exp_desc)
     if(lca_eval_mode):
-      InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=patterns_all, pattern_relation_name='patterns', schema=result_schema, result_type='l')
+      InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=patterns_all, pattern_relation_name='patterns', schema=result_schema, exp_time=exp_time, result_type='l')
     if(not lca_eval_mode):
       Create_jg_time_stats(conn=conn, stats_relation_name='jgs_time_dist', schema=result_schema)
-      Insert_jg_time_stats(conn=conn, jg_time_dict=jg_individual_times_dict, stats_relation_name ='jgs_time_dist', schema=result_schema, exp_desc=exp_desc)
-      InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=patterns_all, pattern_relation_name='patterns', schema=result_schema, result_type=f1_calculation_type)
-      InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=global_rankings, pattern_relation_name='global_results', schema=result_schema, result_type=f1_calculation_type)
-      InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=topk_from_top_jgs, pattern_relation_name='topk_patterns_from_top_jgs', schema=result_schema, result_type=f1_calculation_type)
+      Insert_jg_time_stats(conn=conn, jg_time_dict=jg_individual_times_dict, stats_relation_name ='jgs_time_dist', schema=result_schema, exp_time=exp_time, exp_desc=exp_desc)
+      InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=patterns_all, pattern_relation_name='patterns', schema=result_schema, exp_time=exp_time, result_type=f1_calculation_type)
+      InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=global_rankings, pattern_relation_name='global_results', schema=result_schema, exp_time=exp_time, result_type=f1_calculation_type)
+      InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=topk_from_top_jgs, pattern_relation_name='topk_patterns_from_top_jgs', schema=result_schema, exp_time=exp_time, result_type=f1_calculation_type)
     conn.close()
 
 

@@ -83,6 +83,7 @@ class provenance_getter:
 		rel_set = set(rel_list)
 		rels = [n.replace('__','_') for n in rel_set]
 		rels = list(rels)
+		rels.sort()
 		
 		pt_attrs = []
 

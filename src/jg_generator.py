@@ -98,16 +98,16 @@ class Join_Graph:
             cond_print = cond[0].replace("'","''")
             ret_list.append(f"{u.key}: {u.label}, {v.key}: {v.label}, cond: {cond_print}")
 
-        return f"jg_number: {self.jg_number}, materialize_cost:{self.cost}, join_graph_details: {' | '.join(sorted(ret_list))}"
+
+        return f"{self.jg_number} : {'| '.join(sorted(ret_list))}"
 
     def __str__(self):
 
         ret_list = []
         for u, v, cond in self.graph_core.edges.data('condition'):
-            cond_print = cond[0].replace("'","''")
-            ret_list.append(f"{u.key}: {u.label}, {v.key}: {v.label}, cond: {cond_print}")
+            ret_list.append(f"{u.key}: {u.label}, {v.key}: {v.label}")
 
-        return f"join_graph_details : {' | '.join(sorted(ret_list))}"
+        return f"{'| '.join(sorted(ret_list))}"
 
     def __eq__(self, other):
         return isinstance(other, Join_Graph) and self.__hash__() == other.__hash__()
@@ -304,7 +304,7 @@ class Join_Graph_Generator:
         """
         num_edges: this defines the size of a join graph
         pt_rels: relations coming from PT
-        customize: whether you want to customize a jg or not
+        customize: whether you want to customize a jg or not (TODO)
         """
         # logger.debug(self.attr_dict)
         jg_cur_number = 1
@@ -338,6 +338,7 @@ class Join_Graph_Generator:
             
             self.stats.params['number_of_jgs']+=len(generated_jg_set)
             self.stats.startTimer('jg_hashing')
+            # logger.debug(generated_jg_set)
             jg_hash_table = self.hash_jgs(generated_jg_set)
             self.stats.stopTimer('jg_hashing')
             valid_jgs = []
@@ -363,9 +364,10 @@ class Join_Graph_Generator:
         else:
             for n in jg_set:
                 if n in self.hash_jg_table:
-                    self.hash_jg_table[n]+=1
+                    self.hash_jg_table[n].append(n.jg_number)
                 else:
-                    self.hash_jg_table[n] = 1
+                    self.hash_jg_table[n] = []
 
+            logger.debug(self.hash_jg_table)
             return self.hash_jg_table
 

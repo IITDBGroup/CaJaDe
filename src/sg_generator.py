@@ -231,9 +231,6 @@ class Schema_Graph_Generator:
 								cond_key_besides_pkey.append(k)
 			attr_dict[table]['edge_keys'] = list((set(attr_dict[table]['p_key'])-set(p_key_list))|set(cond_key_besides_pkey))
 
-		# logger.debug(attr_dict)
-
-
 		return graph, attr_dict
 
 
