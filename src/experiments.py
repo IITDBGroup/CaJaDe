@@ -334,42 +334,43 @@ def run_experiment(result_schema,
       jg_cnt=1
 
       for vr in valid_result:
-        jg_individual_times_dict[vr] = 0
-        jgm.stats.startTimer('materialize_jg')
-        logger.debug(f'we are on join graph number {jg_cnt}')
-        jg_cnt+=1
-        # logger.debug(vr)
-        drop_if_exist_jg_view = "DROP MATERIALIZED VIEW IF EXISTS {} CASCADE;".format('jg_{}'.format(vr.jg_number))
-        jg_query_view = "CREATE MATERIALIZED VIEW {} AS {}".format('jg_{}'.format(vr.jg_number), vr.apt_create_q)
-        jgm.cur.execute(drop_if_exist_jg_view)
-        jgm.cur.execute(jg_query_view)
-        apt_size_query = f"SELECT count(*) FROM jg_{vr.jg_number}"
-        jgm.cur.execute(apt_size_query)
-        apt_size = int(jgm.cur.fetchone()[0])
-        jgm.stats.stopTimer('materialize_jg')
-        pgen.stats.startTimer('per_jg_timer')
-        pgen.gen_patterns(jg=vr,
-                            jg_name=f"jg_{vr.jg_number}", 
-                            renaming_dict=vr.renaming_dict, 
-                            skip_cols=vr.ignored_attrs, 
-                            s_rate_for_s=sample_rate_for_s,
-                            lca_s_max_size = lca_s_max_size,
-                            lca_s_min_size = lca_s_min_size,
-                            just_lca = lca_eval_mode,
-                            pattern_recall_threshold=min_recall_threshold,
-                            numercial_attr_filter_method=numercial_attr_filter_method,
-                            user_pt_size=user_pt_size,
-                            original_pt_size=apt_size,
-                            user_questions_map=user_questions_map,
-                            f1_calculation_type=f1_calculation_type,
-                            f1_sample_type = f1_sample_type,
-                            f1_calculation_sample_rate=f1_sample_rate,
-                            f1_calculation_min_size=f1_min_sample_size_threshold,
-                            user_assigned_num_pred_cap=user_assigned_max_num_pred
-                            )
-        pgen.stats.stopTimer('per_jg_timer')
-        jg_individual_times_dict[vr] = pgen.stats.time['per_jg_timer']
-        pgen.stats.resetTimer('per_jg_timer')
+        if(str(vr)=='1: PT, 2: icustays| 2: icustays, 3: patients'):
+          jg_individual_times_dict[vr] = 0
+          jgm.stats.startTimer('materialize_jg')
+          logger.debug(f'we are on join graph number {jg_cnt}')
+          jg_cnt+=1
+          # logger.debug(vr)
+          drop_if_exist_jg_view = "DROP MATERIALIZED VIEW IF EXISTS {} CASCADE;".format('jg_{}'.format(vr.jg_number))
+          jg_query_view = "CREATE MATERIALIZED VIEW {} AS {}".format('jg_{}'.format(vr.jg_number), vr.apt_create_q)
+          jgm.cur.execute(drop_if_exist_jg_view)
+          jgm.cur.execute(jg_query_view)
+          apt_size_query = f"SELECT count(*) FROM jg_{vr.jg_number}"
+          jgm.cur.execute(apt_size_query)
+          apt_size = int(jgm.cur.fetchone()[0])
+          jgm.stats.stopTimer('materialize_jg')
+          pgen.stats.startTimer('per_jg_timer')
+          pgen.gen_patterns(jg=vr,
+                              jg_name=f"jg_{vr.jg_number}", 
+                              renaming_dict=vr.renaming_dict, 
+                              skip_cols=vr.ignored_attrs, 
+                              s_rate_for_s=sample_rate_for_s,
+                              lca_s_max_size = lca_s_max_size,
+                              lca_s_min_size = lca_s_min_size,
+                              just_lca = lca_eval_mode,
+                              pattern_recall_threshold=min_recall_threshold,
+                              numercial_attr_filter_method=numercial_attr_filter_method,
+                              user_pt_size=user_pt_size,
+                              original_pt_size=apt_size,
+                              user_questions_map=user_questions_map,
+                              f1_calculation_type=f1_calculation_type,
+                              f1_sample_type = f1_sample_type,
+                              f1_calculation_sample_rate=f1_sample_rate,
+                              f1_calculation_min_size=f1_min_sample_size_threshold,
+                              user_assigned_num_pred_cap=user_assigned_max_num_pred
+                              )
+          pgen.stats.stopTimer('per_jg_timer')
+          jg_individual_times_dict[vr] = pgen.stats.time['per_jg_timer']
+          pgen.stats.resetTimer('per_jg_timer')
       # logger.debug(jg_individual_times_dict)
     else:
       # cost_estimate_dict 
@@ -467,7 +468,7 @@ def run_experiment(result_schema,
     # collect stats 
     stats_trackers = [jgg.stats, jgm.stats, pgen.stats, statstracker]
 
-    exp_time = datetime.now().strftime("%Y_%m_%d_%M_%S")
+    exp_time = datetime.now().strftime("%Y_%m_%d__%H_%M_%S")
     Create_Stats_Table(conn=conn, stats_trackers=stats_trackers, stats_relation_name='time_and_params', schema=result_schema)
     InsertStats(conn=conn, stats_trackers=stats_trackers, stats_relation_name='time_and_params', schema=result_schema, exp_time=exp_time, exp_desc=exp_desc)
     if(lca_eval_mode):

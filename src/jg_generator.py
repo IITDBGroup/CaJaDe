@@ -368,6 +368,6 @@ class Join_Graph_Generator:
                 else:
                     self.hash_jg_table[n] = []
 
-            logger.debug(self.hash_jg_table)
+            # logger.debug(self.hash_jg_table)
             return self.hash_jg_table
 

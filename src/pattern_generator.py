@@ -730,6 +730,8 @@ class Pattern_Generator:
         self.cur.execute(jg_size_q)
         jg_apt_size = int(self.cur.fetchone()[0])
 
+        logger.debug(renaming_dict)
+
         sample_f1_jg_size=0
         if(jg_apt_size!=0):
             # based on f1 calcuation type set up recall dict and materialized apt to evaluate f1
@@ -1002,7 +1004,7 @@ class Pattern_Generator:
                 self.stats.stopTimer('LCA')
 
                 nominal_pattern_df = pd.read_sql(get_nominal_patterns_q, self.conn)
-                # logger.debug(nominal_pattern_df)
+                logger.debug(nominal_pattern_df)
 
                 nominal_pattern_dicts = nominal_pattern_df.to_dict('records')
                 # logger.debug(nominal_pattern_dicts)
