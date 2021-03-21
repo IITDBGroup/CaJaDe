@@ -111,11 +111,12 @@ class Join_Graph_Materializer:
         scheme for the other jgs  
         """
         # logger.debug(query)
-        errcode, outoput_raw = self.gwrapper.runQuery(query, ec_options=True)
-        # logger.debug(query)
-        outoput = outoput_raw.decode("utf-8")
+        errcode, output_raw = self.gwrapper.runQuery(query, ec_options=True)
+        logger.debug(query)
+        output = output_raw.decode("utf-8")
+        logger.debug(output)
         reg_rc_line = re.compile(r'EC T_ProjectionOperator.*\nList size [0-9]+\n({.*})')
-        rc_line = reg_rc_line.search(outoput).group(1)
+        rc_line = reg_rc_line.search(output).group(1)
         res = re.findall(r'(\{.*?\})', rc_line)
         # logger.debug(res)
 
@@ -311,6 +312,7 @@ class Join_Graph_Materializer:
         else:
             # based on the renaming result, change the join conditions accordingly          
             for node1, node2, cond in join_graph.graph_core.edges.data('condition'):
+                logger.debug(cond)
                 node1_renamed = renaming_dict[node1.key]['renamed_rel']
                 node2_renamed = renaming_dict[node2.key]['renamed_rel']
                 node1_original = renaming_dict[node1.key]['label']

@@ -245,7 +245,8 @@ class Join_Graph_Generator:
                         if(self.schema_graph.has_edge(pt_n, n)):
                             for cond in [x for x in self.schema_graph.get_edge_data(pt_n, n).values()]:
                                 # replace pt_n.label with "PT"
-                                cond_str = cond['condition'].replace(f'{pt_n}.', 'PT.')
+                                # cond_str = cond['condition'].replace(f'{pt_n}.', 'PT.')
+                                cond_str = re.sub(f'(?<!_){pt_n}\.', 'PT.', cond['condition'])
                                 edge_only_plans, edges_w_node_plans = self.add_one_edge(j_graph_target, 'PT', n, [cond_str, cond['key_dict'], pt_n])
                                 j_graph_creation_plans['edges_only'].extend(edge_only_plans)
                                 j_graph_creation_plans['edges_w_node'].extend(edges_w_node_plans)

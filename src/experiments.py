@@ -256,6 +256,7 @@ def run_experiment(result_schema,
 
 
     logger.debug(exp_desc)
+    logger.debug(user_questions_map)
 
     for k,v in statstracker.params.items():
       logger.debug(f'{k} : {v}')
@@ -334,43 +335,43 @@ def run_experiment(result_schema,
       jg_cnt=1
 
       for vr in valid_result:
-        if(str(vr)=='1: PT, 2: icustays| 2: icustays, 3: patients'):
-          jg_individual_times_dict[vr] = 0
-          jgm.stats.startTimer('materialize_jg')
-          logger.debug(f'we are on join graph number {jg_cnt}')
-          jg_cnt+=1
-          # logger.debug(vr)
-          drop_if_exist_jg_view = "DROP MATERIALIZED VIEW IF EXISTS {} CASCADE;".format('jg_{}'.format(vr.jg_number))
-          jg_query_view = "CREATE MATERIALIZED VIEW {} AS {}".format('jg_{}'.format(vr.jg_number), vr.apt_create_q)
-          jgm.cur.execute(drop_if_exist_jg_view)
-          jgm.cur.execute(jg_query_view)
-          apt_size_query = f"SELECT count(*) FROM jg_{vr.jg_number}"
-          jgm.cur.execute(apt_size_query)
-          apt_size = int(jgm.cur.fetchone()[0])
-          jgm.stats.stopTimer('materialize_jg')
-          pgen.stats.startTimer('per_jg_timer')
-          pgen.gen_patterns(jg=vr,
-                              jg_name=f"jg_{vr.jg_number}", 
-                              renaming_dict=vr.renaming_dict, 
-                              skip_cols=vr.ignored_attrs, 
-                              s_rate_for_s=sample_rate_for_s,
-                              lca_s_max_size = lca_s_max_size,
-                              lca_s_min_size = lca_s_min_size,
-                              just_lca = lca_eval_mode,
-                              pattern_recall_threshold=min_recall_threshold,
-                              numercial_attr_filter_method=numercial_attr_filter_method,
-                              user_pt_size=user_pt_size,
-                              original_pt_size=apt_size,
-                              user_questions_map=user_questions_map,
-                              f1_calculation_type=f1_calculation_type,
-                              f1_sample_type = f1_sample_type,
-                              f1_calculation_sample_rate=f1_sample_rate,
-                              f1_calculation_min_size=f1_min_sample_size_threshold,
-                              user_assigned_num_pred_cap=user_assigned_max_num_pred
-                              )
-          pgen.stats.stopTimer('per_jg_timer')
-          jg_individual_times_dict[vr] = pgen.stats.time['per_jg_timer']
-          pgen.stats.resetTimer('per_jg_timer')
+        # if(str(vr)=='1: PT, 2: icustays| 2: icustays, 3: patients'):
+        jg_individual_times_dict[vr] = 0
+        jgm.stats.startTimer('materialize_jg')
+        logger.debug(f'we are on join graph number {jg_cnt}')
+        jg_cnt+=1
+        # logger.debug(vr)
+        drop_if_exist_jg_view = "DROP MATERIALIZED VIEW IF EXISTS {} CASCADE;".format('jg_{}'.format(vr.jg_number))
+        jg_query_view = "CREATE MATERIALIZED VIEW {} AS {}".format('jg_{}'.format(vr.jg_number), vr.apt_create_q)
+        jgm.cur.execute(drop_if_exist_jg_view)
+        jgm.cur.execute(jg_query_view)
+        apt_size_query = f"SELECT count(*) FROM jg_{vr.jg_number}"
+        jgm.cur.execute(apt_size_query)
+        apt_size = int(jgm.cur.fetchone()[0])
+        jgm.stats.stopTimer('materialize_jg')
+        pgen.stats.startTimer('per_jg_timer')
+        pgen.gen_patterns(jg=vr,
+                            jg_name=f"jg_{vr.jg_number}", 
+                            renaming_dict=vr.renaming_dict, 
+                            skip_cols=vr.ignored_attrs, 
+                            s_rate_for_s=sample_rate_for_s,
+                            lca_s_max_size = lca_s_max_size,
+                            lca_s_min_size = lca_s_min_size,
+                            just_lca = lca_eval_mode,
+                            pattern_recall_threshold=min_recall_threshold,
+                            numercial_attr_filter_method=numercial_attr_filter_method,
+                            user_pt_size=user_pt_size,
+                            original_pt_size=apt_size,
+                            user_questions_map=user_questions_map,
+                            f1_calculation_type=f1_calculation_type,
+                            f1_sample_type = f1_sample_type,
+                            f1_calculation_sample_rate=f1_sample_rate,
+                            f1_calculation_min_size=f1_min_sample_size_threshold,
+                            user_assigned_num_pred_cap=user_assigned_max_num_pred
+                            )
+        pgen.stats.stopTimer('per_jg_timer')
+        jg_individual_times_dict[vr] = pgen.stats.time['per_jg_timer']
+        pgen.stats.resetTimer('per_jg_timer')
       # logger.debug(jg_individual_times_dict)
     else:
       # cost_estimate_dict 
@@ -564,20 +565,20 @@ if __name__ == '__main__':
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-  user_query = "provenance of (select count(*) as win, s.season_name from team t, game g, season s where t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' group by s.season_name);"
-  u_query = (user_query, 'gsw wins : 15 vs 12')
-  u_question =["season_name='2015-16'","season_name='2012-13'"]
-  user_specified_attrs = [('team','team'),('season','season_name')]
+  # user_query = "provenance of (select count(*) as win, s.season_name from team t, game g, season s where t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' group by s.season_name);"
+  # u_query = (user_query, 'gsw wins : 15 vs 12')
+  # u_question =["season_name='2015-16'","season_name='2012-13'"]
+  # user_specified_attrs = [('team','team'),('season','season_name')]
 
   # user_query = 'provenance of (select insurance, 1.0*SUM(hospital_expire_flag)/count(*) as death_rate from admissions group by insurance);'
   # u_query = (user_query, 'death rate: gov vs self')
   # u_question =["insurance='Government'","insurance='Self Pay'"]
   # user_specified_attrs = [('admissions','insurance')]
 
-  # user_query = 'provenance of (select insurance, 1.0*SUM(hospital_expire_flag)/count(*) as death_rate from admissions group by insurance);'
-  # u_query = (user_query, 'death rate: medicare vs private')
-  # u_question =["insurance='Private'","insurance='Medicare'"]
-  # user_specified_attrs = [('admissions',  'insurance'), ('admissions', 'hospital_expire_flag')]
+  user_query = 'provenance of (select insurance, 1.0*SUM(hospital_expire_flag)/count(*) as death_rate from admissions group by insurance);'
+  u_query = (user_query, 'death rate: medicare vs private')
+  u_question =["insurance='Private'","insurance='Medicare'"]
+  user_specified_attrs = [('admissions',  'insurance'), ('admissions', 'hospital_expire_flag')]
 
   # user_query = 'provenance of (select insurance, avg(hospital_stay_length) as avg_los, count(*) as cnt from admissions group by insurance);'
   # u_query = (user_query, 'los: self pay vs private')
@@ -613,8 +614,8 @@ if __name__ == '__main__':
       user_questions=u_question,
       # user_questions_map = {'yes':'Government', 'no':'Self Pay'},
       # user_questions_map = {'yes':'Private', 'no':'Self Pay'},
-      # user_questions_map = {'yes':'Private', 'no':'Medicare'},
-      user_questions_map = {'yes':'2015-16', 'no':'2012-13'},
+      user_questions_map = {'yes':'Private', 'no':'Medicare'},
+      # user_questions_map = {'yes':'2015-16', 'no':'2012-13'},
       user_specified_attrs=user_specified_attrs,
       user_name=args.user_name,
       password=args.password,
@@ -636,34 +637,7 @@ if __name__ == '__main__':
       lca_eval_mode=eval_lca,
       )
   else:
-    # for w in nba_workloads:
-    #   run_experiment(
-    #     result_schema = result_schema,
-    #     user_query = w['uquery'],
-    #     user_questions= w['question'],
-    #     user_questions_map = w['umap'],
-    #     user_specified_attrs=w['uattrs'],
-    #     user_name=args.user_name,
-    #     password=args.password,
-    #     host=args.db_host,
-    #     port=args.port,
-    #     dbname=args.db_name, 
-    #     sample_rate_for_s=args.sample_rate_for_lca,
-    #     lca_s_max_size=args.max_lca_s_size,
-    #     lca_s_min_size=args.min_lca_s_size, 
-    #     maximum_edges=args.maximum_edges,
-    #     min_recall_threshold=args.min_recall_threshold,
-    #     numercial_attr_filter_method=args.optimized,
-    #     user_assigned_max_num_pred = 2,
-    #     exclude_high_cost_jg=exclude_high_cost_jg,
-    #     f1_calculation_type =args.f1_calc_type,
-    #     f1_sample_rate = args.f1_sample_rate,
-    #     f1_sample_type = args.f1_sample_type,
-    #     f1_min_sample_size_threshold=args.f1_sample_thresh,
-    #     lca_eval_mode=eval_lca,
-    #     )
-
-    for w in mimic_workloads:
+    for w in nba_workloads:
       run_experiment(
         result_schema = result_schema,
         user_query = w['uquery'],
@@ -689,3 +663,30 @@ if __name__ == '__main__':
         f1_min_sample_size_threshold=args.f1_sample_thresh,
         lca_eval_mode=eval_lca,
         )
+
+    # for w in mimic_workloads:
+    #   run_experiment(
+    #     result_schema = result_schema,
+    #     user_query = w['uquery'],
+    #     user_questions= w['question'],
+    #     user_questions_map = w['umap'],
+    #     user_specified_attrs=w['uattrs'],
+    #     user_name=args.user_name,
+    #     password=args.password,
+    #     host=args.db_host,
+    #     port=args.port,
+    #     dbname=args.db_name, 
+    #     sample_rate_for_s=args.sample_rate_for_lca,
+    #     lca_s_max_size=args.max_lca_s_size,
+    #     lca_s_min_size=args.min_lca_s_size, 
+    #     maximum_edges=args.maximum_edges,
+    #     min_recall_threshold=args.min_recall_threshold,
+    #     numercial_attr_filter_method=args.optimized,
+    #     user_assigned_max_num_pred = 2,
+    #     exclude_high_cost_jg=exclude_high_cost_jg,
+    #     f1_calculation_type =args.f1_calc_type,
+    #     f1_sample_rate = args.f1_sample_rate,
+    #     f1_sample_type = args.f1_sample_type,
+    #     f1_min_sample_size_threshold=args.f1_sample_thresh,
+    #     lca_eval_mode=eval_lca,
+    #     )
