@@ -217,4 +217,4 @@ nba_question_dict_6['umap']= {'yes':'1', 'no':'2'}
 
 # nba_workloads = [nba_question_dict_1,nba_question_dict_2, nba_question_dict_3, nba_question_dict_4,nba_question_dict_5]
 
-nba_workloads = [nba_question_dict_6]
+nba_workloads = [nba_question_dict_1]

@@ -1121,7 +1121,13 @@ class Pattern_Generator:
 
                             cluster_dict = variable_clustering.rsquare[['Cluster', 'Variable']].groupby('Cluster')['Variable'].apply(list).to_dict()
                             # logger.debug(cluster_dict)
+                            # logger.debug(jg.user_attrs)
                             # logger.debug(renaming_dict)
+
+                            for ua in jg.user_attrs:
+                                cluster_dict = {k:v for k,v in cluster_dict.items() if not ua in v}
+                            # logger.debug(cluster_dict)
+
                             for k,v in cluster_dict.items():
                                 cluster_dict[k] = [[x,0,0] for x in v]      
 
@@ -1154,7 +1160,7 @@ class Pattern_Generator:
 
                         # finish clustering here
                         else:
-                            rf_input_vars = ordinal_pattern_attr_list
+                            rf_input_vars = [x for x in ordinal_pattern_attr_list if x not in jg.user_attrs] 
                             logger.debug("smaller number of num attrs!!!!!!")
                             logger.debug(rf_input_vars)
                             rep_from_last_node = [r for r in rf_input_vars if r in attrs_from_spec_node]

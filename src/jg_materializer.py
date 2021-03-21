@@ -291,11 +291,14 @@ class Join_Graph_Materializer:
 
         if(len(join_graph.graph_core)==1):
 
-
             join_graph.ignored_attrs.extend([kk for kk,vk in renaming_dict[1]['columns'].items() 
                 if vk in PT_key_attributes])
+
             join_graph.ignored_attrs.extend([ku for ku,vu in renaming_dict[1]['columns'].items() 
-                if vu in self.db_dict['PT']['user_attrs']])
+                if vu in self.db_dict['PT']['user_text_attrs']])
+
+            join_graph.user_attrs.extend([ku for ku,vu in renaming_dict[1]['columns'].items() 
+                if vu in self.db_dict['PT']['user_numerical_attrs']])
 
 
             # for k,v in renaming_dict.items():
@@ -341,8 +344,12 @@ class Join_Graph_Materializer:
                     # if(self.db_dict['PT']['user_attrs']):
                     join_graph.ignored_attrs.extend([kk for kk,vk in renaming_dict[1]['columns'].items() 
                         if vk in PT_key_attributes])
+
                     join_graph.ignored_attrs.extend([kr for kr,ko in renaming_dict[1]['columns'].items()
-                        if ko in self.db_dict['PT']['user_attrs']])
+                        if ko in self.db_dict['PT']['user_text_attrs']])
+                    
+                    join_graph.user_attrs.extend([kr for kr,ko in renaming_dict[1]['columns'].items()
+                        if ko in self.db_dict['PT']['user_numerical_attrs']])
                 else:
                     node1_key_attributes = self.db_dict[node1.label]['p_key']
 
