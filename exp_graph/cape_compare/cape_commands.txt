@@ -1,0 +1,272 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%CREATE TARGET TABLES%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+CREATE MATERIALIZED VIEW player_games_stats
+SELECT p.player_name,g.game_date,s.season_name,pgs.minutes,pgs.offposs,pgs.points,pgs.fg_two_a,pgs.fg_two_pct,pgs.fg_three_a,
+pgs.fg_three_pct,pgs.ftpoints,pgs.usage,pgs.assists,pgs.rebounds,pgs.defrebounds,pgs.offrebounds 
+FROM player p, game g, season s, player_game_stats pgs
+WHERE p.player_id=pgs.player_id AND g.game_date=pgs.game_date AND
+g.home_id=pgs.home_id AND g.season_id=s.season_id
+
+
+CREATE TABLE player_game_stats 
+(
+player_name character varying(255), 
+game_date date, 
+season_name character varying(255), 
+minutes numeric(5,2), 
+offposs integer, 
+points integer, 
+fg_two_a integer, 
+fg_two_pct numeric(5,2), 
+fg_three_a integer, 
+fg_three_pct numeric(5,2), 
+ftpoints integer, 
+usage numeric(5,2), 
+assists integer, 
+rebounds integer, 
+defrebounds integer, 
+offrebounds integer
+);
+
+
+
+CREATE MATERIALIZED VIEW team_games_stats_table AS
+select t1.team,tgs.points,tgs.fg_two_a,tgs.fg_two_pct,tgs.fg_three_a,
+tgs.fg_three_pct,tgs.assists,tgs.rebounds,tgs.defrebounds, tgs.offrebounds, substring(s.season_name,1,4) as season,
+CASE WHEN g.winner_id=t1.team_id
+	THEN 1
+ELSE 0
+END AS win
+FROM team t1,team_game_stats tgs, season s, game g
+WHERE t1.team_id = tgs.team_id AND g.game_date = tgs.game_date
+AND tgs.home_id = g.home_id  and g.season_id = s.season_id
+order by s.season_name, tgs.game_date
+
+
+CREATE TABLE teams_games_stats
+(
+ team         character varying(255),                       
+ game_date    date,                                         
+ season_name  character varying(255),                       
+ points       integer,                                      
+ fg_two_a     integer,                                      
+ fg_two_pct   numeric(5,2),                                 
+ fg_three_a   integer,                                      
+ fg_three_pct numeric(5,2),                                 
+ ftpoints     integer,                                      
+ assists      integer,                                      
+ rebounds     integer,                                      
+ defrebounds  integer,                                      
+ win          integer
+);                                      
+
+
+CREATE TABLE team_game_stats
+(
+ team         character varying(255),
+ points       integer               ,
+ fg_two_a     integer               ,
+ fg_two_pct   numeric(5,2)          ,
+ fg_three_a   integer               ,
+ fg_three_pct numeric(5,2)          ,
+ assists      integer               ,
+ rebounds     integer               ,
+ defrebounds  integer               ,
+ offrebounds  integer               ,
+ season       integer               ,
+ win          integer               
+)
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%MINE PATTERNS%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+capexplain mine -u japerev -p jape -d nba_cape -P 5433 -t player_game_stats --manual-config True
+
+capexplain mine -u japerev -p jape -d nba_cape -P 5433 -t team_game_stats --manual-config True
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%$$EXPLAIN QUESTION%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+capexplain explain -u japerev -p jape -d nba_cape -P 5433 --qtable player_game_stats --ptable pattern.player_game_stats --ufile player_q.txt -o output.txt 
+
+capexplain explain -u japerev -p jape -d nba_cape -P 5433 --qtable team_game_stats --ptable pattern.team_game_stats --ufile team_q.txt -o output.txt 
+
+
+
+
+players
+
+Top 1 explanation:
+Directly from local pattern : [player_name][LeBron James][season][const][26.92408391487256]
+Score: 13.13271854501465
+Distance: 0.714142842854285
+Outlierness: 2.7864424009169113
+Denominator: 29.710526315789473
+(LeBron James,2009,29.7105263157894737)
+------------------------
+------------------------
+Top 2 explanation:
+Directly from local pattern : [player_name][LeBron James][season][const][26.92408391487256]
+Score: 1.1404251481909888
+Distance: 0.714142842854285
+Outlierness: 0.22107737545001882
+Denominator: 27.14516129032258
+(LeBron James,2011,27.1451612903225806)
+------------------------
+------------------------
+Top 3 explanation:
+Directly from local pattern : [player_name][LeBron James][season][const][26.92408391487256]
+Score: 0.013243350751191176
+Distance: 57.275736573177305
+Outlierness: 0.20578621499756977
+Denominator: 27.12987012987013
+(LeBron James,2013,27.1298701298701299)
+------------------------
+------------------------
+Top 4 explanation:
+Directly from local pattern : [player_name][LeBron James][season][const][26.92408391487256]
+Score: 0.0011310545193631179
+Distance: 1697.7633845739517
+Outlierness: 0.5271355973225624
+Denominator: 27.451219512195124
+(LeBron James,2017,27.4512195121951220)
+------------------------
+------------------------
+Top 5 explanation:
+Directly from local pattern : [player_name][LeBron James][season][const][26.92408391487256]
+Score: 0.0005546154237260197
+Distance: 2896.3093774664335
+Outlierness: 0.43955244876380206
+Denominator: 27.363636363636363
+(LeBron James,2018,27.3636363636363636)
+------------------------
+------------------------
+Top 6 explanation:
+Directly from local pattern : [player_name][LeBron James][season][const][26.92408391487256]
+Score: -0.002143460122525672
+Distance: 916.4103938738364
+Outlierness: -0.5186785094671542
+Denominator: 26.405405405405407
+(LeBron James,2016,26.4054054054054054)
+------------------------
+------------------------
+Top 7 explanation:
+Directly from local pattern : [player_name][LeBron James][season][const][26.92408391487256]
+Score: -0.014876392276401605
+Distance: 441.9417495553006
+Outlierness: -1.6609260201357188
+Denominator: 25.263157894736842
+(LeBron James,2015,25.2631578947368421)
+------------------------
+------------------------
+Top 8 explanation:
+Directly from local pattern : [player_name][LeBron James][season][const][26.92408391487256]
+Score: -0.036372645778211365
+Distance: 181.01936360511272
+Outlierness: -1.6632143496551706
+Denominator: 25.26086956521739
+(LeBron James,2014,25.2608695652173913)
+------------------------
+------------------------
+Top 9 explanation:
+Directly from local pattern : [player_name][LeBron James][season][const][26.92408391487256]
+Score: -0.044411141732645466
+Distance: 11.314150432091663
+Outlierness: -0.13461023066203381
+Denominator: 26.789473684210527
+(LeBron James,2012,26.7894736842105263)
+------------------------
+------------------------
+Top 10 explanation:
+Directly from local pattern : [player_name][LeBron James][season][const][26.92408391487256]
+Score: -7.580591792957109
+Distance: 0.1
+Outlierness: -0.20256492753079058
+Denominator: 26.72151898734177
+(LeBron James,2010,26.7215189873417722)
+------------------------
+
+
+
+teams
+------------------------
+Top 1 explanation:
+Directly from local pattern : [team][GSW][season][linear][{'Intercept': -9065.163636364854, 'season': 4.527272727273331}]
+Score: 7.587970508817971
+Distance: 0.714142842854285
+Outlierness: 2.763636363637488
+Denominator: 51.0
+(GSW,2013,51)
+------------------------
+------------------------
+Top 2 explanation:
+Directly from local pattern : [team][GSW][season][linear][{'Intercept': -9065.163636364854, 'season': 4.527272727273331}]
+Score: 1.8780291160530318
+Distance: 11.314150432091663
+Outlierness: 14.23636363636433
+Denominator: 67.0
+(GSW,2014,67)
+------------------------
+------------------------
+Top 3 explanation:
+Directly from local pattern : [team][GSW][season][linear][{'Intercept': -9065.163636364854, 'season': 4.527272727273331}]
+Score: 0.37571411391103876
+Distance: 57.275736573177305
+Outlierness: 15.709090909091174
+Denominator: 73.0
+(GSW,2015,73)
+------------------------
+------------------------
+Top 4 explanation:
+Directly from local pattern : [team][GSW][season][linear][{'Intercept': -9065.163636364854, 'season': 4.527272727273331}]
+Score: 0.33032738603021766
+Distance: 11.314150432091663
+Outlierness: 1.3454545454587787
+Denominator: 36.0
+(GSW,2010,36)
+------------------------
+------------------------
+Top 5 explanation:
+Directly from local pattern : [team][GSW][season][linear][{'Intercept': -9065.163636364854, 'season': 4.527272727273331}]
+Score: 0.042725025841211406
+Distance: 181.01936360511272
+Outlierness: 5.1818181818180165
+Denominator: 67.0
+(GSW,2016,67)
+------------------------
+------------------------
+Top 6 explanation:
+Directly from local pattern : [team][GSW][season][linear][{'Intercept': -9065.163636364854, 'season': 4.527272727273331}]
+Score: -0.02655809906241746
+Distance: 916.4103938738364
+Outlierness: -13.872727272728298
+Denominator: 57.0
+(GSW,2018,57)
+------------------------
+------------------------
+Top 7 explanation:
+Directly from local pattern : [team][GSW][season][linear][{'Intercept': -9065.163636364854, 'season': 4.527272727273331}]
+Score: -0.03255794400058796
+Distance: 441.9417495553006
+Outlierness: -8.34545454545514
+Denominator: 58.0
+(GSW,2017,58)
+------------------------
+------------------------
+Top 8 explanation:
+Directly from local pattern : [team][GSW][season][linear][{'Intercept': -9065.163636364854, 'season': 4.527272727273331}]
+Score: -0.27715271463731683
+Distance: 57.275736573177305
+Outlierness: -4.127272727268064
+Denominator: 26.0
+(GSW,2009,26)
+------------------------
+------------------------
+Top 9 explanation:
+Directly from local pattern : [team][GSW][season][linear][{'Intercept': -9065.163636364854, 'season': 4.527272727273331}]
+Score: -98.51772923198702
+Distance: 0.714142842854285
+Outlierness: -16.18181818181438
+Denominator: 23.0
+(GSW,2011,23)
+------------------------

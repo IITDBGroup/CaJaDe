@@ -680,6 +680,7 @@ class Pattern_Generator:
                       s_rate_for_s=0.5,
                       lca_s_max_size = 1000,
                       lca_s_min_size = 100,
+                      lca_recall_thresh = 0.3,
                       just_lca = False,
                       pattern_recall_threshold=0.3, 
                       numercial_attr_filter_method = 'y',
@@ -990,8 +991,22 @@ class Pattern_Generator:
                 GROUP BY
                 {nominal_pattern_attr_clause}
                 ORDER BY pattern_freq DESC
-                limit 10;
+                limit 30;
                 """
+
+                # pattern_creation_q = f"""
+                # CREATE MATERIALIZED VIEW {jg_name}_p AS
+                # WITH cp AS
+                # (
+                # SELECT 
+                # {pattern_q_selection_clause}
+                # FROM {jg_name}_d l, {jg_name}_s r
+                # )
+                # SELECT DISTINCT 
+                # {nominal_pattern_attr_clause}
+                # FROM cp;
+                # """
+
                 get_nominal_patterns_q = f"""
                 SELECT {nominal_pattern_attr_clause} FROM {jg_name}_p;
                 """
@@ -1007,16 +1022,46 @@ class Pattern_Generator:
                 logger.debug(nominal_pattern_df)
 
                 nominal_pattern_dicts = nominal_pattern_df.to_dict('records')
-                # logger.debug(nominal_pattern_dicts)
+                # logger.debug(nominal_pattern_dict_listcts)
 
                 nominal_pattern_dict_list = []
 
                 for n_pa in nominal_pattern_dicts:
                     n_pa_dict = {}
-                    n_pa_dict['nominal_values'] = [(k, v) for k, v in n_pa.items() if (v is not None and not pd.isnull(v))]
+                    n_pa_dict['nominal_values'] = [[k, v] for k, v in n_pa.items() if (v is not None and not pd.isnull(v))]
                     if(n_pa_dict['nominal_values']):
-                        nominal_pattern_dict_list.append(n_pa_dict) 
+                        nominal_pattern_dict_list.append(n_pa_dict)
 
+
+                # filter based on recall thresh
+                distinct_tuple_size = recall_dicts['original']['yes'] + recall_dicts['original']['no']
+                for npd in nominal_pattern_dict_list:
+                    if(npd['nominal_values']):
+                        np_cond_list = []
+                        # t_val = t[1].replace("'","''")
+                        for t in npd['nominal_values']:
+                            t_val = t[1].replace("'","''")
+                            np_cond_list.append(f"{t[0]}='{t_val}'")
+                        np_cond = ' AND '.join(np_cond_list)
+                        np_recall_query = f"""
+                        SELECT COUNT(DISTINCT pnumber)::NUMERIC/{distinct_tuple_size} + 
+                        (SELECT COUNT(DISTINCT pnumber)::NUMERIC/{distinct_tuple_size} FROM {jg_name} WHERE {np_cond} 
+                        AND is_user='yes') 
+                        FROM {jg_name} WHERE {np_cond} AND is_user='no' 
+                        """
+                        self.cur.execute(np_recall_query)
+                        npd['np_recall'] = float(self.cur.fetchone()[0])
+                    else:
+                        npd['np_recall'] = 1
+
+                nominal_pattern_dict_list = sorted(nominal_pattern_dict_list, key=lambda d:d['np_recall'], reverse=True)
+                # logger.debug(nominal_pattern_dict_list)
+                nominal_pattern_dict_list = nominal_pattern_dict_list[0:10]
+                # logger.debug(nominal_pattern_dict_list)
+                nominal_pattern_dict_list = [n for n in nominal_pattern_dict_list if n['np_recall']>=lca_recall_thresh]
+                logger.debug(nominal_pattern_dict_list)
+                logger.debug(len(nominal_pattern_dict_list))
+                
                 if(need_weighted_sampling==True): 
                     # if need weighted sampling, we start by sampling for 
                     # nominal patterns only, and we choose most diverse 
