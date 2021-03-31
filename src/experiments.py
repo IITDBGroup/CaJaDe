@@ -565,20 +565,20 @@ if __name__ == '__main__':
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-  # user_query = "provenance of (select count(*) as win, s.season_name from team t, game g, season s where t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' group by s.season_name);"
-  # u_query = (user_query, 'gsw wins : 15 vs 12')
-  # u_question =["season_name='2015-16'","season_name='2012-13'"]
-  # user_specified_attrs = [('team','team'),('season','season_name')]
+  user_query = "provenance of (select count(*) as win, s.season_name from team t, game g, season s where t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' group by s.season_name);"
+  u_query = (user_query, 'gsw wins : 15 vs 12')
+  u_question =["season_name='2015-16'","season_name='2012-13'"]
+  user_specified_attrs = [('team','team'),('season','season_name')]
 
   # user_query = 'provenance of (select insurance, 1.0*SUM(hospital_expire_flag)/count(*) as death_rate from admissions group by insurance);'
   # u_query = (user_query, 'death rate: gov vs self')
   # u_question =["insurance='Government'","insurance='Self Pay'"]
   # user_specified_attrs = [('admissions','insurance')]
 
-  user_query = 'provenance of (select insurance, 1.0*SUM(hospital_expire_flag)/count(*) as death_rate from admissions group by insurance);'
-  u_query = (user_query, 'death rate: medicare vs private')
-  u_question =["insurance='Private'","insurance='Medicare'"]
-  user_specified_attrs = [('admissions',  'insurance'), ('admissions', 'hospital_expire_flag')]
+  # user_query = 'provenance of (select insurance, 1.0*SUM(hospital_expire_flag)/count(*) as death_rate from admissions group by insurance);'
+  # u_query = (user_query, 'death rate: medicare vs private')
+  # u_question =["insurance='Private'","insurance='Medicare'"]
+  # user_specified_attrs = [('admissions',  'insurance'), ('admissions', 'hospital_expire_flag')]
 
   # user_query = 'provenance of (select insurance, avg(hospital_stay_length) as avg_los, count(*) as cnt from admissions group by insurance);'
   # u_query = (user_query, 'los: self pay vs private')
@@ -637,7 +637,34 @@ if __name__ == '__main__':
       lca_eval_mode=eval_lca,
       )
   else:
-    for w in nba_workloads:
+    # for w in nba_workloads:
+      # run_experiment(
+      #   result_schema = result_schema,
+      #   user_query = w['uquery'],
+      #   user_questions= w['question'],
+      #   user_questions_map = w['umap'],
+      #   user_specified_attrs=w['uattrs'],
+      #   user_name=args.user_name,
+      #   password=args.password,
+      #   host=args.db_host,
+      #   port=args.port,
+      #   dbname=args.db_name, 
+      #   sample_rate_for_s=args.sample_rate_for_lca,
+      #   lca_s_max_size=args.max_lca_s_size,
+      #   lca_s_min_size=args.min_lca_s_size, 
+      #   maximum_edges=args.maximum_edges,
+      #   min_recall_threshold=args.min_recall_threshold,
+      #   numercial_attr_filter_method=args.optimized,
+      #   user_assigned_max_num_pred = 2,
+      #   exclude_high_cost_jg=exclude_high_cost_jg,
+      #   f1_calculation_type =args.f1_calc_type,
+      #   f1_sample_rate = args.f1_sample_rate,
+      #   f1_sample_type = args.f1_sample_type,
+      #   f1_min_sample_size_threshold=args.f1_sample_thresh,
+      #   lca_eval_mode=eval_lca,
+      #   )
+
+    for w in mimic_workloads:
       run_experiment(
         result_schema = result_schema,
         user_query = w['uquery'],
@@ -663,30 +690,3 @@ if __name__ == '__main__':
         f1_min_sample_size_threshold=args.f1_sample_thresh,
         lca_eval_mode=eval_lca,
         )
-
-    # for w in mimic_workloads:
-    #   run_experiment(
-    #     result_schema = result_schema,
-    #     user_query = w['uquery'],
-    #     user_questions= w['question'],
-    #     user_questions_map = w['umap'],
-    #     user_specified_attrs=w['uattrs'],
-    #     user_name=args.user_name,
-    #     password=args.password,
-    #     host=args.db_host,
-    #     port=args.port,
-    #     dbname=args.db_name, 
-    #     sample_rate_for_s=args.sample_rate_for_lca,
-    #     lca_s_max_size=args.max_lca_s_size,
-    #     lca_s_min_size=args.min_lca_s_size, 
-    #     maximum_edges=args.maximum_edges,
-    #     min_recall_threshold=args.min_recall_threshold,
-    #     numercial_attr_filter_method=args.optimized,
-    #     user_assigned_max_num_pred = 2,
-    #     exclude_high_cost_jg=exclude_high_cost_jg,
-    #     f1_calculation_type =args.f1_calc_type,
-    #     f1_sample_rate = args.f1_sample_rate,
-    #     f1_sample_type = args.f1_sample_type,
-    #     f1_min_sample_size_threshold=args.f1_sample_thresh,
-    #     lca_eval_mode=eval_lca,
-    #     )
