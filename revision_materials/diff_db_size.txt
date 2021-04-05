@@ -1,19 +1,30 @@
 
-# count rows 
+# relation size in MB
 
 with rowcnt as (
+SELECT nspname || '.' || relname AS "relation", pg_total_relation_size(C.oid) 
+AS "total_size",reltuples AS row_estimate 
+FROM pg_class C LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace)
+WHERE nspname = 'public'AND C.relkind <> 'i'AND nspname !~ '^pg_toast'
+AND relname not in(select distinct matviewname from pg_matviews)
+AND relname not in(select viewname from pg_catalog.pg_views)
+AND relname not like '%pt%'
+ORDER BY pg_total_relation_size(C.oid)) 
+select pg_size_pretty(sum(total_size)) from rowcnt;
 
-SELECT nspname || '.' || relname AS "relation",
-pg_size_pretty(pg_total_relation_size(C.oid)) AS "total_size",
-reltuples AS row_estimate
-FROM pg_class C
-LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace)
-WHERE nspname NOT IN ('pg_catalog', 'information_schema')
-AND C.relkind <> 'i'
-AND nspname !~ '^pg_toast'
-ORDER BY pg_total_relation_size(C.oid)
 
-) select sum(row_estimate) from rowcnt;
+# relation size in rowcnt
+
+with rowcnt as (
+SELECT nspname || '.' || relname AS "relation", pg_total_relation_size(C.oid) 
+AS "total_size",reltuples AS row_estimate 
+FROM pg_class C LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace)
+WHERE nspname = 'public'AND C.relkind <> 'i'AND nspname !~ '^pg_toast'
+AND relname not in(select distinct matviewname from pg_matviews)
+AND relname not in(select viewname from pg_catalog.pg_views)
+AND relname not like '%pt%'
+ORDER BY pg_total_relation_size(C.oid)) 
+select sum(row_estimate) from rowcnt;
 
 
 # create different db size 
@@ -165,3 +176,84 @@ insert into icustays select subject_id+399996,hadm_id+799996,icustay_id,dbsource
 insert into procedures select subject_id+399996,hadm_id+799996,seq_num,icd9_code,chapter from procedures;
 
 pg_dump -U japerev nba_rev > nba_rev.sql
+
+
+
+
+
+# NBA
+
+#01
+create materialized view player01 as (select * from player order by random() limit 120);
+create materialized view player_game_stats01 as (select pgs.* from player_game_stats pgs, player01 p where pgs.player_id = p.player_id);
+create materialized view play_for01 as (select pf.* from play_for pf, player01 p where p.player_id = pf.player_id);
+create materialized view lineup_player01 as (select lp.* from lineup_player lp, player01 p where p.player_id = lp.player_id);
+create materialized view lineup_game_stats01 as (select l.* from lineup_game_stats l, lineup_player01 l1, player01 p where l1.lineup_id = l.lineup_id and l1.player_id = p.player_id);
+create materialized view game01 as (select distinct g.* from game g, lineup_game_stats01 ls where ls.game_date=g.game_date and ls.home_id = g.home_id);
+create materialized view lineup01 as (select l.* from lineup l where l.lineup_id in (select distinct lineup_id from lineup_game_stats01));
+create materialized view team_game_stats01 as (select tgs.* from team_game_stats tgs, game01 g where g.game_date=tgs.game_date and g.home_id=tgs.home_id);
+
+
+\copy (SELECT * FROM player01) to 'nba01/player01.csv' csv header;
+\copy (SELECT * FROM game01) to 'nba01/game01.csv' csv header;
+\copy (SELECT * FROM player_game_stats01) to 'nba01/player_game_stats01.csv' csv header;
+\copy (SELECT * FROM play_for01) to 'nba01/play_for01.csv' csv header;
+\copy (SELECT * FROM lineup01) to 'nba01/lineup01.csv' csv header;
+\copy (SELECT * FROM lineup_player01) to 'nba01/lineup_player01.csv' csv header;
+\copy (SELECT * FROM lineup_game_stats01) to 'nba01/lineup_game_stats01.csv' csv header;
+\copy (SELECT * FROM season) to 'nba01/season01.csv' csv header;
+\copy (SELECT * FROM team) to 'nba01/team01.csv' csv header;
+
+
+
+\copy player FROM 'nba01/player01.csv' csv header;
+\copy team FROM 'nba01/team01.csv' csv header;
+\copy season FROM 'nba01/season01.csv' csv header;
+\copy game FROM 'nba01/game01.csv' csv header;
+\copy player_game_stats FROM 'nba01/player_game_stats01.csv' csv header;
+\copy lineup FROM 'nba01/lineup01.csv' csv header;
+\copy play_for FROM 'nba01/play_for01.csv' csv header;
+\copy lineup_player FROM 'nba01/lineup_player01.csv' csv header;
+\copy lineup_game_stats FROM 'nba01/lineup_game_stats01.csv' csv header;
+
+
+
+#05
+create materialized view player05 as (select * from player order by random() limit 600);
+create materialized view player_game_stats05 as (select pgs.* from player_game_stats pgs, player05 p where pgs.player_id = p.player_id);
+create materialized view play_for05 as (select pf.* from play_for pf, player05 p where p.player_id = pf.player_id);
+create materialized view lineup_player05 as (select lp.* from lineup_player lp, player05 p where p.player_id = lp.player_id);
+create materialized view lineup_game_stats05 as (select l.* from lineup_game_stats l, lineup_player05 l1, player05 p where l1.lineup_id = l.lineup_id and l1.player_id = p.player_id);
+create materialized view game05 as (select distinct g.* from game g, lineup_game_stats05 ls where ls.game_date=g.game_date and ls.home_id = g.home_id);
+create materialized view lineup05 as (select l.* from lineup l where l.lineup_id in (select distinct lineup_id from lineup_game_stats05));
+create materialized view team_game_stats05 as (select tgs.* from team_game_stats tgs, game05 g where g.game_date=tgs.game_date and g.home_id=tgs.home_id);
+
+
+\copy (SELECT * FROM player05) to 'nba05/player05.csv' csv header;
+\copy (SELECT * FROM game05) to 'nba05/game05.csv' csv header;
+\copy (SELECT * FROM player_game_stats05) to 'nba05/player_game_stats05.csv' csv header;
+\copy (SELECT * FROM play_for05) to 'nba05/play_for05.csv' csv header;
+\copy (SELECT * FROM lineup05) to 'nba05/lineup05.csv' csv header;
+\copy (SELECT * FROM lineup_player05) to 'nba05/lineup_player05.csv' csv header;
+\copy (SELECT * FROM lineup_game_stats05) to 'nba05/lineup_game_stats05.csv' csv header;
+\copy (SELECT * FROM season) to 'nba05/season05.csv' csv header;
+\copy (SELECT * FROM team) to 'nba05/team05.csv' csv header;
+
+
+\copy player FROM 'nba05/player05.csv' csv header;
+\copy team FROM 'nba05/team05.csv' csv header;
+\copy season FROM 'nba05/season05.csv' csv header;
+\copy game FROM 'nba05/game05.csv' csv header;
+\copy player_game_stats FROM 'nba05/player_game_stats05.csv' csv header;
+\copy lineup FROM 'nba05/lineup05.csv' csv header;
+\copy play_for FROM 'nba05/play_for05.csv' csv header;
+\copy lineup_player FROM 'nba05/lineup_player05.csv' csv header;
+\copy lineup_game_stats FROM 'nba05/lineup_game_stats05.csv' csv header;
+
+
+# 2
+insert into player select player_name,player_id+1237 FROM player;
+insert into game select game_date + interval '20 year',home_points,away_points,home_possessions,away_possessions,home_id,away_id,winner_id,season_id from game;
+insert into player_game_stats select game_date+ interval '20 year',home_id,minutes,offposs,points,fg_two_m,fg_two_a,fg_two_pct,fg_three_m,fg_three_a,fg_three_pct,nonheavefg_three_pct,ftpoints,ptsassisted_two_s,ptsunassisted_two_s,ptsassisted_three_s,ptsunassisted_three_s,assisted_two_spct,nonputbacksassisted_two_spct,assisted_three_spct,fg_three_apct,shotqualityavg,efgpct,tspct,ptsputbacks,fg_two_ablocked,fg_two_apctblocked,fg_three_ablocked,fg_three_apctblocked,usage,player_id,assists,assistpoints,two_ptassists,three_ptassists,atrimassists,shortmidrangeassists,longmidrangeassists,corner_three_assists,arc_three_assists,rebounds,defrebounds,ftdefrebounds,defftreboundpct,def_two_ptrebounds,def_two_ptreboundpct,def_three_ptrebounds,def_three_ptreboundpct,deffgreboundpct,offrebounds,ftoffrebounds,offftreboundpct,off_two_ptrebounds,off_two_ptreboundpct,off_three_ptrebounds,off_three_ptreboundpct,offfgreboundpct,defatrimreboundpct,defshortmidrangereboundpct,deflongmidrangereboundpct,defarc_three_reboundpct,defcorner_three_reboundpct,offatrimreboundpct,offshortmidrangereboundpct,offlongmidrangereboundpct,offarc_three_reboundpct,offcorner_three_reboundpct from player_game_stats
+insert into team_game_stats select game_date + interval '20 year',offposs,points,fg_two_m,fg_two_a,fg_two_pct,fg_three_m,fg_three_a,fg_three_pct,nonheavefg_three_pct,ftpoints,ptsassisted_two_s,ptsunassisted_two_s,ptsassisted_three_s,ptsunassisted_three_s,assisted_two_spct,nonputbacksassisted_two_spct,assisted_three_spct,fg_three_apct,shotqualityavg,efgpct,tspct,ptsputbacks,fg_two_ablocked,fg_two_apctblocked,fg_three_ablocked,fg_three_apctblocked,home_id,team_id,assists,assistpoints,two_ptassists,three_ptassists,atrimassists,shortmidrangeassists,longmidrangeassists,corner_three_assists,arc_three_assists,rebounds,defrebounds,ftdefrebounds,defftreboundpct,def_two_ptrebounds,def_two_ptreboundpct,def_three_ptrebounds,def_three_ptreboundpct,deffgreboundpct,offrebounds,ftoffrebounds,offftreboundpct,off_two_ptrebounds,off_two_ptreboundpct,off_three_ptrebounds,off_three_ptreboundpct,offfgreboundpct,defatrimreboundpct,defshortmidrangereboundpct,deflongmidrangereboundpct,defarc_three_reboundpct,defcorner_three_reboundpct,offatrimreboundpct,offshortmidrangereboundpct,offlongmidrangereboundpct,offarc_three_reboundpct,offcorner_three_reboundpct from team_game_stats
+insert into lineup_game_stats select game_date + interval '20 year',home_id,lineup_id,mp,tmposs,oppo_tmposs from lineup_game_stats;
