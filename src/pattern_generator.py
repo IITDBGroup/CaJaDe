@@ -382,7 +382,7 @@ class Pattern_Generator:
                 where_cond_list.append(f"{ot[0]}{ot[1]}{ot[2]}")
             for nt in pattern['nominal_values']:
                 if(isinstance(nt[1], datetime.date)):
-                    continue
+                    nt[1] = nt[1].strftime('%Y-%m-%d')
                 n_value = nt[1].replace("'","''")
                 where_cond_list.append(f"{nt[0]}='{n_value}'")
         else:
@@ -917,10 +917,6 @@ class Pattern_Generator:
                 sample_repeatable_clause = None
                 w_sample_attr = None
 
-                if(sample_repeatable):
-                    sample_repeatable_clause = 'REPEATABLE({})'.format(seed)
-                else:
-                    sample_repeatable_clause =''
                 system_sample_rate = int(s_rate_for_s*100)
                 
                 setseed_q = f"""
@@ -1038,8 +1034,9 @@ class Pattern_Generator:
                 for npd in nominal_pattern_dict_list:
                     if(npd['nominal_values']):
                         np_cond_list = []
-                        # t_val = t[1].replace("'","''")
                         for t in npd['nominal_values']:
+                            if(isinstance(t[1], datetime.date)):
+                                t[1] = t[1].strftime('%Y-%m-%d')
                             t_val = t[1].replace("'","''")
                             np_cond_list.append(f"{t[0]}='{t_val}'")
                         np_cond = ' AND '.join(np_cond_list)
@@ -1049,7 +1046,9 @@ class Pattern_Generator:
                         AND is_user='yes') 
                         FROM {jg_name} WHERE {np_cond} AND is_user='no' 
                         """
+                        self.stats.startTimer('check_recall')
                         self.cur.execute(np_recall_query)
+                        self.stats.stopTimer('check_recall')
                         npd['np_recall'] = float(self.cur.fetchone()[0])
                     else:
                         npd['np_recall'] = 1
@@ -1265,8 +1264,7 @@ class Pattern_Generator:
                                 for npair in npa['nominal_values']:
                                     npa['ordinal_quartiles'] = {}
                                     if(isinstance(npair[1], datetime.date)): # temp_fix for date type
-                                        # logger.debug(npair) 
-                                        continue
+                                        npair[1] = npair[1].strftime('%Y-%m-%d')
                                     nominal_where_cond_list.append("{}='{}'".format(npair[0],npair[1].replace("'","''")))
 
                                 for n in importances:
@@ -1575,7 +1573,7 @@ class Pattern_Generator:
                                 npa['ordinal_quartiles'] = {}
                                 if(isinstance(npair[1], datetime.date)): # temp_fix for date type
                                     # logger.debug(npair) 
-                                    continue
+                                    npair[1] = npair[1].strftime('%Y-%m-%d')
                                 # logger.debug(npair)
                                 nominal_where_cond_list.append("{}='{}'".format(npair[0],npair[1].replace("'","''")))
 

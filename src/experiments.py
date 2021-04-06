@@ -19,7 +19,8 @@ from statistics import mean
 import argparse
 from datetime import datetime
 from time import strftime
-from query_workloads import mimic_workloads, nba_workloads
+from workloads import mimic_workloads, nba_workloads
+from case_study import mimic_cases, nba_cases
 
 logger = logging.getLogger(__name__)
 
@@ -547,6 +548,9 @@ if __name__ == '__main__':
   parser.add_argument('-W','--workloads', metavar="\b", type=str, default='false',
     help='using questions from workloads? (default: %(default)s)')
 
+  parser.add_argument('-C','--case_studies', metavar="\b", type=str, default='false',
+    help='using questions from case studies? (default: %(default)s)')
+
   parser.add_argument('-L','--evaluate_lca_mode', metavar='\b', type=str, default='false',
     help='generate LCA results only, will not generate pattern results, (default: %(default)s)')
   
@@ -607,15 +611,15 @@ if __name__ == '__main__':
     eval_lca = True
 
 
-  if(args.workloads=='false'):
+  if(args.workloads=='false' and args.case_studies=='false'):
     run_experiment(
       result_schema = result_schema,
       user_query = u_query,
       user_questions=u_question,
       # user_questions_map = {'yes':'Government', 'no':'Self Pay'},
       # user_questions_map = {'yes':'Private', 'no':'Self Pay'},
-      user_questions_map = {'yes':'Private', 'no':'Medicare'},
-      # user_questions_map = {'yes':'2015-16', 'no':'2012-13'},
+      # user_questions_map = {'yes':'Private', 'no':'Medicare'},
+      user_questions_map = {'yes':'2015-16', 'no':'2012-13'},
       user_specified_attrs=user_specified_attrs,
       user_name=args.user_name,
       password=args.password,
@@ -637,56 +641,113 @@ if __name__ == '__main__':
       lca_eval_mode=eval_lca,
       )
   else:
-    # for w in nba_workloads:
-      # run_experiment(
-      #   result_schema = result_schema,
-      #   user_query = w['uquery'],
-      #   user_questions= w['question'],
-      #   user_questions_map = w['umap'],
-      #   user_specified_attrs=w['uattrs'],
-      #   user_name=args.user_name,
-      #   password=args.password,
-      #   host=args.db_host,
-      #   port=args.port,
-      #   dbname=args.db_name, 
-      #   sample_rate_for_s=args.sample_rate_for_lca,
-      #   lca_s_max_size=args.max_lca_s_size,
-      #   lca_s_min_size=args.min_lca_s_size, 
-      #   maximum_edges=args.maximum_edges,
-      #   min_recall_threshold=args.min_recall_threshold,
-      #   numercial_attr_filter_method=args.optimized,
-      #   user_assigned_max_num_pred = 2,
-      #   exclude_high_cost_jg=exclude_high_cost_jg,
-      #   f1_calculation_type =args.f1_calc_type,
-      #   f1_sample_rate = args.f1_sample_rate,
-      #   f1_sample_type = args.f1_sample_type,
-      #   f1_min_sample_size_threshold=args.f1_sample_thresh,
-      #   lca_eval_mode=eval_lca,
-      #   )
+    if(args.workloads!='false'):
+      if(re.search(r'nba', args.db_name)):
+        for w in nba_workloads:
+          run_experiment(
+            result_schema = result_schema,
+            user_query = w['uquery'],
+            user_questions= w['question'],
+            user_questions_map = w['umap'],
+            user_specified_attrs=w['uattrs'],
+            user_name=args.user_name,
+            password=args.password,
+            host=args.db_host,
+            port=args.port,
+            dbname=args.db_name, 
+            sample_rate_for_s=args.sample_rate_for_lca,
+            lca_s_max_size=args.max_lca_s_size,
+            lca_s_min_size=args.min_lca_s_size, 
+            maximum_edges=args.maximum_edges,
+            min_recall_threshold=args.min_recall_threshold,
+            numercial_attr_filter_method=args.optimized,
+            user_assigned_max_num_pred = 2,
+            exclude_high_cost_jg=exclude_high_cost_jg,
+            f1_calculation_type =args.f1_calc_type,
+            f1_sample_rate = args.f1_sample_rate,
+            f1_sample_type = args.f1_sample_type,
+            f1_min_sample_size_threshold=args.f1_sample_thresh,
+            lca_eval_mode=eval_lca,
+            )
+      if(re.search(r'mimic', args.db_name)):
+        for w in mimic_workloads:
+          run_experiment(
+            result_schema = result_schema,
+            user_query = w['uquery'],
+            user_questions= w['question'],
+            user_questions_map = w['umap'],
+            user_specified_attrs=w['uattrs'],
+            user_name=args.user_name,
+            password=args.password,
+            host=args.db_host,
+            port=args.port,
+            dbname=args.db_name, 
+            sample_rate_for_s=args.sample_rate_for_lca,
+            lca_s_max_size=args.max_lca_s_size,
+            lca_s_min_size=args.min_lca_s_size, 
+            maximum_edges=args.maximum_edges,
+            min_recall_threshold=args.min_recall_threshold,
+            numercial_attr_filter_method=args.optimized,
+            user_assigned_max_num_pred = 2,
+            exclude_high_cost_jg=exclude_high_cost_jg,
+            f1_calculation_type =args.f1_calc_type,
+            f1_sample_rate = args.f1_sample_rate,
+            f1_sample_type = args.f1_sample_type,
+            f1_min_sample_size_threshold=args.f1_sample_thresh,
+            lca_eval_mode=eval_lca,
+            )
+      # else:
+      #   for w in nba_cases:
+      #     run_experiment(
+      #       result_schema = result_schema,
+      #       user_query = w['uquery'],
+      #       user_questions= w['question'],
+      #       user_questions_map = w['umap'],
+      #       user_specified_attrs=w['uattrs'],
+      #       user_name=args.user_name,
+      #       password=args.password,
+      #       host=args.db_host,
+      #       port=args.port,
+      #       dbname=args.db_name, 
+      #       sample_rate_for_s=args.sample_rate_for_lca,
+      #       lca_s_max_size=args.max_lca_s_size,
+      #       lca_s_min_size=args.min_lca_s_size, 
+      #       maximum_edges=args.maximum_edges,
+      #       min_recall_threshold=args.min_recall_threshold,
+      #       numercial_attr_filter_method=args.optimized,
+      #       user_assigned_max_num_pred = 2,
+      #       exclude_high_cost_jg=exclude_high_cost_jg,
+      #       f1_calculation_type =args.f1_calc_type,
+      #       f1_sample_rate = args.f1_sample_rate,
+      #       f1_sample_type = args.f1_sample_type,
+      #       f1_min_sample_size_threshold=args.f1_sample_thresh,
+      #       lca_eval_mode=eval_lca,
+      #       )
 
-    for w in mimic_workloads:
-      run_experiment(
-        result_schema = result_schema,
-        user_query = w['uquery'],
-        user_questions= w['question'],
-        user_questions_map = w['umap'],
-        user_specified_attrs=w['uattrs'],
-        user_name=args.user_name,
-        password=args.password,
-        host=args.db_host,
-        port=args.port,
-        dbname=args.db_name, 
-        sample_rate_for_s=args.sample_rate_for_lca,
-        lca_s_max_size=args.max_lca_s_size,
-        lca_s_min_size=args.min_lca_s_size, 
-        maximum_edges=args.maximum_edges,
-        min_recall_threshold=args.min_recall_threshold,
-        numercial_attr_filter_method=args.optimized,
-        user_assigned_max_num_pred = 2,
-        exclude_high_cost_jg=exclude_high_cost_jg,
-        f1_calculation_type =args.f1_calc_type,
-        f1_sample_rate = args.f1_sample_rate,
-        f1_sample_type = args.f1_sample_type,
-        f1_min_sample_size_threshold=args.f1_sample_thresh,
-        lca_eval_mode=eval_lca,
-        )
+      #   for w in mimic_cases:
+      #     run_experiment(
+      #       result_schema = result_schema,
+      #       user_query = w['uquery'],
+      #       user_questions= w['question'],
+      #       user_questions_map = w['umap'],
+      #       user_specified_attrs=w['uattrs'],
+      #       user_name=args.user_name,
+      #       password=args.password,
+      #       host=args.db_host,
+      #       port=args.port,
+      #       dbname=args.db_name, 
+      #       sample_rate_for_s=args.sample_rate_for_lca,
+      #       lca_s_max_size=args.max_lca_s_size,
+      #       lca_s_min_size=args.min_lca_s_size, 
+      #       maximum_edges=args.maximum_edges,
+      #       min_recall_threshold=args.min_recall_threshold,
+      #       numercial_attr_filter_method=args.optimized,
+      #       user_assigned_max_num_pred = 2,
+      #       exclude_high_cost_jg=exclude_high_cost_jg,
+      #       f1_calculation_type =args.f1_calc_type,
+      #       f1_sample_rate = args.f1_sample_rate,
+      #       f1_sample_type = args.f1_sample_type,
+      #       f1_min_sample_size_threshold=args.f1_sample_thresh,
+      #       lca_eval_mode=eval_lca,
+      #       )
+

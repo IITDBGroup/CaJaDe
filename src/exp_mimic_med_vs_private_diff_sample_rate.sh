@@ -4,20 +4,28 @@ trap "kill 0" EXIT
 
 echo "experiments for different sample rate and different sample strategy in calculating F-score"
 
-originals: 3 differnt max number of egdes
-python3 experiments.py -M 1 -p jape -U japerev -P 5433 -d mimic_rev -t o -m 0 -i false  -D march_4_miic_sample_rate
-python3 experiments.py -M 2 -p jape -U japerev -P 5433 -d mimic_rev -t o -m 0 -i false  -D march_4_miic_sample_rate
-python3 experiments.py -M 3 -p jape -U japerev -P 5433 -d mimic_rev -t o -m 0 -i false  -D march_4_miic_sample_rate
+# originals: 3 differnt max number of egdes
+# python3 experiments.py -M 1 -p jape -U japerev -P 5433 -d mimic_original -t o -m 0 -i false  -D april_4_sample
+# python3 experiments.py -M 2 -p jape -U japerev -P 5433 -d mimic_original -t o -m 0 -i false  -D april_4_sample
+# python3 experiments.py -M 3 -p jape -U japerev -P 5433 -d mimic_original -t o -m 0 -i false  -D april_4_sample
 
 samplerates=(0.05 0.1 0.2 0.3 0.4 0.5 0.6 0.7)
 maxedges=(1 2 3)
+iters=(1 2 3 4)
 
-for s in ${samplerates[@]}
-	do 
-		for e in ${maxedges[@]}
-		do
-		    python3 experiments.py -M ${e} -p jape -U japerev -P 5433 -d mimic_rev -t s -m 0 -i false -F ${s} -D march_4_miic_sample_rate
-	    done
+for i in ${iters[@]}
+	do
+		python3 experiments.py -M 1 -p jape -U japerev -P 5433 -d mimic_original -t o -m 0 -i false  -D april_4_repeat_${i}
+		python3 experiments.py -M 2 -p jape -U japerev -P 5433 -d mimic_original -t o -m 0 -i false  -D april_4_repeat_${i}
+		python3 experiments.py -M 3 -p jape -U japerev -P 5433 -d mimic_original -t o -m 0 -i false  -D april_4_repeat_${i}
+
+		for s in ${samplerates[@]}
+			do 
+				for e in ${maxedges[@]}
+				do
+				    python3 experiments.py -M ${e} -p jape -U japerev -P 5433 -d mimic_original -t s -m 0 -i false -F ${s} -D april_4_repeat_${i}
+			    done
+			done
 	done
 
 

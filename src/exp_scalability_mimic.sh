@@ -13,7 +13,9 @@ for s in ${array[@]}
 		for r in ${rates[@]}
 			do
         # echo "Running query of f1 sample rate = ${s}"
-	        python3 experiments.py -M 3 -p jape -U japerev -P 5433 -d mimic_rev_${s} -t s -m 0 -i false -F ${r} -D march_3_mimic_scalability
+	        # python3 experiments.py -M 3 -p jape -U japerev -P 5433 -d mimic_rev_${s} -t s -m 0 -i false -F ${r} -D march_3_mimic_scalability
+	        # python3 experiments.py -M 3 -p jape -U japerev -P 5433 -d mimic_rev_${s} -t s -m 0 -i false -F ${r} -D april_2_mimic_scalability
+	        python3 experiments.py -M 3 -p jape -U japerev -P 5433 -d mimic_rev_${s} -t s -m 0 -i false -F ${r} -D april_4_mimic_scalability
 	    done
     done
 
@@ -22,5 +24,7 @@ for s in ${array[@]}
 for r in ${rates[@]}
 	do
 	# echo "Running query of f1 sample rate = ${s}"
-    python3 experiments.py -M 3 -p jape -U japerev -P 5433 -d mimic_rev -t s -m 0 -i false -F ${r} -D march_3_mimic_scalability
+    # python3 experiments.py -M 3 -p jape -U japerev -P 5433 -d mimic_rev -t s -m 0 -i false -F ${r} -D march_3_mimic_scalability
+    # python3 experiments.py -M 3 -p jape -U japerev -P 5433 -d mimic_original -t s -m 0 -i false -F ${r} -D april_2_mimic_scalability
+    python3 experiments.py -M 3 -p jape -U japerev -P 5433 -d mimic_original -t s -m 0 -i false -F ${r} -D april_4_mimic_scalability
     done

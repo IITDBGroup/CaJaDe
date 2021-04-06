@@ -26,7 +26,6 @@ class QueryGeneratorStats(ExecStats):
     """
 
     TIMERS = {'renaming',
-              'compose_query',
               'materialize_jg'
               }
 
@@ -112,9 +111,9 @@ class Join_Graph_Materializer:
         """
         # logger.debug(query)
         errcode, output_raw = self.gwrapper.runQuery(query, ec_options=True)
-        logger.debug(query)
+        # logger.debug(query)
         output = output_raw.decode("utf-8")
-        logger.debug(output)
+        # logger.debug(output)
         reg_rc_line = re.compile(r'EC T_ProjectionOperator.*\nList size [0-9]+\n({.*})')
         rc_line = reg_rc_line.search(output).group(1)
         res = re.findall(r'(\{.*?\})', rc_line)
@@ -286,7 +285,6 @@ class Join_Graph_Materializer:
         # if jg has only one node, then don't need to worry about join conditions, 
         # just need to take  care of ignored attributes
 
-        self.stats.startTimer('compose_query')
         PT_key_attributes = self.db_dict['PT']['keys']
 
         if(len(join_graph.graph_core)==1):
@@ -405,8 +403,6 @@ class Join_Graph_Materializer:
             # logger.debug("@@@@ a redundant jg @@@@@@@@@")
             # logger.debug(query)
             query = None
-
-        self.stats.stopTimer('compose_query')
 
         if(cost_estimate and query is not None):
             cost_estimate_q = f"""

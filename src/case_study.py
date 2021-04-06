@@ -42,13 +42,11 @@ mimic_question_dict_5['uattrs'] = [('patients_admit_info','ethnicity')]
 mimic_question_dict_5['umap']= {'yes':'ASIAN', 'no':'HISPANIC'}
 
 
-# mimic_workloads = [mimic_question_dict_1,mimic_question_dict_2,mimic_question_dict_3, mimic_question_dict_5]
-mimic_workloads = [mimic_question_dict_4]
+mimic_cases = [mimic_question_dict_1,mimic_question_dict_2,mimic_question_dict_3, mimic_question_dict_5]
 
 
-# print(mimic_workloads)
+
 # 5 queries / questions from NBA
-
 
 # Q1
 nba_question_dict_1 = {}
@@ -100,6 +98,4 @@ nba_question_dict_6['question'] =["game_month='1'","game_month='2'"]
 nba_question_dict_6['uattrs'] = [('player','player_name'), ('player_game_stats', 'points'), ('game', 'game_month')]
 nba_question_dict_6['umap']= {'yes':'1', 'no':'2'}
 
-nba_workloads = [nba_question_dict_1,nba_question_dict_2, nba_question_dict_3, nba_question_dict_4,nba_question_dict_5]
-
-# nba_workloads = [nba_question_dict_6]
+nba_cases = [nba_question_dict_1,nba_question_dict_2, nba_question_dict_3, nba_question_dict_4,nba_question_dict_5]

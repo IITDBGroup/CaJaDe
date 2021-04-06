@@ -83,18 +83,20 @@ def calc_ndcg(conn, schema):
 			order by tf, id
 			"""
 			
-			#print(fetch_q)
+			# print(fetch_q)
 
 			row_dict = {}
 
 			dfts = pd.read_sql(fetch_q, conn)
 			out = np.empty(dfts.shape[0], dtype=object)
 			tlist = dfts['t_f1'].to_list()
+			# print(tlist)
 			slist = dfts['s_f1'].to_list()
+			# print(slist)
 			tarray = np.asarray([tlist])
 			sarray = np.asarray([slist])
-			# score = ndcg_score(tarray, sarray, k=gt_cnt)
-			score = len(list(filter(lambda x: x > 0, slist[:gt_cnt]))) / gt_cnt
+			score = ndcg_score(tarray, sarray) # ndcg
+			# score = len(list(filter(lambda x: x > 0, slist[:gt_cnt]))) / gt_cnt # recall
 			row_dict['ndcg_score'] = score
 
 			param_q = f"""
@@ -130,11 +132,45 @@ def calc_ndcg(conn, schema):
 
 if __name__ == '__main__':
 
-	conn = psycopg2.connect(f"dbname=mimic_rev user=japerev port=5433")
+	# conn = psycopg2.connect(f"dbname=mimic_rev user=japerev port=5433")
+	# result = calc_ndcg(conn=conn, schema='f1_sample_rate_startsize_100')
+	conn = psycopg2.connect(f"dbname=nba_rev user=japerev port=5433")
 	result = calc_ndcg(conn=conn, schema='f1_sample_rate_startsize_100')
 
-#	conn = psycopg2.connect(f"dbname=nba_rev user=japerev port=5433")
-#	result = calc_ndcg(conn=conn, schema='f1_sample_rate_startsize_100')
+	# new
 
+	# %%%%%%%%%%%%%%%%%%%%%%%%%%% MIMIC %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+	# conn = psycopg2.connect(f"dbname=mimic_original user=japerev port=5433")
+	# result = calc_ndcg(conn=conn, schema='april_4_sample')
+
+	# conn = psycopg2.connect(f"dbname=mimic_original user=japerev port=5433")
+	# result = calc_ndcg(conn=conn, schema='april_4_repeat_1')
+
+	# conn = psycopg2.connect(f"dbname=mimic_original user=japerev port=5433")
+	# result = calc_ndcg(conn=conn, schema='april_4_repeat_2')
+
+	# conn = psycopg2.connect(f"dbname=mimic_original user=japerev port=5433")
+	# result = calc_ndcg(conn=conn, schema='april_4_repeat_3')
+
+	# conn = psycopg2.connect(f"dbname=mimic_original user=japerev port=5433")
+	# result = calc_ndcg(conn=conn, schema='april_4_repeat_4')
+
+	# %%%%%%%%%%%%%%%%%%%%%%%%%%% NBA %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+	# conn = psycopg2.connect(f"dbname=nba_original user=japerev port=5433")
+	# result = calc_ndcg(conn=conn, schema='april_4_sample')
+
+	# conn = psycopg2.connect(f"dbname=nba_original user=japerev port=5433")
+	# result = calc_ndcg(conn=conn, schema='april_4_repeat_1')
+
+	# conn = psycopg2.connect(f"dbname=nba_original user=japerev port=5433")
+	# result = calc_ndcg(conn=conn, schema='april_4_repeat_2')
+
+	# conn = psycopg2.connect(f"dbname=nba_original user=japerev port=5433")
+	# result = calc_ndcg(conn=conn, schema='april_4_repeat_3')
+
+	# conn = psycopg2.connect(f"dbname=nba_original user=japerev port=5433")
+	# result = calc_ndcg(conn=conn, schema='april_4_repeat_4')
 
 	print(result)
