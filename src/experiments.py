@@ -29,7 +29,7 @@ class ExperimentParams(ExecStats):
     """
     Statistics gathered during mining
     """
-    # TIMERS = {'one_jg_timer'}
+    TIMERS = {'one_jg_timer'}
 
     PARAMS = {'result_schema',
               'user_questions',
@@ -359,7 +359,7 @@ def run_experiment(result_schema,
                             lca_s_max_size = lca_s_max_size,
                             lca_s_min_size = lca_s_min_size,
                             just_lca = lca_eval_mode,
-                            pattern_recall_threshold=min_recall_threshold,
+                            lca_recall_thresh=min_recall_threshold,
                             numercial_attr_filter_method=numercial_attr_filter_method,
                             user_pt_size=user_pt_size,
                             original_pt_size=apt_size,
@@ -407,7 +407,6 @@ def run_experiment(result_schema,
         jg_cnt+=1
         if(n.cost<=avg_cost_estimate_by_num_edges[n.num_edges]):
           jg_individual_times_dict[n] = 0
-
           jgg.stats.params['valid_jgs']+=1
           cost_friendly_jgs.append(n) 
           jgm.stats.startTimer('materialize_jg')
@@ -419,6 +418,7 @@ def run_experiment(result_schema,
           apt_size_query = f"SELECT count(*) FROM jg_{n.jg_number}"
           jgm.cur.execute(apt_size_query)
           apt_size = int(jgm.cur.fetchone()[0])
+          pgen.stats.startTimer('per_jg_timer')
           pgen.gen_patterns(jg=n,
                             jg_name=f"jg_{n.jg_number}", 
                             renaming_dict=n.renaming_dict, 
@@ -427,7 +427,7 @@ def run_experiment(result_schema,
                             lca_s_max_size = lca_s_max_size,
                             lca_s_min_size = lca_s_min_size,
                             just_lca = lca_eval_mode,
-                            pattern_recall_threshold=min_recall_threshold,
+                            lca_recall_thresh=min_recall_threshold,
                             numercial_attr_filter_method = numercial_attr_filter_method,
                             user_pt_size=user_pt_size,
                             original_pt_size = apt_size,
@@ -506,7 +506,7 @@ if __name__ == '__main__':
   parser.add_argument('-M','--maximum_edges', metavar="\b", type=int, default=3, 
     help='Maximum number of edges allowed in a join graph (default: %(default)s)')
 
-  parser.add_argument('-F','--f1_sample_rate', metavar="\b", type=float, default=1.0, 
+  parser.add_argument('-F','--f1_sample_rate', metavar="\b", type=float, default=0.3, 
     help='Sample rate of apt when calculating the f1 score (default: %(default)s)')
 
   parser.add_argument('-w','--f1_sample_type', metavar="\b", type=str, default='weighted', 
@@ -521,8 +521,8 @@ if __name__ == '__main__':
   parser.add_argument('-i','--ignore_expensive', metavar="\b", type=str, default='true', 
     help='skip expensive jg or not, (default: %(default)s)')
 
-  parser.add_argument('-m','--min_recall_threshold', metavar="\b", type=float, default=0.5, 
-    help='recall threshold when calculating f1 score (default: %(default)s)')
+  parser.add_argument('-m','--min_recall_threshold', metavar="\b", type=float, default=0.3, 
+    help='recall threshold (default: %(default)s)')
 
   parser.add_argument('-r','--sample_rate_for_lca', metavar="\b", type=float, default=0.05, 
   help='sample rate for lca (default: %(default)s)')
@@ -632,7 +632,7 @@ if __name__ == '__main__':
       maximum_edges=args.maximum_edges,
       min_recall_threshold=args.min_recall_threshold,
       numercial_attr_filter_method=args.optimized,
-      user_assigned_max_num_pred = 2,
+      user_assigned_max_num_pred = 3,
       exclude_high_cost_jg=exclude_high_cost_jg,
       f1_calculation_type =args.f1_calc_type,
       f1_sample_rate = args.f1_sample_rate,
@@ -661,7 +661,7 @@ if __name__ == '__main__':
             maximum_edges=args.maximum_edges,
             min_recall_threshold=args.min_recall_threshold,
             numercial_attr_filter_method=args.optimized,
-            user_assigned_max_num_pred = 2,
+            user_assigned_max_num_pred = 3,
             exclude_high_cost_jg=exclude_high_cost_jg,
             f1_calculation_type =args.f1_calc_type,
             f1_sample_rate = args.f1_sample_rate,
@@ -688,7 +688,7 @@ if __name__ == '__main__':
             maximum_edges=args.maximum_edges,
             min_recall_threshold=args.min_recall_threshold,
             numercial_attr_filter_method=args.optimized,
-            user_assigned_max_num_pred = 2,
+            user_assigned_max_num_pred = 3,
             exclude_high_cost_jg=exclude_high_cost_jg,
             f1_calculation_type =args.f1_calc_type,
             f1_sample_rate = args.f1_sample_rate,
@@ -715,7 +715,7 @@ if __name__ == '__main__':
       #       maximum_edges=args.maximum_edges,
       #       min_recall_threshold=args.min_recall_threshold,
       #       numercial_attr_filter_method=args.optimized,
-      #       user_assigned_max_num_pred = 2,
+      #       user_assigned_max_num_pred = 3,
       #       exclude_high_cost_jg=exclude_high_cost_jg,
       #       f1_calculation_type =args.f1_calc_type,
       #       f1_sample_rate = args.f1_sample_rate,
@@ -742,7 +742,7 @@ if __name__ == '__main__':
       #       maximum_edges=args.maximum_edges,
       #       min_recall_threshold=args.min_recall_threshold,
       #       numercial_attr_filter_method=args.optimized,
-      #       user_assigned_max_num_pred = 2,
+      #       user_assigned_max_num_pred = 3,
       #       exclude_high_cost_jg=exclude_high_cost_jg,
       #       f1_calculation_type =args.f1_calc_type,
       #       f1_sample_rate = args.f1_sample_rate,

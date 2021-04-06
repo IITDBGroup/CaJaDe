@@ -164,14 +164,10 @@ class Pattern_Generator:
                             k=5, 
                             same_attr_weight=-0.3, # punish patterns sharing same attribute
                             same_val_weight=-2, # punish same attr and same value,
-                            pass_thresh=0.3 # must be smaller than 1 
                             ):
         # record patterns' info as new patterns being added and everytime a new pattern 
         # comes in, we iteratively compute its similarities between itself and the previously
         # added patterns.
-
-        # evaluate if 
-        # f1*weight + diff_attr_weight + sum(same_attr_weight*identity[attr_value]) > pass_thresh
 
         res = []
 
@@ -677,12 +673,12 @@ class Pattern_Generator:
                       original_pt_size,
                       attr_alias='a',
                       prov_version='existential',
-                      s_rate_for_s=0.5,
+                      s_rate_for_s=0.1,
                       lca_s_max_size = 1000,
                       lca_s_min_size = 100,
                       lca_recall_thresh = 0.3,
                       just_lca = False,
-                      pattern_recall_threshold=0.3, 
+                      pattern_recall_threshold=0, 
                       numercial_attr_filter_method = 'y',
                       sample_repeatable = False,
                       f1_sample_type = 'weighted',
@@ -691,7 +687,6 @@ class Pattern_Generator:
                       f1_calculation_sample_rate = 0.3,
                       f1_calculation_min_size = 100,
                       user_assigned_num_pred_cap = 3,
-                      num_numerical_attr_rate = 1.5,
                       ):
 
         """
@@ -710,9 +705,6 @@ class Pattern_Generator:
         user_assigned_num_pred_cap: maximum number of numerical attributes allowed.
         doesnt need to meet this number: (could be filtered by recall thresh or invalidated by
         max number of clusters)
-
-        num_numerical_attr_rate: if filter method is 'varclus', after random forest, how 
-        many important features will be considered? it is equal to user_assigned_num_pred_cap*num_numerical_attr_rate
         """
 
         self.pattern_by_jg[jg] = []
@@ -893,9 +885,7 @@ class Pattern_Generator:
             self.cur.execute(drop_prov_s)
 
             lca_sample_size = max([min(math.ceil(original_pt_size*s_rate_for_s), lca_s_max_size), lca_s_min_size])
-            # logger.debug(f"sample size : {lca_sample_size}")
-
-
+            logger.debug(f"sample size : {lca_sample_size}")
 
             if(lca_sample_size!=0):
                 # make sure jg result is not empty            
@@ -1227,7 +1217,7 @@ class Pattern_Generator:
 
                         self.stats.stopTimer('feature_reduct')
 
-                        num_feature_to_consider = math.ceil(num_numerical_attr_rate*user_assigned_num_pred_cap)
+                        num_feature_to_consider = user_assigned_num_pred_cap
                         # construct dictionary for each nominal pattern with ordinal attributes
                         # add patterns that only include nominal attributes
 

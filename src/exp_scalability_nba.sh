@@ -13,7 +13,8 @@ for s in ${array[@]}
 		for r in ${rates[@]}
 			do
         # echo "Running query of f1 sample rate = ${s}"
-	        python3 experiments.py -M 3 -p jape -U japerev -P 5433 -d nba_rev_${s} -t s -m 0 -i false -F ${r} -D april_3_nba_scalability
+	        # python3 experiments.py -M 3 -p jape -U japerev -P 5433 -d nba_rev_${s} -t s -i false -F ${r} -D april_3_nba_scalability
+	        python3 experiments.py -M 3 -p jape -U japerev -P 5433 -d nba_rev_${s} -t s -i false -F ${r} -D april_6_nba_scalability
 	    done
     done
 
@@ -22,5 +23,6 @@ for s in ${array[@]}
 for r in ${rates[@]}
 	do
 	# echo "Running query of f1 sample rate = ${s}"
-    python3 experiments.py -M 3 -p jape -U japerev -P 5433 -d nba_original -t s -m 0 -i false -F ${r} -D april_3_nba_scalability
+    # python3 experiments.py -M 3 -p jape -U japerev -P 5433 -d nba_original -t s -i false -F ${r} -D april_3_nba_scalability
+    python3 experiments.py -M 3 -p jape -U japerev -P 5433 -d nba_original -t s -i false -F ${r} -D april_6_nba_scalability
     done
