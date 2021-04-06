@@ -687,6 +687,7 @@ class Pattern_Generator:
                       f1_calculation_sample_rate = 0.3,
                       f1_calculation_min_size = 100,
                       user_assigned_num_pred_cap = 3,
+                      num_numerical_attr_rate = 1.5,
                       ):
 
         """
@@ -705,6 +706,9 @@ class Pattern_Generator:
         user_assigned_num_pred_cap: maximum number of numerical attributes allowed.
         doesnt need to meet this number: (could be filtered by recall thresh or invalidated by
         max number of clusters)
+
+        num_numerical_attr_rate: if filter method is 'varclus', after random forest, how 
+        many important features will be considered? it is equal to user_assigned_num_pred_cap*num_numerical_attr_rate
         """
 
         self.pattern_by_jg[jg] = []
@@ -1217,7 +1221,7 @@ class Pattern_Generator:
 
                         self.stats.stopTimer('feature_reduct')
 
-                        num_feature_to_consider = user_assigned_num_pred_cap
+                        num_feature_to_consider = math.ceil(num_numerical_attr_rate*user_assigned_num_pred_cap)
                         # construct dictionary for each nominal pattern with ordinal attributes
                         # add patterns that only include nominal attributes
 
