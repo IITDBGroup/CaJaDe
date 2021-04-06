@@ -82,6 +82,7 @@ class Join_Graph:
         self.jg_number = jg_number
         self.graph_core = graph_core
         self.ignored_attrs = []
+        self.user_attrs = []
         self.spec_node_key = spec_node_key
         self.intermediate = intermediate
         self.cost = 0

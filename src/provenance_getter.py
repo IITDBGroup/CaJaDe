@@ -101,9 +101,9 @@ class provenance_getter:
 			pt_full_dict = dict.fromkeys(pt_remamed_attr, None)
 			pt_dict = {'attributes':{}, 
 			'keys':[],
-			'user_attrs':[]}
-			# logger.debug(pt_full_dict)
-			# logger.debug(self.db_dict)
+			'user_text_attrs':[],
+			'user_numerical_attrs':[]}
+
 			for k,v in pt_full_dict.items():
 				if(re_PROV.search(k)):
 					str_items = re.split('(?<!_)_(?!_)', k)
@@ -117,27 +117,22 @@ class provenance_getter:
 						origin_rel = origin_rel.replace('__','_')
 						origin_attr = str_items[3]
 						origin_attr = origin_attr.replace('__','_')
-					# logger.debug(f"self.db_dict[origin_rel]['p_key']: {self.db_dict[origin_rel]['p_key']}")
-					# logger.debug(f"self.db_dict[origin_rel]['keys']: {self.db_dict[origin_rel]['keys']}")
-					# logger.debug(f"origin_rel: {origin_rel}")
+
 					for kk, vv in self.db_dict.items():
 						if(origin_rel==kk):
 							for attr in vv['attributes']:
 								if(origin_attr==attr[0]):
 									pt_dict['attributes'][':'.join([k,attr[1]])] = (origin_rel, origin_attr)
+									if((origin_rel, origin_attr) in user_specified_attrs):
+										if(attr[1]=='nominal'):
+											pt_dict['user_text_attrs'].append(k)
+										else:
+											pt_dict['user_numerical_attrs'].append(k)		
 									if(origin_attr in self.db_dict[origin_rel]['keys'] or 
 										origin_attr in self.db_dict[origin_rel]['p_key']):
 										pt_dict['keys'].append(k)
 					# logger.debug((origin_rel, origin_attr))
-					if((origin_rel, origin_attr) in user_specified_attrs):
-						pt_dict['user_attrs'].append(k)									
-					# if(re_CAT.search(k)):
-					# 	pt_attrs.append(f'"{k}"')
-					# 	pt_dict[k] = (origin_rel, origin_attr)
-					# pt_full_dict[k] = (origin_rel,origin_attr)
-					# if(origin_attr in keys):
-					# 	pt_attrs.append(f'"{k}"')
-					# 	pt_dict[k] = (origin_rel, origin_attr)
+							
 				else:
 					pt_dict['attributes'][':'.join([k,'nominal'])] = ('PT', k)
 
