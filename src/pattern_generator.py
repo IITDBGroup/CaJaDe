@@ -1126,6 +1126,8 @@ class Pattern_Generator:
                         # comes from the "last node" specified in join graph 
                         # (either nominal or ordinal has to be in the patten)
 
+                        ordinal_pattern_attr_list = [x for x in ordinal_pattern_attr_list if x not in jg.user_attrs]
+
                         self.stats.startTimer('feature_reduct')
 
                         Q_cor = f"""
@@ -1158,16 +1160,11 @@ class Pattern_Generator:
                             variable_clustering.varclus()
 
                             cluster_dict = variable_clustering.rsquare[['Cluster', 'Variable']].groupby('Cluster')['Variable'].apply(list).to_dict()
-                            # logger.debug(cluster_dict)
-                            # logger.debug(jg.user_attrs)
-                            # logger.debug(renaming_dict)
-
-                            for ua in jg.user_attrs:
-                                cluster_dict = {k:v for k,v in cluster_dict.items() if not ua in v}
-                            # logger.debug(cluster_dict)
 
                             for k,v in cluster_dict.items():
-                                cluster_dict[k] = [[x,0,0] for x in v]      
+                                cluster_dict[k] = [[x,0,0] for x in v]
+
+                            logger.debug(cluster_dict)      
 
                             # entropy rank in each cluster to find the highest one 
                             # as the training input variable "representing" the cluster
@@ -1187,14 +1184,15 @@ class Pattern_Generator:
                                         col[2]=1
                                 cluster_dict[k] = sorted(v, key = lambda x: (x[2],x[1],x[0]), reverse=True)
                                 representative_var_for_clust = cluster_dict[k][0][0]
+                                logger.debug(representative_var_for_clust)
                                 if(representative_var_for_clust in attrs_from_spec_node):
                                     rep_from_last_node.append(representative_var_for_clust)
                                 rf_input_vars.append(representative_var_for_clust)
                                 correlation_dict[representative_var_for_clust] = [cora[0] for cora in cluster_dict[k][1:]]
 
-                            # logger.debug("lagrge number of num attrs")
-                            # logger.debug(rf_input_vars)
-                        # logger.debug(correlation_dict)
+                            logger.debug("lagrge number of num attrs")
+                            logger.debug(rf_input_vars)
+                            logger.debug(correlation_dict)
 
                         # finish clustering here
                         else:
@@ -1206,7 +1204,7 @@ class Pattern_Generator:
 
 
                         rf_df = cor_df[rf_input_vars]
-                        # logger.debug(rf_df.head())
+                        logger.debug(rf_df.head())
                         target = raw_df['is_user']
                         le = LabelEncoder()
                         y = le.fit(target)
