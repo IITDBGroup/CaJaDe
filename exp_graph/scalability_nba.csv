@@ -1,0 +1,6 @@
+db_size,jg_enumeration,numercial_attr_filter,get_nominal_patterns,run_f1_query,validate_patterns_recall_constraint,enumerate_all_from_nominal_patterns,total
+0.1,184.19,203.16,0.73,8.47,8.01,2.95,407.51
+0.5,181.2,310.58,16.28,72.81,49.05,14.2,644.12
+2,181.06,299.68,156.09,143.59,87.01,45.1,912.53
+5,183.07,355.01,969.27,461.1,294.82,166.05,2429.32
+10,181.37,402.05,4083.69,2162.43,1018.6,493.18,8341.32

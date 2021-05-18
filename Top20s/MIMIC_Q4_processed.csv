@@ -1,0 +1,40 @@
+\makecell{$A_1$: PT \\ $A_2$: patients\_admit\_info \\ $A_3$: patients} & \makecell{($A_1$.prov\_admissions\_hadm\_\_id)=($A_2$.hadm\_id)\\($A_3$.subject\_id)=($A_2$.subject\_id)} & \makecell{$A_3$.expire\_flag=0 \\ $A_2$.age<70.86} & 0.77 & 0.77 & 0.77 & Private\\
+\hline
+\makecell{} & \makecell{A\_1} & \makecell{$A_1$.prov\_admissions\_admission\_\_type=EMERGENCY} & 0.65 & 0.84 & 0.73 & Medicare\\
+\hline
+\makecell{$A_1$: PT \\ $A_2$: procedures \\ $A_3$: patients} & \makecell{($A_1$.prov\_admissions\_hadm\_\_id)=($A_2$.hadm\_id)\\($A_3$.subject\_id)=($A_2$.subject\_id)} & \makecell{$A_3$.expire\_flag=0} & 0.6 & 0.79 & 0.68 & Private\\
+\hline
+\makecell{$A_1$: PT \\ $A_2$: icustays \\ $A_3$: patients} & \makecell{($A_1$.prov\_admissions\_hadm\_\_id)=($A_2$.hadm\_id)\\($A_3$.subject\_id)=($A_2$.subject\_id)} & \makecell{$A_3$.expire\_flag=0} & 0.6 & 0.8 & 0.68 & Private\\
+\hline
+\makecell{$A_1$: PT \\ $A_2$: procedures \\ $A_3$: patients} & \makecell{($A_1$.prov\_admissions\_hadm\_\_id)=($A_2$.hadm\_id)\\($A_3$.subject\_id)=($A_2$.subject\_id)} & \makecell{$A_1$.prov\_admissions\_hospital\_\_stay\_\_length<22.0 \\ $A_3$.expire\_flag=1} & 0.78 & 0.5 & 0.61 & Medicare\\
+\hline
+\makecell{$A_1$: PT \\ $A_2$: procedures \\ $A_3$: patients} & \makecell{($A_1$.prov\_admissions\_hadm\_\_id)=($A_2$.hadm\_id)\\($A_3$.subject\_id)=($A_2$.subject\_id)} & \makecell{$A_3$.gender=M} & 0.48 & 0.61 & 0.54 & Private\\
+\hline
+\makecell{$A_1$: PT \\ $A_2$: icustays \\ $A_3$: patients} & \makecell{($A_1$.prov\_admissions\_hadm\_\_id)=($A_2$.hadm\_id)\\($A_3$.subject\_id)=($A_2$.subject\_id)} & \makecell{$A_3$.gender=F} & 0.6 & 0.48 & 0.53 & Medicare\\
+\hline
+\makecell{$A_1$: PT \\ $A_2$: patients\_admit\_info \\ $A_3$: patients} & \makecell{($A_1$.prov\_admissions\_hadm\_\_id)=($A_2$.hadm\_id)\\($A_3$.subject\_id)=($A_2$.subject\_id)} & \makecell{$A_3$.gender=M} & 0.48 & 0.6 & 0.53 & Private\\
+\hline
+\makecell{$A_1$: PT \\ $A_2$: patients\_admit\_info \\ $A_3$: patients} & \makecell{($A_1$.prov\_admissions\_hadm\_\_id)=($A_2$.hadm\_id)\\($A_3$.subject\_id)=($A_2$.subject\_id)} & \makecell{$A_3$.gender=M \\ $A_2$.age<64.72 \\ $A_2$.ethnicity=WHITE} & 0.83 & 0.39 & 0.53 & Private\\
+\hline
+\makecell{} & \makecell{A\_1} & \makecell{$A_1$.prov\_admissions\_marital\_\_status=MARRIED} & 0.56 & 0.45 & 0.5 & Medicare\\
+\hline
+\makecell{$A_1$: PT \\ $A_2$: patients\_admit\_info \\ $A_3$: patients} & \makecell{($A_1$.prov\_admissions\_hadm\_\_id)=($A_2$.hadm\_id)\\($A_3$.subject\_id)=($A_2$.subject\_id)} & \makecell{$A_1$.prov\_admissions\_hospital\_\_stay\_\_length<10.0 \\ $A_3$.expire\_flag=0 \\ $A_2$.ethnicity=WHITE} & 0.59 & 0.42 & 0.49 & Private\\
+\hline
+\makecell{$A_1$: PT \\ $A_2$: procedures \\ $A_3$: patients} & \makecell{($A_1$.prov\_admissions\_hadm\_\_id)=($A_2$.hadm\_id)\\($A_3$.subject\_id)=($A_2$.subject\_id)} & \makecell{$A_1$.prov\_admissions\_hospital\_\_stay\_\_length<20.0 \\ $A_3$.gender=F} & 0.6 & 0.41 & 0.49 & Medicare\\
+\hline
+\makecell{$A_1$: PT \\ $A_2$: icustays \\ $A_3$: patients} & \makecell{($A_1$.prov\_admissions\_hadm\_\_id)=($A_2$.hadm\_id)\\($A_3$.subject\_id)=($A_2$.subject\_id)} & \makecell{$A_2$.los>1.1306 \\ $A_3$.gender=M} & 0.56 & 0.42 & 0.48 & Medicare\\
+\hline
+\makecell{$A_1$: PT \\ $A_2$: icustays \\ $A_3$: patients} & \makecell{($A_1$.prov\_admissions\_hadm\_\_id)=($A_2$.hadm\_id)\\($A_3$.subject\_id)=($A_2$.subject\_id)} & \makecell{$A_1$.prov\_admissions\_admission\_\_type=EMERGENCY \\ $A_1$.prov\_admissions\_hospital\_\_stay\_\_length<15.0 \\ $A_2$.los<5.2349 \\ $A_3$.expire\_flag=1} & 0.8 & 0.34 & 0.47 & Medicare\\
+\hline
+\makecell{$A_1$: PT \\ $A_2$: patients\_admit\_info \\ $A_3$: patients} & \makecell{($A_1$.prov\_admissions\_hadm\_\_id)=($A_2$.hadm\_id)\\($A_3$.subject\_id)=($A_2$.subject\_id)} & \makecell{$A_1$.prov\_admissions\_hospital\_\_stay\_\_length<12.0 \\ $A_3$.gender=F \\ $A_2$.age>48.08} & 0.76 & 0.34 & 0.47 & Medicare\\
+\hline
+\makecell{$A_1$: PT \\ $A_2$: procedures \\ $A_3$: patients} & \makecell{($A_1$.prov\_admissions\_hadm\_\_id)=($A_2$.hadm\_id)\\($A_3$.subject\_id)=($A_2$.subject\_id)} & \makecell{$A_1$.prov\_admissions\_admission\_\_type=EMERGENCY \\ $A_1$.prov\_admissions\_hospital\_\_stay\_\_length<21.0 \\ $A_3$.gender=M} & 0.61 & 0.38 & 0.46 & Medicare\\
+\hline
+\makecell{} & \makecell{A\_1} & \makecell{$A_1$.prov\_admissions\_admission\_\_type=EMERGENCY \\ $A_1$.prov\_admissions\_marital\_\_status=MARRIED} & 0.58 & 0.36 & 0.45 & Medicare\\
+\hline
+\makecell{} & \makecell{A\_1} & \makecell{$A_1$.prov\_admissions\_admission\_\_location=EMERGENCY ROOM ADMIT \\ $A_1$.prov\_admissions\_admission\_\_type=EMERGENCY \\ $A_1$.prov\_admissions\_hospital\_\_stay\_\_length<12.0} & 0.66 & 0.33 & 0.44 & Medicare\\
+\hline
+\makecell{} & \makecell{A\_1} & \makecell{$A_1$.prov\_admissions\_hospital\_\_stay\_\_length>4.0 \\ $A_1$.prov\_admissions\_marital\_\_status=MARRIED} & 0.58 & 0.33 & 0.42 & Medicare\\
+\hline
+\makecell{$A_1$: PT \\ $A_2$: icustays \\ $A_3$: patients} & \makecell{($A_1$.prov\_admissions\_hadm\_\_id)=($A_2$.hadm\_id)\\($A_3$.subject\_id)=($A_2$.subject\_id)} & \makecell{$A_1$.prov\_admissions\_hospital\_\_stay\_\_length>4.0 \\ $A_2$.los>1.111825 \\ $A_3$.gender=F} & 0.65 & 0.31 & 0.42 & Medicare\\
+\hline
