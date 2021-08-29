@@ -1,0 +1,13 @@
+{"nodes": [
+     {"name": "register", "label": "register", "id": 1}, 
+     {"name": "student", "label": "student", "id": 2}, 
+     {"name": "course", "label": "course", "id": 3}, 
+     {"name": "teach", "label": "teach", "id": 4}, 
+     {"name": "teacher", "label": "teacher", "id": 5}], 
+
+"links": 
+[{"source": 1, "target": 2, "type": "(student.email)=(register.student)"}, 
+     {"source": 1, "target": 3, "type": "(course.id)=(register.course)"},
+ {"source": 3, "target": 4, "type": "(course.id)=(teach.course)"}, {"source": 5, "target": 4, "type": "(teacher.email)=(teach.teacher)"}]
+
+}
