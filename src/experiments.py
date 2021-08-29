@@ -569,15 +569,15 @@ if __name__ == '__main__':
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-  # user_query = "provenance of (select count(*) as win, s.season_name from team t, game g, season s where t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' group by s.season_name);"
-  # u_query = (user_query, 'gsw wins : 15 vs 12')
-  # u_question =["season_name='2015-16'","season_name='2012-13'"]
-  # user_specified_attrs = [('team','team'),('season','season_name')]
+  user_query = "provenance of (select count(*) as win, s.season_name from team t, game g, season s where t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' group by s.season_name);"
+  u_query = (user_query, 'gsw wins : 15 vs 12')
+  u_question =["season_name='2015-16'","season_name='2012-13'"]
+  user_specified_attrs = [('team','team'),('season','season_name')]
 
-  user_query = 'provenance of (select insurance, 1.0*SUM(hospital_expire_flag)/count(*) as death_rate from admissions group by insurance);'
-  u_query = (user_query, 'death rate: medicare vs private')
-  u_question =["insurance='Private'","insurance='Medicare'"]
-  user_specified_attrs = [('admissions',  'insurance'), ('admissions', 'hospital_expire_flag')]
+  # user_query = 'provenance of (select insurance, 1.0*SUM(hospital_expire_flag)/count(*) as death_rate from admissions group by insurance);'
+  # u_query = (user_query, 'death rate: medicare vs private')
+  # u_question =["insurance='Private'","insurance='Medicare'"]
+  # user_specified_attrs = [('admissions',  'insurance'), ('admissions', 'hospital_expire_flag')]
   
 
   args=parser.parse_args()
@@ -606,8 +606,8 @@ if __name__ == '__main__':
       result_schema = result_schema,
       user_query = u_query,
       user_questions=u_question,
-      user_questions_map = {'yes':'Private', 'no':'Medicare'},
-      # user_questions_map = {'yes':'2015-16', 'no':'2012-13'},
+      # user_questions_map = {'yes':'Private', 'no':'Medicare'},
+      user_questions_map = {'yes':'2015-16', 'no':'2012-13'},
       user_specified_attrs=user_specified_attrs,
       user_name=args.user_name,
       password=args.password,
