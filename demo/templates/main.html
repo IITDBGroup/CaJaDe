@@ -181,138 +181,139 @@
 		
       </div>
 
-      <div class="col-md-3"> 
-        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-          <div id="schemagraph"></div>
-          <script>
-            var svg = d3.select("#schemagraph")            
-              .append("svg")
-              .attr("width", 400)
-              .attr("height", 300);
 
-            svg.append("defs").append("marker")
-                .attr("id", "arrow")
-                .attr("viewBox", "5 -5 10 10")
-                .attr("refX", 20)
-                .attr("refY", 0)
-                .attr("markerWidth", 8)
-                .attr("markerHeight", 8)
-                .attr("orient", "auto")
-              .append("svg:path")
-                .attr("d", "M0,-5L10,0L0,5");
+    </div>
+    <div class="col-md-3"> 
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <div id="schemagraph"></div>
+        <script>
+          var svg = d3.select("#schemagraph")            
+            .append("svg")
+            .attr("width", 400)
+            .attr("height", 300);
 
-            var width = svg.attr("width");
-            var height = svg.attr("height");
+          svg.append("defs").append("marker")
+              .attr("id", "arrow")
+              .attr("viewBox", "5 -5 10 10")
+              .attr("refX", 20)
+              .attr("refY", 0)
+              .attr("markerWidth", 8)
+              .attr("markerHeight", 8)
+              .attr("orient", "auto")
+            .append("svg:path")
+              .attr("d", "M0,-5L10,0L0,5");
 
-            var graph = {{schema_graph_data|safe}};
+          var width = svg.attr("width");
+          var height = svg.attr("height");
 
-            var simulation = d3
-                .forceSimulation(graph.nodes)
-                .force("link",d3.forceLink(graph.links).id(function(d) {return d.id;}).distance(120).links(graph.links))
-                .force("charge", d3.forceManyBody().strength(-200))
-                .force("center", d3.forceCenter(width / 2, height / 2))
-                .on("tick", ticked);
+          var graph = {{schema_graph_data|safe}};
 
-              var link = svg.selectAll(".link")
-                  .data(graph.links)
-                  .enter()
-                  .append("g")
-                  .attr("class", "link")
-                  .append("line")
-                  .style("stroke", "blue")
-                  .attr("class", "link-line")
-                  .attr("marker-end", "url(#arrow)")
-                  .attr("stroke-width", function(d) {
-                    return 3;
-                  });
+          var simulation = d3
+              .forceSimulation(graph.nodes)
+              .force("link",d3.forceLink(graph.links).id(function(d) {return d.id;}).distance(120).links(graph.links))
+              .force("charge", d3.forceManyBody().strength(-200))
+              .force("center", d3.forceCenter(width / 2, height / 2))
+              .on("tick", ticked);
 
-              var linkText = svg.selectAll(".link")
-                  .append("text")
-                  .attr("class", "link-label")
-                  .attr("font-family", "Arial, Helvetica, sans-serif")
-                  .attr("fill", "Black")
-                  .style("font", "normal 12px Arial")
-                  .attr("dy", ".35em")
-                  .attr("text-anchor", "middle")
-                  .text(function(d) {
-                      return d.type;
-                  });
-
-              var drag = d3
-                .drag()
-                .on("start", dragstarted)
-                .on("drag", dragged)
-                .on("end", dragended);
-
-
-              var nodes_with_text = svg
-                .append("g")
-                .selectAll("g")
-                .data(graph.nodes)
+            var link = svg.selectAll(".link")
+                .data(graph.links)
                 .enter()
                 .append("g")
-                .call(drag);
-
-              var circles = nodes_with_text
-                .append("circle")
-                .attr("r", 15)
-                .attr("fill", "red");
-
-              var texts = nodes_with_text
-                .append("text").text(function(d){
-                  return d.name
-                  }
-                );
-
-              function ticked() {
-
-                nodes_with_text.attr("transform", function(d){
-                  return "translate(" + d.x + ", " + d.y + ")";
+                .attr("class", "link")
+                .append("line")
+                .style("stroke", "blue")
+                .attr("class", "link-line")
+                .attr("marker-end", "url(#arrow)")
+                .attr("stroke-width", function(d) {
+                  return 3;
                 });
 
-                link
-                  .attr("x1", function(d) {
-                    return d.source.x;
+            var linkText = svg.selectAll(".link")
+                .append("text")
+                .attr("class", "link-label")
+                .attr("font-family", "Arial, Helvetica, sans-serif")
+                .attr("fill", "Black")
+                .style("font", "normal 12px Arial")
+                .attr("dy", ".35em")
+                .attr("text-anchor", "middle")
+                .text(function(d) {
+                    return d.type;
+                });
+
+            var drag = d3
+              .drag()
+              .on("start", dragstarted)
+              .on("drag", dragged)
+              .on("end", dragended);
+
+
+            var nodes_with_text = svg
+              .append("g")
+              .selectAll("g")
+              .data(graph.nodes)
+              .enter()
+              .append("g")
+              .call(drag);
+
+            var circles = nodes_with_text
+              .append("circle")
+              .attr("r", 15)
+              .attr("fill", "red");
+
+            var texts = nodes_with_text
+              .append("text").text(function(d){
+                return d.name
+                }
+              );
+
+            function ticked() {
+
+              nodes_with_text.attr("transform", function(d){
+                return "translate(" + d.x + ", " + d.y + ")";
+              });
+
+              link
+                .attr("x1", function(d) {
+                  return d.source.x;
+                })
+                .attr("y1", function(d) {
+                  return d.source.y;
+                })
+                .attr("x2", function(d) {
+                  return d.target.x;
+                })
+                .attr("y2", function(d) {
+                  return d.target.y;
+                });
+
+              linkText
+                  .attr("x", function(d) {
+                      return ((d.source.x + d.target.x)/2);
                   })
-                  .attr("y1", function(d) {
-                    return d.source.y;
-                  })
-                  .attr("x2", function(d) {
-                    return d.target.x;
-                  })
-                  .attr("y2", function(d) {
-                    return d.target.y;
+                  .attr("y", function(d) {
+                      return ((d.source.y + d.target.y)/2);
                   });
+            };
 
-                linkText
-                    .attr("x", function(d) {
-                        return ((d.source.x + d.target.x)/2);
-                    })
-                    .attr("y", function(d) {
-                        return ((d.source.y + d.target.y)/2);
-                    });
-              };
+            function dragstarted(d) {
+              if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+              d.fx = d.x;
+              d.fy = d.y;
+            };
 
-              function dragstarted(d) {
-                if (!d3.event.active) simulation.alphaTarget(0.3).restart();
-                d.fx = d.x;
-                d.fy = d.y;
-              };
+            function dragged(d) {
+              d.fx = d3.event.x;
+              d.fy = d3.event.y;
+            };
 
-              function dragged(d) {
-                d.fx = d3.event.x;
-                d.fy = d3.event.y;
-              };
-
-              function dragended(d) {
-                if (!d3.event.active) simulation.alphaTarget(0);
-                d.fx = null;
-                d.fy = null;
-              };
-            </script>
-
+            function dragended(d) {
+              if (!d3.event.active) simulation.alphaTarget(0);
+              d.fx = null;
+              d.fy = null;
+            };
           </script>
-        </div>
+
+        </script>
       </div>
     </div>
 </div>
