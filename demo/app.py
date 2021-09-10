@@ -82,6 +82,43 @@ def db_connect(active_table='nba'):
             db_schemas=db_schemas,
             schema_graph_data=json_schema)
 
+@app.route('/ajax', methods=['POST'])
+def ajax():
+  data = request.get_json()
+  
+  slt = data["slt"]
+  agg = data["agg"]
+  frm = data["frm"]
+  grp = data["grp"]
+  
+  #[ERROR] missing <select> or <from>
+  if slt == "" or frm == "":
+      return 'OK'
+    
+  #select <select> from <from> group by <group>
+  if agg == "" and grp != "": 
+    query = "select "+slt+" "+" from "+frm+" group by "+grp
+      
+  #select <select> from <from>
+  elif agg == "" and grp == "": 
+    query = "select "+slt+" "+" from "+frm
+      
+  #select <select>, <agg> from <from>
+  elif agg != "" and grp == "": 
+    query = "select "+slt+", "+agg+" from "+frm
+      
+  #select <select>, <agg> from <from> group by <group>
+  else: 
+    query = "select "+slt+", "+agg+" from "+frm+" group by "+grp
+      
+  cursor.execute(query)
+  data_list = cursor.fetchall()
+  return jsonify(result = "success", result2 = data_list)
+
+  #print(data["select"])    
+  #print(data)
+  
+  ####return jsonify(result = "success", result2=data)
 
 def convert_to_graph_json(ll):
     l_json  = {"nodes":[], "links":[]}
@@ -105,6 +142,11 @@ def convert_to_graph_json(ll):
 
 
     return l_json
+
+
+    
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)

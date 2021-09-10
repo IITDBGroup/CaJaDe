@@ -113,20 +113,72 @@
       </nav>
 
       <div class="col-md-7">
-        <form id="query-form">
+        <form id="query-form" method="POST" action="/run">
             <div class="col-auto">
               <div class="input-group">
                 <div class="input-group-text">SELECT</div>
-                <input type="text" class="form-control" id="query-select" >
+                <input type="text" class="form-control" id="query-select" name="query-select">
                 <div class="input-group-text">,</div>
-                <input type="text" class="form-control" id="query-aggregate" placeholder="COUNT(*)">
+                <input type="text" class="form-control" id="query-aggregate" placeholder="COUNT(*)" name="query-aggregate">
                 <div class="input-group-text">FROM</div>
-                <input type="text" class="form-control" id="query-from">
+                <input type="text" class="form-control" id="query-from" name="query-from">
                 <div class="input-group-text">GROUP BY</div>
-                <input type="text" class="form-control" id="query-group">
+                <input type="text" class="form-control" id="query-group" name="query-group">
+                
+                <!--Make a Run button -->
+                <div class="input-group-run">
+                <!-- <input type="submit" name="run" value="run" />-->
+                <!--- 
+                <button type = "submit">run</button></div> --->    
+                <input type="button" id="execute" value="run">
+                 
+                               
               </div>
+       
             </div>
-            </form>
+      	</form>
+
+
+		<script>
+		  $('#execute').click(function(){
+		    var slt = $('#query-select').val();
+		    var agg = $('#query-aggregate').val();
+		    var frm = $('#query-from').val();
+		    var grp = $('#query-group').val();
+		    
+		    var postdata = {
+		      'slt':slt, 'agg':agg, 'frm':frm, 'grp':grp
+		    }
+		    $.ajax({
+		      type: 'POST',
+		      url: '{{url_for("ajax")}}',
+		      data: JSON.stringify(postdata),
+		      dataType: 'JSON',
+		      contentType: "application/json",
+		      success: function(data){
+		        var html = "<table border = '1'>";
+		  	html += "<tr>"+"</tr>";
+		  
+		  	$.each(data.result2, function(i){
+		    		html += "<tr align = 'center'>";
+		    		html += "<td>"+data.result2[i]+"</td>";
+		    		html += "</tr>";
+		  
+		 	 });
+		  	html += "</table>";
+		  	$("#display").empty();
+		  	$("#display").append(html);
+		      },
+		      error: function(request, status, error){ 
+		        alert('ajax failed')
+		        alert(error);
+		      }
+		    })
+		  })
+		</script>
+		<div id="display">
+		</div>
+		
       </div>
 
       <div class="col-md-3"> 
@@ -264,7 +316,7 @@
       </div>
     </div>
 </div>
-
+<div><table id = "boardList" border = "1"></table></div>
     
 </body>
 </html>
