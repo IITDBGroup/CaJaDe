@@ -113,12 +113,9 @@ def ajax():
       
   cursor.execute(query)
   data_list = cursor.fetchall()
-  return jsonify(result = "success", result2 = data_list)
-
-  #print(data["select"])    
-  #print(data)
   
-  ####return jsonify(result = "success", result2=data)
+  colnames = [desc[0] for desc in cursor.description]
+  return jsonify(result = "success", result2 = data_list, result3=colnames)
 
 def convert_to_graph_json(ll):
     l_json  = {"nodes":[], "links":[]}

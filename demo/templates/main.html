@@ -126,14 +126,9 @@
                 <input type="text" class="form-control" id="query-group" name="query-group">
                 
                 <!--Make a Run button -->
-                <div class="input-group-run">
-                <!-- <input type="submit" name="run" value="run" />-->
-                <!--- 
-                <button type = "submit">run</button></div> --->    
-                <input type="button" id="execute" value="run">
-                 
-                               
-              </div>
+                <div class="input-group-run">  
+                <input type="button" id="execute" value="run">                    
+                </div>
        
             </div>
       	</form>
@@ -156,15 +151,26 @@
 		      dataType: 'JSON',
 		      contentType: "application/json",
 		      success: function(data){
-		        var html = "<table border = '1'>";
-		  	html += "<tr>"+"</tr>";
-		  
+		        alert("colums name: "+ data.result3)
+		      
+		        var cnt = data.result2[0].length;		        
+		        var html = "<table style=\"border: 1px solid;\">";
+		        html += "<tr>";
+		        $.each(data.result3, function(cnt){
+			  html += "<td style=\"border: 1px solid;\">" + data.result3[cnt] + "</td>";
+		        });
+		       html += "</tr>";
+
 		  	$.each(data.result2, function(i){
-		    		html += "<tr align = 'center'>";
-		    		html += "<td>"+data.result2[i]+"</td>";
-		    		html += "</tr>";
-		  
+		  	  html += "<tr onmouseover=\"this.style.background='silver'\" onmouseout=\"this.style.background='white'\">";
+		  	  
+		  	  $.each(data.result2[i], function(cnt){
+		  	    html += "<td style=\"border: 1px solid;\">" + data.result2[i][cnt] + "</td>";		  	  
+		  	  });
+		  	  html += "<td style=\"border: 1px solid;\"><input type='checkbox' name='checkboxName'></td>";
+		    	  html += "</tr>";
 		 	 });
+		 	 
 		  	html += "</table>";
 		  	$("#display").empty();
 		  	$("#display").append(html);
@@ -316,8 +322,6 @@
         </script>
       </div>
     </div>
-</div>
-<div><table id = "boardList" border = "1"></table></div>
-    
+</div>    
 </body>
 </html>
