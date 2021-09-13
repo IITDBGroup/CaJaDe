@@ -27,3 +27,11 @@ svg {
 .input-group-run {
 	width: 10%;
 }
+
+body::-webkit-scrollbar{
+  width: 10px;
+  background-color: #c1c1c1;
+}
+body::-webkit-scrollbar-thumb{
+  background-color: #444444;
+}
