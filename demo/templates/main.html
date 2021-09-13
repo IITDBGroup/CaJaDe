@@ -170,10 +170,14 @@
 		        colData = data.result3;
 		        tblData = data.result2;
 		        
-		        pageNumber(dataPerPage, totalNum);
 		        displayData(1, dataPerPage);
 		        paging(totalNum, dataPerPage, pageCount, 1);
-		        
+
+		        $("#dataPerPage").change(function () {
+		          dataPerPage = $("#dataPerPage").val();
+		          paging(totalNum, dataPerPage, pageCount, globalCurrentPage);
+		          displayData(globalCurrentPage, dataPerPge);
+		        });
 		  	//$("#display").empty();
 		  	//$("#display").append(html);
 		      },
@@ -181,14 +185,11 @@
 		        alert('ajax failed')
 		        alert(error);
 		      }
+
 		    })
 		    
-		    function pageNumber(dataPerPage, totalNum){
-		      let totalPageNum = Math.ceil(totalNum/dataPerPage);
-		      //alert("Total Page Number" + totalPageNum)
-		    }
+
 		    function paging(totalNum, dataPerPage, pageCount, currentPage){
-		      console.log("currentPage: "+currentPage);
 		      let totalPageNum = Math.ceil(totalNum/dataPerPage);
 		      if(totalPageNum < pageCount){
 		        pageCount = totalPageNum;
@@ -230,6 +231,7 @@
 		      let displayCount = "";
 		      let currentShowingPageFrom = (currentPage*dataPerPage)-dataPerPage+1;
 		      let currentShowingPageTo = currentPage*dataPerPage;
+          if(currentShowingPageTo > totalNum) currentShowingPageTo = totalNum;
 		      //displayCount = "Current 1 - "+totalPageNum + " Page / "+totalNum + "Total";
 		      displayCount = "Showing "+currentShowingPageFrom+" to "+currentShowingPageTo+" of "+totalNum+" entries";
 		      $("#displayCount").text(displayCount);
@@ -258,8 +260,12 @@
 		        chartHtml += "<td style=\"border: 1px solid; text-align: center;\">" + colData[i] + "</td>";
 		      }
 		      chartHtml += "</tr>";
-		        
-		      for(var i = (currentPage-1)*dataPerPage; i<(currentPage-1)*dataPerPage+dataPerPage;i++){
+		      
+          let tableFrom = (currentPage-1)*dataPerPage;
+          let tableTo = (currentPage-1)*dataPerPage+dataPerPage;
+          if(tableTo > totalNum) tableTo = totalNum;
+          
+		      for(var i = tableFrom; i<tableTo;i++){
 		        chartHtml += "<tr>"
 		        for(var j=0;j<colNum;j++){
 		          chartHtml += "<td style=\"border: 1px solid; text-align: center;\">" + tblData[i][j] + "</td>";
@@ -288,12 +294,9 @@
 		    	  html += "</tr>";
 		 	});
 		 	 html += "</table>"; ***/
-		    }
-		    $("#dataPerPage").change(function () {
-		      dataPerPage = $("#dataPerPage").val();
-		      paging(totalNum, dataPerPage, pageCount, globalCurrentPage);
-		      displayData(globalCurrentPage, dataPerPge);
-		    });
+		  }
+		 
+
 		  })
 		  
 		
