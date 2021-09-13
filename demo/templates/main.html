@@ -142,7 +142,7 @@
 		    let colData;
 		    let tblData;
 		    let dataPerPage;
-		    let pageCount = 10;
+		    let pageCount = 5;
 		    let globalCurrentPage = 1;
 		    var cnt;
 		    var html;
@@ -200,28 +200,33 @@
 		      if(last>totalPageNum){
 		        last = totalPageNum;
 		      }
-		      let first = last - (pageCount -1 );
+		      let first = last - (pageCount -1);
 		      let next = last + 1;
 		      let prev = first - 1;
 		      let pageHtml = "";
 		      
 		      pageHtml += "<nav aria-label=\"Page navigation example\"><ul class=\"pagination\">";
-		      if(prev > 0){
 
-		      pageHtml += "<li class=\"page-item\><a class=\"page-link\" href=\"#\" aria-label=\"Previous\"><span aria-hidden=\"true\">&laquo;</span><span class=\"sr-only\">Previous</span></a></li>";
+		      if(prev > 0){
+          pageHtml += "<li><a class=\"page-link\" href='#' id='prev' aria-label=\"Previous\"><span aria-hidden=\"true\">&laquo;</span><span class=\"sr-only\">Previous</span></a></li>";
+
+		      //pageHtml += "<li class=\"page-item\><a class=\"page-link\" href=\"#\" aria-label=\"Previous\"><span aria-hidden=\"true\">&laquo;</span><span class=\"sr-only\">Previous</span></a></li>";
 		       
 		      }
 		      for(var i = first; i<=last; i++){ 
 		        if(currentPage == i){
-		          pageHtml += "<li class=\"page-item\"><a class=\"page-link\" href=\"#\">" + i + "</a></li>";
+		          //pageHtml += "<li class='\"page-item\"'><a class=\"page-link\" href=\"#\">" + i + "</a></li>";
+              pageHtml += "<li class='on'><a class=\"page-link\" href='#' id='"+i+"'>" + i + "</a></li>";
 
 		        } else{
-		          pageHtml += "<li class=\"page-item\"><a class=\"page-link\" href=\"#\">" + i + "</a></li>";
+		          //pageHtml += "<li class=\"page-item\"><a class=\"page-link\" href=\"#\">" + i + "</a></li>";
+              pageHtml += "<li><a class=\"page-link\" href='#' id='"+i+"'>" + i + "</a></li>";
 
 		        }
 		      }
 		      if(last<totalPageNum){
-		        pageHtml += "<li class=\"page-item\"><a class=\"page-link\" href=\"#\" aria-label=\"Next\"><span aria-hidden=\"true\">&raquo;</span><span class=\"sr-only\">Next</span></a></li>";
+		        //pageHtml += "<li class=\"page-item\"><a class=\"page-link\" href=\"#\" aria-label=\"Next\"><span aria-hidden=\"true\">&raquo;</span><span class=\"sr-only\">Next</span></a></li>";
+          pageHtml += "<li><a class=\"page-link\" href='#' id='next' aria-label=\"Next\"><span aria-hidden=\"true\">&raquo;</span><span class=\"sr-only\">Next</span></a></li>";
 
 		      }
 		      pageHtml += "</ul></nav>";
@@ -264,7 +269,7 @@
           let tableFrom = (currentPage-1)*dataPerPage;
           let tableTo = (currentPage-1)*dataPerPage+dataPerPage;
           if(tableTo > totalNum) tableTo = totalNum;
-          
+
 		      for(var i = tableFrom; i<tableTo;i++){
 		        chartHtml += "<tr>"
 		        for(var j=0;j<colNum;j++){
