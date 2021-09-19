@@ -125,9 +125,10 @@
                 <div class="input-group-text">GROUP BY</div>
                 <input type="text" class="form-control" id="query-group" name="query-group">
                 
-                <!--Make a Run button -->
+                <!--Run button -->
                 <div class="input-group-run">  
-                <input type="button" id="execute" value="run">                    
+                  <!-- <input type="button" id="execute" value="run"> -->
+                  <button type="button" class="btn btn-outline-primary" id="execute">Run</button>                   
                 </div>
        
             </div>
@@ -172,6 +173,7 @@
 		        
 		        displayData(1, dataPerPage);
 		        paging(totalNum, dataPerPage, pageCount, 1);
+            selectRows();
 
 		        $("#dataPerPage").change(function () {
 		          dataPerPage = $("#dataPerPage").val();
@@ -259,25 +261,26 @@
 		      currentPage = Number(currentPage);
 		      dataPerPage = Number(dataPerPage);
 		      
-		      chartHtml = "<table class=\"table\" sellspacing=\"0\" width=\"90%\" style=\"border: 1px solid;\" id=\"example\">";
-		      chartHtml += "<tr>";
+		      chartHtml = "<table class=\"table table-hover table-bordered\" sellspacing=\"0\" width=\"90%\" id=\"example\">";
+		      chartHtml += "<thead><tr>";
 		      for(var i=0;i<colNum;i++){
-		        chartHtml += "<td style=\"border: 1px solid; text-align: center;\">" + colData[i] + "</td>";
+		        chartHtml += "<th style=\"text-align: center;\">" + colData[i] + "</th>";
 		      }
-		      chartHtml += "</tr>";
+		      chartHtml += "</tr></thead>";
 		      
           let tableFrom = (currentPage-1)*dataPerPage;
           let tableTo = (currentPage-1)*dataPerPage+dataPerPage;
           if(tableTo > totalNum) tableTo = totalNum;
 
-		      for(var i = tableFrom; i<tableTo;i++){
-		        chartHtml += "<tr>"
+		      chartHtml += "<tbody>";
+          for(var i = tableFrom; i<tableTo;i++){
+		        chartHtml += "<tr onclick=\"selectRows(this);\">";
 		        for(var j=0;j<colNum;j++){
-		          chartHtml += "<td style=\"border: 1px solid; text-align: center;\">" + tblData[i][j] + "</td>";
+		          chartHtml += "<td style=\"text-align: center;\">" + tblData[i][j] + "</td>";
 		        }
 		        chartHtml += "</tr>";
 		      }
-		      chartHtml += "</table>";
+		      chartHtml += "</tbody></table>";
 		      
 		      $("#display").empty();
 		      $("#display").append(chartHtml);
@@ -303,30 +306,33 @@
 		 
 
 		  })
-		  
+
+		  function selectRows(){
+        $("#example tbody tr").click(function(){
+          var text = $(this).text();
+          alert(text);
+
+          $(this).css("background-color", "#e0e0e0");
+        })
+      }
 		
 		</script>
 		<br>
 		
 		<div class="row">	
-		<div class="col-sm-12 col-md-6" style="display: inline;">
-		<p>Show
-		<select id="dataPerPage" class="form-select" style="width: 70px; display: inline;">
-		      <option value="10">10</option>
-		      <option value="15">15</option>
-		      <option value="20">20</option>
-		    </select>
+		  <div class="col-sm-12 col-md-6" style="display: inline;">
+		  <p>Show
+		  <select id="dataPerPage" class="form-select" style="width: 70px; display: inline;">
+		    <option value="10">10</option>
+		    <option value="15">15</option>
+		    <option value="20">20</option>
+		  </select>
 		   Rows</p>
+		  </div>
 		</div>
-		</div>	
-		
-		
 
-		<div id="display" style="overflow: auto;">
-		</div>
-		
-		<br>
-		
+		<div id="display" style="overflow: auto;"></div><br>
+
 		<div id="pageInfo" style="display: inline;" class="col-md-8">
 		  <div style="float: left;">
 		    <p id="displayCount"></p>
@@ -336,6 +342,7 @@
 		  </div>
 		</div>
 		
+  
       </div>
 
 
