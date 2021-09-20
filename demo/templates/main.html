@@ -176,14 +176,14 @@
 		        displayData(1, dataPerPage);
 		        paging(totalNum, dataPerPage, pageCount, 1);
             selectRows();
-
+            /***
 		        $("#dataPerPage").change(function () {
 		          dataPerPage = $("#dataPerPage").val();
 		          paging(totalNum, dataPerPage, pageCount, globalCurrentPage);
 		          displayData(globalCurrentPage, dataPerPge);
 		        });
-		  	//$("#display").empty();
-		  	//$("#display").append(html);
+            ***/
+
 		      },
 		      error: function(request, status, error){ 
 		        alert('ajax failed')
@@ -192,6 +192,14 @@
 
 		    })
 		    
+        $("#dataPerPage").change(function () {
+		      dataPerPage = $("#dataPerPage").val();
+          displayData(1, dataPerPage);
+		      paging(totalNum, dataPerPage, pageCount, 1);
+
+		      //paging(totalNum, dataPerPage, pageCount, globalCurrentPage);
+		      //displayData(globalCurrentPage, dataPerPge);
+		    });
 
 		    function paging(totalNum, dataPerPage, pageCount, currentPage){
 		      let totalPageNum = Math.ceil(totalNum/dataPerPage);
@@ -212,26 +220,19 @@
 		      pageHtml += "<nav aria-label=\"Page navigation example\"><ul class=\"pagination\">";
 
 		      if(prev > 0){
-          pageHtml += "<li><a class=\"page-link\" href='#' id='prev' aria-label=\"Previous\"><span aria-hidden=\"true\">&laquo;</span><span class=\"sr-only\">Previous</span></a></li>";
-
-		      //pageHtml += "<li class=\"page-item\><a class=\"page-link\" href=\"#\" aria-label=\"Previous\"><span aria-hidden=\"true\">&laquo;</span><span class=\"sr-only\">Previous</span></a></li>";
-		       
+            pageHtml += "<li><a class=\"page-link\" href='#' id='prev' aria-label=\"Previous\"><span aria-hidden=\"true\">&laquo;</span><span class=\"sr-only\">Previous</span></a></li>";		       
 		      }
 		      for(var i = first; i<=last; i++){ 
 		        if(currentPage == i){
-		          //pageHtml += "<li class='\"page-item\"'><a class=\"page-link\" href=\"#\">" + i + "</a></li>";
               pageHtml += "<li class='on'><a class=\"page-link\" href='#' id='"+i+"'>" + i + "</a></li>";
 
 		        } else{
-		          //pageHtml += "<li class=\"page-item\"><a class=\"page-link\" href=\"#\">" + i + "</a></li>";
               pageHtml += "<li><a class=\"page-link\" href='#' id='"+i+"'>" + i + "</a></li>";
 
 		        }
 		      }
 		      if(last<totalPageNum){
-		        //pageHtml += "<li class=\"page-item\"><a class=\"page-link\" href=\"#\" aria-label=\"Next\"><span aria-hidden=\"true\">&raquo;</span><span class=\"sr-only\">Next</span></a></li>";
-          pageHtml += "<li><a class=\"page-link\" href='#' id='next' aria-label=\"Next\"><span aria-hidden=\"true\">&raquo;</span><span class=\"sr-only\">Next</span></a></li>";
-
+            pageHtml += "<li><a class=\"page-link\" href='#' id='next' aria-label=\"Next\"><span aria-hidden=\"true\">&raquo;</span><span class=\"sr-only\">Next</span></a></li>";
 		      }
 		      pageHtml += "</ul></nav>";
 		      $("#pagingul").html(pageHtml);
@@ -310,8 +311,7 @@
 
               $("#sltROWScount").empty();
 		          $("#sltROWScount").append(sltROWScnt);
-              $("#sltROWScount").append(sltROWS);
-            
+              $("#sltROWScount").append(sltROWS);            
           }
 
           
@@ -329,18 +329,30 @@
       }
 		
 		</script>
+
+    <script>
+      function changeRowsSelect(){
+        var rowsSelect = document.getElementById("dataPerPage");
+
+      }
+    </script>
 		<br>
 		
 		<div class="row">	
-		  <div class="col-sm-12 col-md-6" style="display: inline;">
-		  <p>Show
-		  <select id="dataPerPage" class="form-select" style="width: 70px; display: inline;">
-		    <option value="10">10</option>
-		    <option value="15">15</option>
-		    <option value="20">20</option>
-		  </select>
-		   Rows</p>
-		  </div>
+		  <div style="display: inline;">
+        <div style="float: left;">
+		      <p>Show
+		      <select id="dataPerPage" class="form-select" style="width: 70px; display: inline;" onchange="changeRowsSelect()">
+		        <option value="10">10</option>
+		        <option value="15">15</option>
+		        <option value="20">20</option>
+		      </select>
+		      Rows</p>
+		    </div>      
+        <div style="float: right; text-align: right;">
+          <p id="sltROWScount"></p>
+        </div>
+      </div>
 		</div>
 
 		<div id="display" style="overflow: auto;"></div><br>
@@ -348,7 +360,7 @@
 		<div id="pageInfo" style="display: inline;" class="col-md-8">
 		  <div style="float: left;">
 		    <p id="displayCount"></p>
-        <p id="sltROWScount"></p>
+        <!--- <p id="sltROWScount"></p> -->
 		  </div>
 		  <div style="float: right;">
 		    <ul id="pagingul" class="col-md-5"></ul>
