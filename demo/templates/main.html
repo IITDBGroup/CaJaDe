@@ -147,6 +147,8 @@
 		    let globalCurrentPage = 1;
 		    var cnt;
 		    var html;
+
+        //let sltList = [];
 		    
 		    dataPerPage = $("#dataPerPage").val();
 		  
@@ -232,14 +234,13 @@
 
 		      }
 		      pageHtml += "</ul></nav>";
-		      //$("#pagingul").append(pageHtml);
 		      $("#pagingul").html(pageHtml);
 		      
 		      let displayCount = "";
 		      let currentShowingPageFrom = (currentPage*dataPerPage)-dataPerPage+1;
 		      let currentShowingPageTo = currentPage*dataPerPage;
           if(currentShowingPageTo > totalNum) currentShowingPageTo = totalNum;
-		      //displayCount = "Current 1 - "+totalPageNum + " Page / "+totalNum + "Total";
+
 		      displayCount = "Showing "+currentShowingPageFrom+" to "+currentShowingPageTo+" of "+totalNum+" entries";
 		      $("#displayCount").text(displayCount);
 		      
@@ -284,35 +285,46 @@
 		      
 		      $("#display").empty();
 		      $("#display").append(chartHtml);
-		      
-		      /***
-		      html = "<table class=\"table\" sellspacing=\"0\" width=\"90%\" style=\"border: 1px solid;\" id=\"example\">";
-		      html += "<tr>";
-		      $.each(colData, function(colNum){
-			  html += "<td style=\"border: 1px solid; text-align: center;\">" + colData[colNum] + "</td>";
-		        });
-		      html += "</tr>";
-		      $.each(tblData, function(i){
-		  	  html += "<tr>";
-		  	  
-		  	  $.each(tblData[i], function(colNum){
-		  	    html += "<td style=\"border: 1px solid; text-align: center;\">" + tblData[i][colNum] + "</td>";		  	  
-		  	  });
-		  	  
-		    	  html += "</tr>";
-		 	});
-		 	 html += "</table>"; ***/
 		  }
 		 
 
 		  })
 
-		  function selectRows(){
+		  let sltROWS = 0;
+      var selectedArr = new Array();
+      let sltROWScnt = "Total Selected Rows: ";
+
+      function selectRows(){
         $("#example tbody tr").click(function(){
           var text = $(this).text();
-          alert(text);
 
-          $(this).css("background-color", "#e0e0e0");
+          let cnt = selectedArr.indexOf(text);
+          let len = selectedArr.length;
+
+          if(cnt<0 && len<2){
+                       
+              sltROWS += 1;
+              selectedArr.push(text);
+              $(this).css("background-color", "#e0e0e0");
+              //alert("cnt<0, Length: "+selectedArr.length+", sltROWS: "+sltROWS);
+
+              $("#sltROWScount").empty();
+		          $("#sltROWScount").append(sltROWScnt);
+              $("#sltROWScount").append(sltROWS);
+            
+          }
+
+          
+        //Explanation Button
+        /***
+        $('#container').append(
+            $(document.createElement('button')).prop({
+              type: 'button',
+              innerHTML: 'Explanation',
+              class:'btn-styled'
+            })
+          ); ***/
+
         })
       }
 		
@@ -336,15 +348,23 @@
 		<div id="pageInfo" style="display: inline;" class="col-md-8">
 		  <div style="float: left;">
 		    <p id="displayCount"></p>
+        <p id="sltROWScount"></p>
 		  </div>
 		  <div style="float: right;">
 		    <ul id="pagingul" class="col-md-5"></ul>
 		  </div>
 		</div>
-		
-  
-      </div>
 
+
+
+    <div id="container"></div>
+
+    <!--
+		<div style="float:right;" class="col-md-8">
+      <button type="button" class="btn btn-outline-primary">Explanation</button>
+    </div>
+    -->
+      </div>
 
     </div>
     <div class="col-md-3"> 
