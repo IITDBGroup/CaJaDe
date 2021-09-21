@@ -172,7 +172,13 @@
 		        colNum = data.result2[0].length;
 		        colData = data.result3;
 		        tblData = data.result2;
-		        
+
+            $("#sltROWScount").empty();
+            $('#container').empty();
+            selectedArr = [];
+            tdArr = [];
+            sltROWS = 0;
+
 		        displayData(1, dataPerPage);
 		        paging(totalNum, dataPerPage, pageCount, 1);
             selectRows();
@@ -286,6 +292,7 @@
 		      
 		      $("#display").empty();
 		      $("#display").append(chartHtml);
+          
 		  }
 		 
 
