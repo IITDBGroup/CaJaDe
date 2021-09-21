@@ -295,9 +295,15 @@
       var selectedArr = new Array();
       let sltROWScnt = "Total Selected Rows: ";
 
+      var str="";
+      var tdArr = new Array();
+      var td;
+
       function selectRows(){
         $("#example tbody tr").click(function(){
-          var text = $(this).text();
+          var text = $(this).text();          
+          var tr = $(this);
+          td = tr.children();
 
           let cnt = selectedArr.indexOf(text);
           let len = selectedArr.length;
@@ -307,40 +313,42 @@
               sltROWS += 1;
               selectedArr.push(text);
               $(this).css("background-color", "#e0e0e0");
-              //alert("cnt<0, Length: "+selectedArr.length+", sltROWS: "+sltROWS);
 
               $("#sltROWScount").empty();
 		          $("#sltROWScount").append(sltROWScnt);
-              $("#sltROWScount").append(sltROWS);            
-          }
+              $("#sltROWScount").append(sltROWS);
 
-          
-        //Explanation Button
-        /***
-        $('#container').append(
-            $(document.createElement('button')).prop({
-              type: 'button',
-              innerHTML: 'Explanation',
-              class:'btn-styled'
-            })
-          ); ***/
+              $('#container').empty();
+              $('#container').append(
+                "<button onclick=\"exp()\" type=\"button\" class=\"btn btn-outline-primary\" id=\"explanation\">explanation</button>"
+              );    
+
+              td.each(function(i){
+                tdArr.push(td.eq(i).text());
+              })      
+          }
 
         })
       }
-		
+      function exp(){
+        var expTEXT = "";
+        for(var i=0;i<tdArr.length;i++){
+          expTEXT += tdArr[i];
+          expTEXT += " ";
+        }
+        alert(expTEXT);
+      }
 		</script>
+    
 
     <script>
-      function changeRowsSelect(){
-        var rowsSelect = document.getElementById("dataPerPage");
-
-      }
+      
     </script>
 		<br>
 		
 		<div class="row">	
 		  <div style="display: inline;">
-        <div style="float: left;">
+        <div style="float: left; width: 33%; padding: 10px;">
 		      <p>Show
 		      <select id="dataPerPage" class="form-select" style="width: 70px; display: inline;" onchange="changeRowsSelect()">
 		        <option value="10">10</option>
@@ -348,10 +356,19 @@
 		        <option value="20">20</option>
 		      </select>
 		      Rows</p>
-		    </div>      
-        <div style="float: right; text-align: right;">
+		    </div>
+
+        <div style="float: left; padding: 10px; width: 41%; text-align: right;" class="col-md-5">
           <p id="sltROWScount"></p>
         </div>
+<!---
+          <div style="display: inline;">
+            <div style="float:left;"><p id="sltROWScount"></p></div>
+            <div style="float: right;" id="container" class="d-grid gap-2 d-md-block"></div>
+          </div>
+-->
+        <div style="float: right; width: 25%; text-align: right;" id="container"></div>
+        
       </div>
 		</div>
 
@@ -368,10 +385,10 @@
 		</div>
 
 
-
+  <!--
     <div id="container"></div>
 
-    <!--
+  
 		<div style="float:right;" class="col-md-8">
       <button type="button" class="btn btn-outline-primary">Explanation</button>
     </div>
