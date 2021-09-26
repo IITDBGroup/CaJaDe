@@ -205,12 +205,13 @@ def InsertStats(conn, stats_trackers, stats_relation_name, schema, exp_time, exp
         )
 
 
-def run_experiment(result_schema='test',
-                   user_query = "provenance of (select count(*) as win, s.season_name from team t, game g, season s where t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' group by s.season_name);",
+def run_experiment(conn,
+                   result_schema='test',
+                   user_query = ("provenance of (select count(*) as win, s.season_name from team t, game g, season s where t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' group by s.season_name);",'test'),
                    user_questions = ["season_name='2015-16'","season_name='2012-13'"],
                    user_questions_map = {'yes':'2015-16', 'no':'2012-13'},
                    user_specified_attrs=[('team','team'),('season','season_name')],
-                   user_name='postgres',
+                   user_name='lchenjie',
                    password='1234',
                    host='localhost',
                    port='5432',
@@ -267,9 +268,11 @@ def run_experiment(result_schema='test',
       logger.debug(f'{k} : {v}')
 
 
-    conn = psycopg2.connect(f"dbname={dbname} user={user_name} password={password} port={port}")
+    # conn = psycopg2.connect(f"dbname={dbname} user={user_name} password={password} port={port}")
 
-    conn.autocommit = True
+    conn = conn
+
+    # conn.autocommit = True
 
     w = GProMWrapper(user= user_name, passwd=password, host=host, 
         port=port, db=dbname, frontend='', backend='postgres', options={})
@@ -576,7 +579,7 @@ if __name__ == '__main__':
   ##print("colNum: "+colNum)
   #####
   user_query = "provenance of (select count(*) as win, s.season_name from team t, game g, season s where t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' group by s.season_name);"
-  ###u_query = (user_query, 'gsw wins : 15 vs 12') 
+  # u_query = (user_query, 'gsw wins : 15 vs 12') 
   u_query = (user_query, 'demo')
   u_question =["season_name='2015-16'","season_name='2012-13'"]
   user_specified_attrs = [('team','team'),('season','season_name')]

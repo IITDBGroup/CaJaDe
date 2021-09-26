@@ -133,7 +133,7 @@ def ajax():
 ######
 @app.route('/explanation',methods=['EXP'])
 def explanation():
-    run_experiment()
+    run_experiment(conn=globals()['conn'])
   
 #   data = request.get_json()
 
