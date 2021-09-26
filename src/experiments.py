@@ -22,6 +22,10 @@ from time import strftime
 from workloads import mimic_workloads, nba_workloads
 from case_study import mimic_cases, nba_cases
 
+#####
+##import app.py
+###from app import colNum
+
 logger = logging.getLogger(__name__)
 
 
@@ -201,24 +205,24 @@ def InsertStats(conn, stats_trackers, stats_relation_name, schema, exp_time, exp
         )
 
 
-def run_experiment(result_schema,
-                   user_query,
-                   user_questions,
-                   user_questions_map,
-                   user_specified_attrs,
-                   user_name,
-                   password,
-                   host,
-                   port,
-                   dbname, 
-                   sample_rate_for_s,
-                   lca_s_max_size,
-                   lca_s_min_size,
-                   maximum_edges,
-                   min_recall_threshold,
-                   numercial_attr_filter_method,
-                   f1_sample_rate,
-                   f1_sample_type,
+def run_experiment(result_schema='test',
+                   user_query = "provenance of (select count(*) as win, s.season_name from team t, game g, season s where t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' group by s.season_name);",
+                   user_questions = ["season_name='2015-16'","season_name='2012-13'"],
+                   user_questions_map = {'yes':'2015-16', 'no':'2012-13'},
+                   user_specified_attrs=[('team','team'),('season','season_name')],
+                   user_name='postgres',
+                   password='1234',
+                   host='localhost',
+                   port='5432',
+                   dbname='nba', 
+                   sample_rate_for_s=0.1,
+                   lca_s_max_size=100,
+                   lca_s_min_size=100,
+                   maximum_edges=1,
+                   min_recall_threshold=0.2,
+                   numercial_attr_filter_method='y',
+                   f1_sample_rate=0.3,
+                   f1_sample_type='s.0',
                    exclude_high_cost_jg = (False, 'f'),
                    f1_calculation_type = 'o',
                    user_assigned_max_num_pred = 3,
@@ -568,9 +572,12 @@ if __name__ == '__main__':
 
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+  #####
+  ##print("colNum: "+colNum)
+  #####
   user_query = "provenance of (select count(*) as win, s.season_name from team t, game g, season s where t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' group by s.season_name);"
-  u_query = (user_query, 'gsw wins : 15 vs 12')
+  ###u_query = (user_query, 'gsw wins : 15 vs 12') 
+  u_query = (user_query, 'demo')
   u_question =["season_name='2015-16'","season_name='2012-13'"]
   user_specified_attrs = [('team','team'),('season','season_name')]
 
