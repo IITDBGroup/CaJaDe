@@ -135,11 +135,13 @@
       	</form>
 
 
-		<script>		    
+		<script>
+      var colNum;
+
 		  $('#execute').click(function(){
 		    let dataList;
 		    let totalNum;
-		    let colNum;
+		    //var colNum;
 		    let colData;
 		    let tblData;
 		    let dataPerPage;
@@ -166,8 +168,7 @@
 		      data: JSON.stringify(postdata),
 		      dataType: 'JSON',
 		      contentType: "application/json",
-		      success: function(data){
-			
+		      success: function(data){	
 		        totalNum = data.result2.length;
 		        colNum = data.result2[0].length;
 		        colData = data.result3;
@@ -344,6 +345,39 @@
           expTEXT += " ";
         }
         alert(expTEXT);
+        
+
+        //////   
+        alert("0, colNum:"+colNum); //colNum data can not be accessed
+		    var postdata_exp = { 'tdArr': tdArr, 'colNum': colNum }
+        alert("1");
+
+        $.ajax({
+          type: 'EXP',
+          url: '{{url_for("explanation")}}',
+          data: JSON.stringify(postdata_exp),
+          dataType: 'JSON',
+          contentType: "application/json",
+          success: function(data){
+            if (data){
+              alert("complete");
+            } 
+            else {
+              alert("No data");
+            }
+            //var rs = data.result;
+            //alert(rs);
+            //alert("success-explanation");
+          },
+		      error: function(request, status, error){ 
+		        alert('ajax failed')
+		        alert(error);
+		      }
+          })
+          alert("2");
+
+        
+        //////
       }
 		</script>
     

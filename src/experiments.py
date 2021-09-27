@@ -1,26 +1,27 @@
-from sg_generator import Schema_Graph_Generator
+from CaJaDe.src.provenance_getter import provenance_getter
+from CaJaDe.src.gprom_wrapper import  GProMWrapper
+from CaJaDe.src.jg_generator import Join_Graph_Generator
+from CaJaDe.src.jg_materializer import Join_Graph_Materializer
+from CaJaDe.src.pattern_generator import Pattern_Generator
+from CaJaDe.src.sg_generator import Schema_Graph_Generator
+from CaJaDe.src.workloads import mimic_workloads, nba_workloads
+from CaJaDe.src.case_study import mimic_cases, nba_cases
+from CaJaDe.src.instrumentation import ExecStats
+from CaJaDe.src.renaming import encode
+import CaJaDe.src.config
 from networkx import MultiGraph
 import networkx as nx
 import psycopg2
-from provenance_getter import provenance_getter
-from gprom_wrapper import  GProMWrapper
-from jg_generator import Join_Graph_Generator
-from jg_materializer import Join_Graph_Materializer
-from pattern_generator import Pattern_Generator
 import colorful
 import logging 
-from renaming import encode
 import re
 import colorful
 import random
-import config
-from instrumentation import ExecStats
 from statistics import mean 
 import argparse
 from datetime import datetime
 from time import strftime
-from workloads import mimic_workloads, nba_workloads
-from case_study import mimic_cases, nba_cases
+
 
 #####
 ##import app.py

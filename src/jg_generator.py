@@ -1,15 +1,15 @@
-from sg_generator import Schema_Graph_Generator
+from CaJaDe.src.sg_generator import Schema_Graph_Generator
+from CaJaDe.src.provenance_getter import provenance_getter
+from CaJaDe.src.gprom_wrapper import  GProMWrapper
+from CaJaDe.src.hashes import fnv1a_init, fnv1a_update_str
+from CaJaDe.src.instrumentation import ExecStats
 from networkx import MultiGraph
 import networkx as nx
 import psycopg2
-from provenance_getter import provenance_getter
-from gprom_wrapper import  GProMWrapper
 import logging 
 from copy import deepcopy
-from hashes import fnv1a_init, fnv1a_update_str
 import re
 import time
-from instrumentation import ExecStats
 
 
 class JGGeneratorStats(ExecStats):

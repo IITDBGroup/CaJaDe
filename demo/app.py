@@ -2,9 +2,13 @@ from flask import Flask
 from flask import render_template, request, jsonify, redirect, url_for, flash
 import psycopg2 as pg2
 from networkx import MultiGraph
-from src.sg_generator import Schema_Graph_Generator
+from CaJaDe.src.sg_generator import Schema_Graph_Generator
+from CaJaDe.src.experiments import run_experiment
+
+
 
 app = Flask(__name__)
+
 
 @app.route("/")
 def index():
@@ -116,6 +120,38 @@ def ajax():
   
   colnames = [desc[0] for desc in cursor.description]
   return jsonify(result = "success", result2 = data_list, result3=colnames)
+
+######
+@app.route('/explanation',methods=['EXP'])
+def explanation():
+    run_experiment(conn=globals()['conn'])
+  
+#   data = request.get_json()
+
+#   tdArr = data["tdArr"]
+#   colNum = data["colNum"]
+#   rangelen = len(tdArr)
+
+#   tmp1 = []
+#   tmp2 = []
+  
+#   for i in range(0, rangelen):
+#       if i<colNum:
+#           tmp1.append(tdArr[i])
+#       else:
+#           tmp2.append(tdArr[i])
+  
+#   ########
+#   ####execfile("expeirments.py")
+#   #EXPORT204 = "./example.py"
+#   #EXPORT204 = "cd ../src "
+#   x1 = 2
+#   os.system("cd ../src; python example.py")
+#   #os.system("python example.py")
+#   return jsonify(result = "success-explanation")
+
+
+######
 
 def convert_to_graph_json(ll):
     l_json  = {"nodes":[], "links":[]}

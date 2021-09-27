@@ -1,3 +1,4 @@
+from CaJaDe.src.instrumentation import ExecStats
 import pandas as pd
 import logging
 import math
@@ -5,7 +6,6 @@ import re
 import itertools
 import random
 import time
-from instrumentation import ExecStats
 from statistics import mean
 from varclushi import VarClusHi
 import numpy as np
