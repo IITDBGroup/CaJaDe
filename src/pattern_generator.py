@@ -1,4 +1,4 @@
-from CaJaDe.src.instrumentation import ExecStats
+from src.instrumentation import ExecStats
 import pandas as pd
 import logging
 import math

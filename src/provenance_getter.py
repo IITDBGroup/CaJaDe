@@ -1,5 +1,5 @@
-from CaJaDe.src.gprom_wrapper import *
-from CaJaDe.src.sg_generator import Schema_Graph_Generator
+from src.gprom_wrapper import *
+from src.sg_generator import Schema_Graph_Generator
 import sys
 import psycopg2
 import pandas as pd

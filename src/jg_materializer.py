@@ -1,9 +1,9 @@
-from CaJaDe.src.sg_generator import Schema_Graph_Generator
-from CaJaDe.src.provenance_getter import provenance_getter
-from CaJaDe.src.gprom_wrapper import  GProMWrapper
-from CaJaDe.src.jg_generator import Join_Graph_Generator
-from CaJaDe.src.instrumentation import ExecStats
-from CaJaDe.src.renaming import encode
+from src.sg_generator import Schema_Graph_Generator
+from src.provenance_getter import provenance_getter
+from src.gprom_wrapper import  GProMWrapper
+from src.jg_generator import Join_Graph_Generator
+from src.instrumentation import ExecStats
+from src.renaming import encode
 from networkx import MultiGraph
 import networkx as nx
 import psycopg2

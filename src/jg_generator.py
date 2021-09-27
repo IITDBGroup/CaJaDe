@@ -1,8 +1,8 @@
-from CaJaDe.src.sg_generator import Schema_Graph_Generator
-from CaJaDe.src.provenance_getter import provenance_getter
-from CaJaDe.src.gprom_wrapper import  GProMWrapper
-from CaJaDe.src.hashes import fnv1a_init, fnv1a_update_str
-from CaJaDe.src.instrumentation import ExecStats
+from src.sg_generator import Schema_Graph_Generator
+from src.provenance_getter import provenance_getter
+from src.gprom_wrapper import  GProMWrapper
+from src.hashes import fnv1a_init, fnv1a_update_str
+from src.instrumentation import ExecStats
 from networkx import MultiGraph
 import networkx as nx
 import psycopg2

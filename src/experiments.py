@@ -1,14 +1,14 @@
-from CaJaDe.src.provenance_getter import provenance_getter
-from CaJaDe.src.gprom_wrapper import  GProMWrapper
-from CaJaDe.src.jg_generator import Join_Graph_Generator
-from CaJaDe.src.jg_materializer import Join_Graph_Materializer
-from CaJaDe.src.pattern_generator import Pattern_Generator
-from CaJaDe.src.sg_generator import Schema_Graph_Generator
-from CaJaDe.src.workloads import mimic_workloads, nba_workloads
-from CaJaDe.src.case_study import mimic_cases, nba_cases
-from CaJaDe.src.instrumentation import ExecStats
-from CaJaDe.src.renaming import encode
-import CaJaDe.src.config
+from src.provenance_getter import provenance_getter
+from src.gprom_wrapper import  GProMWrapper
+from src.jg_generator import Join_Graph_Generator
+from src.jg_materializer import Join_Graph_Materializer
+from src.pattern_generator import Pattern_Generator
+from src.sg_generator import Schema_Graph_Generator
+from src.workloads import mimic_workloads, nba_workloads
+from src.case_study import mimic_cases, nba_cases
+from src.instrumentation import ExecStats
+from src.renaming import encode
+import src.config
 from networkx import MultiGraph
 import networkx as nx
 import psycopg2
@@ -506,8 +506,7 @@ def drop_jg_views(conn):
         cur.execute(q)
         conn.commit()
 
-
-if __name__ == '__main__':
+def main():
 
   parser = argparse.ArgumentParser(description='Running experiments of CaJaDe')
 
@@ -575,10 +574,10 @@ if __name__ == '__main__':
 
 
 
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  #####
-  ##print("colNum: "+colNum)
-  #####
+  # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    #####
+    ##print("colNum: "+colNum)
+    #####
   user_query = "provenance of (select count(*) as win, s.season_name from team t, game g, season s where t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' group by s.season_name);"
   # u_query = (user_query, 'gsw wins : 15 vs 12') 
   u_query = (user_query, 'demo')
@@ -750,3 +749,5 @@ if __name__ == '__main__':
       #       lca_eval_mode=eval_lca,
       #       )
 
+if __name__ == '__main__':
+  main()
