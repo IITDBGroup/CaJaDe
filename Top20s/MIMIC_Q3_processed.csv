@@ -1,0 +1,40 @@
+\makecell{$A_1$: PT \\ $A_2$: patients \\ $A_3$: procedures \\ $A_4$: admissions} & \makecell{($A_2$.subject\_id)=($A_1$.prov\_icustays\_subject\_\_id)\\($A_2$.subject\_id)=($A_3$.subject\_id)\\($A_4$.hadm\_id)=($A_3$.hadm\_id)} & \makecell{$A_4$.hospital\_stay\_length>9.0 \\ $A_3$.chapter=16} & 0.8 & 0.94 & 0.87 & x>8\\
+\hline
+\makecell{$A_1$: PT \\ $A_2$: patients \\ $A_3$: icustays \\ $A_4$: admissions} & \makecell{($A_2$.subject\_id)=($A_1$.prov\_icustays\_subject\_\_id)\\($A_2$.subject\_id)=($A_3$.subject\_id)\\($A_4$.hadm\_id)=($A_3$.hadm\_id)} & \makecell{$A_4$.hospital\_stay\_length<6.0 \\ $A_3$.los\_group=0-1} & 0.97 & 0.77 & 0.86 & 0-1\\
+\hline
+\makecell{$A_1$: PT \\ $A_2$: admissions \\ $A_3$: icustays \\ $A_4$: patients} & \makecell{($A_2$.hadm\_id)=($A_1$.prov\_icustays\_hadm\_\_id)\\($A_2$.hadm\_id)=($A_3$.hadm\_id)\\($A_4$.subject\_id)=($A_3$.subject\_id)} & \makecell{$A_3$.los\_group=0-1 \\ $A_4$.expire\_flag=0} & 0.99 & 0.72 & 0.83 & 0-1\\
+\hline
+\makecell{$A_1$: PT \\ $A_2$: patients \\ $A_3$: admissions} & \makecell{($A_2$.subject\_id)=($A_1$.prov\_icustays\_subject\_\_id)\\($A_3$.hadm\_id)=($A_1$.prov\_icustays\_hadm\_\_id)} & \makecell{$A_1$.prov\_icustays\_dbsource=carevue \\ $A_3$.hospital\_stay\_length>8.0} & 0.87 & 0.71 & 0.78 & x>8\\
+\hline
+\makecell{$A_1$: PT \\ $A_2$: patients \\ $A_3$: admissions} & \makecell{($A_2$.subject\_id)=($A_1$.prov\_icustays\_subject\_\_id)\\($A_3$.hadm\_id)=($A_1$.prov\_icustays\_hadm\_\_id)} & \makecell{$A_3$.hospital\_stay\_length<16.0 \\ $A_2$.expire\_flag=0} & 0.86 & 0.7 & 0.77 & 0-1\\
+\hline
+\makecell{$A_1$: PT \\ $A_2$: patients \\ $A_3$: icustays \\ $A_4$: admissions} & \makecell{($A_2$.subject\_id)=($A_1$.prov\_icustays\_subject\_\_id)\\($A_2$.subject\_id)=($A_3$.subject\_id)\\($A_4$.hadm\_id)=($A_3$.hadm\_id)} & \makecell{$A_4$.hospital\_stay\_length<16.0 \\ $A_2$.expire\_flag=0} & 0.81 & 0.7 & 0.76 & 0-1\\
+\hline
+\makecell{$A_1$: PT \\ $A_2$: patients \\ $A_3$: icustays \\ $A_4$: admissions} & \makecell{($A_2$.subject\_id)=($A_1$.prov\_icustays\_subject\_\_id)\\($A_2$.subject\_id)=($A_3$.subject\_id)\\($A_4$.hadm\_id)=($A_3$.hadm\_id)} & \makecell{$A_1$.prov\_icustays\_dbsource=carevue \\ $A_4$.hospital\_stay\_length>9.0 \\ $A_3$.dbsource=carevue} & 0.83 & 0.69 & 0.75 & x>8\\
+\hline
+\makecell{$A_1$: PT \\ $A_2$: patients} & \makecell{($A_2$.subject\_id)=($A_1$.prov\_icustays\_subject\_\_id)} & \makecell{$A_2$.expire\_flag=0} & 0.65 & 0.72 & 0.68 & 0-1\\
+\hline
+\makecell{$A_1$: PT \\ $A_2$: admissions \\ $A_3$: patients\_admit\_info \\ $A_4$: patients} & \makecell{($A_2$.hadm\_id)=($A_1$.prov\_icustays\_hadm\_\_id)\\($A_2$.hadm\_id)=($A_3$.hadm\_id)\\($A_4$.subject\_id)=($A_3$.subject\_id)} & \makecell{$A_4$.expire\_flag=0} & 0.65 & 0.72 & 0.68 & 0-1\\
+\hline
+\makecell{$A_1$: PT \\ $A_2$: patients \\ $A_3$: patients\_admit\_info \\ $A_4$: admissions} & \makecell{($A_2$.subject\_id)=($A_1$.prov\_icustays\_subject\_\_id)\\($A_2$.subject\_id)=($A_3$.subject\_id)\\($A_4$.hadm\_id)=($A_3$.hadm\_id)} & \makecell{$A_4$.admission\_type=EMERGENCY \\ $A_4$.hospital\_stay\_length>8.0} & 0.7 & 0.67 & 0.68 & x>8\\
+\hline
+\makecell{$A_1$: PT \\ $A_2$: admissions \\ $A_3$: icustays \\ $A_4$: patients} & \makecell{($A_2$.hadm\_id)=($A_1$.prov\_icustays\_hadm\_\_id)\\($A_2$.hadm\_id)=($A_3$.hadm\_id)\\($A_4$.subject\_id)=($A_3$.subject\_id)} & \makecell{$A_3$.los<0.9754 \\ $A_4$.gender=M} & 0.99 & 0.51 & 0.67 & 0-1\\
+\hline
+\makecell{$A_1$: PT \\ $A_2$: admissions \\ $A_3$: icustays \\ $A_4$: patients} & \makecell{($A_2$.hadm\_id)=($A_1$.prov\_icustays\_hadm\_\_id)\\($A_2$.hadm\_id)=($A_3$.hadm\_id)\\($A_4$.subject\_id)=($A_3$.subject\_id)} & \makecell{$A_1$.prov\_icustays\_dbsource=carevue \\ $A_3$.dbsource=carevue \\ $A_3$.los<11.887 \\ $A_4$.expire\_flag=0} & 0.85 & 0.51 & 0.64 & 0-1\\
+\hline
+\makecell{$A_1$: PT \\ $A_2$: patients \\ $A_3$: procedures \\ $A_4$: admissions} & \makecell{($A_2$.subject\_id)=($A_1$.prov\_icustays\_subject\_\_id)\\($A_2$.subject\_id)=($A_3$.subject\_id)\\($A_4$.hadm\_id)=($A_3$.hadm\_id)} & \makecell{$A_1$.prov\_icustays\_dbsource=carevue \\ $A_4$.hospital\_stay\_length<7.0 \\ $A_2$.expire\_flag=0} & 0.96 & 0.47 & 0.63 & 0-1\\
+\hline
+\makecell{} & \makecell{A\_1} & \makecell{$A_1$.prov\_icustays\_dbsource=carevue} & 0.57 & 0.68 & 0.62 & 0-1\\
+\hline
+\makecell{$A_1$: PT \\ $A_2$: patients} & \makecell{($A_2$.subject\_id)=($A_1$.prov\_icustays\_subject\_\_id)} & \makecell{$A_1$.prov\_icustays\_dbsource=carevue} & 0.57 & 0.68 & 0.62 & 0-1\\
+\hline
+\makecell{$A_1$: PT \\ $A_2$: patients \\ $A_3$: admissions} & \makecell{($A_2$.subject\_id)=($A_1$.prov\_icustays\_subject\_\_id)\\($A_3$.hadm\_id)=($A_1$.prov\_icustays\_hadm\_\_id)} & \makecell{$A_3$.hospital\_stay\_length<20.0 \\ $A_2$.gender=M} & 0.75 & 0.52 & 0.62 & 0-1\\
+\hline
+\makecell{$A_1$: PT \\ $A_2$: patients \\ $A_3$: patients\_admit\_info \\ $A_4$: admissions} & \makecell{($A_2$.subject\_id)=($A_1$.prov\_icustays\_subject\_\_id)\\($A_2$.subject\_id)=($A_3$.subject\_id)\\($A_4$.hadm\_id)=($A_3$.hadm\_id)} & \makecell{$A_4$.admission\_type=EMERGENCY \\ $A_4$.hospital\_stay\_length<17.0} & 0.68 & 0.56 & 0.61 & 0-1\\
+\hline
+\makecell{$A_1$: PT \\ $A_2$: patients \\ $A_3$: procedures \\ $A_4$: admissions} & \makecell{($A_2$.subject\_id)=($A_1$.prov\_icustays\_subject\_\_id)\\($A_2$.subject\_id)=($A_3$.subject\_id)\\($A_4$.hadm\_id)=($A_3$.hadm\_id)} & \makecell{$A_4$.hospital\_stay\_length<18.0 \\ $A_2$.gender=M} & 0.69 & 0.54 & 0.6 & 0-1\\
+\hline
+\makecell{$A_1$: PT \\ $A_2$: patients \\ $A_3$: icustays \\ $A_4$: admissions} & \makecell{($A_2$.subject\_id)=($A_1$.prov\_icustays\_subject\_\_id)\\($A_2$.subject\_id)=($A_3$.subject\_id)\\($A_4$.hadm\_id)=($A_3$.hadm\_id)} & \makecell{$A_4$.hospital\_stay\_length<20.0 \\ $A_2$.gender=M} & 0.7 & 0.53 & 0.6 & 0-1\\
+\hline
+\makecell{$A_1$: PT \\ $A_2$: admissions \\ $A_3$: icustays \\ $A_4$: patients} & \makecell{($A_2$.hadm\_id)=($A_1$.prov\_icustays\_hadm\_\_id)\\($A_2$.hadm\_id)=($A_3$.hadm\_id)\\($A_4$.subject\_id)=($A_3$.subject\_id)} & \makecell{$A_3$.los<0.9574 \\ $A_4$.gender=F} & 0.99 & 0.42 & 0.58 & 0-1\\
+\hline
