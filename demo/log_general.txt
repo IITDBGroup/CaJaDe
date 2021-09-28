@@ -6007,3 +6007,557 @@ DEBUG 2021-09-28 00:01:35,365[pattern_generator.py:gen_patterns:1207]   a_5
 4  108
 DEBUG 2021-09-28 00:01:36,036[experiments.py:run_experiment:476]total number of patterns 41
 INFO 2021-09-28 00:01:36,089[_internal.py:_log:225]127.0.0.1 - - [28/Sep/2021 00:01:36] "EXP /explanation HTTP/1.1" 200 -
+INFO 2021-09-28 09:33:12,653[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-09-28 09:33:15,024[_internal.py:_log:225]127.0.0.1 - - [28/Sep/2021 09:33:15] "GET / HTTP/1.1" 200 -
+INFO 2021-09-28 09:33:15,123[_internal.py:_log:225]127.0.0.1 - - [28/Sep/2021 09:33:15] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-09-28 09:33:15,327[_internal.py:_log:225]127.0.0.1 - - [28/Sep/2021 09:33:15] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+INFO 2021-09-28 09:33:20,848[_internal.py:_log:225]127.0.0.1 - - [28/Sep/2021 09:33:20] "POST /db/ HTTP/1.1" 200 -
+INFO 2021-09-28 09:33:20,884[_internal.py:_log:225]127.0.0.1 - - [28/Sep/2021 09:33:20] "[36mGET /static/main.css HTTP/1.1[0m" 304 -
+INFO 2021-09-28 09:33:25,512[_internal.py:_log:225]127.0.0.1 - - [28/Sep/2021 09:33:25] "POST /ajax HTTP/1.1" 200 -
+INFO 2021-09-28 09:35:37,424[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-09-28 09:35:39,703[_internal.py:_log:225]127.0.0.1 - - [28/Sep/2021 09:35:39] "GET / HTTP/1.1" 200 -
+INFO 2021-09-28 09:35:39,778[_internal.py:_log:225]127.0.0.1 - - [28/Sep/2021 09:35:39] "[36mGET /static/main.css HTTP/1.1[0m" 304 -
+INFO 2021-09-28 09:35:48,562[_internal.py:_log:225]127.0.0.1 - - [28/Sep/2021 09:35:48] "POST /db/ HTTP/1.1" 200 -
+INFO 2021-09-28 09:35:48,594[_internal.py:_log:225]127.0.0.1 - - [28/Sep/2021 09:35:48] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-09-28 09:35:52,857[_internal.py:_log:225]127.0.0.1 - - [28/Sep/2021 09:35:52] "POST /ajax HTTP/1.1" 200 -
+INFO 2021-09-28 09:38:40,306[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-09-28 09:38:42,374[_internal.py:_log:225]127.0.0.1 - - [28/Sep/2021 09:38:42] "GET / HTTP/1.1" 200 -
+INFO 2021-09-28 09:38:42,487[_internal.py:_log:225]127.0.0.1 - - [28/Sep/2021 09:38:42] "[36mGET /static/main.css HTTP/1.1[0m" 304 -
+INFO 2021-09-28 09:38:48,765[_internal.py:_log:225]127.0.0.1 - - [28/Sep/2021 09:38:48] "POST /db/ HTTP/1.1" 200 -
+INFO 2021-09-28 09:38:48,802[_internal.py:_log:225]127.0.0.1 - - [28/Sep/2021 09:38:48] "[36mGET /static/main.css HTTP/1.1[0m" 304 -
+INFO 2021-09-28 09:38:53,455[_internal.py:_log:225]127.0.0.1 - - [28/Sep/2021 09:38:53] "POST /ajax HTTP/1.1" 200 -
+INFO 2021-09-28 09:44:37,233[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-09-28 09:44:41,011[_internal.py:_log:225]127.0.0.1 - - [28/Sep/2021 09:44:41] "GET / HTTP/1.1" 200 -
+INFO 2021-09-28 09:44:41,118[_internal.py:_log:225]127.0.0.1 - - [28/Sep/2021 09:44:41] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-09-28 09:44:49,919[_internal.py:_log:225]127.0.0.1 - - [28/Sep/2021 09:44:49] "POST /db/ HTTP/1.1" 200 -
+INFO 2021-09-28 09:44:49,959[_internal.py:_log:225]127.0.0.1 - - [28/Sep/2021 09:44:49] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-09-28 09:44:54,149[_internal.py:_log:225]127.0.0.1 - - [28/Sep/2021 09:44:54] "POST /ajax HTTP/1.1" 200 -
+INFO 2021-09-28 09:45:30,239[_internal.py:_log:225]127.0.0.1 - - [28/Sep/2021 09:45:30] "GET /db/ HTTP/1.1" 200 -
+INFO 2021-09-28 09:46:26,320[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-09-28 09:46:28,175[_internal.py:_log:225]127.0.0.1 - - [28/Sep/2021 09:46:28] "GET / HTTP/1.1" 200 -
+INFO 2021-09-28 09:46:28,272[_internal.py:_log:225]127.0.0.1 - - [28/Sep/2021 09:46:28] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-09-28 09:46:33,571[_internal.py:_log:225]127.0.0.1 - - [28/Sep/2021 09:46:33] "POST /db/ HTTP/1.1" 200 -
+INFO 2021-09-28 09:46:33,623[_internal.py:_log:225]127.0.0.1 - - [28/Sep/2021 09:46:33] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-09-28 09:46:37,823[_internal.py:_log:225]127.0.0.1 - - [28/Sep/2021 09:46:37] "POST /ajax HTTP/1.1" 200 -
+INFO 2021-09-28 09:48:40,223[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-09-28 09:48:43,935[_internal.py:_log:225]127.0.0.1 - - [28/Sep/2021 09:48:43] "GET / HTTP/1.1" 200 -
+INFO 2021-09-28 09:48:43,989[_internal.py:_log:225]127.0.0.1 - - [28/Sep/2021 09:48:43] "[36mGET /static/main.css HTTP/1.1[0m" 304 -
+INFO 2021-09-28 09:48:49,163[_internal.py:_log:225]127.0.0.1 - - [28/Sep/2021 09:48:49] "POST /db/ HTTP/1.1" 200 -
+INFO 2021-09-28 09:48:49,195[_internal.py:_log:225]127.0.0.1 - - [28/Sep/2021 09:48:49] "[36mGET /static/main.css HTTP/1.1[0m" 304 -
+INFO 2021-09-28 09:48:53,376[_internal.py:_log:225]127.0.0.1 - - [28/Sep/2021 09:48:53] "POST /ajax HTTP/1.1" 200 -
+INFO 2021-09-28 09:49:10,685[_internal.py:_log:225]127.0.0.1 - - [28/Sep/2021 09:49:10] "GET /db/ HTTP/1.1" 200 -
+INFO 2021-09-28 09:49:16,926[_internal.py:_log:225]127.0.0.1 - - [28/Sep/2021 09:49:16] "GET /db/ HTTP/1.1" 200 -
+DEBUG 2021-09-28 09:50:31,184[experiments.py:run_experiment:265]test__nba__0.1__100__100__False__1__0.2__y__f__o__0.3__100
+DEBUG 2021-09-28 09:50:31,184[experiments.py:run_experiment:266]{'yes': '2015-16', 'no': '2012-13'}
+DEBUG 2021-09-28 09:50:31,185[experiments.py:run_experiment:269]user_questions : 'season_name=2015-16 VS season_name=2012-13'
+DEBUG 2021-09-28 09:50:31,185[experiments.py:run_experiment:269]maximum_edges : '1'
+DEBUG 2021-09-28 09:50:31,185[experiments.py:run_experiment:269]exclude_high_cost_jg : 'f'
+DEBUG 2021-09-28 09:50:31,185[experiments.py:run_experiment:269]sample_rate_for_s : '0.1'
+DEBUG 2021-09-28 09:50:31,185[experiments.py:run_experiment:269]f1_calculation_type : 'o'
+DEBUG 2021-09-28 09:50:31,185[experiments.py:run_experiment:269]f1_min_sample_size_threshold : '100'
+DEBUG 2021-09-28 09:50:31,185[experiments.py:run_experiment:269]result_schema : 'demotest'
+DEBUG 2021-09-28 09:50:31,185[experiments.py:run_experiment:269]dbname : 'nba'
+DEBUG 2021-09-28 09:50:31,185[experiments.py:run_experiment:269]numercial_attr_filter_method : 'y'
+DEBUG 2021-09-28 09:50:31,185[experiments.py:run_experiment:269]f1_sample_rate : '0.3'
+DEBUG 2021-09-28 09:50:31,185[experiments.py:run_experiment:269]min_recall_threshold : '0.2'
+DEBUG 2021-09-28 09:50:31,185[experiments.py:run_experiment:269]user_query : 'test'
+DEBUG 2021-09-28 09:50:31,185[experiments.py:run_experiment:269]lca_s_max_size : '100'
+DEBUG 2021-09-28 09:50:31,185[experiments.py:run_experiment:269]lca_s_min_size : '100'
+DEBUG 2021-09-28 09:50:31,185[experiments.py:run_experiment:269]just_lca : False
+DEBUG 2021-09-28 09:50:31,185[experiments.py:run_experiment:269]f1_sample_type : 's.0'
+DEBUG 2021-09-28 09:50:31,389[provenance_getter.py:gen_provenance_table:65]CREATE VIEW original_pt AS WITH _temp_view_1 AS (
+SELECT /*+ materialize */ 1 AS "AGG_GB_ARG0", F0."season_name" AS "AGG_GB_ARG1", F0."prov_team_team__id" AS "prov_team_team__id", F0."prov_team_team" AS "prov_team_team", F0."prov_game_game__date" AS "prov_game_game__date", F0."prov_game_home__points" AS "prov_game_home__points", F0."prov_game_away__points" AS "prov_game_away__points", F0."prov_game_home__possessions" AS "prov_game_home__possessions", F0."prov_game_away__possessions" AS "prov_game_away__possessions", F0."prov_game_home__id" AS "prov_game_home__id", F0."prov_game_away__id" AS "prov_game_away__id", F0."prov_game_winner__id" AS "prov_game_winner__id", F0."prov_game_season__id" AS "prov_game_season__id", F0."prov_season_season__id" AS "prov_season_season__id", F0."prov_season_season__name" AS "prov_season_season__name", F0."prov_season_season__type" AS "prov_season_season__type"
+FROM (
+SELECT F0."team_id" AS "team_id", F0."team" AS "team", F0."game_date" AS "game_date", F0."home_points" AS "home_points", F0."away_points" AS "away_points", F0."home_possessions" AS "home_possessions", F0."away_possessions" AS "away_possessions", F0."home_id" AS "home_id", F0."away_id" AS "away_id", F0."winner_id" AS "winner_id", F0."season_id" AS "season_id", F1."season_id" AS "season_id1", F1."season_name" AS "season_name", F1."season_type" AS "season_type", F0."prov_team_team__id" AS "prov_team_team__id", F0."prov_team_team" AS "prov_team_team", F0."prov_game_game__date" AS "prov_game_game__date", F0."prov_game_home__points" AS "prov_game_home__points", F0."prov_game_away__points" AS "prov_game_away__points", F0."prov_game_home__possessions" AS "prov_game_home__possessions", F0."prov_game_away__possessions" AS "prov_game_away__possessions", F0."prov_game_home__id" AS "prov_game_home__id", F0."prov_game_away__id" AS "prov_game_away__id", F0."prov_game_winner__id" AS "prov_game_winner__id", F0."prov_game_season__id" AS "prov_game_season__id", F1."prov_season_season__id" AS "prov_season_season__id", F1."prov_season_season__name" AS "prov_season_season__name", F1."prov_season_season__type" AS "prov_season_season__type"
+FROM ((
+SELECT F0."team_id" AS "team_id", F0."team" AS "team", F1."game_date" AS "game_date", F1."home_points" AS "home_points", F1."away_points" AS "away_points", F1."home_possessions" AS "home_possessions", F1."away_possessions" AS "away_possessions", F1."home_id" AS "home_id", F1."away_id" AS "away_id", F1."winner_id" AS "winner_id", F1."season_id" AS "season_id", F0."prov_team_team__id" AS "prov_team_team__id", F0."prov_team_team" AS "prov_team_team", F1."prov_game_game__date" AS "prov_game_game__date", F1."prov_game_home__points" AS "prov_game_home__points", F1."prov_game_away__points" AS "prov_game_away__points", F1."prov_game_home__possessions" AS "prov_game_home__possessions", F1."prov_game_away__possessions" AS "prov_game_away__possessions", F1."prov_game_home__id" AS "prov_game_home__id", F1."prov_game_away__id" AS "prov_game_away__id", F1."prov_game_winner__id" AS "prov_game_winner__id", F1."prov_game_season__id" AS "prov_game_season__id"
+FROM ((
+SELECT F0."team_id" AS "team_id", F0."team" AS "team", F0."team_id" AS "prov_team_team__id", F0."team" AS "prov_team_team"
+FROM "team" AS F0) F0 CROSS JOIN (
+SELECT F0."game_date" AS "game_date", F0."home_points" AS "home_points", F0."away_points" AS "away_points", F0."home_possessions" AS "home_possessions", F0."away_possessions" AS "away_possessions", F0."home_id" AS "home_id", F0."away_id" AS "away_id", F0."winner_id" AS "winner_id", F0."season_id" AS "season_id", F0."game_date" AS "prov_game_game__date", F0."home_points" AS "prov_game_home__points", F0."away_points" AS "prov_game_away__points", F0."home_possessions" AS "prov_game_home__possessions", F0."away_possessions" AS "prov_game_away__possessions", F0."home_id" AS "prov_game_home__id", F0."away_id" AS "prov_game_away__id", F0."winner_id" AS "prov_game_winner__id", F0."season_id" AS "prov_game_season__id"
+FROM "game" AS F0) F1)) F0 CROSS JOIN (
+SELECT F0."season_id" AS "season_id", F0."season_name" AS "season_name", F0."season_type" AS "season_type", F0."season_id" AS "prov_season_season__id", F0."season_name" AS "prov_season_season__name", F0."season_type" AS "prov_season_season__type"
+FROM "season" AS F0) F1)) F0
+WHERE (((F0."team_id" = F0."winner_id") AND (F0."season_id" = F0."season_id1")) AND (F0."team" = 'GSW'))),
+_temp_view_0 AS (
+SELECT /*+ materialize */ F0."AGGR_0" AS "AGGR_0", F0."GROUP_0" AS "GROUP_0", F1."prov_team_team__id" AS "prov_team_team__id", F1."prov_team_team" AS "prov_team_team", F1."prov_game_game__date" AS "prov_game_game__date", F1."prov_game_home__points" AS "prov_game_home__points", F1."prov_game_away__points" AS "prov_game_away__points", F1."prov_game_home__possessions" AS "prov_game_home__possessions", F1."prov_game_away__possessions" AS "prov_game_away__possessions", F1."prov_game_home__id" AS "prov_game_home__id", F1."prov_game_away__id" AS "prov_game_away__id", F1."prov_game_winner__id" AS "prov_game_winner__id", F1."prov_game_season__id" AS "prov_game_season__id", F1."prov_season_season__id" AS "prov_season_season__id", F1."prov_season_season__name" AS "prov_season_season__name", F1."prov_season_season__type" AS "prov_season_season__type"
+FROM ((
+SELECT count(1) AS "AGGR_0", F2."season_name" AS "GROUP_0"
+FROM (("team" AS F0 CROSS JOIN "game" AS F1) CROSS JOIN "season" AS F2)
+WHERE (((F0."team_id" = F1."winner_id") AND (F1."season_id" = F2."season_id")) AND (F0."team" = 'GSW'))
+GROUP BY F2."season_name") F0 JOIN (
+SELECT F0."AGG_GB_ARG1" AS "_P_SIDE_GROUP_0", F0."prov_team_team__id" AS "prov_team_team__id", F0."prov_team_team" AS "prov_team_team", F0."prov_game_game__date" AS "prov_game_game__date", F0."prov_game_home__points" AS "prov_game_home__points", F0."prov_game_away__points" AS "prov_game_away__points", F0."prov_game_home__possessions" AS "prov_game_home__possessions", F0."prov_game_away__possessions" AS "prov_game_away__possessions", F0."prov_game_home__id" AS "prov_game_home__id", F0."prov_game_away__id" AS "prov_game_away__id", F0."prov_game_winner__id" AS "prov_game_winner__id", F0."prov_game_season__id" AS "prov_game_season__id", F0."prov_season_season__id" AS "prov_season_season__id", F0."prov_season_season__name" AS "prov_season_season__name", F0."prov_season_season__type" AS "prov_season_season__type"
+FROM (SELECT * FROM _temp_view_1) F0) F1 ON ((F0."GROUP_0" IS NOT DISTINCT FROM F1."_P_SIDE_GROUP_0"))))
+SELECT F0."AGGR_0" AS "win", F0."GROUP_0" AS "season_name", F0."prov_team_team__id" AS "prov_team_team__id", F0."prov_team_team" AS "prov_team_team", F0."prov_game_game__date" AS "prov_game_game__date", F0."prov_game_home__points" AS "prov_game_home__points", F0."prov_game_away__points" AS "prov_game_away__points", F0."prov_game_home__possessions" AS "prov_game_home__possessions", F0."prov_game_away__possessions" AS "prov_game_away__possessions", F0."prov_game_home__id" AS "prov_game_home__id", F0."prov_game_away__id" AS "prov_game_away__id", F0."prov_game_winner__id" AS "prov_game_winner__id", F0."prov_game_season__id" AS "prov_game_season__id", F0."prov_season_season__id" AS "prov_season_season__id", F0."prov_season_season__name" AS "prov_season_season__name", F0."prov_season_season__type" AS "prov_season_season__type"
+FROM (SELECT * FROM _temp_view_0) F0;
+
+
+;
+DEBUG 2021-09-28 09:50:31,534[experiments.py:run_experiment:294]generate new valid_jgs
+DEBUG 2021-09-28 09:50:31,558[experiments.py:run_experiment:297]Before filtering any, we have 5 valid jgs 
+
+DEBUG 2021-09-28 09:50:31,561[experiments.py:run_experiment:312]DO include high cost jg!!!!!!!!!!!!!
+DEBUG 2021-09-28 09:50:31,561[experiments.py:run_experiment:313]before filtering intermediate, we have 5 jgs
+DEBUG 2021-09-28 09:50:31,561[experiments.py:run_experiment:321]after filtering out intermediate we have 5 valid jgs 
+
+DEBUG 2021-09-28 09:50:32,049[jg_materializer.py:materialize_jg:316]['(team.team_id)=(PT.winner_id)', {'game': ['winner_id'], 'team': ['team_id']}, 'game']
+DEBUG 2021-09-28 09:50:32,177[jg_materializer.py:materialize_jg:316]['(team.team_id)=(PT.home_id)', {'game': ['home_id'], 'team': ['team_id']}, 'game']
+DEBUG 2021-09-28 09:50:32,304[jg_materializer.py:materialize_jg:316]['(team.team_id)=(PT.away_id)', {'game': ['away_id'], 'team': ['team_id']}, 'game']
+DEBUG 2021-09-28 09:50:32,444[jg_materializer.py:materialize_jg:316]['(season.season_id)=(PT.season_id)', {'game': ['season_id'], 'season': ['season_id']}, 'game']
+DEBUG 2021-09-28 09:50:32,566[experiments.py:run_experiment:337]before filtering redundant, we have 5 jgs
+DEBUG 2021-09-28 09:50:32,567[experiments.py:run_experiment:340]after filtering out redundant we have 3 valid jgs 
+
+DEBUG 2021-09-28 09:50:32,567[experiments.py:run_experiment:342]we found 3 valid join graphs, now materializing and generating patterns
+DEBUG 2021-09-28 09:50:32,567[experiments.py:run_experiment:350]we are on join graph number 1
+DEBUG 2021-09-28 09:50:32,579[pattern_generator.py:gen_patterns:730]{'max_rel_index': 2, 'max_attr_index': 14, 'dtypes': {'win': 'nominal', 'season_name': 'nominal', 'a_1': 'ordinal', 'a_2': 'nominal', 'a_3': 'nominal', 'a_4': 'ordinal', 'a_5': 'ordinal', 'a_6': 'ordinal', 'a_7': 'ordinal', 'a_8': 'ordinal', 'a_9': 'ordinal', 'a_10': 'ordinal', 'a_11': 'ordinal', 'a_12': 'ordinal', 'a_13': 'nominal', 'a_14': 'nominal', 'pnumber': 'nominal', 'is_user': 'nominal'}, 1: {'key': 1, 'label': 'PT', 'columns': {'win': 'win', 'season_name': 'season_name', 'a_1': 'prov_team_team__id', 'a_2': 'prov_team_team', 'a_3': 'prov_game_game__date', 'a_4': 'prov_game_home__points', 'a_5': 'prov_game_away__points', 'a_6': 'prov_game_home__possessions', 'a_7': 'prov_game_away__possessions', 'a_8': 'prov_game_home__id', 'a_9': 'prov_game_away__id', 'a_10': 'prov_game_winner__id', 'a_11': 'prov_game_season__id', 'a_12': 'prov_season_season__id', 'a_13': 'prov_season_season__name', 'a_14': 'prov_season_season__type', 'pnumber': 'pnumber', 'is_user': 'is_user'}, 'renamed_rel': 'A_1', 'rel_min_attr_index': 0, 'rel_max_attr_index': 14}}
+DEBUG 2021-09-28 09:50:32,582[pattern_generator.py:gen_patterns:892]sample size : 100
+DEBUG 2021-09-28 09:50:32,611[pattern_generator.py:gen_patterns:1012]             a_14
+0  regular season
+DEBUG 2021-09-28 09:50:32,621[pattern_generator.py:gen_patterns:1055][{'nominal_values': [['a_14', 'regular season']], 'np_recall': 1.0}]
+DEBUG 2021-09-28 09:50:32,621[pattern_generator.py:gen_patterns:1056]1
+DEBUG 2021-09-28 09:50:32,676[pattern_generator.py:gen_patterns:1167]{0: [['a_4', 0, 0], ['a_5', 0, 0], ['a_6', 0, 0], ['a_7', 0, 0]]}
+DEBUG 2021-09-28 09:50:32,678[pattern_generator.py:gen_patterns:1187]a_5
+DEBUG 2021-09-28 09:50:32,678[pattern_generator.py:gen_patterns:1193]lagrge number of num attrs
+DEBUG 2021-09-28 09:50:32,678[pattern_generator.py:gen_patterns:1194]['a_5']
+DEBUG 2021-09-28 09:50:32,679[pattern_generator.py:gen_patterns:1195]{'a_5': ['a_4', 'a_7', 'a_6']}
+DEBUG 2021-09-28 09:50:32,680[pattern_generator.py:gen_patterns:1207]   a_5
+0   94
+1  110
+2  106
+3  108
+4   94
+DEBUG 2021-09-28 09:50:33,592[experiments.py:run_experiment:350]we are on join graph number 2
+DEBUG 2021-09-28 09:50:33,601[pattern_generator.py:gen_patterns:730]{'max_rel_index': 3, 'max_attr_index': 16, 'dtypes': {'win': 'nominal', 'season_name': 'nominal', 'a_1': 'ordinal', 'a_2': 'nominal', 'a_3': 'nominal', 'a_4': 'ordinal', 'a_5': 'ordinal', 'a_6': 'ordinal', 'a_7': 'ordinal', 'a_8': 'ordinal', 'a_9': 'ordinal', 'a_10': 'ordinal', 'a_11': 'ordinal', 'a_12': 'ordinal', 'a_13': 'nominal', 'a_14': 'nominal', 'pnumber': 'nominal', 'is_user': 'nominal', 'a_15': 'ordinal', 'a_16': 'nominal'}, 1: {'key': 1, 'label': 'PT', 'columns': {'win': 'win', 'season_name': 'season_name', 'a_1': 'prov_team_team__id', 'a_2': 'prov_team_team', 'a_3': 'prov_game_game__date', 'a_4': 'prov_game_home__points', 'a_5': 'prov_game_away__points', 'a_6': 'prov_game_home__possessions', 'a_7': 'prov_game_away__possessions', 'a_8': 'prov_game_home__id', 'a_9': 'prov_game_away__id', 'a_10': 'prov_game_winner__id', 'a_11': 'prov_game_season__id', 'a_12': 'prov_season_season__id', 'a_13': 'prov_season_season__name', 'a_14': 'prov_season_season__type', 'pnumber': 'pnumber', 'is_user': 'is_user'}, 'renamed_rel': 'A_1', 'rel_min_attr_index': 0, 'rel_max_attr_index': 14}, 2: {'key': 2, 'label': 'team', 'columns': {'a_15': 'team_id', 'a_16': 'team'}, 'renamed_rel': 'A_2', 'rel_min_attr_index': 14, 'rel_max_attr_index': 16}}
+DEBUG 2021-09-28 09:50:33,603[pattern_generator.py:gen_patterns:892]sample size : 100
+DEBUG 2021-09-28 09:50:33,629[pattern_generator.py:gen_patterns:1012]              a_14  a_16
+0   regular season  None
+1   regular season   GSW
+2   regular season   PHX
+3   regular season   MIN
+4   regular season   LAC
+5   regular season   NOP
+6   regular season   UTA
+7   regular season   ATL
+8   regular season   MIA
+9   regular season   CHA
+10  regular season   BKN
+11  regular season   WAS
+12  regular season   SAC
+13  regular season   POR
+14  regular season   HOU
+15  regular season   DAL
+16  regular season   TOR
+17  regular season   IND
+18  regular season   SAS
+19  regular season   LAL
+20  regular season   CLE
+21  regular season   OKC
+22  regular season   ORL
+23  regular season   DET
+24  regular season   DEN
+25  regular season   CHI
+26  regular season   NYK
+27  regular season   BOS
+DEBUG 2021-09-28 09:50:33,650[pattern_generator.py:gen_patterns:1055][{'nominal_values': [['a_14', 'regular season']], 'np_recall': 1.0}, {'nominal_values': [['a_14', 'regular season'], ['a_16', 'GSW']], 'np_recall': 0.5583333333333333}]
+DEBUG 2021-09-28 09:50:33,650[pattern_generator.py:gen_patterns:1056]2
+DEBUG 2021-09-28 09:50:33,677[pattern_generator.py:gen_patterns:1167]{0: [['a_4', 0, 0], ['a_5', 0, 0], ['a_6', 0, 0], ['a_7', 0, 0]]}
+DEBUG 2021-09-28 09:50:33,678[pattern_generator.py:gen_patterns:1187]a_5
+DEBUG 2021-09-28 09:50:33,678[pattern_generator.py:gen_patterns:1193]lagrge number of num attrs
+DEBUG 2021-09-28 09:50:33,679[pattern_generator.py:gen_patterns:1194]['a_5']
+DEBUG 2021-09-28 09:50:33,679[pattern_generator.py:gen_patterns:1195]{'a_5': ['a_4', 'a_7', 'a_6']}
+DEBUG 2021-09-28 09:50:33,680[pattern_generator.py:gen_patterns:1207]   a_5
+0   98
+1  128
+2   97
+3  103
+4   87
+DEBUG 2021-09-28 09:50:34,523[experiments.py:run_experiment:350]we are on join graph number 3
+DEBUG 2021-09-28 09:50:34,543[pattern_generator.py:gen_patterns:730]{'max_rel_index': 3, 'max_attr_index': 16, 'dtypes': {'win': 'nominal', 'season_name': 'nominal', 'a_1': 'ordinal', 'a_2': 'nominal', 'a_3': 'nominal', 'a_4': 'ordinal', 'a_5': 'ordinal', 'a_6': 'ordinal', 'a_7': 'ordinal', 'a_8': 'ordinal', 'a_9': 'ordinal', 'a_10': 'ordinal', 'a_11': 'ordinal', 'a_12': 'ordinal', 'a_13': 'nominal', 'a_14': 'nominal', 'pnumber': 'nominal', 'is_user': 'nominal', 'a_15': 'ordinal', 'a_16': 'nominal'}, 1: {'key': 1, 'label': 'PT', 'columns': {'win': 'win', 'season_name': 'season_name', 'a_1': 'prov_team_team__id', 'a_2': 'prov_team_team', 'a_3': 'prov_game_game__date', 'a_4': 'prov_game_home__points', 'a_5': 'prov_game_away__points', 'a_6': 'prov_game_home__possessions', 'a_7': 'prov_game_away__possessions', 'a_8': 'prov_game_home__id', 'a_9': 'prov_game_away__id', 'a_10': 'prov_game_winner__id', 'a_11': 'prov_game_season__id', 'a_12': 'prov_season_season__id', 'a_13': 'prov_season_season__name', 'a_14': 'prov_season_season__type', 'pnumber': 'pnumber', 'is_user': 'is_user'}, 'renamed_rel': 'A_1', 'rel_min_attr_index': 0, 'rel_max_attr_index': 14}, 2: {'key': 2, 'label': 'team', 'columns': {'a_15': 'team_id', 'a_16': 'team'}, 'renamed_rel': 'A_2', 'rel_min_attr_index': 14, 'rel_max_attr_index': 16}}
+DEBUG 2021-09-28 09:50:34,545[pattern_generator.py:gen_patterns:892]sample size : 100
+DEBUG 2021-09-28 09:50:34,574[pattern_generator.py:gen_patterns:1012]              a_14  a_16
+0   regular season  None
+1   regular season   GSW
+2   regular season   PHX
+3   regular season   LAC
+4   regular season   POR
+5   regular season   NOP
+6   regular season   SAS
+7   regular season   DEN
+8   regular season   OKC
+9   regular season   UTA
+10  regular season   NYK
+11  regular season   TOR
+12  regular season   IND
+13  regular season   CHA
+14  regular season   MEM
+15  regular season   DET
+16  regular season   BKN
+17  regular season   SAC
+18  regular season   PHI
+19  regular season   DAL
+20  regular season   WAS
+21  regular season   MIN
+22  regular season   LAL
+23  regular season   CLE
+24  regular season   ORL
+25  regular season   MIA
+26  regular season   ATL
+27  regular season   CHI
+28  regular season   HOU
+29  regular season   MIL
+DEBUG 2021-09-28 09:50:34,604[pattern_generator.py:gen_patterns:1055][{'nominal_values': [['a_14', 'regular season']], 'np_recall': 1.0}, {'nominal_values': [['a_14', 'regular season'], ['a_16', 'GSW']], 'np_recall': 0.44166666666666665}]
+DEBUG 2021-09-28 09:50:34,604[pattern_generator.py:gen_patterns:1056]2
+DEBUG 2021-09-28 09:50:34,632[pattern_generator.py:gen_patterns:1167]{0: [['a_4', 0, 0], ['a_5', 0, 0], ['a_6', 0, 0], ['a_7', 0, 0]]}
+DEBUG 2021-09-28 09:50:34,633[pattern_generator.py:gen_patterns:1187]a_5
+DEBUG 2021-09-28 09:50:34,633[pattern_generator.py:gen_patterns:1193]lagrge number of num attrs
+DEBUG 2021-09-28 09:50:34,633[pattern_generator.py:gen_patterns:1194]['a_5']
+DEBUG 2021-09-28 09:50:34,633[pattern_generator.py:gen_patterns:1195]{'a_5': ['a_4', 'a_7', 'a_6']}
+DEBUG 2021-09-28 09:50:34,635[pattern_generator.py:gen_patterns:1207]   a_5
+0   85
+1  110
+2  103
+3   92
+4  101
+DEBUG 2021-09-28 09:50:35,459[experiments.py:run_experiment:476]total number of patterns 41
+INFO 2021-09-28 09:50:35,507[_internal.py:_log:225]127.0.0.1 - - [28/Sep/2021 09:50:35] "EXP /explanation HTTP/1.1" 200 -
+DEBUG 2021-09-28 11:32:40,327[experiments.py:run_experiment:265]test__nba__0.1__100__100__False__1__0.2__y__f__o__0.3__100
+DEBUG 2021-09-28 11:32:40,328[experiments.py:run_experiment:266]{'yes': '2015-16', 'no': '2012-13'}
+DEBUG 2021-09-28 11:32:40,328[experiments.py:run_experiment:269]user_questions : 'season_name=2015-16 VS season_name=2012-13'
+DEBUG 2021-09-28 11:32:40,328[experiments.py:run_experiment:269]maximum_edges : '1'
+DEBUG 2021-09-28 11:32:40,329[experiments.py:run_experiment:269]exclude_high_cost_jg : 'f'
+DEBUG 2021-09-28 11:32:40,329[experiments.py:run_experiment:269]sample_rate_for_s : '0.1'
+DEBUG 2021-09-28 11:32:40,329[experiments.py:run_experiment:269]f1_calculation_type : 'o'
+DEBUG 2021-09-28 11:32:40,329[experiments.py:run_experiment:269]f1_min_sample_size_threshold : '100'
+DEBUG 2021-09-28 11:32:40,329[experiments.py:run_experiment:269]result_schema : 'demotest'
+DEBUG 2021-09-28 11:32:40,330[experiments.py:run_experiment:269]dbname : 'nba'
+DEBUG 2021-09-28 11:32:40,330[experiments.py:run_experiment:269]numercial_attr_filter_method : 'y'
+DEBUG 2021-09-28 11:32:40,330[experiments.py:run_experiment:269]f1_sample_rate : '0.3'
+DEBUG 2021-09-28 11:32:40,330[experiments.py:run_experiment:269]min_recall_threshold : '0.2'
+DEBUG 2021-09-28 11:32:40,330[experiments.py:run_experiment:269]user_query : 'test'
+DEBUG 2021-09-28 11:32:40,330[experiments.py:run_experiment:269]lca_s_max_size : '100'
+DEBUG 2021-09-28 11:32:40,330[experiments.py:run_experiment:269]lca_s_min_size : '100'
+DEBUG 2021-09-28 11:32:40,330[experiments.py:run_experiment:269]just_lca : False
+DEBUG 2021-09-28 11:32:40,330[experiments.py:run_experiment:269]f1_sample_type : 's.0'
+DEBUG 2021-09-28 11:32:40,565[provenance_getter.py:gen_provenance_table:65]CREATE VIEW original_pt AS WITH _temp_view_1 AS (
+SELECT /*+ materialize */ 1 AS "AGG_GB_ARG0", F0."season_name" AS "AGG_GB_ARG1", F0."prov_team_team__id" AS "prov_team_team__id", F0."prov_team_team" AS "prov_team_team", F0."prov_game_game__date" AS "prov_game_game__date", F0."prov_game_home__points" AS "prov_game_home__points", F0."prov_game_away__points" AS "prov_game_away__points", F0."prov_game_home__possessions" AS "prov_game_home__possessions", F0."prov_game_away__possessions" AS "prov_game_away__possessions", F0."prov_game_home__id" AS "prov_game_home__id", F0."prov_game_away__id" AS "prov_game_away__id", F0."prov_game_winner__id" AS "prov_game_winner__id", F0."prov_game_season__id" AS "prov_game_season__id", F0."prov_season_season__id" AS "prov_season_season__id", F0."prov_season_season__name" AS "prov_season_season__name", F0."prov_season_season__type" AS "prov_season_season__type"
+FROM (
+SELECT F0."team_id" AS "team_id", F0."team" AS "team", F0."game_date" AS "game_date", F0."home_points" AS "home_points", F0."away_points" AS "away_points", F0."home_possessions" AS "home_possessions", F0."away_possessions" AS "away_possessions", F0."home_id" AS "home_id", F0."away_id" AS "away_id", F0."winner_id" AS "winner_id", F0."season_id" AS "season_id", F1."season_id" AS "season_id1", F1."season_name" AS "season_name", F1."season_type" AS "season_type", F0."prov_team_team__id" AS "prov_team_team__id", F0."prov_team_team" AS "prov_team_team", F0."prov_game_game__date" AS "prov_game_game__date", F0."prov_game_home__points" AS "prov_game_home__points", F0."prov_game_away__points" AS "prov_game_away__points", F0."prov_game_home__possessions" AS "prov_game_home__possessions", F0."prov_game_away__possessions" AS "prov_game_away__possessions", F0."prov_game_home__id" AS "prov_game_home__id", F0."prov_game_away__id" AS "prov_game_away__id", F0."prov_game_winner__id" AS "prov_game_winner__id", F0."prov_game_season__id" AS "prov_game_season__id", F1."prov_season_season__id" AS "prov_season_season__id", F1."prov_season_season__name" AS "prov_season_season__name", F1."prov_season_season__type" AS "prov_season_season__type"
+FROM ((
+SELECT F0."team_id" AS "team_id", F0."team" AS "team", F1."game_date" AS "game_date", F1."home_points" AS "home_points", F1."away_points" AS "away_points", F1."home_possessions" AS "home_possessions", F1."away_possessions" AS "away_possessions", F1."home_id" AS "home_id", F1."away_id" AS "away_id", F1."winner_id" AS "winner_id", F1."season_id" AS "season_id", F0."prov_team_team__id" AS "prov_team_team__id", F0."prov_team_team" AS "prov_team_team", F1."prov_game_game__date" AS "prov_game_game__date", F1."prov_game_home__points" AS "prov_game_home__points", F1."prov_game_away__points" AS "prov_game_away__points", F1."prov_game_home__possessions" AS "prov_game_home__possessions", F1."prov_game_away__possessions" AS "prov_game_away__possessions", F1."prov_game_home__id" AS "prov_game_home__id", F1."prov_game_away__id" AS "prov_game_away__id", F1."prov_game_winner__id" AS "prov_game_winner__id", F1."prov_game_season__id" AS "prov_game_season__id"
+FROM ((
+SELECT F0."team_id" AS "team_id", F0."team" AS "team", F0."team_id" AS "prov_team_team__id", F0."team" AS "prov_team_team"
+FROM "team" AS F0) F0 CROSS JOIN (
+SELECT F0."game_date" AS "game_date", F0."home_points" AS "home_points", F0."away_points" AS "away_points", F0."home_possessions" AS "home_possessions", F0."away_possessions" AS "away_possessions", F0."home_id" AS "home_id", F0."away_id" AS "away_id", F0."winner_id" AS "winner_id", F0."season_id" AS "season_id", F0."game_date" AS "prov_game_game__date", F0."home_points" AS "prov_game_home__points", F0."away_points" AS "prov_game_away__points", F0."home_possessions" AS "prov_game_home__possessions", F0."away_possessions" AS "prov_game_away__possessions", F0."home_id" AS "prov_game_home__id", F0."away_id" AS "prov_game_away__id", F0."winner_id" AS "prov_game_winner__id", F0."season_id" AS "prov_game_season__id"
+FROM "game" AS F0) F1)) F0 CROSS JOIN (
+SELECT F0."season_id" AS "season_id", F0."season_name" AS "season_name", F0."season_type" AS "season_type", F0."season_id" AS "prov_season_season__id", F0."season_name" AS "prov_season_season__name", F0."season_type" AS "prov_season_season__type"
+FROM "season" AS F0) F1)) F0
+WHERE (((F0."team_id" = F0."winner_id") AND (F0."season_id" = F0."season_id1")) AND (F0."team" = 'GSW'))),
+_temp_view_0 AS (
+SELECT /*+ materialize */ F0."AGGR_0" AS "AGGR_0", F0."GROUP_0" AS "GROUP_0", F1."prov_team_team__id" AS "prov_team_team__id", F1."prov_team_team" AS "prov_team_team", F1."prov_game_game__date" AS "prov_game_game__date", F1."prov_game_home__points" AS "prov_game_home__points", F1."prov_game_away__points" AS "prov_game_away__points", F1."prov_game_home__possessions" AS "prov_game_home__possessions", F1."prov_game_away__possessions" AS "prov_game_away__possessions", F1."prov_game_home__id" AS "prov_game_home__id", F1."prov_game_away__id" AS "prov_game_away__id", F1."prov_game_winner__id" AS "prov_game_winner__id", F1."prov_game_season__id" AS "prov_game_season__id", F1."prov_season_season__id" AS "prov_season_season__id", F1."prov_season_season__name" AS "prov_season_season__name", F1."prov_season_season__type" AS "prov_season_season__type"
+FROM ((
+SELECT count(1) AS "AGGR_0", F2."season_name" AS "GROUP_0"
+FROM (("team" AS F0 CROSS JOIN "game" AS F1) CROSS JOIN "season" AS F2)
+WHERE (((F0."team_id" = F1."winner_id") AND (F1."season_id" = F2."season_id")) AND (F0."team" = 'GSW'))
+GROUP BY F2."season_name") F0 JOIN (
+SELECT F0."AGG_GB_ARG1" AS "_P_SIDE_GROUP_0", F0."prov_team_team__id" AS "prov_team_team__id", F0."prov_team_team" AS "prov_team_team", F0."prov_game_game__date" AS "prov_game_game__date", F0."prov_game_home__points" AS "prov_game_home__points", F0."prov_game_away__points" AS "prov_game_away__points", F0."prov_game_home__possessions" AS "prov_game_home__possessions", F0."prov_game_away__possessions" AS "prov_game_away__possessions", F0."prov_game_home__id" AS "prov_game_home__id", F0."prov_game_away__id" AS "prov_game_away__id", F0."prov_game_winner__id" AS "prov_game_winner__id", F0."prov_game_season__id" AS "prov_game_season__id", F0."prov_season_season__id" AS "prov_season_season__id", F0."prov_season_season__name" AS "prov_season_season__name", F0."prov_season_season__type" AS "prov_season_season__type"
+FROM (SELECT * FROM _temp_view_1) F0) F1 ON ((F0."GROUP_0" IS NOT DISTINCT FROM F1."_P_SIDE_GROUP_0"))))
+SELECT F0."AGGR_0" AS "win", F0."GROUP_0" AS "season_name", F0."prov_team_team__id" AS "prov_team_team__id", F0."prov_team_team" AS "prov_team_team", F0."prov_game_game__date" AS "prov_game_game__date", F0."prov_game_home__points" AS "prov_game_home__points", F0."prov_game_away__points" AS "prov_game_away__points", F0."prov_game_home__possessions" AS "prov_game_home__possessions", F0."prov_game_away__possessions" AS "prov_game_away__possessions", F0."prov_game_home__id" AS "prov_game_home__id", F0."prov_game_away__id" AS "prov_game_away__id", F0."prov_game_winner__id" AS "prov_game_winner__id", F0."prov_game_season__id" AS "prov_game_season__id", F0."prov_season_season__id" AS "prov_season_season__id", F0."prov_season_season__name" AS "prov_season_season__name", F0."prov_season_season__type" AS "prov_season_season__type"
+FROM (SELECT * FROM _temp_view_0) F0;
+
+
+;
+DEBUG 2021-09-28 11:32:40,666[experiments.py:run_experiment:294]generate new valid_jgs
+DEBUG 2021-09-28 11:32:40,686[experiments.py:run_experiment:297]Before filtering any, we have 5 valid jgs 
+
+DEBUG 2021-09-28 11:32:40,689[experiments.py:run_experiment:312]DO include high cost jg!!!!!!!!!!!!!
+DEBUG 2021-09-28 11:32:40,689[experiments.py:run_experiment:313]before filtering intermediate, we have 5 jgs
+DEBUG 2021-09-28 11:32:40,689[experiments.py:run_experiment:321]after filtering out intermediate we have 5 valid jgs 
+
+DEBUG 2021-09-28 11:32:41,144[jg_materializer.py:materialize_jg:316]['(team.team_id)=(PT.winner_id)', {'game': ['winner_id'], 'team': ['team_id']}, 'game']
+DEBUG 2021-09-28 11:32:41,291[jg_materializer.py:materialize_jg:316]['(team.team_id)=(PT.home_id)', {'game': ['home_id'], 'team': ['team_id']}, 'game']
+DEBUG 2021-09-28 11:32:41,438[jg_materializer.py:materialize_jg:316]['(team.team_id)=(PT.away_id)', {'game': ['away_id'], 'team': ['team_id']}, 'game']
+DEBUG 2021-09-28 11:32:41,589[jg_materializer.py:materialize_jg:316]['(season.season_id)=(PT.season_id)', {'game': ['season_id'], 'season': ['season_id']}, 'game']
+DEBUG 2021-09-28 11:32:41,714[experiments.py:run_experiment:337]before filtering redundant, we have 5 jgs
+DEBUG 2021-09-28 11:32:41,714[experiments.py:run_experiment:340]after filtering out redundant we have 3 valid jgs 
+
+DEBUG 2021-09-28 11:32:41,715[experiments.py:run_experiment:342]we found 3 valid join graphs, now materializing and generating patterns
+DEBUG 2021-09-28 11:32:41,715[experiments.py:run_experiment:350]we are on join graph number 1
+DEBUG 2021-09-28 11:32:41,725[pattern_generator.py:gen_patterns:730]{'max_rel_index': 2, 'max_attr_index': 14, 'dtypes': {'win': 'nominal', 'season_name': 'nominal', 'a_1': 'ordinal', 'a_2': 'nominal', 'a_3': 'nominal', 'a_4': 'ordinal', 'a_5': 'ordinal', 'a_6': 'ordinal', 'a_7': 'ordinal', 'a_8': 'ordinal', 'a_9': 'ordinal', 'a_10': 'ordinal', 'a_11': 'ordinal', 'a_12': 'ordinal', 'a_13': 'nominal', 'a_14': 'nominal', 'pnumber': 'nominal', 'is_user': 'nominal'}, 1: {'key': 1, 'label': 'PT', 'columns': {'win': 'win', 'season_name': 'season_name', 'a_1': 'prov_team_team__id', 'a_2': 'prov_team_team', 'a_3': 'prov_game_game__date', 'a_4': 'prov_game_home__points', 'a_5': 'prov_game_away__points', 'a_6': 'prov_game_home__possessions', 'a_7': 'prov_game_away__possessions', 'a_8': 'prov_game_home__id', 'a_9': 'prov_game_away__id', 'a_10': 'prov_game_winner__id', 'a_11': 'prov_game_season__id', 'a_12': 'prov_season_season__id', 'a_13': 'prov_season_season__name', 'a_14': 'prov_season_season__type', 'pnumber': 'pnumber', 'is_user': 'is_user'}, 'renamed_rel': 'A_1', 'rel_min_attr_index': 0, 'rel_max_attr_index': 14}}
+DEBUG 2021-09-28 11:32:41,729[pattern_generator.py:gen_patterns:892]sample size : 100
+DEBUG 2021-09-28 11:32:41,752[pattern_generator.py:gen_patterns:1012]             a_14
+0  regular season
+DEBUG 2021-09-28 11:32:41,760[pattern_generator.py:gen_patterns:1055][{'nominal_values': [['a_14', 'regular season']], 'np_recall': 1.0}]
+DEBUG 2021-09-28 11:32:41,760[pattern_generator.py:gen_patterns:1056]1
+DEBUG 2021-09-28 11:32:41,824[pattern_generator.py:gen_patterns:1167]{0: [['a_4', 0, 0], ['a_5', 0, 0], ['a_6', 0, 0], ['a_7', 0, 0]]}
+DEBUG 2021-09-28 11:32:41,831[pattern_generator.py:gen_patterns:1187]a_5
+DEBUG 2021-09-28 11:32:41,831[pattern_generator.py:gen_patterns:1193]lagrge number of num attrs
+DEBUG 2021-09-28 11:32:41,831[pattern_generator.py:gen_patterns:1194]['a_5']
+DEBUG 2021-09-28 11:32:41,832[pattern_generator.py:gen_patterns:1195]{'a_5': ['a_4', 'a_7', 'a_6']}
+DEBUG 2021-09-28 11:32:41,836[pattern_generator.py:gen_patterns:1207]   a_5
+0   97
+1   90
+2  103
+3  104
+4  114
+DEBUG 2021-09-28 11:32:42,626[experiments.py:run_experiment:350]we are on join graph number 2
+DEBUG 2021-09-28 11:32:42,643[pattern_generator.py:gen_patterns:730]{'max_rel_index': 3, 'max_attr_index': 16, 'dtypes': {'win': 'nominal', 'season_name': 'nominal', 'a_1': 'ordinal', 'a_2': 'nominal', 'a_3': 'nominal', 'a_4': 'ordinal', 'a_5': 'ordinal', 'a_6': 'ordinal', 'a_7': 'ordinal', 'a_8': 'ordinal', 'a_9': 'ordinal', 'a_10': 'ordinal', 'a_11': 'ordinal', 'a_12': 'ordinal', 'a_13': 'nominal', 'a_14': 'nominal', 'pnumber': 'nominal', 'is_user': 'nominal', 'a_15': 'ordinal', 'a_16': 'nominal'}, 1: {'key': 1, 'label': 'PT', 'columns': {'win': 'win', 'season_name': 'season_name', 'a_1': 'prov_team_team__id', 'a_2': 'prov_team_team', 'a_3': 'prov_game_game__date', 'a_4': 'prov_game_home__points', 'a_5': 'prov_game_away__points', 'a_6': 'prov_game_home__possessions', 'a_7': 'prov_game_away__possessions', 'a_8': 'prov_game_home__id', 'a_9': 'prov_game_away__id', 'a_10': 'prov_game_winner__id', 'a_11': 'prov_game_season__id', 'a_12': 'prov_season_season__id', 'a_13': 'prov_season_season__name', 'a_14': 'prov_season_season__type', 'pnumber': 'pnumber', 'is_user': 'is_user'}, 'renamed_rel': 'A_1', 'rel_min_attr_index': 0, 'rel_max_attr_index': 14}, 2: {'key': 2, 'label': 'team', 'columns': {'a_15': 'team_id', 'a_16': 'team'}, 'renamed_rel': 'A_2', 'rel_min_attr_index': 14, 'rel_max_attr_index': 16}}
+DEBUG 2021-09-28 11:32:42,644[pattern_generator.py:gen_patterns:892]sample size : 100
+DEBUG 2021-09-28 11:32:42,675[pattern_generator.py:gen_patterns:1012]              a_14  a_16
+0   regular season  None
+1   regular season   GSW
+2   regular season   PHX
+3   regular season   MIN
+4   regular season   LAC
+5   regular season   NOP
+6   regular season   HOU
+7   regular season   UTA
+8   regular season   MEM
+9   regular season   TOR
+10  regular season   POR
+11  regular season   SAC
+12  regular season   WAS
+13  regular season   CHA
+14  regular season   ATL
+15  regular season   MIA
+16  regular season   BKN
+17  regular season   IND
+18  regular season   SAS
+19  regular season   CLE
+20  regular season   OKC
+21  regular season   ORL
+22  regular season   DET
+23  regular season   DEN
+24  regular season   CHI
+25  regular season   NYK
+26  regular season   DAL
+27  regular season   BOS
+DEBUG 2021-09-28 11:32:42,696[pattern_generator.py:gen_patterns:1055][{'nominal_values': [['a_14', 'regular season']], 'np_recall': 1.0}, {'nominal_values': [['a_14', 'regular season'], ['a_16', 'GSW']], 'np_recall': 0.5583333333333333}]
+DEBUG 2021-09-28 11:32:42,696[pattern_generator.py:gen_patterns:1056]2
+DEBUG 2021-09-28 11:32:42,734[pattern_generator.py:gen_patterns:1167]{0: [['a_4', 0, 0], ['a_5', 0, 0], ['a_6', 0, 0], ['a_7', 0, 0]]}
+DEBUG 2021-09-28 11:32:42,735[pattern_generator.py:gen_patterns:1187]a_5
+DEBUG 2021-09-28 11:32:42,735[pattern_generator.py:gen_patterns:1193]lagrge number of num attrs
+DEBUG 2021-09-28 11:32:42,735[pattern_generator.py:gen_patterns:1194]['a_5']
+DEBUG 2021-09-28 11:32:42,735[pattern_generator.py:gen_patterns:1195]{'a_5': ['a_4', 'a_7', 'a_6']}
+DEBUG 2021-09-28 11:32:42,736[pattern_generator.py:gen_patterns:1207]   a_5
+0  112
+1  110
+2  100
+3   97
+4   83
+DEBUG 2021-09-28 11:32:43,600[experiments.py:run_experiment:350]we are on join graph number 3
+DEBUG 2021-09-28 11:32:43,618[pattern_generator.py:gen_patterns:730]{'max_rel_index': 3, 'max_attr_index': 16, 'dtypes': {'win': 'nominal', 'season_name': 'nominal', 'a_1': 'ordinal', 'a_2': 'nominal', 'a_3': 'nominal', 'a_4': 'ordinal', 'a_5': 'ordinal', 'a_6': 'ordinal', 'a_7': 'ordinal', 'a_8': 'ordinal', 'a_9': 'ordinal', 'a_10': 'ordinal', 'a_11': 'ordinal', 'a_12': 'ordinal', 'a_13': 'nominal', 'a_14': 'nominal', 'pnumber': 'nominal', 'is_user': 'nominal', 'a_15': 'ordinal', 'a_16': 'nominal'}, 1: {'key': 1, 'label': 'PT', 'columns': {'win': 'win', 'season_name': 'season_name', 'a_1': 'prov_team_team__id', 'a_2': 'prov_team_team', 'a_3': 'prov_game_game__date', 'a_4': 'prov_game_home__points', 'a_5': 'prov_game_away__points', 'a_6': 'prov_game_home__possessions', 'a_7': 'prov_game_away__possessions', 'a_8': 'prov_game_home__id', 'a_9': 'prov_game_away__id', 'a_10': 'prov_game_winner__id', 'a_11': 'prov_game_season__id', 'a_12': 'prov_season_season__id', 'a_13': 'prov_season_season__name', 'a_14': 'prov_season_season__type', 'pnumber': 'pnumber', 'is_user': 'is_user'}, 'renamed_rel': 'A_1', 'rel_min_attr_index': 0, 'rel_max_attr_index': 14}, 2: {'key': 2, 'label': 'team', 'columns': {'a_15': 'team_id', 'a_16': 'team'}, 'renamed_rel': 'A_2', 'rel_min_attr_index': 14, 'rel_max_attr_index': 16}}
+DEBUG 2021-09-28 11:32:43,621[pattern_generator.py:gen_patterns:892]sample size : 100
+DEBUG 2021-09-28 11:32:43,655[pattern_generator.py:gen_patterns:1012]              a_14  a_16
+0   regular season  None
+1   regular season   GSW
+2   regular season   SAS
+3   regular season   POR
+4   regular season   LAC
+5   regular season   SAC
+6   regular season   DEN
+7   regular season   LAL
+8   regular season   DAL
+9   regular season   NOP
+10  regular season   OKC
+11  regular season   BKN
+12  regular season   TOR
+13  regular season   DET
+14  regular season   UTA
+15  regular season   CHA
+16  regular season   NYK
+17  regular season   PHX
+18  regular season   ATL
+19  regular season   CLE
+20  regular season   MEM
+21  regular season   PHI
+22  regular season   IND
+23  regular season   ORL
+24  regular season   HOU
+25  regular season   MIL
+26  regular season   MIA
+27  regular season   WAS
+28  regular season   MIN
+29  regular season   CHI
+DEBUG 2021-09-28 11:32:43,696[pattern_generator.py:gen_patterns:1055][{'nominal_values': [['a_14', 'regular season']], 'np_recall': 1.0}, {'nominal_values': [['a_14', 'regular season'], ['a_16', 'GSW']], 'np_recall': 0.44166666666666665}]
+DEBUG 2021-09-28 11:32:43,697[pattern_generator.py:gen_patterns:1056]2
+DEBUG 2021-09-28 11:32:43,732[pattern_generator.py:gen_patterns:1167]{0: [['a_4', 0, 0], ['a_5', 0, 0], ['a_6', 0, 0], ['a_7', 0, 0]]}
+DEBUG 2021-09-28 11:32:43,733[pattern_generator.py:gen_patterns:1187]a_5
+DEBUG 2021-09-28 11:32:43,733[pattern_generator.py:gen_patterns:1193]lagrge number of num attrs
+DEBUG 2021-09-28 11:32:43,733[pattern_generator.py:gen_patterns:1194]['a_5']
+DEBUG 2021-09-28 11:32:43,733[pattern_generator.py:gen_patterns:1195]{'a_5': ['a_4', 'a_7', 'a_6']}
+DEBUG 2021-09-28 11:32:43,734[pattern_generator.py:gen_patterns:1207]   a_5
+0   87
+1  114
+2  103
+3  124
+4  101
+DEBUG 2021-09-28 11:32:44,429[experiments.py:run_experiment:476]total number of patterns 41
+INFO 2021-09-28 11:32:44,460[_internal.py:_log:225]127.0.0.1 - - [28/Sep/2021 11:32:44] "EXP /explanation HTTP/1.1" 200 -
+DEBUG 2021-09-28 11:32:46,608[experiments.py:run_experiment:265]test__nba__0.1__100__100__False__1__0.2__y__f__o__0.3__100
+DEBUG 2021-09-28 11:32:46,609[experiments.py:run_experiment:266]{'yes': '2015-16', 'no': '2012-13'}
+DEBUG 2021-09-28 11:32:46,609[experiments.py:run_experiment:269]user_questions : 'season_name=2015-16 VS season_name=2012-13'
+DEBUG 2021-09-28 11:32:46,609[experiments.py:run_experiment:269]maximum_edges : '1'
+DEBUG 2021-09-28 11:32:46,609[experiments.py:run_experiment:269]exclude_high_cost_jg : 'f'
+DEBUG 2021-09-28 11:32:46,609[experiments.py:run_experiment:269]sample_rate_for_s : '0.1'
+DEBUG 2021-09-28 11:32:46,610[experiments.py:run_experiment:269]f1_calculation_type : 'o'
+DEBUG 2021-09-28 11:32:46,610[experiments.py:run_experiment:269]f1_min_sample_size_threshold : '100'
+DEBUG 2021-09-28 11:32:46,610[experiments.py:run_experiment:269]result_schema : 'demotest'
+DEBUG 2021-09-28 11:32:46,610[experiments.py:run_experiment:269]dbname : 'nba'
+DEBUG 2021-09-28 11:32:46,610[experiments.py:run_experiment:269]numercial_attr_filter_method : 'y'
+DEBUG 2021-09-28 11:32:46,610[experiments.py:run_experiment:269]f1_sample_rate : '0.3'
+DEBUG 2021-09-28 11:32:46,610[experiments.py:run_experiment:269]min_recall_threshold : '0.2'
+DEBUG 2021-09-28 11:32:46,610[experiments.py:run_experiment:269]user_query : 'test'
+DEBUG 2021-09-28 11:32:46,610[experiments.py:run_experiment:269]lca_s_max_size : '100'
+DEBUG 2021-09-28 11:32:46,610[experiments.py:run_experiment:269]lca_s_min_size : '100'
+DEBUG 2021-09-28 11:32:46,610[experiments.py:run_experiment:269]just_lca : False
+DEBUG 2021-09-28 11:32:46,610[experiments.py:run_experiment:269]f1_sample_type : 's.0'
+DEBUG 2021-09-28 11:32:46,830[provenance_getter.py:gen_provenance_table:65]CREATE VIEW original_pt AS WITH _temp_view_1 AS (
+SELECT /*+ materialize */ 1 AS "AGG_GB_ARG0", F0."season_name" AS "AGG_GB_ARG1", F0."prov_team_team__id" AS "prov_team_team__id", F0."prov_team_team" AS "prov_team_team", F0."prov_game_game__date" AS "prov_game_game__date", F0."prov_game_home__points" AS "prov_game_home__points", F0."prov_game_away__points" AS "prov_game_away__points", F0."prov_game_home__possessions" AS "prov_game_home__possessions", F0."prov_game_away__possessions" AS "prov_game_away__possessions", F0."prov_game_home__id" AS "prov_game_home__id", F0."prov_game_away__id" AS "prov_game_away__id", F0."prov_game_winner__id" AS "prov_game_winner__id", F0."prov_game_season__id" AS "prov_game_season__id", F0."prov_season_season__id" AS "prov_season_season__id", F0."prov_season_season__name" AS "prov_season_season__name", F0."prov_season_season__type" AS "prov_season_season__type"
+FROM (
+SELECT F0."team_id" AS "team_id", F0."team" AS "team", F0."game_date" AS "game_date", F0."home_points" AS "home_points", F0."away_points" AS "away_points", F0."home_possessions" AS "home_possessions", F0."away_possessions" AS "away_possessions", F0."home_id" AS "home_id", F0."away_id" AS "away_id", F0."winner_id" AS "winner_id", F0."season_id" AS "season_id", F1."season_id" AS "season_id1", F1."season_name" AS "season_name", F1."season_type" AS "season_type", F0."prov_team_team__id" AS "prov_team_team__id", F0."prov_team_team" AS "prov_team_team", F0."prov_game_game__date" AS "prov_game_game__date", F0."prov_game_home__points" AS "prov_game_home__points", F0."prov_game_away__points" AS "prov_game_away__points", F0."prov_game_home__possessions" AS "prov_game_home__possessions", F0."prov_game_away__possessions" AS "prov_game_away__possessions", F0."prov_game_home__id" AS "prov_game_home__id", F0."prov_game_away__id" AS "prov_game_away__id", F0."prov_game_winner__id" AS "prov_game_winner__id", F0."prov_game_season__id" AS "prov_game_season__id", F1."prov_season_season__id" AS "prov_season_season__id", F1."prov_season_season__name" AS "prov_season_season__name", F1."prov_season_season__type" AS "prov_season_season__type"
+FROM ((
+SELECT F0."team_id" AS "team_id", F0."team" AS "team", F1."game_date" AS "game_date", F1."home_points" AS "home_points", F1."away_points" AS "away_points", F1."home_possessions" AS "home_possessions", F1."away_possessions" AS "away_possessions", F1."home_id" AS "home_id", F1."away_id" AS "away_id", F1."winner_id" AS "winner_id", F1."season_id" AS "season_id", F0."prov_team_team__id" AS "prov_team_team__id", F0."prov_team_team" AS "prov_team_team", F1."prov_game_game__date" AS "prov_game_game__date", F1."prov_game_home__points" AS "prov_game_home__points", F1."prov_game_away__points" AS "prov_game_away__points", F1."prov_game_home__possessions" AS "prov_game_home__possessions", F1."prov_game_away__possessions" AS "prov_game_away__possessions", F1."prov_game_home__id" AS "prov_game_home__id", F1."prov_game_away__id" AS "prov_game_away__id", F1."prov_game_winner__id" AS "prov_game_winner__id", F1."prov_game_season__id" AS "prov_game_season__id"
+FROM ((
+SELECT F0."team_id" AS "team_id", F0."team" AS "team", F0."team_id" AS "prov_team_team__id", F0."team" AS "prov_team_team"
+FROM "team" AS F0) F0 CROSS JOIN (
+SELECT F0."game_date" AS "game_date", F0."home_points" AS "home_points", F0."away_points" AS "away_points", F0."home_possessions" AS "home_possessions", F0."away_possessions" AS "away_possessions", F0."home_id" AS "home_id", F0."away_id" AS "away_id", F0."winner_id" AS "winner_id", F0."season_id" AS "season_id", F0."game_date" AS "prov_game_game__date", F0."home_points" AS "prov_game_home__points", F0."away_points" AS "prov_game_away__points", F0."home_possessions" AS "prov_game_home__possessions", F0."away_possessions" AS "prov_game_away__possessions", F0."home_id" AS "prov_game_home__id", F0."away_id" AS "prov_game_away__id", F0."winner_id" AS "prov_game_winner__id", F0."season_id" AS "prov_game_season__id"
+FROM "game" AS F0) F1)) F0 CROSS JOIN (
+SELECT F0."season_id" AS "season_id", F0."season_name" AS "season_name", F0."season_type" AS "season_type", F0."season_id" AS "prov_season_season__id", F0."season_name" AS "prov_season_season__name", F0."season_type" AS "prov_season_season__type"
+FROM "season" AS F0) F1)) F0
+WHERE (((F0."team_id" = F0."winner_id") AND (F0."season_id" = F0."season_id1")) AND (F0."team" = 'GSW'))),
+_temp_view_0 AS (
+SELECT /*+ materialize */ F0."AGGR_0" AS "AGGR_0", F0."GROUP_0" AS "GROUP_0", F1."prov_team_team__id" AS "prov_team_team__id", F1."prov_team_team" AS "prov_team_team", F1."prov_game_game__date" AS "prov_game_game__date", F1."prov_game_home__points" AS "prov_game_home__points", F1."prov_game_away__points" AS "prov_game_away__points", F1."prov_game_home__possessions" AS "prov_game_home__possessions", F1."prov_game_away__possessions" AS "prov_game_away__possessions", F1."prov_game_home__id" AS "prov_game_home__id", F1."prov_game_away__id" AS "prov_game_away__id", F1."prov_game_winner__id" AS "prov_game_winner__id", F1."prov_game_season__id" AS "prov_game_season__id", F1."prov_season_season__id" AS "prov_season_season__id", F1."prov_season_season__name" AS "prov_season_season__name", F1."prov_season_season__type" AS "prov_season_season__type"
+FROM ((
+SELECT count(1) AS "AGGR_0", F2."season_name" AS "GROUP_0"
+FROM (("team" AS F0 CROSS JOIN "game" AS F1) CROSS JOIN "season" AS F2)
+WHERE (((F0."team_id" = F1."winner_id") AND (F1."season_id" = F2."season_id")) AND (F0."team" = 'GSW'))
+GROUP BY F2."season_name") F0 JOIN (
+SELECT F0."AGG_GB_ARG1" AS "_P_SIDE_GROUP_0", F0."prov_team_team__id" AS "prov_team_team__id", F0."prov_team_team" AS "prov_team_team", F0."prov_game_game__date" AS "prov_game_game__date", F0."prov_game_home__points" AS "prov_game_home__points", F0."prov_game_away__points" AS "prov_game_away__points", F0."prov_game_home__possessions" AS "prov_game_home__possessions", F0."prov_game_away__possessions" AS "prov_game_away__possessions", F0."prov_game_home__id" AS "prov_game_home__id", F0."prov_game_away__id" AS "prov_game_away__id", F0."prov_game_winner__id" AS "prov_game_winner__id", F0."prov_game_season__id" AS "prov_game_season__id", F0."prov_season_season__id" AS "prov_season_season__id", F0."prov_season_season__name" AS "prov_season_season__name", F0."prov_season_season__type" AS "prov_season_season__type"
+FROM (SELECT * FROM _temp_view_1) F0) F1 ON ((F0."GROUP_0" IS NOT DISTINCT FROM F1."_P_SIDE_GROUP_0"))))
+SELECT F0."AGGR_0" AS "win", F0."GROUP_0" AS "season_name", F0."prov_team_team__id" AS "prov_team_team__id", F0."prov_team_team" AS "prov_team_team", F0."prov_game_game__date" AS "prov_game_game__date", F0."prov_game_home__points" AS "prov_game_home__points", F0."prov_game_away__points" AS "prov_game_away__points", F0."prov_game_home__possessions" AS "prov_game_home__possessions", F0."prov_game_away__possessions" AS "prov_game_away__possessions", F0."prov_game_home__id" AS "prov_game_home__id", F0."prov_game_away__id" AS "prov_game_away__id", F0."prov_game_winner__id" AS "prov_game_winner__id", F0."prov_game_season__id" AS "prov_game_season__id", F0."prov_season_season__id" AS "prov_season_season__id", F0."prov_season_season__name" AS "prov_season_season__name", F0."prov_season_season__type" AS "prov_season_season__type"
+FROM (SELECT * FROM _temp_view_0) F0;
+
+
+;
+DEBUG 2021-09-28 11:32:46,945[experiments.py:run_experiment:294]generate new valid_jgs
+DEBUG 2021-09-28 11:32:46,962[experiments.py:run_experiment:297]Before filtering any, we have 5 valid jgs 
+
+DEBUG 2021-09-28 11:32:46,965[experiments.py:run_experiment:312]DO include high cost jg!!!!!!!!!!!!!
+DEBUG 2021-09-28 11:32:46,965[experiments.py:run_experiment:313]before filtering intermediate, we have 5 jgs
+DEBUG 2021-09-28 11:32:46,965[experiments.py:run_experiment:321]after filtering out intermediate we have 5 valid jgs 
+
+DEBUG 2021-09-28 11:32:47,513[jg_materializer.py:materialize_jg:316]['(team.team_id)=(PT.winner_id)', {'game': ['winner_id'], 'team': ['team_id']}, 'game']
+DEBUG 2021-09-28 11:32:47,657[jg_materializer.py:materialize_jg:316]['(team.team_id)=(PT.home_id)', {'game': ['home_id'], 'team': ['team_id']}, 'game']
+DEBUG 2021-09-28 11:32:47,799[jg_materializer.py:materialize_jg:316]['(team.team_id)=(PT.away_id)', {'game': ['away_id'], 'team': ['team_id']}, 'game']
+DEBUG 2021-09-28 11:32:47,942[jg_materializer.py:materialize_jg:316]['(season.season_id)=(PT.season_id)', {'game': ['season_id'], 'season': ['season_id']}, 'game']
+DEBUG 2021-09-28 11:32:48,085[experiments.py:run_experiment:337]before filtering redundant, we have 5 jgs
+DEBUG 2021-09-28 11:32:48,085[experiments.py:run_experiment:340]after filtering out redundant we have 3 valid jgs 
+
+DEBUG 2021-09-28 11:32:48,085[experiments.py:run_experiment:342]we found 3 valid join graphs, now materializing and generating patterns
+DEBUG 2021-09-28 11:32:48,086[experiments.py:run_experiment:350]we are on join graph number 1
+DEBUG 2021-09-28 11:32:48,104[pattern_generator.py:gen_patterns:730]{'max_rel_index': 2, 'max_attr_index': 14, 'dtypes': {'win': 'nominal', 'season_name': 'nominal', 'a_1': 'ordinal', 'a_2': 'nominal', 'a_3': 'nominal', 'a_4': 'ordinal', 'a_5': 'ordinal', 'a_6': 'ordinal', 'a_7': 'ordinal', 'a_8': 'ordinal', 'a_9': 'ordinal', 'a_10': 'ordinal', 'a_11': 'ordinal', 'a_12': 'ordinal', 'a_13': 'nominal', 'a_14': 'nominal', 'pnumber': 'nominal', 'is_user': 'nominal'}, 1: {'key': 1, 'label': 'PT', 'columns': {'win': 'win', 'season_name': 'season_name', 'a_1': 'prov_team_team__id', 'a_2': 'prov_team_team', 'a_3': 'prov_game_game__date', 'a_4': 'prov_game_home__points', 'a_5': 'prov_game_away__points', 'a_6': 'prov_game_home__possessions', 'a_7': 'prov_game_away__possessions', 'a_8': 'prov_game_home__id', 'a_9': 'prov_game_away__id', 'a_10': 'prov_game_winner__id', 'a_11': 'prov_game_season__id', 'a_12': 'prov_season_season__id', 'a_13': 'prov_season_season__name', 'a_14': 'prov_season_season__type', 'pnumber': 'pnumber', 'is_user': 'is_user'}, 'renamed_rel': 'A_1', 'rel_min_attr_index': 0, 'rel_max_attr_index': 14}}
+DEBUG 2021-09-28 11:32:48,106[pattern_generator.py:gen_patterns:892]sample size : 100
+DEBUG 2021-09-28 11:32:48,134[pattern_generator.py:gen_patterns:1012]             a_14
+0  regular season
+DEBUG 2021-09-28 11:32:48,142[pattern_generator.py:gen_patterns:1055][{'nominal_values': [['a_14', 'regular season']], 'np_recall': 1.0}]
+DEBUG 2021-09-28 11:32:48,143[pattern_generator.py:gen_patterns:1056]1
+DEBUG 2021-09-28 11:32:48,198[pattern_generator.py:gen_patterns:1167]{0: [['a_4', 0, 0], ['a_5', 0, 0], ['a_6', 0, 0], ['a_7', 0, 0]]}
+DEBUG 2021-09-28 11:32:48,201[pattern_generator.py:gen_patterns:1187]a_5
+DEBUG 2021-09-28 11:32:48,201[pattern_generator.py:gen_patterns:1193]lagrge number of num attrs
+DEBUG 2021-09-28 11:32:48,201[pattern_generator.py:gen_patterns:1194]['a_5']
+DEBUG 2021-09-28 11:32:48,201[pattern_generator.py:gen_patterns:1195]{'a_5': ['a_4', 'a_7', 'a_6']}
+DEBUG 2021-09-28 11:32:48,203[pattern_generator.py:gen_patterns:1207]   a_5
+0   88
+1  106
+2  100
+3  106
+4  135
+DEBUG 2021-09-28 11:32:49,117[experiments.py:run_experiment:350]we are on join graph number 2
+DEBUG 2021-09-28 11:32:49,131[pattern_generator.py:gen_patterns:730]{'max_rel_index': 3, 'max_attr_index': 16, 'dtypes': {'win': 'nominal', 'season_name': 'nominal', 'a_1': 'ordinal', 'a_2': 'nominal', 'a_3': 'nominal', 'a_4': 'ordinal', 'a_5': 'ordinal', 'a_6': 'ordinal', 'a_7': 'ordinal', 'a_8': 'ordinal', 'a_9': 'ordinal', 'a_10': 'ordinal', 'a_11': 'ordinal', 'a_12': 'ordinal', 'a_13': 'nominal', 'a_14': 'nominal', 'pnumber': 'nominal', 'is_user': 'nominal', 'a_15': 'ordinal', 'a_16': 'nominal'}, 1: {'key': 1, 'label': 'PT', 'columns': {'win': 'win', 'season_name': 'season_name', 'a_1': 'prov_team_team__id', 'a_2': 'prov_team_team', 'a_3': 'prov_game_game__date', 'a_4': 'prov_game_home__points', 'a_5': 'prov_game_away__points', 'a_6': 'prov_game_home__possessions', 'a_7': 'prov_game_away__possessions', 'a_8': 'prov_game_home__id', 'a_9': 'prov_game_away__id', 'a_10': 'prov_game_winner__id', 'a_11': 'prov_game_season__id', 'a_12': 'prov_season_season__id', 'a_13': 'prov_season_season__name', 'a_14': 'prov_season_season__type', 'pnumber': 'pnumber', 'is_user': 'is_user'}, 'renamed_rel': 'A_1', 'rel_min_attr_index': 0, 'rel_max_attr_index': 14}, 2: {'key': 2, 'label': 'team', 'columns': {'a_15': 'team_id', 'a_16': 'team'}, 'renamed_rel': 'A_2', 'rel_min_attr_index': 14, 'rel_max_attr_index': 16}}
+DEBUG 2021-09-28 11:32:49,133[pattern_generator.py:gen_patterns:892]sample size : 100
+DEBUG 2021-09-28 11:32:49,169[pattern_generator.py:gen_patterns:1012]              a_14  a_16
+0   regular season  None
+1   regular season   GSW
+2   regular season   PHX
+3   regular season   UTA
+4   regular season   NOP
+5   regular season   MIN
+6   regular season   LAC
+7   regular season   HOU
+8   regular season   MEM
+9   regular season   DAL
+10  regular season   ATL
+11  regular season   CLE
+12  regular season   WAS
+13  regular season   TOR
+14  regular season   BKN
+15  regular season   CHA
+16  regular season   POR
+17  regular season   IND
+18  regular season   OKC
+19  regular season   DET
+20  regular season   DEN
+21  regular season   CHI
+22  regular season   PHI
+23  regular season   BOS
+DEBUG 2021-09-28 11:32:49,210[pattern_generator.py:gen_patterns:1055][{'nominal_values': [['a_14', 'regular season']], 'np_recall': 1.0}, {'nominal_values': [['a_14', 'regular season'], ['a_16', 'GSW']], 'np_recall': 0.5583333333333333}]
+DEBUG 2021-09-28 11:32:49,211[pattern_generator.py:gen_patterns:1056]2
+DEBUG 2021-09-28 11:32:49,239[pattern_generator.py:gen_patterns:1167]{0: [['a_4', 0, 0], ['a_5', 0, 0], ['a_6', 0, 0], ['a_7', 0, 0]]}
+DEBUG 2021-09-28 11:32:49,240[pattern_generator.py:gen_patterns:1187]a_5
+DEBUG 2021-09-28 11:32:49,240[pattern_generator.py:gen_patterns:1193]lagrge number of num attrs
+DEBUG 2021-09-28 11:32:49,240[pattern_generator.py:gen_patterns:1194]['a_5']
+DEBUG 2021-09-28 11:32:49,240[pattern_generator.py:gen_patterns:1195]{'a_5': ['a_4', 'a_7', 'a_6']}
+DEBUG 2021-09-28 11:32:49,240[pattern_generator.py:gen_patterns:1207]   a_5
+0  112
+1   92
+2  104
+3  103
+4  112
+DEBUG 2021-09-28 11:32:49,896[experiments.py:run_experiment:350]we are on join graph number 3
+DEBUG 2021-09-28 11:32:49,913[pattern_generator.py:gen_patterns:730]{'max_rel_index': 3, 'max_attr_index': 16, 'dtypes': {'win': 'nominal', 'season_name': 'nominal', 'a_1': 'ordinal', 'a_2': 'nominal', 'a_3': 'nominal', 'a_4': 'ordinal', 'a_5': 'ordinal', 'a_6': 'ordinal', 'a_7': 'ordinal', 'a_8': 'ordinal', 'a_9': 'ordinal', 'a_10': 'ordinal', 'a_11': 'ordinal', 'a_12': 'ordinal', 'a_13': 'nominal', 'a_14': 'nominal', 'pnumber': 'nominal', 'is_user': 'nominal', 'a_15': 'ordinal', 'a_16': 'nominal'}, 1: {'key': 1, 'label': 'PT', 'columns': {'win': 'win', 'season_name': 'season_name', 'a_1': 'prov_team_team__id', 'a_2': 'prov_team_team', 'a_3': 'prov_game_game__date', 'a_4': 'prov_game_home__points', 'a_5': 'prov_game_away__points', 'a_6': 'prov_game_home__possessions', 'a_7': 'prov_game_away__possessions', 'a_8': 'prov_game_home__id', 'a_9': 'prov_game_away__id', 'a_10': 'prov_game_winner__id', 'a_11': 'prov_game_season__id', 'a_12': 'prov_season_season__id', 'a_13': 'prov_season_season__name', 'a_14': 'prov_season_season__type', 'pnumber': 'pnumber', 'is_user': 'is_user'}, 'renamed_rel': 'A_1', 'rel_min_attr_index': 0, 'rel_max_attr_index': 14}, 2: {'key': 2, 'label': 'team', 'columns': {'a_15': 'team_id', 'a_16': 'team'}, 'renamed_rel': 'A_2', 'rel_min_attr_index': 14, 'rel_max_attr_index': 16}}
+DEBUG 2021-09-28 11:32:49,915[pattern_generator.py:gen_patterns:892]sample size : 100
+DEBUG 2021-09-28 11:32:49,956[pattern_generator.py:gen_patterns:1012]              a_14  a_16
+0   regular season  None
+1   regular season   GSW
+2   regular season   POR
+3   regular season   LAC
+4   regular season   DEN
+5   regular season   OKC
+6   regular season   PHX
+7   regular season   SAS
+8   regular season   NOP
+9   regular season   DAL
+10  regular season   IND
+11  regular season   WAS
+12  regular season   CLE
+13  regular season   UTA
+14  regular season   NYK
+15  regular season   ATL
+16  regular season   LAL
+17  regular season   SAC
+18  regular season   MEM
+19  regular season   CHA
+20  regular season   MIN
+21  regular season   DET
+22  regular season   HOU
+23  regular season   MIL
+24  regular season   TOR
+25  regular season   BOS
+26  regular season   MIA
+27  regular season   PHI
+28  regular season   BKN
+DEBUG 2021-09-28 11:32:49,998[pattern_generator.py:gen_patterns:1055][{'nominal_values': [['a_14', 'regular season']], 'np_recall': 1.0}, {'nominal_values': [['a_14', 'regular season'], ['a_16', 'GSW']], 'np_recall': 0.44166666666666665}]
+DEBUG 2021-09-28 11:32:49,998[pattern_generator.py:gen_patterns:1056]2
+DEBUG 2021-09-28 11:32:50,022[pattern_generator.py:gen_patterns:1167]{0: [['a_4', 0, 0], ['a_5', 0, 0], ['a_6', 0, 0], ['a_7', 0, 0]]}
+DEBUG 2021-09-28 11:32:50,023[pattern_generator.py:gen_patterns:1187]a_5
+DEBUG 2021-09-28 11:32:50,023[pattern_generator.py:gen_patterns:1193]lagrge number of num attrs
+DEBUG 2021-09-28 11:32:50,023[pattern_generator.py:gen_patterns:1194]['a_5']
+DEBUG 2021-09-28 11:32:50,023[pattern_generator.py:gen_patterns:1195]{'a_5': ['a_4', 'a_7', 'a_6']}
+DEBUG 2021-09-28 11:32:50,023[pattern_generator.py:gen_patterns:1207]   a_5
+0  103
+1   85
+2   63
+3  106
+4   95
+DEBUG 2021-09-28 11:32:50,762[experiments.py:run_experiment:476]total number of patterns 41
+INFO 2021-09-28 11:32:50,790[_internal.py:_log:225]127.0.0.1 - - [28/Sep/2021 11:32:50] "EXP /explanation HTTP/1.1" 200 -

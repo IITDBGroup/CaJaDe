@@ -137,12 +137,13 @@
 
 		<script>
       var colNum;
+      var colData;
 
 		  $('#execute').click(function(){
 		    let dataList;
 		    let totalNum;
 		    //var colNum;
-		    let colData;
+		    //let colData;
 		    let tblData;
 		    let dataPerPage;
 		    let pageCount = 5;
@@ -317,10 +318,12 @@
           let len = selectedArr.length;
 
           if(cnt<0 && len<2){
-                       
+              //console.log("cnt<0");
+
+              $(this).css("background-color", "#e0e0e0");            
               sltROWS += 1;
               selectedArr.push(text);
-              $(this).css("background-color", "#e0e0e0");
+              
 
               $("#sltROWScount").empty();
 		          $("#sltROWScount").append(sltROWScnt);
@@ -334,6 +337,28 @@
               td.each(function(i){
                 tdArr.push(td.eq(i).text());
               })      
+          } else if(cnt > -1){
+              //console.log();
+
+              $(this).css("background-color", "#FFFFFF");    
+              sltROWS -= 1;
+              selectedArr.splice(cnt,1);
+            
+
+              $("#sltROWScount").empty();
+		          $("#sltROWScount").append(sltROWScnt);
+              $("#sltROWScount").append(sltROWS);
+              $('#container').empty();
+              $('#container').append(
+                "<button onclick=\"exp()\" type=\"button\" class=\"btn btn-outline-primary\" id=\"explanation\">explanation</button>"
+              ); 
+              td.each(function(i){
+                var index = tdArr.indexOf(td.eq(i).text());
+                if(index>-1){
+                  tdArr.splice(index, 1);
+                }
+              })  
+            
           }
 
         })
@@ -349,7 +374,7 @@
 
         //////   
         alert("0, colNum:"+colNum); //colNum data can not be accessed
-		    var postdata_exp = { 'tdArr': tdArr, 'colNum': colNum }
+		    var postdata_exp = { 'tdArr': tdArr, 'colNum': colNum, 'colData': colData}
         //alert("1");
 
         $.ajax({

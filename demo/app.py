@@ -106,6 +106,7 @@ def ajax():
   agg = data["agg"]
   frm = data["frm"]
   grp = data["grp"]
+  global query
   
   #[ERROR] missing <select> or <from>
   if slt == "" or frm == "":
@@ -140,6 +141,7 @@ def explanation():
 
     # tdArr = data["tdArr"]
     # colNum = data["colNum"]
+    # colData = data["colData"]
     # rangelen = len(tdArr)
 
     # tmp1 = []
@@ -151,7 +153,17 @@ def explanation():
     #   else:
     #       tmp2.append(tdArr[i])
 
-    #run_experiment(conn=globals()['conn'],result_schema='demoresult')
+    #uQuery = "provenance of ("+query+");"
+    #map_yes = ""
+    #map_no = ""
+
+    # run_experiment(conn=globals()['conn'],
+    #                 result_schema='demotest',
+    #                 user_query=(uQuery, 'test'),
+    #                 user_questions = ["season_name='2015-16'","season_name='2012-13'"],
+    #                 user_questions_map = {'yes':'2015-16', 'no':'2012-13'},
+    #                 user_specified_attrs=[('team','team'),('season','season_name')])
+
     run_experiment(conn=globals()['conn'])
 
     globals()['conn'] = pg2.connect(database=db_name, 
