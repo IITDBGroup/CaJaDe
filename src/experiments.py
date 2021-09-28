@@ -206,8 +206,8 @@ def InsertStats(conn, stats_trackers, stats_relation_name, schema, exp_time, exp
         )
 
 
-def run_experiment(conn,
-                   result_schema='test',
+def run_experiment(conn=None,
+                   result_schema='demotest',
                    user_query = ("provenance of (select count(*) as win, s.season_name from team t, game g, season s where t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' group by s.season_name);",'test'),
                    user_questions = ["season_name='2015-16'","season_name='2012-13'"],
                    user_questions_map = {'yes':'2015-16', 'no':'2012-13'},
@@ -269,12 +269,12 @@ def run_experiment(conn,
       logger.debug(f'{k} : {v}')
 
 
-    # conn = psycopg2.connect(f"dbname={dbname} user={user_name} password={password} port={port}")
-
-    conn = conn
-
-    # conn.autocommit = True
-
+    if(conn is None):
+      conn = psycopg2.connect(f"dbname={dbname} user={user_name} password={password} port={port}")
+      conn.autocommit = True
+    else:
+      conn = conn
+      
     w = GProMWrapper(user= user_name, passwd=password, host=host, 
         port=port, db=dbname, frontend='', backend='postgres', options={})
 

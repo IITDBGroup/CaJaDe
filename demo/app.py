@@ -2,8 +2,8 @@ from flask import Flask
 from flask import render_template, request, jsonify, redirect, url_for, flash
 import psycopg2 as pg2
 from networkx import MultiGraph
-from CaJaDe.src.sg_generator import Schema_Graph_Generator
-from CaJaDe.src.experiments import run_experiment
+from src.sg_generator import Schema_Graph_Generator
+from src.experiments import run_experiment
 
 
 
@@ -28,6 +28,8 @@ def db_connect(active_table='nba'):
             password=form_data['dbpswd'],
             port=form_data['port'],
             host=form_data['host'])
+        globals()['conn'].autocommit = True
+
         globals()['cursor'] = conn.cursor()
         globals()['info'] = "SUCCESS!"
 
