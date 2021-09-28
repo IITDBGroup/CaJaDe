@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 pt_attr_re = re.compile("(?<=PT\.)(\w+)(?=[),=])")
+extract_pattern = re.compile('([a-zA-Z]+)_([0-9]+)')
 
 class QueryGeneratorStats(ExecStats):
     """
@@ -69,36 +70,38 @@ class Join_Graph_Materializer:
         return which base table the renamed_attribute belongs to 
         and if it is a part of the keys and the pkeys of that base table
         """
-        re_a_index = int(re.findall(r'([0-9]+)', renamed_attribute)[0])
+        logger.debug(renamed_attribute)
+        if(extract_pattern.search(renamed_attribute)):
+            re_a_index = int(re.findall(r'([0-9]+)', renamed_attribute)[0])
 
-        ispk=True
-        for k,v in jg_rename_dict.items():
-            if(k=='max_rel_index' or k=='max_attr_index' or k=='dtypes'):
-                continue
-            else:
-                if(re_a_index>=v['rel_min_attr_index'] and re_a_index<=v['rel_max_attr_index']):
-                    tid = k
-                    t_a_name = v['columns'][renamed_attribute]
-                    t_name = v['label']
-                    if(t_name=='PT'):
-                        atype = jg_rename_dict['dtypes'][renamed_attribute]
-                        (t_name, t_a_name) = db_dict['PT']['attributes'][':'.join([t_a_name,atype])]
-                        t_pk = db_dict[t_name]['p_key']
-                    else:
-                        t_pk = db_dict[t_name]['p_key']
-                    if(t_a_name in t_pk):
-                        ispk = True
-                    break
-                else:
+            ispk=True
+            for k,v in jg_rename_dict.items():
+                if(k=='max_rel_index' or k=='max_attr_index' or k=='dtypes'):
                     continue
+                else:
+                    if(re_a_index>=v['rel_min_attr_index'] and re_a_index<=v['rel_max_attr_index']):
+                        tid = k
+                        t_a_name = v['columns'][renamed_attribute]
+                        t_name = v['label']
+                        if(t_name=='PT'):
+                            atype = jg_rename_dict['dtypes'][renamed_attribute]
+                            (t_name, t_a_name) = db_dict['PT']['attributes'][':'.join([t_a_name,atype])]
+                            t_pk = db_dict[t_name]['p_key']
+                        else:
+                            t_pk = db_dict[t_name]['p_key']
+                        if(t_a_name in t_pk):
+                            ispk = True
+                        break
+                    else:
+                        continue
 
-        res = {'table':t_name, 'table_identity':tid, 
-        'original_attr_name':t_a_name, 
-        'is_part_of_pk':ispk, 'table_pk':t_pk, 'ec_id':ec_id}
+            res = {'table':t_name, 'table_identity':tid, 
+            'original_attr_name':t_a_name, 
+            'is_part_of_pk':ispk, 'table_pk':t_pk, 'ec_id':ec_id}
         
-        # logger.debug(res)
+            # logger.debug(res)
 
-        return res
+            return res
 
 
     def gen_ec(self, query):
@@ -117,15 +120,16 @@ class Join_Graph_Materializer:
         reg_rc_line = re.compile(r'EC T_ProjectionOperator.*\nList size [0-9]+\n({.*})')
         rc_line = reg_rc_line.search(output).group(1)
         res = re.findall(r'(\{.*?\})', rc_line)
-        # logger.debug(res)
+        logger.debug(res)
 
         return [x.strip('{}').split(' ') for x in res]
 
-
     def process_pt_ec(self, pt_raw_ec, jg_rename_dict):
         processed_ec = []
+        # logger.debug(jg_rename_dict)
         for one_ec in pt_raw_ec:
             processed_one_ec = []
+            # logger.debug(one_ec)
             for col in one_ec:
                 for k,v in jg_rename_dict[1]['columns'].items():
                     if(col==v):
@@ -141,9 +145,11 @@ class Join_Graph_Materializer:
 
 
     def modifiy_jg_ec(self, jg_ec, pt_ec):
+        # logger.debug(jg_ec)
+        # logger.debug(pt_ec)
         res = []
         modifier_from_pt_ec = [pe for pe in pt_ec if len(pe)>1]
-        
+        # logger.debug(modifier_from_pt_ec)
         # modify: adding relationships from x 
         for m in modifier_from_pt_ec:
             for i in range(len(jg_ec)):
@@ -153,6 +159,7 @@ class Join_Graph_Materializer:
         # combine elements from modified jg_ec 
         # then do a set operation
 
+        # logger.debug(jg_ec)
         while(jg_ec):
             i = 0
             index_to_del = [i]
@@ -218,13 +225,14 @@ class Join_Graph_Materializer:
             else:
                 ec_info_dicts = []
                 ec_id = 1
+                logger.debug(ecs_more_than_one)
                 for ec in ecs_more_than_one:
                     for renamed_a in ec:
                         col_info_dict = self.get_col_info(renamed_a, self.db_dict, jg_rename_dict, ec_id)
-                        if(col_info_dict['is_part_of_pk']):
-                            ec_info_dicts.append(col_info_dict)
-                    ec_id+=1
-
+                        if(col_info_dict):
+                            if(col_info_dict['is_part_of_pk']):
+                                ec_info_dicts.append(col_info_dict)
+                        ec_id+=1
                 if(not ec_info_dicts):
                     return True
                 else:
