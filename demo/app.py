@@ -23,11 +23,21 @@ def db_connect(active_table='nba'):
         form_data = request.form
         # try:
         print(form_data)
-        globals()['conn'] = pg2.connect(database=form_data['dbname'], 
-            user=form_data['dbusr'], 
-            password=form_data['dbpswd'],
-            port=form_data['port'],
-            host=form_data['host'])
+        global db_name
+        global db_user
+        global db_pswd
+        global db_port
+        global db_host
+        db_name = form_data['dbname']
+        db_user = form_data['dbusr']
+        db_pswd = form_data['dbpswd']
+        db_port = form_data['port']
+        db_host = form_data['host']
+        globals()['conn'] = pg2.connect(database=db_name, 
+            user=db_user, 
+            password=db_pswd,
+            port=db_port,
+            host=db_host)
         globals()['conn'].autocommit = True
 
         globals()['cursor'] = conn.cursor()
@@ -126,34 +136,38 @@ def ajax():
 ######
 @app.route('/explanation',methods=['EXP'])
 def explanation():
+    # data = request.get_json()
+
+    # tdArr = data["tdArr"]
+    # colNum = data["colNum"]
+    # rangelen = len(tdArr)
+
+    # tmp1 = []
+    # tmp2 = []
+  
+    # for i in range(0, rangelen):
+    #   if i<colNum:
+    #       tmp1.append(tdArr[i])
+    #   else:
+    #       tmp2.append(tdArr[i])
+
+    #run_experiment(conn=globals()['conn'],result_schema='demoresult')
     run_experiment(conn=globals()['conn'])
-  
-#   data = request.get_json()
 
-#   tdArr = data["tdArr"]
-#   colNum = data["colNum"]
-#   rangelen = len(tdArr)
+    globals()['conn'] = pg2.connect(database=db_name, 
+            user=db_user, 
+            password=db_pswd,
+            port=db_port,
+            host=db_host)
+    globals()['conn'].autocommit = True
+    globals()['cursor2'] = conn.cursor()
 
-#   tmp1 = []
-#   tmp2 = []
-  
-#   for i in range(0, rangelen):
-#       if i<colNum:
-#           tmp1.append(tdArr[i])
-#       else:
-#           tmp2.append(tdArr[i])
-  
-#   ########
-#   ####execfile("expeirments.py")
-#   #EXPORT204 = "./example.py"
-#   #EXPORT204 = "cd ../src "
-#   x1 = 2
-#   os.system("cd ../src; python example.py")
-#   #os.system("python example.py")
-#   return jsonify(result = "success-explanation")
+    query2 = "select p_desc from demotest.global_results"
+    cursor2.execute(query2)
+    exp_list = cursor2.fetchall()
 
+    return jsonify(result = "success-explanation", result2 = exp_list)
 
-######
 
 def convert_to_graph_json(ll):
     l_json  = {"nodes":[], "links":[]}
