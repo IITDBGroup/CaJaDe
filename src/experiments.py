@@ -584,6 +584,15 @@ def main():
   u_question =["season_name='2015-16'","season_name='2012-13'"]
   user_specified_attrs = [('team','team'),('season','season_name')]
 
+
+
+  # user_query = "provenance of (select team from team);"
+  # # u_query = (user_query, 'gsw wins : 15 vs 12') 
+  # u_query = (user_query, 'demo')
+  # u_question = ["team='BOS'","team='DET'"]
+  # user_specified_attrs = [('team', 'team')]
+
+
   # user_query = 'provenance of (select insurance, 1.0*SUM(hospital_expire_flag)/count(*) as death_rate from admissions group by insurance);'
   # u_query = (user_query, 'death rate: medicare vs private')
   # u_question =["insurance='Private'","insurance='Medicare'"]
