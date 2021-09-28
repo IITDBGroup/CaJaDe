@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 pt_attr_re = re.compile("(?<=PT\.)(\w+)(?=[),=])")
+extract_pattern = re.compile('([a-zA-Z]+)_([0-9]+)')
 
 class QueryGeneratorStats(ExecStats):
     """
@@ -69,36 +70,39 @@ class Join_Graph_Materializer:
         return which base table the renamed_attribute belongs to 
         and if it is a part of the keys and the pkeys of that base table
         """
-        re_a_index = int(re.findall(r'([0-9]+)', renamed_attribute)[0])
-
-        ispk=True
-        for k,v in jg_rename_dict.items():
-            if(k=='max_rel_index' or k=='max_attr_index' or k=='dtypes'):
-                continue
-            else:
-                if(re_a_index>=v['rel_min_attr_index'] and re_a_index<=v['rel_max_attr_index']):
-                    tid = k
-                    t_a_name = v['columns'][renamed_attribute]
-                    t_name = v['label']
-                    if(t_name=='PT'):
-                        atype = jg_rename_dict['dtypes'][renamed_attribute]
-                        (t_name, t_a_name) = db_dict['PT']['attributes'][':'.join([t_a_name,atype])]
-                        t_pk = db_dict[t_name]['p_key']
-                    else:
-                        t_pk = db_dict[t_name]['p_key']
-                    if(t_a_name in t_pk):
-                        ispk = True
-                    break
-                else:
+        if(extract_pattern.search(renamed_attribute)):
+            re_a_index = int(re.findall(r'([0-9]+)', renamed_attribute)[0])
+            ispk=True
+            for k,v in jg_rename_dict.items():
+                if(k=='max_rel_index' or k=='max_attr_index' or k=='dtypes'):
                     continue
+                else:
+                    if(re_a_index>=v['rel_min_attr_index'] and re_a_index<=v['rel_max_attr_index']):
+                        tid = k
+                        t_a_name = v['columns'][renamed_attribute]
+                        t_name = v['label']
+                        if(t_name=='PT'):
+                            atype = jg_rename_dict['dtypes'][renamed_attribute]
+                            (t_name, t_a_name) = db_dict['PT']['attributes'][':'.join([t_a_name,atype])]
+                            t_pk = db_dict[t_name]['p_key']
+                        else:
+                            t_pk = db_dict[t_name]['p_key']
+                        if(t_a_name in t_pk):
+                            ispk = True
+                        break
+                    else:
+                        continue
 
-        res = {'table':t_name, 'table_identity':tid, 
-        'original_attr_name':t_a_name, 
-        'is_part_of_pk':ispk, 'table_pk':t_pk, 'ec_id':ec_id}
-        
-        # logger.debug(res)
+            res = {'table':t_name, 'table_identity':tid, 
+            'original_attr_name':t_a_name, 
+            'is_part_of_pk':ispk, 'table_pk':t_pk, 'ec_id':ec_id}
 
-        return res
+            # logger.debug(res)
+
+            return res
+
+        else:
+            return None
 
 
     def gen_ec(self, query):
@@ -221,8 +225,9 @@ class Join_Graph_Materializer:
                 for ec in ecs_more_than_one:
                     for renamed_a in ec:
                         col_info_dict = self.get_col_info(renamed_a, self.db_dict, jg_rename_dict, ec_id)
-                        if(col_info_dict['is_part_of_pk']):
-                            ec_info_dicts.append(col_info_dict)
+                        if(col_info_dict):
+                            if(col_info_dict['is_part_of_pk']):
+                                ec_info_dicts.append(col_info_dict)
                     ec_id+=1
 
                 if(not ec_info_dicts):
