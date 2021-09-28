@@ -137,12 +137,13 @@
 
 		<script>
       var colNum;
+      var colData;
 
 		  $('#execute').click(function(){
 		    let dataList;
 		    let totalNum;
 		    //var colNum;
-		    let colData;
+		    //let colData;
 		    let tblData;
 		    let dataPerPage;
 		    let pageCount = 5;
@@ -317,10 +318,12 @@
           let len = selectedArr.length;
 
           if(cnt<0 && len<2){
-                       
+              //console.log("cnt<0");
+
+              $(this).css("background-color", "#e0e0e0");            
               sltROWS += 1;
               selectedArr.push(text);
-              $(this).css("background-color", "#e0e0e0");
+              
 
               $("#sltROWScount").empty();
 		          $("#sltROWScount").append(sltROWScnt);
@@ -334,6 +337,28 @@
               td.each(function(i){
                 tdArr.push(td.eq(i).text());
               })      
+          } else if(cnt > -1){
+              //console.log();
+
+              $(this).css("background-color", "#FFFFFF");    
+              sltROWS -= 1;
+              selectedArr.splice(cnt,1);
+            
+
+              $("#sltROWScount").empty();
+		          $("#sltROWScount").append(sltROWScnt);
+              $("#sltROWScount").append(sltROWS);
+              $('#container').empty();
+              $('#container').append(
+                "<button onclick=\"exp()\" type=\"button\" class=\"btn btn-outline-primary\" id=\"explanation\">explanation</button>"
+              ); 
+              td.each(function(i){
+                var index = tdArr.indexOf(td.eq(i).text());
+                if(index>-1){
+                  tdArr.splice(index, 1);
+                }
+              })  
+            
           }
 
         })
@@ -349,8 +374,8 @@
 
         //////   
         alert("0, colNum:"+colNum); //colNum data can not be accessed
-		    var postdata_exp = { 'tdArr': tdArr, 'colNum': colNum }
-        alert("1");
+		    var postdata_exp = { 'tdArr': tdArr, 'colNum': colNum, 'colData': colData}
+        //alert("1");
 
         $.ajax({
           type: 'EXP',
@@ -359,25 +384,39 @@
           dataType: 'JSON',
           contentType: "application/json",
           success: function(data){
-            if (data){
+            if (data.result2){
               alert("complete");
+              exp_len = data.result2.length;
+              exp_data = data.result2;
+              exp_table(exp_data,exp_len);
             } 
             else {
               alert("No data");
             }
-            //var rs = data.result;
-            //alert(rs);
-            //alert("success-explanation");
           },
 		      error: function(request, status, error){ 
 		        alert('ajax failed')
 		        alert(error);
 		      }
-          })
-          alert("2");
+        })
 
-        
-        //////
+        function exp_table(exp_data,exp_len){
+          
+          let expHtml = "";
+
+          expHtml = "<table class=\"table table-bordered\" sellspacing=\"0\" width=\"90%\" id=\"exp\" style=\"overflow: auto;height: 50px;\">";
+          expHtml += "<tbody style=\"overflow: auto;height: 50px;\">";
+          
+          for(var i=0;i<exp_len;i++){
+            expHtml += "<tr><td style=\"text-align: center;\">"+ exp_data[i] +"</td></tr>";
+          }
+          expHtml += "</tbody></table>";
+                   
+
+          $("#explanation_table").empty();
+		      $("#explanation_table").append(expHtml);
+        }
+
       }
 		</script>
     
@@ -413,7 +452,7 @@
       </div>
 		</div>
 
-		<div id="display" style="overflow: auto;"></div><br>
+		<div id="display" style="overflow: auto;"></div><br>    
 
 		<div id="pageInfo" style="display: inline;" class="col-md-8">
 		  <div style="float: left;">
@@ -423,7 +462,9 @@
 		  <div style="float: right;">
 		    <ul id="pagingul" class="col-md-5"></ul>
 		  </div>
-		</div>
+
+		</div><br>
+    <div id="explanation_table" style="display: inline; width: 90%; height: 5px;overflow: scroll;overflow-y: scroll"></div><br>
 
 
   <!--
