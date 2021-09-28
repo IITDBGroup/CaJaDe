@@ -122,6 +122,8 @@
                 <input type="text" class="form-control" id="query-aggregate" placeholder="COUNT(*)" name="query-aggregate">
                 <div class="input-group-text">FROM</div>
                 <input type="text" class="form-control" id="query-from" name="query-from">
+                <div class="input-group-text">WHERE</div>
+                <input type="text" class="form-control" id="query-where" name="query-where">
                 <div class="input-group-text">GROUP BY</div>
                 <input type="text" class="form-control" id="query-group" name="query-group">
                 
@@ -158,10 +160,11 @@
 		    var slt = $('#query-select').val();
 		    var agg = $('#query-aggregate').val();
 		    var frm = $('#query-from').val();
+        var where = $('#query-where').val();
 		    var grp = $('#query-group').val();
 		    
 		    var postdata = {
-		      'slt':slt, 'agg':agg, 'frm':frm, 'grp':grp
+		      'slt':slt, 'agg':agg, 'frm':frm, 'where':where, 'grp':grp
 		    }
 		    $.ajax({
 		      type: 'POST',
@@ -183,7 +186,7 @@
 
 		        displayData(1, dataPerPage);
 		        paging(totalNum, dataPerPage, pageCount, 1);
-            selectRows();
+            //selectRows();
             /***
 		        $("#dataPerPage").change(function () {
 		          dataPerPage = $("#dataPerPage").val();
@@ -266,18 +269,23 @@
 		        displayData(selectedPage, dataPerPage);
 		      });
 		    }
+
+       
+
 		    function displayData(currentPage, dataPerPage){
 		      let chartHtml = "";
 		      currentPage = Number(currentPage);
 		      dataPerPage = Number(dataPerPage);
 		      
 		      chartHtml = "<table class=\"table table-hover table-bordered\" sellspacing=\"0\" width=\"90%\" id=\"example\">";
-		      chartHtml += "<thead><tr>";
+		      
+          chartHtml += "<thead><tr>";
 		      for(var i=0;i<colNum;i++){
 		        chartHtml += "<th style=\"text-align: center;\">" + colData[i] + "</th>";
 		      }
-		      chartHtml += "</tr></thead>";
 		      
+		      chartHtml += "</tr></thead>";
+
           let tableFrom = (currentPage-1)*dataPerPage;
           let tableTo = (currentPage-1)*dataPerPage+dataPerPage;
           if(tableTo > totalNum) tableTo = totalNum;
@@ -285,6 +293,7 @@
 		      chartHtml += "<tbody>";
           for(var i = tableFrom; i<tableTo;i++){
 		        chartHtml += "<tr onclick=\"selectRows(this);\">";
+            //chartHtml += "<tr>";
 		        for(var j=0;j<colNum;j++){
 		          chartHtml += "<td style=\"text-align: center;\">" + tblData[i][j] + "</td>";
 		        }
@@ -307,18 +316,51 @@
       var str="";
       var tdArr = new Array();
       var td;
+      var cnt;
+      var len;
 
       function selectRows(){
         $("#example tbody tr").click(function(){
+
+          console.log("<<selectRows()>>");
+
           var text = $(this).text();          
           var tr = $(this);
           td = tr.children();
 
-          let cnt = selectedArr.indexOf(text);
-          let len = selectedArr.length;
+          //let cnt = selectedArr.indexOf(text);
+          cnt = selectedArr.indexOf(text);
+          len = selectedArr.length;
+          //let len = selectedArr.length;
+          bgcolor = $(this).css("background-color");
 
-          if(cnt<0 && len<2){
-              //console.log("cnt<0");
+          console.log("bgCOLOR: "+bgcolor);
+
+          if(bgcolor == "rgb(224, 224, 224)"){
+            console.log("bgCOLOR equal")
+            $(this).css("background-color", "#FFFFFF");    
+              sltROWS -= 1;
+              selectedArr.splice(cnt,1);
+
+              $("#sltROWScount").empty();
+		          $("#sltROWScount").append(sltROWScnt);
+              $("#sltROWScount").append(sltROWS);
+              $('#container').empty();
+              $('#container').append(
+                "<button onclick=\"exp()\" type=\"button\" class=\"btn btn-outline-primary\" id=\"explanation\">explanation</button>"
+              ); 
+
+              td.each(function(i){
+                var index = tdArr.indexOf(td.eq(i).text());
+                if(index>-1){
+                  tdArr.splice(index, 1);
+                }
+              })
+          }
+
+          else {
+            if(cnt==-1 && len<2){
+              console.log("cnt==-1, cnt: "+cnt);
 
               $(this).css("background-color", "#e0e0e0");            
               sltROWS += 1;
@@ -337,31 +379,10 @@
               td.each(function(i){
                 tdArr.push(td.eq(i).text());
               })      
-          } else if(cnt > -1){
-              //console.log();
-
-              $(this).css("background-color", "#FFFFFF");    
-              sltROWS -= 1;
-              selectedArr.splice(cnt,1);
-            
-
-              $("#sltROWScount").empty();
-		          $("#sltROWScount").append(sltROWScnt);
-              $("#sltROWScount").append(sltROWS);
-              $('#container').empty();
-              $('#container').append(
-                "<button onclick=\"exp()\" type=\"button\" class=\"btn btn-outline-primary\" id=\"explanation\">explanation</button>"
-              ); 
-              td.each(function(i){
-                var index = tdArr.indexOf(td.eq(i).text());
-                if(index>-1){
-                  tdArr.splice(index, 1);
-                }
-              })  
-            
+            } 
           }
 
-        })
+        });
       }
       function exp(){
         var expTEXT = "";
@@ -369,11 +390,11 @@
           expTEXT += tdArr[i];
           expTEXT += " ";
         }
-        alert(expTEXT);
+        //alert(expTEXT);
         
 
         //////   
-        alert("0, colNum:"+colNum); //colNum data can not be accessed
+        //alert("0, colNum:"+colNum); //colNum data can not be accessed
 		    var postdata_exp = { 'tdArr': tdArr, 'colNum': colNum, 'colData': colData}
         //alert("1");
 
@@ -385,7 +406,7 @@
           contentType: "application/json",
           success: function(data){
             if (data.result2){
-              alert("complete");
+              //alert("complete");
               exp_len = data.result2.length;
               exp_data = data.result2;
               exp_table(exp_data,exp_len);

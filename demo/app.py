@@ -105,7 +105,9 @@ def ajax():
   slt = data["slt"]
   agg = data["agg"]
   frm = data["frm"]
+  where = data["where"]
   grp = data["grp"]
+
   global query
   
   #[ERROR] missing <select> or <from>
@@ -113,20 +115,36 @@ def ajax():
       return 'OK'
     
   #select <select> from <from> group by <group>
-  if agg == "" and grp != "": 
+  if agg == "" and grp != "" and where =="": 
     query = "select "+slt+" "+" from "+frm+" group by "+grp
-      
-  #select <select> from <from>
-  elif agg == "" and grp == "": 
-    query = "select "+slt+" "+" from "+frm
+
+  #select <select> from <from> where <where>
+  elif agg == "" and grp == "" and where != "": 
+    query = "select "+slt+" "+" from "+frm+" where "+where
       
   #select <select>, <agg> from <from>
-  elif agg != "" and grp == "": 
+  elif agg != "" and grp == "" and where =="": 
     query = "select "+slt+", "+agg+" from "+frm
-      
-  #select <select>, <agg> from <from> group by <group>
-  else: 
+
+  #select <select> from <from> where <where> group by <group>
+  elif agg == "" and grp != "" and where != "": 
+    query = "select "+slt+" from "+frm+" where "+where+" group by "+grp
+
+  #select <select>, <agg> from <from> where <where> group by <group>
+  elif agg != "" and grp == "" and where != "": 
+    query = "select "+slt+", "+agg+" from "+frm+" where "+where
+
+  #select <select> , <agg> from <from> group by <group>
+  elif agg != "" and grp != "" and where == "": 
     query = "select "+slt+", "+agg+" from "+frm+" group by "+grp
+
+  #select <select>, <agg> from <from> where <where> group by <group>
+  else:
+    query = "select "+slt+", "+agg+" from "+frm+" where "+where+" group by "+grp
+
+  #select <select>, <agg> from <from> group by <group>
+#   else: 
+#     query = "select "+slt+", "+agg+" from "+frm+" group by "+grp
       
   cursor.execute(query)
   data_list = cursor.fetchall()
@@ -153,7 +171,7 @@ def explanation():
     #   else:
     #       tmp2.append(tdArr[i])
 
-    #uQuery = "provenance of ("+query+");"
+    uQuery = "provenance of ("+query+");"
     #map_yes = ""
     #map_no = ""
 
@@ -163,20 +181,58 @@ def explanation():
     #                 user_questions = ["season_name='2015-16'","season_name='2012-13'"],
     #                 user_questions_map = {'yes':'2015-16', 'no':'2012-13'},
     #                 user_specified_attrs=[('team','team'),('season','season_name')])
+    # print(uQuery)
+    # run_experiment(conn=globals()['conn'],
+    #             result_schema='demotest',
+    #             user_query=(uQuery, 'test'),
+    #             user_questions = ["team='BOS'","team='DET'"],
+    #             user_questions_map = {'yes':'BOS', 'no':'DET'},
+    #             user_specified_attrs=[('team','team')]
+    #             )
+    
+    # def run_experiment(conn=None,
+    #                result_schema='demotest',
+    #                user_query = ("provenance of (select count(*) as win, s.season_name from team t, game g, season s where t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' group by s.season_name);",'test'),
+    #                user_questions = ["season_name='2015-16'","season_name='2012-13'"],
+    #                user_questions_map = {'yes':'2015-16', 'no':'2012-13'},
+    #                user_specified_attrs=[('team','team'),('season','season_name')],
+    #                user_name='juseung',
+    #                password='1234',
+    #                host='localhost',
+    #                port='5432',
+    #                dbname='nba', 
+    #                sample_rate_for_s=0.1,
+    #                lca_s_max_size=100,
+    #                lca_s_min_size=100,
+    #                maximum_edges=1,
+    #                min_recall_threshold=0.2,
+    #                numercial_attr_filter_method='y',
+    #                f1_sample_rate=0.3,
+    #                f1_sample_type='s.0',
+    #                exclude_high_cost_jg = (False, 'f'),
+    #                f1_calculation_type = 'o',
+    #                user_assigned_max_num_pred = 3,
+    #                f1_min_sample_size_threshold=100,
+    #                lca_eval_mode=False,
+    #                statstracker=ExperimentParams()):
+
 
     run_experiment(conn=globals()['conn'])
 
-    globals()['conn'] = pg2.connect(database=db_name, 
-            user=db_user, 
-            password=db_pswd,
-            port=db_port,
-            host=db_host)
-    globals()['conn'].autocommit = True
-    globals()['cursor2'] = conn.cursor()
+    # globals()['conn'] = pg2.connect(database=db_name, 
+    #         user=db_user, 
+    #         password=db_pswd,
+    #         port=db_port,
+    #         host=db_host)
+    # globals()['conn'].autocommit = True
+    # globals()['cursor2'] = conn.cursor()
 
     query2 = "select p_desc from demotest.global_results"
-    cursor2.execute(query2)
-    exp_list = cursor2.fetchall()
+    globals()['cursor'].execute(query2)
+    # cursor2.execute(query2)
+    exp_list = globals()['cursor'].fetchall()
+
+    # exp_list = cursor2.fetchall()
 
     return jsonify(result = "success-explanation", result2 = exp_list)
 
