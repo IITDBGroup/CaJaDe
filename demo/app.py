@@ -109,42 +109,13 @@ def ajax():
   grp = data["grp"]
 
   global query
-  
-  #[ERROR] missing <select> or <from>
-  if slt == "" or frm == "":
-      return 'OK'
-    
-  #select <select> from <from> group by <group>
-  if agg == "" and grp != "" and where =="": 
-    query = "select "+slt+" "+" from "+frm+" group by "+grp
 
-  #select <select> from <from> where <where>
-  elif agg == "" and grp == "" and where != "": 
-    query = "select "+slt+" "+" from "+frm+" where "+where
-      
-  #select <select>, <agg> from <from>
-  elif agg != "" and grp == "" and where =="": 
-    query = "select "+slt+", "+agg+" from "+frm
 
-  #select <select> from <from> where <where> group by <group>
-  elif agg == "" and grp != "" and where != "": 
-    query = "select "+slt+" from "+frm+" where "+where+" group by "+grp
-
-  #select <select>, <agg> from <from> where <where> group by <group>
-  elif agg != "" and grp == "" and where != "": 
-    query = "select "+slt+", "+agg+" from "+frm+" where "+where
-
-  #select <select> , <agg> from <from> group by <group>
-  elif agg != "" and grp != "" and where == "": 
-    query = "select "+slt+", "+agg+" from "+frm+" group by "+grp
-
-  #select <select>, <agg> from <from> where <where> group by <group>
-  else:
-    query = "select "+slt+", "+agg+" from "+frm+" where "+where+" group by "+grp
-
-  #select <select>, <agg> from <from> group by <group>
-#   else: 
-#     query = "select "+slt+", "+agg+" from "+frm+" group by "+grp
+  query = f"""
+  SELECT {slt} FROM {frm}
+  {"WHERE {}".format(where) if where !="" else ""}
+  {"GROUP BY".format(grp) if grp !="" else ""}
+  """
       
   cursor.execute(query)
   data_list = cursor.fetchall()
