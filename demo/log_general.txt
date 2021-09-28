@@ -6561,3 +6561,21 @@ DEBUG 2021-09-28 11:32:50,023[pattern_generator.py:gen_patterns:1207]   a_5
 4   95
 DEBUG 2021-09-28 11:32:50,762[experiments.py:run_experiment:476]total number of patterns 41
 INFO 2021-09-28 11:32:50,790[_internal.py:_log:225]127.0.0.1 - - [28/Sep/2021 11:32:50] "EXP /explanation HTTP/1.1" 200 -
+INFO 2021-09-28 17:33:00,288[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-09-28 17:33:05,084[_internal.py:_log:225]127.0.0.1 - - [28/Sep/2021 17:33:05] "GET / HTTP/1.1" 200 -
+INFO 2021-09-28 17:33:05,267[_internal.py:_log:225]127.0.0.1 - - [28/Sep/2021 17:33:05] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-09-28 17:33:05,416[_internal.py:_log:225]127.0.0.1 - - [28/Sep/2021 17:33:05] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+ERROR 2021-09-28 17:33:22,229[app.py:log_exception:1454]Exception on /ajax [POST]
+Traceback (most recent call last):
+  File "/home/jayli/cajade/lib/python3.9/site-packages/flask/app.py", line 2070, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/jayli/cajade/lib/python3.9/site-packages/flask/app.py", line 1515, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/jayli/cajade/lib/python3.9/site-packages/flask/app.py", line 1513, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/jayli/cajade/lib/python3.9/site-packages/flask/app.py", line 1499, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**req.view_args)
+  File "/home/jayli/CaJaDe/demo/app.py", line 131, in ajax
+    cursor.execute(query)
+NameError: name 'cursor' is not defined
+INFO 2021-09-28 17:33:22,232[_internal.py:_log:225]127.0.0.1 - - [28/Sep/2021 17:33:22] "[35m[1mPOST /ajax HTTP/1.1[0m" 500 -

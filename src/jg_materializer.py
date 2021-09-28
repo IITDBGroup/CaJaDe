@@ -94,14 +94,13 @@ class Join_Graph_Materializer:
                         break
                     else:
                         continue
-
             res = {'table':t_name, 'table_identity':tid, 
             'original_attr_name':t_a_name, 
             'is_part_of_pk':ispk, 'table_pk':t_pk, 'ec_id':ec_id}
-        
-            # logger.debug(res)
-
             return res
+        else:
+            return None
+
 
 
     def gen_ec(self, query):
