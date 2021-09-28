@@ -11,4 +11,18 @@ trap "kill 0" EXIT
 
 # mimic
 # python3 experiments.py -M 3 -p jape -U japerev -P 5433 -d mimic_rev -o n -t o -m 0 -i false -F 1 -D march_3_mimic_naive
-python3 experiments.py -M 3 -p jape -U japerev -P 5433 -d mimic_original -o n -t o -i false -F 1 -D april_14_mimic_naive
+
+
+# iters=(1 2 3 4 5)
+
+# for i in ${iters[@]}
+# 	do
+# 		python3 experiments.py -M 3 -p jape -U japerev -P 5433 -d mimic_original -o n -t o -i false -F 1 -D april_15_repeat_${i}
+# 	done
+
+iters=(1 2 3)
+
+for i in ${iters[@]}
+	do
+		python3 experiments.py -M 3 -p jape -U japerev -P 5433 -d nba_original -o n -t o -i false -F 1 -D april_16_naive_repeat_${i}
+	done
