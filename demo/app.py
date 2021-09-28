@@ -4,8 +4,11 @@ import psycopg2 as pg2
 from networkx import MultiGraph
 from src.sg_generator import Schema_Graph_Generator
 from src.experiments import run_experiment
+from flask.logging import default_handler
+import logging
 
-
+logger = logging.getLogger()
+logger.addHandler(default_handler)
 
 app = Flask(__name__)
 
@@ -112,11 +115,12 @@ def ajax():
 
 
   query = f"""
-  SELECT {slt} FROM {frm}
-  {"WHERE {}".format(where) if where !="" else ""}
-  {"GROUP BY".format(grp) if grp !="" else ""}
+  SELECT {slt} \
+  {", {}".format(agg) if agg!="" else ""} FROM {frm} \
+  {"WHERE {}".format(where) if where !="" else ""} \
+  {"GROUP BY {}".format(grp) if grp !="" else ""} \
   """
-      
+  logger.debug(query)
   cursor.execute(query)
   data_list = cursor.fetchall()
   
