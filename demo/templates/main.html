@@ -319,10 +319,14 @@
       var cnt;
       var len;
 
+      var count=1;
+
       function selectRows(){
         $("#example tbody tr").click(function(){
+        
+          bgcolor = $(this).css("background-color");
 
-          console.log("<<selectRows()>>");
+          console.log("<<selectRows()>>, cnt: "+count);
 
           var text = $(this).text();          
           var tr = $(this);
@@ -332,11 +336,13 @@
           cnt = selectedArr.indexOf(text);
           len = selectedArr.length;
           //let len = selectedArr.length;
-          bgcolor = $(this).css("background-color");
+          //bgcolor = $(this).css("background-color");
 
           console.log("bgCOLOR: "+bgcolor);
 
           if(bgcolor == "rgb(224, 224, 224)"){
+            count--;
+            
             console.log("bgCOLOR equal")
             $(this).css("background-color", "#FFFFFF");    
               sltROWS -= 1;
@@ -360,6 +366,7 @@
 
           else {
             if(cnt==-1 && len<2){
+              count++;
               console.log("cnt==-1, cnt: "+cnt);
 
               $(this).css("background-color", "#e0e0e0");            
@@ -384,6 +391,8 @@
 
         });
       }
+
+
       function exp(){
         var expTEXT = "";
         for(var i=0;i<tdArr.length;i++){
