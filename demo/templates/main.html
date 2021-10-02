@@ -321,15 +321,16 @@
 
       var count=1;
 
-      function selectRows(){
-        $("#example tbody tr").click(function(){
+      function selectRows(elem){
+        // $("#example tbody tr").click(function(){
         
-          bgcolor = $(this).css("background-color");
+          bgcolor = $(elem).css("background-color");
+          console.log("bgcolor : "+ bgcolor);
 
           console.log("<<selectRows()>>, cnt: "+count);
 
-          var text = $(this).text();          
-          var tr = $(this);
+          var text = $(elem).text();          
+          var tr = $(elem);
           td = tr.children();
 
           //let cnt = selectedArr.indexOf(text);
@@ -344,7 +345,7 @@
             count--;
             
             console.log("bgCOLOR equal")
-            $(this).css("background-color", "#FFFFFF");    
+            $(elem).css("background-color", "#FFFFFF");    
               sltROWS -= 1;
               selectedArr.splice(cnt,1);
 
@@ -369,7 +370,7 @@
               count++;
               console.log("cnt==-1, cnt: "+cnt);
 
-              $(this).css("background-color", "#e0e0e0");            
+              $(elem).css("background-color", "#e0e0e0");            
               sltROWS += 1;
               selectedArr.push(text);
               
@@ -389,7 +390,7 @@
             } 
           }
 
-        });
+        // });
       }
 
 
