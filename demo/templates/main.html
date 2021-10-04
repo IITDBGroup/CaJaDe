@@ -290,10 +290,23 @@
           let tableTo = (currentPage-1)*dataPerPage+dataPerPage;
           if(tableTo > totalNum) tableTo = totalNum;
 
+          
 		      chartHtml += "<tbody>";
           for(var i = tableFrom; i<tableTo;i++){
-		        chartHtml += "<tr onclick=\"selectRows(this);\">";
-            //chartHtml += "<tr>";
+            let txtTMP = "";
+
+            for(var j=0;j<colNum;j++){
+              txtTMP += tblData[i][j];
+            }
+            if(selectedArr.indexOf(txtTMP) != -1){
+              console.log("*****selectedArr:*****");
+              chartHtml += "<tr onclick=\"selectRows(this);\" style=\"background-color: #e0e0e0;\">";
+            }else{
+              chartHtml += "<tr onclick=\"selectRows(this);\">";
+            }
+
+		        //chartHtml += "<tr onclick=\"selectRows(this);\">";
+
 		        for(var j=0;j<colNum;j++){
 		          chartHtml += "<td style=\"text-align: center;\">" + tblData[i][j] + "</td>";
 		        }
@@ -305,7 +318,6 @@
 		      $("#display").append(chartHtml);
           
 		  }
-		 
 
 		  })
 
@@ -321,9 +333,7 @@
 
       var count=1;
 
-      function selectRows(elem){
-        // $("#example tbody tr").click(function(){
-        
+      function selectRows(elem){        
           bgcolor = $(elem).css("background-color");
           console.log("bgcolor : "+ bgcolor);
 
@@ -333,13 +343,10 @@
           var tr = $(elem);
           td = tr.children();
 
-          //let cnt = selectedArr.indexOf(text);
           cnt = selectedArr.indexOf(text);
           len = selectedArr.length;
-          //let len = selectedArr.length;
-          //bgcolor = $(this).css("background-color");
 
-          console.log("bgCOLOR: "+bgcolor);
+          ////console.log("bgCOLOR: "+bgcolor);
 
           if(bgcolor == "rgb(224, 224, 224)"){
             count--;
@@ -373,7 +380,6 @@
               $(elem).css("background-color", "#e0e0e0");            
               sltROWS += 1;
               selectedArr.push(text);
-              
 
               $("#sltROWScount").empty();
 		          $("#sltROWScount").append(sltROWScnt);
@@ -389,8 +395,6 @@
               })      
             } 
           }
-
-        // });
       }
 
 
@@ -400,13 +404,8 @@
           expTEXT += tdArr[i];
           expTEXT += " ";
         }
-        //alert(expTEXT);
-        
 
-        //////   
-        //alert("0, colNum:"+colNum); //colNum data can not be accessed
 		    var postdata_exp = { 'tdArr': tdArr, 'colNum': colNum, 'colData': colData}
-        //alert("1");
 
         $.ajax({
           type: 'EXP',
@@ -472,12 +471,7 @@
         <div style="float: left; padding: 10px; width: 41%; text-align: right;" class="col-md-5">
           <p id="sltROWScount"></p>
         </div>
-<!---
-          <div style="display: inline;">
-            <div style="float:left;"><p id="sltROWScount"></p></div>
-            <div style="float: right;" id="container" class="d-grid gap-2 d-md-block"></div>
-          </div>
--->
+
         <div style="float: right; width: 25%; text-align: right;" id="container"></div>
         
       </div>
@@ -488,7 +482,6 @@
 		<div id="pageInfo" style="display: inline;" class="col-md-8">
 		  <div style="float: left;">
 		    <p id="displayCount"></p>
-        <!--- <p id="sltROWScount"></p> -->
 		  </div>
 		  <div style="float: right;">
 		    <ul id="pagingul" class="col-md-5"></ul>
@@ -497,15 +490,6 @@
 		</div><br>
     <div id="explanation_table" style="display: inline; width: 90%; height: 5px;overflow: scroll;overflow-y: scroll"></div><br>
 
-
-  <!--
-    <div id="container"></div>
-
-  
-		<div style="float:right;" class="col-md-8">
-      <button type="button" class="btn btn-outline-primary">Explanation</button>
-    </div>
-    -->
       </div>
 
     </div>
