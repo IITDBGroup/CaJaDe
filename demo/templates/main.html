@@ -337,9 +337,9 @@
 
       function selectRows(elem){        
           bgcolor = $(elem).css("background-color");
-          console.log("bgcolor : "+ bgcolor);
+          //console.log("bgcolor : "+ bgcolor);
 
-          console.log("<<selectRows()>>, cnt: "+count);
+          //console.log("<<selectRows()>>, cnt: "+count);
 
           var text = $(elem).text();          
           var tr = $(elem);
@@ -353,7 +353,7 @@
           if(bgcolor == "rgb(224, 224, 224)"){
             count--;
             
-            console.log("bgCOLOR equal")
+            //console.log("bgCOLOR equal")
             $(elem).css("background-color", "#FFFFFF");    
               sltROWS -= 1;
               selectedArr.splice(cnt,1);
@@ -377,7 +377,7 @@
           else {
             if(cnt==-1 && len<2){
               count++;
-              console.log("cnt==-1, cnt: "+cnt);
+              //console.log("cnt==-1, cnt: "+cnt);
 
               $(elem).css("background-color", "#e0e0e0");            
               sltROWS += 1;
@@ -417,7 +417,6 @@
           contentType: "application/json",
           success: function(data){
             if (data.result2){
-              //alert("complete");
               exp_len = data.result2.length;
               exp_data = data.result2;
               exp_table(exp_data,exp_len);
@@ -432,18 +431,16 @@
 		      }
         })
 
-        function exp_table(exp_data,exp_len){
-          
+        function exp_table(exp_data,exp_len){          
           let expHtml = "";
 
-          expHtml = "<table class=\"table table-bordered\" sellspacing=\"0\" width=\"90%\" id=\"exp\" style=\"overflow: auto;height: 50px;\">";
-          expHtml += "<tbody style=\"overflow: auto;height: 50px;\">";
+          expHtml = "<table class=\"table table-bordered\" sellspacing=\"0\" width=\"90%\" id=\"exp\">";
+          expHtml += "<tbody>";
           
           for(var i=0;i<exp_len;i++){
             expHtml += "<tr><td style=\"text-align: center;\">"+ exp_data[i] +"</td></tr>";
           }
           expHtml += "</tbody></table>";
-                   
 
           $("#explanation_table").empty();
 		      $("#explanation_table").append(expHtml);
@@ -482,17 +479,16 @@
 
 		<div id="display" style="overflow: auto;"></div><br>    
 
-		<div id="pageInfo" style="display: inline;" class="col-md-8">
+		<div id="pageInfo" style="display: inline;" class="col-md-12">
 		  <div style="float: left;">
 		    <p id="displayCount"></p>
 		  </div>
 		  <div style="float: right;">
-		    <ul id="pagingul" class="col-md-5"></ul>
+		    <ul id="pagingul" class="col-md-6"></ul>
 		  </div>
 
 		</div><br>
-    <div id="explanation_table" style="display: inline; width: 90%; height: 5px;overflow: scroll;overflow-y: scroll"></div><br>
-
+    <div id="explanation_table" style="overflow: auto; height: 200px;"></div><br>
       </div>
 
     </div>

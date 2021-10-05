@@ -130,7 +130,7 @@ def ajax():
 ######
 @app.route('/explanation',methods=['EXP'])
 def explanation():
-    # data = request.get_json()
+    data = request.get_json()
 
     # tdArr = data["tdArr"]
     # colNum = data["colNum"]
@@ -139,7 +139,10 @@ def explanation():
 
     # tmp1 = []
     # tmp2 = []
-  
+    
+    # logger.debug(query)
+
+
     # for i in range(0, rangelen):
     #   if i<colNum:
     #       tmp1.append(tdArr[i])
