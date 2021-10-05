@@ -114,26 +114,27 @@
 
       <div class="col-md-7">
         <form id="query-form" method="POST" action="/run">
-            <div class="col-auto">
-              <div class="input-group">
-                <div class="input-group-text">SELECT</div>
-                <input type="text" class="form-control" id="query-select" name="query-select">
-                <div class="input-group-text">,</div>
-                <input type="text" class="form-control" id="query-aggregate" placeholder="COUNT(*)" name="query-aggregate">
-                <div class="input-group-text">FROM</div>
-                <input type="text" class="form-control" id="query-from" name="query-from">
-                <div class="input-group-text">WHERE</div>
-                <input type="text" class="form-control" id="query-where" name="query-where">
-                <div class="input-group-text">GROUP BY</div>
-                <input type="text" class="form-control" id="query-group" name="query-group">
-                
-                <!--Run button -->
-                <div class="input-group-run">  
-                  <!-- <input type="button" id="execute" value="run"> -->
-                  <button type="button" class="btn btn-outline-primary" id="execute">Run</button>                   
+            <div class="col-auto" style="display: flex; flex-direction: column; justify-content: center;  ">
+              <!--<div class="input-group"> -->
+                <div class="input-group1">
+                  <div class="input-group-text" style="float: left;">SELECT</div>
+                  <input type="text" class="form-control" id="query-select" name="query-select" style="float: left; width: 27%;">
+                  <div class="input-group-text" style="float: left;">,</div>
+                  <input type="text" class="form-control" id="query-aggregate" placeholder="COUNT(*)" name="query-aggregate" style="float: left; width: 27%;">
+                  <div class="input-group-text" style="float: left;">FROM</div>
+                  <input type="text" class="form-control" id="query-from" name="query-from" style="float: left; width: 28%;">
                 </div>
-       
-            </div>
+                <div class="input-group2">
+                  <div class="input-group-text" style="float: left;">WHERE</div>
+                  <input type="text" class="form-control" id="query-where" name="query-where" style="float: left; width: 27%;">
+                  <div class="input-group-text" style="float: left;">GROUP BY</div>
+                  <input type="text" class="form-control" id="query-group" name="query-group" style="float: left; width: 27%;">
+          
+                  <div class="input-group-run" style="float: left;">  
+                    <button type="button" class="btn btn-outline-primary" id="execute" style="width: 100%">Run</button>                   
+                  </div>
+                </div>
+            <!--</div>-->
       	</form>
 
 
@@ -319,6 +320,7 @@
           
 		  }
 
+
 		  })
 
 		  let sltROWS = 0;
@@ -456,7 +458,8 @@
     </script>
 		<br>
 		
-		<div class="row">	
+		<div class="row2">
+      <br>
 		  <div style="display: inline;">
         <div style="float: left; width: 33%; padding: 10px;">
 		      <p>Show

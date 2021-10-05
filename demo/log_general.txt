@@ -400,3 +400,963 @@ INFO 2021-10-04 13:14:00,249[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 13
 DEBUG 2021-10-04 13:14:50,749[app.py:ajax:123]
   SELECT *    FROM game         
 INFO 2021-10-04 13:14:50,860[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 13:14:50] "POST /ajax HTTP/1.1" 200 -
+DEBUG 2021-10-04 13:21:38,442[experiments.py:run_experiment:265]test__nba__0.1__100__100__False__1__0.2__y__f__o__0.3__100
+DEBUG 2021-10-04 13:21:38,443[experiments.py:run_experiment:266]{'yes': '2015-16', 'no': '2012-13'}
+DEBUG 2021-10-04 13:21:38,443[experiments.py:run_experiment:269]f1_min_sample_size_threshold : '100'
+DEBUG 2021-10-04 13:21:38,443[experiments.py:run_experiment:269]dbname : 'nba'
+DEBUG 2021-10-04 13:21:38,443[experiments.py:run_experiment:269]sample_rate_for_s : '0.1'
+DEBUG 2021-10-04 13:21:38,443[experiments.py:run_experiment:269]maximum_edges : '1'
+DEBUG 2021-10-04 13:21:38,444[experiments.py:run_experiment:269]f1_calculation_type : 'o'
+DEBUG 2021-10-04 13:21:38,444[experiments.py:run_experiment:269]min_recall_threshold : '0.2'
+DEBUG 2021-10-04 13:21:38,444[experiments.py:run_experiment:269]result_schema : 'demotest'
+DEBUG 2021-10-04 13:21:38,444[experiments.py:run_experiment:269]numercial_attr_filter_method : 'y'
+DEBUG 2021-10-04 13:21:38,444[experiments.py:run_experiment:269]user_questions : 'season_name=2015-16 VS season_name=2012-13'
+DEBUG 2021-10-04 13:21:38,445[experiments.py:run_experiment:269]f1_sample_rate : '0.3'
+DEBUG 2021-10-04 13:21:38,445[experiments.py:run_experiment:269]exclude_high_cost_jg : 'f'
+DEBUG 2021-10-04 13:21:38,445[experiments.py:run_experiment:269]user_query : 'test'
+DEBUG 2021-10-04 13:21:38,445[experiments.py:run_experiment:269]lca_s_max_size : '100'
+DEBUG 2021-10-04 13:21:38,445[experiments.py:run_experiment:269]lca_s_min_size : '100'
+DEBUG 2021-10-04 13:21:38,445[experiments.py:run_experiment:269]just_lca : False
+DEBUG 2021-10-04 13:21:38,446[experiments.py:run_experiment:269]f1_sample_type : 's.0'
+ERROR 2021-10-04 13:21:38,654[app.py:log_exception:1454]Exception on /explanation [EXP]
+Traceback (most recent call last):
+  File "/home/juseung/cajade/lib/python3.8/site-packages/flask/app.py", line 2070, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/juseung/cajade/lib/python3.8/site-packages/flask/app.py", line 1515, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/juseung/cajade/lib/python3.8/site-packages/flask/app.py", line 1513, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/juseung/cajade/lib/python3.8/site-packages/flask/app.py", line 1499, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**req.view_args)
+  File "/home/juseung/CaJaDe/demo/app.py", line 195, in explanation
+    run_experiment(conn=globals()['conn'])
+  File "/home/juseung/CaJaDe/src/experiments.py", line 286, in run_experiment
+    user_pt_size, pt_dict, pt_relations = pg.gen_provenance_table(query=user_query[0],
+  File "/home/juseung/CaJaDe/src/provenance_getter.py", line 61, in gen_provenance_table
+    gen_original_pt_query = output.decode("utf-8")
+UnicodeDecodeError: 'utf-8' codec can't decode bytes in position 375-376: invalid continuation byte
+INFO 2021-10-04 13:21:38,664[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 13:21:38] "[35m[1mEXP /explanation HTTP/1.1[0m" 500 -
+INFO 2021-10-04 13:21:48,138[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 13:21:50,090[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 13:21:50] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 13:21:50,200[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 13:21:50] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 13:21:54,279[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 13:21:54] "POST /db/ HTTP/1.1" 200 -
+INFO 2021-10-04 13:21:54,324[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 13:21:54] "[36mGET /static/main.css HTTP/1.1[0m" 304 -
+DEBUG 2021-10-04 13:21:58,019[app.py:ajax:123]
+  SELECT *    FROM team         
+INFO 2021-10-04 13:21:58,023[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 13:21:58] "POST /ajax HTTP/1.1" 200 -
+DEBUG 2021-10-04 13:22:00,872[experiments.py:run_experiment:265]test__nba__0.1__100__100__False__1__0.2__y__f__o__0.3__100
+DEBUG 2021-10-04 13:22:00,873[experiments.py:run_experiment:266]{'yes': '2015-16', 'no': '2012-13'}
+DEBUG 2021-10-04 13:22:00,873[experiments.py:run_experiment:269]sample_rate_for_s : '0.1'
+DEBUG 2021-10-04 13:22:00,874[experiments.py:run_experiment:269]f1_min_sample_size_threshold : '100'
+DEBUG 2021-10-04 13:22:00,874[experiments.py:run_experiment:269]result_schema : 'demotest'
+DEBUG 2021-10-04 13:22:00,874[experiments.py:run_experiment:269]exclude_high_cost_jg : 'f'
+DEBUG 2021-10-04 13:22:00,875[experiments.py:run_experiment:269]maximum_edges : '1'
+DEBUG 2021-10-04 13:22:00,875[experiments.py:run_experiment:269]min_recall_threshold : '0.2'
+DEBUG 2021-10-04 13:22:00,875[experiments.py:run_experiment:269]f1_sample_rate : '0.3'
+DEBUG 2021-10-04 13:22:00,875[experiments.py:run_experiment:269]dbname : 'nba'
+DEBUG 2021-10-04 13:22:00,876[experiments.py:run_experiment:269]f1_calculation_type : 'o'
+DEBUG 2021-10-04 13:22:00,876[experiments.py:run_experiment:269]numercial_attr_filter_method : 'y'
+DEBUG 2021-10-04 13:22:00,876[experiments.py:run_experiment:269]user_questions : 'season_name=2015-16 VS season_name=2012-13'
+DEBUG 2021-10-04 13:22:00,877[experiments.py:run_experiment:269]user_query : 'test'
+DEBUG 2021-10-04 13:22:00,877[experiments.py:run_experiment:269]lca_s_max_size : '100'
+DEBUG 2021-10-04 13:22:00,877[experiments.py:run_experiment:269]lca_s_min_size : '100'
+DEBUG 2021-10-04 13:22:00,878[experiments.py:run_experiment:269]just_lca : False
+DEBUG 2021-10-04 13:22:00,878[experiments.py:run_experiment:269]f1_sample_type : 's.0'
+ERROR 2021-10-04 13:22:01,110[app.py:log_exception:1454]Exception on /explanation [EXP]
+Traceback (most recent call last):
+  File "/home/juseung/cajade/lib/python3.8/site-packages/flask/app.py", line 2070, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/juseung/cajade/lib/python3.8/site-packages/flask/app.py", line 1515, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/juseung/cajade/lib/python3.8/site-packages/flask/app.py", line 1513, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/juseung/cajade/lib/python3.8/site-packages/flask/app.py", line 1499, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**req.view_args)
+  File "/home/juseung/CaJaDe/demo/app.py", line 195, in explanation
+    run_experiment(conn=globals()['conn'])
+  File "/home/juseung/CaJaDe/src/experiments.py", line 286, in run_experiment
+    user_pt_size, pt_dict, pt_relations = pg.gen_provenance_table(query=user_query[0],
+  File "/home/juseung/CaJaDe/src/provenance_getter.py", line 61, in gen_provenance_table
+    gen_original_pt_query = output.decode("utf-8")
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xe0 in position 374: invalid continuation byte
+INFO 2021-10-04 13:22:01,116[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 13:22:01] "[35m[1mEXP /explanation HTTP/1.1[0m" 500 -
+INFO 2021-10-04 13:22:38,446[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 13:22:39,833[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 13:22:39] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 13:22:39,915[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 13:22:39] "[36mGET /static/main.css HTTP/1.1[0m" 304 -
+INFO 2021-10-04 13:22:48,953[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 13:22:48] "POST /db/ HTTP/1.1" 200 -
+INFO 2021-10-04 13:22:49,000[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 13:22:49] "[36mGET /static/main.css HTTP/1.1[0m" 304 -
+DEBUG 2021-10-04 13:22:52,140[app.py:ajax:123]
+  SELECT *    FROM team         
+INFO 2021-10-04 13:22:52,141[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 13:22:52] "POST /ajax HTTP/1.1" 200 -
+DEBUG 2021-10-04 13:22:53,765[experiments.py:run_experiment:265]test__nba__0.1__100__100__False__1__0.2__y__f__o__0.3__100
+DEBUG 2021-10-04 13:22:53,766[experiments.py:run_experiment:266]{'yes': '2015-16', 'no': '2012-13'}
+DEBUG 2021-10-04 13:22:53,766[experiments.py:run_experiment:269]dbname : 'nba'
+DEBUG 2021-10-04 13:22:53,767[experiments.py:run_experiment:269]f1_calculation_type : 'o'
+DEBUG 2021-10-04 13:22:53,767[experiments.py:run_experiment:269]exclude_high_cost_jg : 'f'
+DEBUG 2021-10-04 13:22:53,768[experiments.py:run_experiment:269]user_questions : 'season_name=2015-16 VS season_name=2012-13'
+DEBUG 2021-10-04 13:22:53,768[experiments.py:run_experiment:269]maximum_edges : '1'
+DEBUG 2021-10-04 13:22:53,769[experiments.py:run_experiment:269]numercial_attr_filter_method : 'y'
+DEBUG 2021-10-04 13:22:53,769[experiments.py:run_experiment:269]f1_sample_rate : '0.3'
+DEBUG 2021-10-04 13:22:53,770[experiments.py:run_experiment:269]min_recall_threshold : '0.2'
+DEBUG 2021-10-04 13:22:53,770[experiments.py:run_experiment:269]f1_min_sample_size_threshold : '100'
+DEBUG 2021-10-04 13:22:53,771[experiments.py:run_experiment:269]result_schema : 'demotest'
+DEBUG 2021-10-04 13:22:53,771[experiments.py:run_experiment:269]sample_rate_for_s : '0.1'
+DEBUG 2021-10-04 13:22:53,772[experiments.py:run_experiment:269]user_query : 'test'
+DEBUG 2021-10-04 13:22:53,772[experiments.py:run_experiment:269]lca_s_max_size : '100'
+DEBUG 2021-10-04 13:22:53,773[experiments.py:run_experiment:269]lca_s_min_size : '100'
+DEBUG 2021-10-04 13:22:53,774[experiments.py:run_experiment:269]just_lca : False
+DEBUG 2021-10-04 13:22:53,774[experiments.py:run_experiment:269]f1_sample_type : 's.0'
+DEBUG 2021-10-04 13:22:54,016[provenance_getter.py:gen_provenance_table:65]CREATE VIEW original_pt AS WITH _temp_view_1 AS (
+SELECT /*+ materialize */ 1 AS "AGG_GB_ARG0", F0."season_name" AS "AGG_GB_ARG1", F0."prov_team_team__id" AS "prov_team_team__id", F0."prov_team_team" AS "prov_team_team", F0."prov_game_game__date" AS "prov_game_game__date", F0."prov_game_home__points" AS "prov_game_home__points", F0."prov_game_away__points" AS "prov_game_away__points", F0."prov_game_home__possessions" AS "prov_game_home__possessions", F0."prov_game_away__possessions" AS "prov_game_away__possessions", F0."prov_game_home__id" AS "prov_game_home__id", F0."prov_game_away__id" AS "prov_game_away__id", F0."prov_game_winner__id" AS "prov_game_winner__id", F0."prov_game_season__id" AS "prov_game_season__id", F0."prov_season_season__id" AS "prov_season_season__id", F0."prov_season_season__name" AS "prov_season_season__name", F0."prov_season_season__type" AS "prov_season_season__type"
+FROM (
+SELECT F0."team_id" AS "team_id", F0."team" AS "team", F0."game_date" AS "game_date", F0."home_points" AS "home_points", F0."away_points" AS "away_points", F0."home_possessions" AS "home_possessions", F0."away_possessions" AS "away_possessions", F0."home_id" AS "home_id", F0."away_id" AS "away_id", F0."winner_id" AS "winner_id", F0."season_id" AS "season_id", F1."season_id" AS "season_id1", F1."season_name" AS "season_name", F1."season_type" AS "season_type", F0."prov_team_team__id" AS "prov_team_team__id", F0."prov_team_team" AS "prov_team_team", F0."prov_game_game__date" AS "prov_game_game__date", F0."prov_game_home__points" AS "prov_game_home__points", F0."prov_game_away__points" AS "prov_game_away__points", F0."prov_game_home__possessions" AS "prov_game_home__possessions", F0."prov_game_away__possessions" AS "prov_game_away__possessions", F0."prov_game_home__id" AS "prov_game_home__id", F0."prov_game_away__id" AS "prov_game_away__id", F0."prov_game_winner__id" AS "prov_game_winner__id", F0."prov_game_season__id" AS "prov_game_season__id", F1."prov_season_season__id" AS "prov_season_season__id", F1."prov_season_season__name" AS "prov_season_season__name", F1."prov_season_season__type" AS "prov_season_season__type"
+FROM ((
+SELECT F0."team_id" AS "team_id", F0."team" AS "team", F1."game_date" AS "game_date", F1."home_points" AS "home_points", F1."away_points" AS "away_points", F1."home_possessions" AS "home_possessions", F1."away_possessions" AS "away_possessions", F1."home_id" AS "home_id", F1."away_id" AS "away_id", F1."winner_id" AS "winner_id", F1."season_id" AS "season_id", F0."prov_team_team__id" AS "prov_team_team__id", F0."prov_team_team" AS "prov_team_team", F1."prov_game_game__date" AS "prov_game_game__date", F1."prov_game_home__points" AS "prov_game_home__points", F1."prov_game_away__points" AS "prov_game_away__points", F1."prov_game_home__possessions" AS "prov_game_home__possessions", F1."prov_game_away__possessions" AS "prov_game_away__possessions", F1."prov_game_home__id" AS "prov_game_home__id", F1."prov_game_away__id" AS "prov_game_away__id", F1."prov_game_winner__id" AS "prov_game_winner__id", F1."prov_game_season__id" AS "prov_game_season__id"
+FROM ((
+SELECT F0."team_id" AS "team_id", F0."team" AS "team", F0."team_id" AS "prov_team_team__id", F0."team" AS "prov_team_team"
+FROM "team" AS F0) F0 CROSS JOIN (
+SELECT F0."game_date" AS "game_date", F0."home_points" AS "home_points", F0."away_points" AS "away_points", F0."home_possessions" AS "home_possessions", F0."away_possessions" AS "away_possessions", F0."home_id" AS "home_id", F0."away_id" AS "away_id", F0."winner_id" AS "winner_id", F0."season_id" AS "season_id", F0."game_date" AS "prov_game_game__date", F0."home_points" AS "prov_game_home__points", F0."away_points" AS "prov_game_away__points", F0."home_possessions" AS "prov_game_home__possessions", F0."away_possessions" AS "prov_game_away__possessions", F0."home_id" AS "prov_game_home__id", F0."away_id" AS "prov_game_away__id", F0."winner_id" AS "prov_game_winner__id", F0."season_id" AS "prov_game_season__id"
+FROM "game" AS F0) F1)) F0 CROSS JOIN (
+SELECT F0."season_id" AS "season_id", F0."season_name" AS "season_name", F0."season_type" AS "season_type", F0."season_id" AS "prov_season_season__id", F0."season_name" AS "prov_season_season__name", F0."season_type" AS "prov_season_season__type"
+FROM "season" AS F0) F1)) F0
+WHERE (((F0."team_id" = F0."winner_id") AND (F0."season_id" = F0."season_id1")) AND (F0."team" = 'GSW'))),
+_temp_view_0 AS (
+SELECT /*+ materialize */ F0."AGGR_0" AS "AGGR_0", F0."GROUP_0" AS "GROUP_0", F1."prov_team_team__id" AS "prov_team_team__id", F1."prov_team_team" AS "prov_team_team", F1."prov_game_game__date" AS "prov_game_game__date", F1."prov_game_home__points" AS "prov_game_home__points", F1."prov_game_away__points" AS "prov_game_away__points", F1."prov_game_home__possessions" AS "prov_game_home__possessions", F1."prov_game_away__possessions" AS "prov_game_away__possessions", F1."prov_game_home__id" AS "prov_game_home__id", F1."prov_game_away__id" AS "prov_game_away__id", F1."prov_game_winner__id" AS "prov_game_winner__id", F1."prov_game_season__id" AS "prov_game_season__id", F1."prov_season_season__id" AS "prov_season_season__id", F1."prov_season_season__name" AS "prov_season_season__name", F1."prov_season_season__type" AS "prov_season_season__type"
+FROM ((
+SELECT count(1) AS "AGGR_0", F2."season_name" AS "GROUP_0"
+FROM (("team" AS F0 CROSS JOIN "game" AS F1) CROSS JOIN "season" AS F2)
+WHERE (((F0."team_id" = F1."winner_id") AND (F1."season_id" = F2."season_id")) AND (F0."team" = 'GSW'))
+GROUP BY F2."season_name") F0 JOIN (
+SELECT F0."AGG_GB_ARG1" AS "_P_SIDE_GROUP_0", F0."prov_team_team__id" AS "prov_team_team__id", F0."prov_team_team" AS "prov_team_team", F0."prov_game_game__date" AS "prov_game_game__date", F0."prov_game_home__points" AS "prov_game_home__points", F0."prov_game_away__points" AS "prov_game_away__points", F0."prov_game_home__possessions" AS "prov_game_home__possessions", F0."prov_game_away__possessions" AS "prov_game_away__possessions", F0."prov_game_home__id" AS "prov_game_home__id", F0."prov_game_away__id" AS "prov_game_away__id", F0."prov_game_winner__id" AS "prov_game_winner__id", F0."prov_game_season__id" AS "prov_game_season__id", F0."prov_season_season__id" AS "prov_season_season__id", F0."prov_season_season__name" AS "prov_season_season__name", F0."prov_season_season__type" AS "prov_season_season__type"
+FROM (SELECT * FROM _temp_view_1) F0) F1 ON ((F0."GROUP_0" IS NOT DISTINCT FROM F1."_P_SIDE_GROUP_0"))))
+SELECT F0."AGGR_0" AS "win", F0."GROUP_0" AS "season_name", F0."prov_team_team__id" AS "prov_team_team__id", F0."prov_team_team" AS "prov_team_team", F0."prov_game_game__date" AS "prov_game_game__date", F0."prov_game_home__points" AS "prov_game_home__points", F0."prov_game_away__points" AS "prov_game_away__points", F0."prov_game_home__possessions" AS "prov_game_home__possessions", F0."prov_game_away__possessions" AS "prov_game_away__possessions", F0."prov_game_home__id" AS "prov_game_home__id", F0."prov_game_away__id" AS "prov_game_away__id", F0."prov_game_winner__id" AS "prov_game_winner__id", F0."prov_game_season__id" AS "prov_game_season__id", F0."prov_season_season__id" AS "prov_season_season__id", F0."prov_season_season__name" AS "prov_season_season__name", F0."prov_season_season__type" AS "prov_season_season__type"
+FROM (SELECT * FROM _temp_view_0) F0;
+
+
+;
+DEBUG 2021-10-04 13:22:54,132[experiments.py:run_experiment:294]generate new valid_jgs
+DEBUG 2021-10-04 13:22:54,159[experiments.py:run_experiment:297]Before filtering any, we have 5 valid jgs 
+
+DEBUG 2021-10-04 13:22:54,163[experiments.py:run_experiment:312]DO include high cost jg!!!!!!!!!!!!!
+DEBUG 2021-10-04 13:22:54,163[experiments.py:run_experiment:313]before filtering intermediate, we have 5 jgs
+DEBUG 2021-10-04 13:22:54,163[experiments.py:run_experiment:321]after filtering out intermediate we have 5 valid jgs 
+
+DEBUG 2021-10-04 13:22:54,572[jg_materializer.py:gen_ec:122]['{season_name}', '{win}', '{prov_team_team__id prov_game_winner__id}', "{prov_team_team 'GSW'}", '{prov_game_game__date}', '{prov_game_home__points}', '{prov_game_away__points}', '{prov_game_home__possessions}', '{prov_game_away__possessions}', '{prov_game_home__id}', '{prov_game_away__id}', '{prov_game_season__id prov_season_season__id}', '{prov_season_season__name}', '{prov_season_season__type}']
+DEBUG 2021-10-04 13:22:54,683[jg_materializer.py:gen_ec:122]['{win}', '{season_name}', '{a_1}', '{a_2}', '{a_3}', '{a_4}', '{a_5}', '{a_6}', '{a_7}', '{a_8}', '{a_9}', '{a_10}', '{a_11}', '{a_12}', '{a_13}', '{a_14}', '{pnumber}', '{is_user}']
+DEBUG 2021-10-04 13:22:54,684[jg_materializer.py:non_redundant_check:227][['a_1', 'a_10'], ['a_12', 'a_11']]
+DEBUG 2021-10-04 13:22:54,684[jg_materializer.py:get_col_info:73]a_1
+DEBUG 2021-10-04 13:22:54,684[jg_materializer.py:get_col_info:73]a_10
+DEBUG 2021-10-04 13:22:54,685[jg_materializer.py:get_col_info:73]a_12
+DEBUG 2021-10-04 13:22:54,685[jg_materializer.py:get_col_info:73]a_11
+DEBUG 2021-10-04 13:22:54,718[jg_materializer.py:materialize_jg:323]['(team.team_id)=(PT.winner_id)', {'game': ['winner_id'], 'team': ['team_id']}, 'game']
+DEBUG 2021-10-04 13:22:54,830[jg_materializer.py:gen_ec:122]['{win}', '{season_name}', '{a_1}', '{a_2}', '{a_3}', '{a_4}', '{a_5}', '{a_6}', '{a_7}', '{a_8}', '{a_9}', '{a_10 a_15}', '{a_11}', '{a_12}', '{a_13}', '{a_14}', '{pnumber}', '{is_user}', '{a_16}']
+DEBUG 2021-10-04 13:22:54,830[jg_materializer.py:non_redundant_check:227][['a_1', 'a_15', 'a_10'], ['a_12', 'a_11']]
+DEBUG 2021-10-04 13:22:54,831[jg_materializer.py:get_col_info:73]a_1
+DEBUG 2021-10-04 13:22:54,831[jg_materializer.py:get_col_info:73]a_15
+DEBUG 2021-10-04 13:22:54,831[jg_materializer.py:get_col_info:73]a_10
+DEBUG 2021-10-04 13:22:54,831[jg_materializer.py:get_col_info:73]a_12
+DEBUG 2021-10-04 13:22:54,831[jg_materializer.py:get_col_info:73]a_11
+DEBUG 2021-10-04 13:22:54,851[jg_materializer.py:materialize_jg:323]['(team.team_id)=(PT.home_id)', {'game': ['home_id'], 'team': ['team_id']}, 'game']
+DEBUG 2021-10-04 13:22:54,964[jg_materializer.py:gen_ec:122]['{win}', '{season_name}', '{a_1}', '{a_2}', '{a_3}', '{a_4}', '{a_5}', '{a_6}', '{a_7}', '{a_8 a_15}', '{a_9}', '{a_10}', '{a_11}', '{a_12}', '{a_13}', '{a_14}', '{pnumber}', '{is_user}', '{a_16}']
+DEBUG 2021-10-04 13:22:54,966[jg_materializer.py:non_redundant_check:227][['a_1', 'a_10'], ['a_8', 'a_15'], ['a_12', 'a_11']]
+DEBUG 2021-10-04 13:22:54,966[jg_materializer.py:get_col_info:73]a_1
+DEBUG 2021-10-04 13:22:54,967[jg_materializer.py:get_col_info:73]a_10
+DEBUG 2021-10-04 13:22:54,967[jg_materializer.py:get_col_info:73]a_8
+DEBUG 2021-10-04 13:22:54,968[jg_materializer.py:get_col_info:73]a_15
+DEBUG 2021-10-04 13:22:54,968[jg_materializer.py:get_col_info:73]a_12
+DEBUG 2021-10-04 13:22:54,968[jg_materializer.py:get_col_info:73]a_11
+DEBUG 2021-10-04 13:22:54,996[jg_materializer.py:materialize_jg:323]['(team.team_id)=(PT.away_id)', {'game': ['away_id'], 'team': ['team_id']}, 'game']
+DEBUG 2021-10-04 13:22:55,105[jg_materializer.py:gen_ec:122]['{win}', '{season_name}', '{a_1}', '{a_2}', '{a_3}', '{a_4}', '{a_5}', '{a_6}', '{a_7}', '{a_8}', '{a_9 a_15}', '{a_10}', '{a_11}', '{a_12}', '{a_13}', '{a_14}', '{pnumber}', '{is_user}', '{a_16}']
+DEBUG 2021-10-04 13:22:55,107[jg_materializer.py:non_redundant_check:227][['a_1', 'a_10'], ['a_15', 'a_9'], ['a_12', 'a_11']]
+DEBUG 2021-10-04 13:22:55,108[jg_materializer.py:get_col_info:73]a_1
+DEBUG 2021-10-04 13:22:55,108[jg_materializer.py:get_col_info:73]a_10
+DEBUG 2021-10-04 13:22:55,109[jg_materializer.py:get_col_info:73]a_15
+DEBUG 2021-10-04 13:22:55,109[jg_materializer.py:get_col_info:73]a_9
+DEBUG 2021-10-04 13:22:55,109[jg_materializer.py:get_col_info:73]a_12
+DEBUG 2021-10-04 13:22:55,110[jg_materializer.py:get_col_info:73]a_11
+DEBUG 2021-10-04 13:22:55,137[jg_materializer.py:materialize_jg:323]['(season.season_id)=(PT.season_id)', {'game': ['season_id'], 'season': ['season_id']}, 'game']
+DEBUG 2021-10-04 13:22:55,245[jg_materializer.py:gen_ec:122]['{win}', '{season_name}', '{a_1}', '{a_2}', '{a_3}', '{a_4}', '{a_5}', '{a_6}', '{a_7}', '{a_8}', '{a_9}', '{a_10}', '{a_11 a_17}', '{a_12}', '{a_13}', '{a_14}', '{pnumber}', '{is_user}', '{a_16}']
+DEBUG 2021-10-04 13:22:55,247[jg_materializer.py:non_redundant_check:227][['a_1', 'a_10'], ['a_12', 'a_11', 'a_17']]
+DEBUG 2021-10-04 13:22:55,247[jg_materializer.py:get_col_info:73]a_1
+DEBUG 2021-10-04 13:22:55,248[jg_materializer.py:get_col_info:73]a_10
+DEBUG 2021-10-04 13:22:55,248[jg_materializer.py:get_col_info:73]a_12
+DEBUG 2021-10-04 13:22:55,249[jg_materializer.py:get_col_info:73]a_11
+DEBUG 2021-10-04 13:22:55,249[jg_materializer.py:get_col_info:73]a_17
+DEBUG 2021-10-04 13:22:55,273[experiments.py:run_experiment:337]before filtering redundant, we have 5 jgs
+DEBUG 2021-10-04 13:22:55,274[experiments.py:run_experiment:340]after filtering out redundant we have 5 valid jgs 
+
+DEBUG 2021-10-04 13:22:55,274[experiments.py:run_experiment:342]we found 5 valid join graphs, now materializing and generating patterns
+DEBUG 2021-10-04 13:22:55,274[experiments.py:run_experiment:350]we are on join graph number 1
+DEBUG 2021-10-04 13:22:55,298[pattern_generator.py:gen_patterns:730]{'max_rel_index': 2, 'max_attr_index': 14, 'dtypes': {'win': 'nominal', 'season_name': 'nominal', 'a_1': 'ordinal', 'a_2': 'nominal', 'a_3': 'nominal', 'a_4': 'ordinal', 'a_5': 'ordinal', 'a_6': 'ordinal', 'a_7': 'ordinal', 'a_8': 'ordinal', 'a_9': 'ordinal', 'a_10': 'ordinal', 'a_11': 'ordinal', 'a_12': 'ordinal', 'a_13': 'nominal', 'a_14': 'nominal', 'pnumber': 'nominal', 'is_user': 'nominal'}, 1: {'key': 1, 'label': 'PT', 'columns': {'win': 'win', 'season_name': 'season_name', 'a_1': 'prov_team_team__id', 'a_2': 'prov_team_team', 'a_3': 'prov_game_game__date', 'a_4': 'prov_game_home__points', 'a_5': 'prov_game_away__points', 'a_6': 'prov_game_home__possessions', 'a_7': 'prov_game_away__possessions', 'a_8': 'prov_game_home__id', 'a_9': 'prov_game_away__id', 'a_10': 'prov_game_winner__id', 'a_11': 'prov_game_season__id', 'a_12': 'prov_season_season__id', 'a_13': 'prov_season_season__name', 'a_14': 'prov_season_season__type', 'pnumber': 'pnumber', 'is_user': 'is_user'}, 'renamed_rel': 'A_1', 'rel_min_attr_index': 0, 'rel_max_attr_index': 14}}
+DEBUG 2021-10-04 13:22:55,304[pattern_generator.py:gen_patterns:892]sample size : 100
+DEBUG 2021-10-04 13:22:55,352[pattern_generator.py:gen_patterns:1012]             a_14
+0  regular season
+DEBUG 2021-10-04 13:22:55,375[pattern_generator.py:gen_patterns:1055][{'nominal_values': [['a_14', 'regular season']], 'np_recall': 1.0}]
+DEBUG 2021-10-04 13:22:55,376[pattern_generator.py:gen_patterns:1056]1
+DEBUG 2021-10-04 13:22:55,442[pattern_generator.py:gen_patterns:1167]{0: [['a_4', 0, 0], ['a_5', 0, 0], ['a_6', 0, 0], ['a_7', 0, 0]]}
+DEBUG 2021-10-04 13:22:55,444[pattern_generator.py:gen_patterns:1187]a_5
+DEBUG 2021-10-04 13:22:55,445[pattern_generator.py:gen_patterns:1193]lagrge number of num attrs
+DEBUG 2021-10-04 13:22:55,445[pattern_generator.py:gen_patterns:1194]['a_5']
+DEBUG 2021-10-04 13:22:55,446[pattern_generator.py:gen_patterns:1195]{'a_5': ['a_4', 'a_7', 'a_6']}
+DEBUG 2021-10-04 13:22:55,447[pattern_generator.py:gen_patterns:1207]   a_5
+0   77
+1  120
+2   83
+3   90
+4  101
+DEBUG 2021-10-04 13:22:56,203[experiments.py:run_experiment:350]we are on join graph number 2
+DEBUG 2021-10-04 13:22:56,211[pattern_generator.py:gen_patterns:730]{'max_rel_index': 3, 'max_attr_index': 16, 'dtypes': {'win': 'nominal', 'season_name': 'nominal', 'a_1': 'ordinal', 'a_2': 'nominal', 'a_3': 'nominal', 'a_4': 'ordinal', 'a_5': 'ordinal', 'a_6': 'ordinal', 'a_7': 'ordinal', 'a_8': 'ordinal', 'a_9': 'ordinal', 'a_10': 'ordinal', 'a_11': 'ordinal', 'a_12': 'ordinal', 'a_13': 'nominal', 'a_14': 'nominal', 'pnumber': 'nominal', 'is_user': 'nominal', 'a_15': 'ordinal', 'a_16': 'nominal'}, 1: {'key': 1, 'label': 'PT', 'columns': {'win': 'win', 'season_name': 'season_name', 'a_1': 'prov_team_team__id', 'a_2': 'prov_team_team', 'a_3': 'prov_game_game__date', 'a_4': 'prov_game_home__points', 'a_5': 'prov_game_away__points', 'a_6': 'prov_game_home__possessions', 'a_7': 'prov_game_away__possessions', 'a_8': 'prov_game_home__id', 'a_9': 'prov_game_away__id', 'a_10': 'prov_game_winner__id', 'a_11': 'prov_game_season__id', 'a_12': 'prov_season_season__id', 'a_13': 'prov_season_season__name', 'a_14': 'prov_season_season__type', 'pnumber': 'pnumber', 'is_user': 'is_user'}, 'renamed_rel': 'A_1', 'rel_min_attr_index': 0, 'rel_max_attr_index': 14}, 2: {'key': 2, 'label': 'team', 'columns': {'a_15': 'team_id', 'a_16': 'team'}, 'renamed_rel': 'A_2', 'rel_min_attr_index': 14, 'rel_max_attr_index': 16}}
+DEBUG 2021-10-04 13:22:56,213[pattern_generator.py:gen_patterns:892]sample size : 100
+DEBUG 2021-10-04 13:22:56,244[pattern_generator.py:gen_patterns:1012]             a_14 a_16
+0  regular season  GSW
+DEBUG 2021-10-04 13:22:56,272[pattern_generator.py:gen_patterns:1055][{'nominal_values': [['a_14', 'regular season'], ['a_16', 'GSW']], 'np_recall': 1.0}]
+DEBUG 2021-10-04 13:22:56,272[pattern_generator.py:gen_patterns:1056]1
+DEBUG 2021-10-04 13:22:56,298[pattern_generator.py:gen_patterns:1167]{0: [['a_4', 0, 0], ['a_5', 0, 0], ['a_6', 0, 0], ['a_7', 0, 0]]}
+DEBUG 2021-10-04 13:22:56,299[pattern_generator.py:gen_patterns:1187]a_5
+DEBUG 2021-10-04 13:22:56,299[pattern_generator.py:gen_patterns:1193]lagrge number of num attrs
+DEBUG 2021-10-04 13:22:56,300[pattern_generator.py:gen_patterns:1194]['a_5']
+DEBUG 2021-10-04 13:22:56,300[pattern_generator.py:gen_patterns:1195]{'a_5': ['a_4', 'a_7', 'a_6']}
+DEBUG 2021-10-04 13:22:56,301[pattern_generator.py:gen_patterns:1207]   a_5
+0  114
+1   95
+2   92
+3  114
+4  112
+DEBUG 2021-10-04 13:22:57,036[experiments.py:run_experiment:350]we are on join graph number 3
+DEBUG 2021-10-04 13:22:57,056[pattern_generator.py:gen_patterns:730]{'max_rel_index': 3, 'max_attr_index': 16, 'dtypes': {'win': 'nominal', 'season_name': 'nominal', 'a_1': 'ordinal', 'a_2': 'nominal', 'a_3': 'nominal', 'a_4': 'ordinal', 'a_5': 'ordinal', 'a_6': 'ordinal', 'a_7': 'ordinal', 'a_8': 'ordinal', 'a_9': 'ordinal', 'a_10': 'ordinal', 'a_11': 'ordinal', 'a_12': 'ordinal', 'a_13': 'nominal', 'a_14': 'nominal', 'pnumber': 'nominal', 'is_user': 'nominal', 'a_15': 'ordinal', 'a_16': 'nominal'}, 1: {'key': 1, 'label': 'PT', 'columns': {'win': 'win', 'season_name': 'season_name', 'a_1': 'prov_team_team__id', 'a_2': 'prov_team_team', 'a_3': 'prov_game_game__date', 'a_4': 'prov_game_home__points', 'a_5': 'prov_game_away__points', 'a_6': 'prov_game_home__possessions', 'a_7': 'prov_game_away__possessions', 'a_8': 'prov_game_home__id', 'a_9': 'prov_game_away__id', 'a_10': 'prov_game_winner__id', 'a_11': 'prov_game_season__id', 'a_12': 'prov_season_season__id', 'a_13': 'prov_season_season__name', 'a_14': 'prov_season_season__type', 'pnumber': 'pnumber', 'is_user': 'is_user'}, 'renamed_rel': 'A_1', 'rel_min_attr_index': 0, 'rel_max_attr_index': 14}, 2: {'key': 2, 'label': 'team', 'columns': {'a_15': 'team_id', 'a_16': 'team'}, 'renamed_rel': 'A_2', 'rel_min_attr_index': 14, 'rel_max_attr_index': 16}}
+DEBUG 2021-10-04 13:22:57,062[pattern_generator.py:gen_patterns:892]sample size : 100
+DEBUG 2021-10-04 13:22:57,114[pattern_generator.py:gen_patterns:1012]              a_14  a_16
+0   regular season  None
+1   regular season   GSW
+2   regular season   PHX
+3   regular season   UTA
+4   regular season   HOU
+5   regular season   POR
+6   regular season   SAC
+7   regular season   ATL
+8   regular season   MIA
+9   regular season   MIN
+10  regular season   TOR
+11  regular season   WAS
+12  regular season   CHA
+13  regular season   LAC
+14  regular season   CLE
+15  regular season   DAL
+16  regular season   MEM
+17  regular season   SAS
+18  regular season   NYK
+19  regular season   DEN
+20  regular season   IND
+21  regular season   ORL
+22  regular season   PHI
+DEBUG 2021-10-04 13:22:57,138[pattern_generator.py:gen_patterns:1055][{'nominal_values': [['a_14', 'regular season']], 'np_recall': 1.0}, {'nominal_values': [['a_14', 'regular season'], ['a_16', 'GSW']], 'np_recall': 0.5583333333333333}]
+DEBUG 2021-10-04 13:22:57,138[pattern_generator.py:gen_patterns:1056]2
+DEBUG 2021-10-04 13:22:57,162[pattern_generator.py:gen_patterns:1167]{0: [['a_4', 0, 0], ['a_5', 0, 0], ['a_6', 0, 0], ['a_7', 0, 0]]}
+DEBUG 2021-10-04 13:22:57,163[pattern_generator.py:gen_patterns:1187]a_5
+DEBUG 2021-10-04 13:22:57,163[pattern_generator.py:gen_patterns:1193]lagrge number of num attrs
+DEBUG 2021-10-04 13:22:57,163[pattern_generator.py:gen_patterns:1194]['a_5']
+DEBUG 2021-10-04 13:22:57,163[pattern_generator.py:gen_patterns:1195]{'a_5': ['a_4', 'a_7', 'a_6']}
+DEBUG 2021-10-04 13:22:57,164[pattern_generator.py:gen_patterns:1207]   a_5
+0  108
+1  112
+2   95
+3  114
+4  130
+DEBUG 2021-10-04 13:22:57,828[experiments.py:run_experiment:350]we are on join graph number 4
+DEBUG 2021-10-04 13:22:57,844[pattern_generator.py:gen_patterns:730]{'max_rel_index': 3, 'max_attr_index': 16, 'dtypes': {'win': 'nominal', 'season_name': 'nominal', 'a_1': 'ordinal', 'a_2': 'nominal', 'a_3': 'nominal', 'a_4': 'ordinal', 'a_5': 'ordinal', 'a_6': 'ordinal', 'a_7': 'ordinal', 'a_8': 'ordinal', 'a_9': 'ordinal', 'a_10': 'ordinal', 'a_11': 'ordinal', 'a_12': 'ordinal', 'a_13': 'nominal', 'a_14': 'nominal', 'pnumber': 'nominal', 'is_user': 'nominal', 'a_15': 'ordinal', 'a_16': 'nominal'}, 1: {'key': 1, 'label': 'PT', 'columns': {'win': 'win', 'season_name': 'season_name', 'a_1': 'prov_team_team__id', 'a_2': 'prov_team_team', 'a_3': 'prov_game_game__date', 'a_4': 'prov_game_home__points', 'a_5': 'prov_game_away__points', 'a_6': 'prov_game_home__possessions', 'a_7': 'prov_game_away__possessions', 'a_8': 'prov_game_home__id', 'a_9': 'prov_game_away__id', 'a_10': 'prov_game_winner__id', 'a_11': 'prov_game_season__id', 'a_12': 'prov_season_season__id', 'a_13': 'prov_season_season__name', 'a_14': 'prov_season_season__type', 'pnumber': 'pnumber', 'is_user': 'is_user'}, 'renamed_rel': 'A_1', 'rel_min_attr_index': 0, 'rel_max_attr_index': 14}, 2: {'key': 2, 'label': 'team', 'columns': {'a_15': 'team_id', 'a_16': 'team'}, 'renamed_rel': 'A_2', 'rel_min_attr_index': 14, 'rel_max_attr_index': 16}}
+DEBUG 2021-10-04 13:22:57,846[pattern_generator.py:gen_patterns:892]sample size : 100
+DEBUG 2021-10-04 13:22:57,878[pattern_generator.py:gen_patterns:1012]              a_14  a_16
+0   regular season  None
+1   regular season   GSW
+2   regular season   NOP
+3   regular season   SAS
+4   regular season   PHX
+5   regular season   LAC
+6   regular season   OKC
+7   regular season   POR
+8   regular season   SAC
+9   regular season   DEN
+10  regular season   TOR
+11  regular season   PHI
+12  regular season   WAS
+13  regular season   CHA
+14  regular season   CLE
+15  regular season   MIN
+16  regular season   ATL
+17  regular season   DAL
+18  regular season   LAL
+19  regular season   IND
+20  regular season   MEM
+21  regular season   UTA
+22  regular season   DET
+23  regular season   BKN
+24  regular season   NYK
+25  regular season   CHI
+26  regular season   MIA
+27  regular season   ORL
+28  regular season   BOS
+29  regular season   MIL
+DEBUG 2021-10-04 13:22:57,910[pattern_generator.py:gen_patterns:1055][{'nominal_values': [['a_14', 'regular season']], 'np_recall': 1.0}, {'nominal_values': [['a_14', 'regular season'], ['a_16', 'GSW']], 'np_recall': 0.44166666666666665}]
+DEBUG 2021-10-04 13:22:57,910[pattern_generator.py:gen_patterns:1056]2
+DEBUG 2021-10-04 13:22:57,935[pattern_generator.py:gen_patterns:1167]{0: [['a_4', 0, 0], ['a_5', 0, 0], ['a_6', 0, 0], ['a_7', 0, 0]]}
+DEBUG 2021-10-04 13:22:57,936[pattern_generator.py:gen_patterns:1187]a_5
+DEBUG 2021-10-04 13:22:57,936[pattern_generator.py:gen_patterns:1193]lagrge number of num attrs
+DEBUG 2021-10-04 13:22:57,936[pattern_generator.py:gen_patterns:1194]['a_5']
+DEBUG 2021-10-04 13:22:57,936[pattern_generator.py:gen_patterns:1195]{'a_5': ['a_4', 'a_7', 'a_6']}
+DEBUG 2021-10-04 13:22:57,937[pattern_generator.py:gen_patterns:1207]   a_5
+0  105
+1  100
+2   98
+3  128
+4   98
+DEBUG 2021-10-04 13:22:58,592[experiments.py:run_experiment:350]we are on join graph number 5
+DEBUG 2021-10-04 13:22:58,612[pattern_generator.py:gen_patterns:730]{'max_rel_index': 3, 'max_attr_index': 17, 'dtypes': {'win': 'nominal', 'season_name': 'nominal', 'a_1': 'ordinal', 'a_2': 'nominal', 'a_3': 'nominal', 'a_4': 'ordinal', 'a_5': 'ordinal', 'a_6': 'ordinal', 'a_7': 'ordinal', 'a_8': 'ordinal', 'a_9': 'ordinal', 'a_10': 'ordinal', 'a_11': 'ordinal', 'a_12': 'ordinal', 'a_13': 'nominal', 'a_14': 'nominal', 'pnumber': 'nominal', 'is_user': 'nominal', 'a_15': 'nominal', 'a_16': 'nominal', 'a_17': 'ordinal'}, 1: {'key': 1, 'label': 'PT', 'columns': {'win': 'win', 'season_name': 'season_name', 'a_1': 'prov_team_team__id', 'a_2': 'prov_team_team', 'a_3': 'prov_game_game__date', 'a_4': 'prov_game_home__points', 'a_5': 'prov_game_away__points', 'a_6': 'prov_game_home__possessions', 'a_7': 'prov_game_away__possessions', 'a_8': 'prov_game_home__id', 'a_9': 'prov_game_away__id', 'a_10': 'prov_game_winner__id', 'a_11': 'prov_game_season__id', 'a_12': 'prov_season_season__id', 'a_13': 'prov_season_season__name', 'a_14': 'prov_season_season__type', 'pnumber': 'pnumber', 'is_user': 'is_user'}, 'renamed_rel': 'A_1', 'rel_min_attr_index': 0, 'rel_max_attr_index': 14}, 2: {'key': 2, 'label': 'season', 'columns': {'a_15': 'season_name', 'a_16': 'season_type', 'a_17': 'season_id'}, 'renamed_rel': 'A_2', 'rel_min_attr_index': 14, 'rel_max_attr_index': 17}}
+DEBUG 2021-10-04 13:22:58,616[pattern_generator.py:gen_patterns:892]sample size : 100
+DEBUG 2021-10-04 13:22:58,669[pattern_generator.py:gen_patterns:1012]             a_14     a_15            a_16
+0  regular season     None  regular season
+1  regular season  2015-16  regular season
+2  regular season  2012-13  regular season
+DEBUG 2021-10-04 13:22:58,704[pattern_generator.py:gen_patterns:1055][{'nominal_values': [['a_14', 'regular season'], ['a_16', 'regular season']], 'np_recall': 1.0}, {'nominal_values': [['a_14', 'regular season'], ['a_15', '2015-16'], ['a_16', 'regular season']], 'np_recall': 0.6083333333333333}, {'nominal_values': [['a_14', 'regular season'], ['a_15', '2012-13'], ['a_16', 'regular season']], 'np_recall': 0.39166666666666666}]
+DEBUG 2021-10-04 13:22:58,704[pattern_generator.py:gen_patterns:1056]3
+DEBUG 2021-10-04 13:22:58,728[pattern_generator.py:gen_patterns:1167]{0: [['a_4', 0, 0], ['a_5', 0, 0], ['a_6', 0, 0], ['a_7', 0, 0]]}
+DEBUG 2021-10-04 13:22:58,728[pattern_generator.py:gen_patterns:1187]a_5
+DEBUG 2021-10-04 13:22:58,729[pattern_generator.py:gen_patterns:1193]lagrge number of num attrs
+DEBUG 2021-10-04 13:22:58,729[pattern_generator.py:gen_patterns:1194]['a_5']
+DEBUG 2021-10-04 13:22:58,729[pattern_generator.py:gen_patterns:1195]{'a_5': ['a_4', 'a_7', 'a_6']}
+DEBUG 2021-10-04 13:22:58,729[pattern_generator.py:gen_patterns:1207]   a_5
+0  110
+1   94
+2  105
+3   89
+4  120
+DEBUG 2021-10-04 13:22:59,441[experiments.py:run_experiment:476]total number of patterns 83
+ERROR 2021-10-04 13:22:59,501[app.py:log_exception:1454]Exception on /explanation [EXP]
+Traceback (most recent call last):
+  File "/home/juseung/cajade/lib/python3.8/site-packages/flask/app.py", line 2070, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/juseung/cajade/lib/python3.8/site-packages/flask/app.py", line 1515, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/juseung/cajade/lib/python3.8/site-packages/flask/app.py", line 1513, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/juseung/cajade/lib/python3.8/site-packages/flask/app.py", line 1499, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**req.view_args)
+  File "/home/juseung/CaJaDe/demo/app.py", line 206, in explanation
+    globals()['cursor'].execute(query2)
+psycopg2.InterfaceError: cursor already closed
+INFO 2021-10-04 13:22:59,505[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 13:22:59] "[35m[1mEXP /explanation HTTP/1.1[0m" 500 -
+INFO 2021-10-04 14:04:14,147[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 14:04:16,952[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:04:16] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 14:04:17,081[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:04:17] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 14:04:17,215[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:04:17] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+INFO 2021-10-04 14:04:22,275[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:04:22] "POST /db/ HTTP/1.1" 200 -
+INFO 2021-10-04 14:04:22,329[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:04:22] "GET /static/main.css HTTP/1.1" 200 -
+DEBUG 2021-10-04 14:04:27,826[app.py:ajax:123]
+  SELECT *    FROM team         
+INFO 2021-10-04 14:04:27,827[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:04:27] "POST /ajax HTTP/1.1" 200 -
+DEBUG 2021-10-04 14:04:31,630[experiments.py:run_experiment:265]test__nba__0.1__100__100__False__1__0.2__y__f__o__0.3__100
+DEBUG 2021-10-04 14:04:31,631[experiments.py:run_experiment:266]{'yes': '2015-16', 'no': '2012-13'}
+DEBUG 2021-10-04 14:04:31,632[experiments.py:run_experiment:269]dbname : 'nba'
+DEBUG 2021-10-04 14:04:31,632[experiments.py:run_experiment:269]numercial_attr_filter_method : 'y'
+DEBUG 2021-10-04 14:04:31,632[experiments.py:run_experiment:269]sample_rate_for_s : '0.1'
+DEBUG 2021-10-04 14:04:31,633[experiments.py:run_experiment:269]user_questions : 'season_name=2015-16 VS season_name=2012-13'
+DEBUG 2021-10-04 14:04:31,633[experiments.py:run_experiment:269]exclude_high_cost_jg : 'f'
+DEBUG 2021-10-04 14:04:31,634[experiments.py:run_experiment:269]f1_calculation_type : 'o'
+DEBUG 2021-10-04 14:04:31,634[experiments.py:run_experiment:269]maximum_edges : '1'
+DEBUG 2021-10-04 14:04:31,635[experiments.py:run_experiment:269]min_recall_threshold : '0.2'
+DEBUG 2021-10-04 14:04:31,635[experiments.py:run_experiment:269]result_schema : 'demotest'
+DEBUG 2021-10-04 14:04:31,636[experiments.py:run_experiment:269]f1_sample_rate : '0.3'
+DEBUG 2021-10-04 14:04:31,636[experiments.py:run_experiment:269]f1_min_sample_size_threshold : '100'
+DEBUG 2021-10-04 14:04:31,637[experiments.py:run_experiment:269]user_query : 'test'
+DEBUG 2021-10-04 14:04:31,637[experiments.py:run_experiment:269]lca_s_max_size : '100'
+DEBUG 2021-10-04 14:04:31,637[experiments.py:run_experiment:269]lca_s_min_size : '100'
+DEBUG 2021-10-04 14:04:31,637[experiments.py:run_experiment:269]just_lca : False
+DEBUG 2021-10-04 14:04:31,638[experiments.py:run_experiment:269]f1_sample_type : 's.0'
+DEBUG 2021-10-04 14:04:31,969[provenance_getter.py:gen_provenance_table:65]CREATE VIEW original_pt AS WITH _temp_view_1 AS (
+SELECT /*+ materialize */ 1 AS "AGG_GB_ARG0", F0."season_name" AS "AGG_GB_ARG1", F0."prov_team_team__id" AS "prov_team_team__id", F0."prov_team_team" AS "prov_team_team", F0."prov_game_game__date" AS "prov_game_game__date", F0."prov_game_home__points" AS "prov_game_home__points", F0."prov_game_away__points" AS "prov_game_away__points", F0."prov_game_home__possessions" AS "prov_game_home__possessions", F0."prov_game_away__possessions" AS "prov_game_away__possessions", F0."prov_game_home__id" AS "prov_game_home__id", F0."prov_game_away__id" AS "prov_game_away__id", F0."prov_game_winner__id" AS "prov_game_winner__id", F0."prov_game_season__id" AS "prov_game_season__id", F0."prov_season_season__id" AS "prov_season_season__id", F0."prov_season_season__name" AS "prov_season_season__name", F0."prov_season_season__type" AS "prov_season_season__type"
+FROM (
+SELECT F0."team_id" AS "team_id", F0."team" AS "team", F0."game_date" AS "game_date", F0."home_points" AS "home_points", F0."away_points" AS "away_points", F0."home_possessions" AS "home_possessions", F0."away_possessions" AS "away_possessions", F0."home_id" AS "home_id", F0."away_id" AS "away_id", F0."winner_id" AS "winner_id", F0."season_id" AS "season_id", F1."season_id" AS "season_id1", F1."season_name" AS "season_name", F1."season_type" AS "season_type", F0."prov_team_team__id" AS "prov_team_team__id", F0."prov_team_team" AS "prov_team_team", F0."prov_game_game__date" AS "prov_game_game__date", F0."prov_game_home__points" AS "prov_game_home__points", F0."prov_game_away__points" AS "prov_game_away__points", F0."prov_game_home__possessions" AS "prov_game_home__possessions", F0."prov_game_away__possessions" AS "prov_game_away__possessions", F0."prov_game_home__id" AS "prov_game_home__id", F0."prov_game_away__id" AS "prov_game_away__id", F0."prov_game_winner__id" AS "prov_game_winner__id", F0."prov_game_season__id" AS "prov_game_season__id", F1."prov_season_season__id" AS "prov_season_season__id", F1."prov_season_season__name" AS "prov_season_season__name", F1."prov_season_season__type" AS "prov_season_season__type"
+FROM ((
+SELECT F0."team_id" AS "team_id", F0."team" AS "team", F1."game_date" AS "game_date", F1."home_points" AS "home_points", F1."away_points" AS "away_points", F1."home_possessions" AS "home_possessions", F1."away_possessions" AS "away_possessions", F1."home_id" AS "home_id", F1."away_id" AS "away_id", F1."winner_id" AS "winner_id", F1."season_id" AS "season_id", F0."prov_team_team__id" AS "prov_team_team__id", F0."prov_team_team" AS "prov_team_team", F1."prov_game_game__date" AS "prov_game_game__date", F1."prov_game_home__points" AS "prov_game_home__points", F1."prov_game_away__points" AS "prov_game_away__points", F1."prov_game_home__possessions" AS "prov_game_home__possessions", F1."prov_game_away__possessions" AS "prov_game_away__possessions", F1."prov_game_home__id" AS "prov_game_home__id", F1."prov_game_away__id" AS "prov_game_away__id", F1."prov_game_winner__id" AS "prov_game_winner__id", F1."prov_game_season__id" AS "prov_game_season__id"
+FROM ((
+SELECT F0."team_id" AS "team_id", F0."team" AS "team", F0."team_id" AS "prov_team_team__id", F0."team" AS "prov_team_team"
+FROM "team" AS F0) F0 CROSS JOIN (
+SELECT F0."game_date" AS "game_date", F0."home_points" AS "home_points", F0."away_points" AS "away_points", F0."home_possessions" AS "home_possessions", F0."away_possessions" AS "away_possessions", F0."home_id" AS "home_id", F0."away_id" AS "away_id", F0."winner_id" AS "winner_id", F0."season_id" AS "season_id", F0."game_date" AS "prov_game_game__date", F0."home_points" AS "prov_game_home__points", F0."away_points" AS "prov_game_away__points", F0."home_possessions" AS "prov_game_home__possessions", F0."away_possessions" AS "prov_game_away__possessions", F0."home_id" AS "prov_game_home__id", F0."away_id" AS "prov_game_away__id", F0."winner_id" AS "prov_game_winner__id", F0."season_id" AS "prov_game_season__id"
+FROM "game" AS F0) F1)) F0 CROSS JOIN (
+SELECT F0."season_id" AS "season_id", F0."season_name" AS "season_name", F0."season_type" AS "season_type", F0."season_id" AS "prov_season_season__id", F0."season_name" AS "prov_season_season__name", F0."season_type" AS "prov_season_season__type"
+FROM "season" AS F0) F1)) F0
+WHERE (((F0."team_id" = F0."winner_id") AND (F0."season_id" = F0."season_id1")) AND (F0."team" = 'GSW'))),
+_temp_view_0 AS (
+SELECT /*+ materialize */ F0."AGGR_0" AS "AGGR_0", F0."GROUP_0" AS "GROUP_0", F1."prov_team_team__id" AS "prov_team_team__id", F1."prov_team_team" AS "prov_team_team", F1."prov_game_game__date" AS "prov_game_game__date", F1."prov_game_home__points" AS "prov_game_home__points", F1."prov_game_away__points" AS "prov_game_away__points", F1."prov_game_home__possessions" AS "prov_game_home__possessions", F1."prov_game_away__possessions" AS "prov_game_away__possessions", F1."prov_game_home__id" AS "prov_game_home__id", F1."prov_game_away__id" AS "prov_game_away__id", F1."prov_game_winner__id" AS "prov_game_winner__id", F1."prov_game_season__id" AS "prov_game_season__id", F1."prov_season_season__id" AS "prov_season_season__id", F1."prov_season_season__name" AS "prov_season_season__name", F1."prov_season_season__type" AS "prov_season_season__type"
+FROM ((
+SELECT count(1) AS "AGGR_0", F2."season_name" AS "GROUP_0"
+FROM (("team" AS F0 CROSS JOIN "game" AS F1) CROSS JOIN "season" AS F2)
+WHERE (((F0."team_id" = F1."winner_id") AND (F1."season_id" = F2."season_id")) AND (F0."team" = 'GSW'))
+GROUP BY F2."season_name") F0 JOIN (
+SELECT F0."AGG_GB_ARG1" AS "_P_SIDE_GROUP_0", F0."prov_team_team__id" AS "prov_team_team__id", F0."prov_team_team" AS "prov_team_team", F0."prov_game_game__date" AS "prov_game_game__date", F0."prov_game_home__points" AS "prov_game_home__points", F0."prov_game_away__points" AS "prov_game_away__points", F0."prov_game_home__possessions" AS "prov_game_home__possessions", F0."prov_game_away__possessions" AS "prov_game_away__possessions", F0."prov_game_home__id" AS "prov_game_home__id", F0."prov_game_away__id" AS "prov_game_away__id", F0."prov_game_winner__id" AS "prov_game_winner__id", F0."prov_game_season__id" AS "prov_game_season__id", F0."prov_season_season__id" AS "prov_season_season__id", F0."prov_season_season__name" AS "prov_season_season__name", F0."prov_season_season__type" AS "prov_season_season__type"
+FROM (SELECT * FROM _temp_view_1) F0) F1 ON ((F0."GROUP_0" IS NOT DISTINCT FROM F1."_P_SIDE_GROUP_0"))))
+SELECT F0."AGGR_0" AS "win", F0."GROUP_0" AS "season_name", F0."prov_team_team__id" AS "prov_team_team__id", F0."prov_team_team" AS "prov_team_team", F0."prov_game_game__date" AS "prov_game_game__date", F0."prov_game_home__points" AS "prov_game_home__points", F0."prov_game_away__points" AS "prov_game_away__points", F0."prov_game_home__possessions" AS "prov_game_home__possessions", F0."prov_game_away__possessions" AS "prov_game_away__possessions", F0."prov_game_home__id" AS "prov_game_home__id", F0."prov_game_away__id" AS "prov_game_away__id", F0."prov_game_winner__id" AS "prov_game_winner__id", F0."prov_game_season__id" AS "prov_game_season__id", F0."prov_season_season__id" AS "prov_season_season__id", F0."prov_season_season__name" AS "prov_season_season__name", F0."prov_season_season__type" AS "prov_season_season__type"
+FROM (SELECT * FROM _temp_view_0) F0;
+
+
+;
+DEBUG 2021-10-04 14:04:32,099[experiments.py:run_experiment:294]generate new valid_jgs
+DEBUG 2021-10-04 14:04:32,122[experiments.py:run_experiment:297]Before filtering any, we have 5 valid jgs 
+
+DEBUG 2021-10-04 14:04:32,126[experiments.py:run_experiment:312]DO include high cost jg!!!!!!!!!!!!!
+DEBUG 2021-10-04 14:04:32,126[experiments.py:run_experiment:313]before filtering intermediate, we have 5 jgs
+DEBUG 2021-10-04 14:04:32,126[experiments.py:run_experiment:321]after filtering out intermediate we have 5 valid jgs 
+
+DEBUG 2021-10-04 14:04:32,536[jg_materializer.py:gen_ec:122]['{season_name}', '{win}', '{prov_team_team__id prov_game_winner__id}', "{prov_team_team 'GSW'}", '{prov_game_game__date}', '{prov_game_home__points}', '{prov_game_away__points}', '{prov_game_home__possessions}', '{prov_game_away__possessions}', '{prov_game_home__id}', '{prov_game_away__id}', '{prov_game_season__id prov_season_season__id}', '{prov_season_season__name}', '{prov_season_season__type}']
+DEBUG 2021-10-04 14:04:32,645[jg_materializer.py:gen_ec:122]['{win}', '{season_name}', '{a_1}', '{a_2}', '{a_3}', '{a_4}', '{a_5}', '{a_6}', '{a_7}', '{a_8}', '{a_9}', '{a_10}', '{a_11}', '{a_12}', '{a_13}', '{a_14}', '{pnumber}', '{is_user}']
+DEBUG 2021-10-04 14:04:32,648[jg_materializer.py:non_redundant_check:227][['a_1', 'a_10'], ['a_11', 'a_12']]
+DEBUG 2021-10-04 14:04:32,648[jg_materializer.py:get_col_info:73]a_1
+DEBUG 2021-10-04 14:04:32,650[jg_materializer.py:get_col_info:73]a_10
+DEBUG 2021-10-04 14:04:32,650[jg_materializer.py:get_col_info:73]a_11
+DEBUG 2021-10-04 14:04:32,651[jg_materializer.py:get_col_info:73]a_12
+DEBUG 2021-10-04 14:04:32,715[jg_materializer.py:materialize_jg:323]['(team.team_id)=(PT.winner_id)', {'game': ['winner_id'], 'team': ['team_id']}, 'game']
+DEBUG 2021-10-04 14:04:32,824[jg_materializer.py:gen_ec:122]['{win}', '{season_name}', '{a_1}', '{a_2}', '{a_3}', '{a_4}', '{a_5}', '{a_6}', '{a_7}', '{a_8}', '{a_9}', '{a_10 a_15}', '{a_11}', '{a_12}', '{a_13}', '{a_14}', '{pnumber}', '{is_user}', '{a_16}']
+DEBUG 2021-10-04 14:04:32,826[jg_materializer.py:non_redundant_check:227][['a_1', 'a_10', 'a_15'], ['a_11', 'a_12']]
+DEBUG 2021-10-04 14:04:32,826[jg_materializer.py:get_col_info:73]a_1
+DEBUG 2021-10-04 14:04:32,827[jg_materializer.py:get_col_info:73]a_10
+DEBUG 2021-10-04 14:04:32,827[jg_materializer.py:get_col_info:73]a_15
+DEBUG 2021-10-04 14:04:32,828[jg_materializer.py:get_col_info:73]a_11
+DEBUG 2021-10-04 14:04:32,829[jg_materializer.py:get_col_info:73]a_12
+DEBUG 2021-10-04 14:04:32,863[jg_materializer.py:materialize_jg:323]['(team.team_id)=(PT.home_id)', {'game': ['home_id'], 'team': ['team_id']}, 'game']
+DEBUG 2021-10-04 14:04:32,971[jg_materializer.py:gen_ec:122]['{win}', '{season_name}', '{a_1}', '{a_2}', '{a_3}', '{a_4}', '{a_5}', '{a_6}', '{a_7}', '{a_8 a_15}', '{a_9}', '{a_10}', '{a_11}', '{a_12}', '{a_13}', '{a_14}', '{pnumber}', '{is_user}', '{a_16}']
+DEBUG 2021-10-04 14:04:32,973[jg_materializer.py:non_redundant_check:227][['a_1', 'a_10'], ['a_8', 'a_15'], ['a_11', 'a_12']]
+DEBUG 2021-10-04 14:04:32,974[jg_materializer.py:get_col_info:73]a_1
+DEBUG 2021-10-04 14:04:32,974[jg_materializer.py:get_col_info:73]a_10
+DEBUG 2021-10-04 14:04:32,974[jg_materializer.py:get_col_info:73]a_8
+DEBUG 2021-10-04 14:04:32,975[jg_materializer.py:get_col_info:73]a_15
+DEBUG 2021-10-04 14:04:32,975[jg_materializer.py:get_col_info:73]a_11
+DEBUG 2021-10-04 14:04:32,976[jg_materializer.py:get_col_info:73]a_12
+DEBUG 2021-10-04 14:04:33,010[jg_materializer.py:materialize_jg:323]['(team.team_id)=(PT.away_id)', {'game': ['away_id'], 'team': ['team_id']}, 'game']
+DEBUG 2021-10-04 14:04:33,118[jg_materializer.py:gen_ec:122]['{win}', '{season_name}', '{a_1}', '{a_2}', '{a_3}', '{a_4}', '{a_5}', '{a_6}', '{a_7}', '{a_8}', '{a_9 a_15}', '{a_10}', '{a_11}', '{a_12}', '{a_13}', '{a_14}', '{pnumber}', '{is_user}', '{a_16}']
+DEBUG 2021-10-04 14:04:33,120[jg_materializer.py:non_redundant_check:227][['a_1', 'a_10'], ['a_9', 'a_15'], ['a_11', 'a_12']]
+DEBUG 2021-10-04 14:04:33,121[jg_materializer.py:get_col_info:73]a_1
+DEBUG 2021-10-04 14:04:33,121[jg_materializer.py:get_col_info:73]a_10
+DEBUG 2021-10-04 14:04:33,121[jg_materializer.py:get_col_info:73]a_9
+DEBUG 2021-10-04 14:04:33,122[jg_materializer.py:get_col_info:73]a_15
+DEBUG 2021-10-04 14:04:33,122[jg_materializer.py:get_col_info:73]a_11
+DEBUG 2021-10-04 14:04:33,123[jg_materializer.py:get_col_info:73]a_12
+DEBUG 2021-10-04 14:04:33,157[jg_materializer.py:materialize_jg:323]['(season.season_id)=(PT.season_id)', {'game': ['season_id'], 'season': ['season_id']}, 'game']
+DEBUG 2021-10-04 14:04:33,265[jg_materializer.py:gen_ec:122]['{win}', '{season_name}', '{a_1}', '{a_2}', '{a_3}', '{a_4}', '{a_5}', '{a_6}', '{a_7}', '{a_8}', '{a_9}', '{a_10}', '{a_11 a_17}', '{a_12}', '{a_13}', '{a_14}', '{pnumber}', '{is_user}', '{a_16}']
+DEBUG 2021-10-04 14:04:33,266[jg_materializer.py:non_redundant_check:227][['a_1', 'a_10'], ['a_17', 'a_11', 'a_12']]
+DEBUG 2021-10-04 14:04:33,266[jg_materializer.py:get_col_info:73]a_1
+DEBUG 2021-10-04 14:04:33,266[jg_materializer.py:get_col_info:73]a_10
+DEBUG 2021-10-04 14:04:33,267[jg_materializer.py:get_col_info:73]a_17
+DEBUG 2021-10-04 14:04:33,267[jg_materializer.py:get_col_info:73]a_11
+DEBUG 2021-10-04 14:04:33,267[jg_materializer.py:get_col_info:73]a_12
+DEBUG 2021-10-04 14:04:33,281[experiments.py:run_experiment:337]before filtering redundant, we have 5 jgs
+DEBUG 2021-10-04 14:04:33,281[experiments.py:run_experiment:340]after filtering out redundant we have 5 valid jgs 
+
+DEBUG 2021-10-04 14:04:33,281[experiments.py:run_experiment:342]we found 5 valid join graphs, now materializing and generating patterns
+DEBUG 2021-10-04 14:04:33,282[experiments.py:run_experiment:350]we are on join graph number 1
+DEBUG 2021-10-04 14:04:33,301[pattern_generator.py:gen_patterns:730]{'max_rel_index': 2, 'max_attr_index': 14, 'dtypes': {'win': 'nominal', 'season_name': 'nominal', 'a_1': 'ordinal', 'a_2': 'nominal', 'a_3': 'nominal', 'a_4': 'ordinal', 'a_5': 'ordinal', 'a_6': 'ordinal', 'a_7': 'ordinal', 'a_8': 'ordinal', 'a_9': 'ordinal', 'a_10': 'ordinal', 'a_11': 'ordinal', 'a_12': 'ordinal', 'a_13': 'nominal', 'a_14': 'nominal', 'pnumber': 'nominal', 'is_user': 'nominal'}, 1: {'key': 1, 'label': 'PT', 'columns': {'win': 'win', 'season_name': 'season_name', 'a_1': 'prov_team_team__id', 'a_2': 'prov_team_team', 'a_3': 'prov_game_game__date', 'a_4': 'prov_game_home__points', 'a_5': 'prov_game_away__points', 'a_6': 'prov_game_home__possessions', 'a_7': 'prov_game_away__possessions', 'a_8': 'prov_game_home__id', 'a_9': 'prov_game_away__id', 'a_10': 'prov_game_winner__id', 'a_11': 'prov_game_season__id', 'a_12': 'prov_season_season__id', 'a_13': 'prov_season_season__name', 'a_14': 'prov_season_season__type', 'pnumber': 'pnumber', 'is_user': 'is_user'}, 'renamed_rel': 'A_1', 'rel_min_attr_index': 0, 'rel_max_attr_index': 14}}
+DEBUG 2021-10-04 14:04:33,303[pattern_generator.py:gen_patterns:892]sample size : 100
+DEBUG 2021-10-04 14:04:33,327[pattern_generator.py:gen_patterns:1012]             a_14
+0  regular season
+DEBUG 2021-10-04 14:04:33,352[pattern_generator.py:gen_patterns:1055][{'nominal_values': [['a_14', 'regular season']], 'np_recall': 1.0}]
+DEBUG 2021-10-04 14:04:33,352[pattern_generator.py:gen_patterns:1056]1
+DEBUG 2021-10-04 14:04:33,406[pattern_generator.py:gen_patterns:1167]{0: [['a_4', 0, 0], ['a_5', 0, 0], ['a_6', 0, 0], ['a_7', 0, 0]]}
+DEBUG 2021-10-04 14:04:33,408[pattern_generator.py:gen_patterns:1187]a_5
+DEBUG 2021-10-04 14:04:33,409[pattern_generator.py:gen_patterns:1193]lagrge number of num attrs
+DEBUG 2021-10-04 14:04:33,409[pattern_generator.py:gen_patterns:1194]['a_5']
+DEBUG 2021-10-04 14:04:33,410[pattern_generator.py:gen_patterns:1195]{'a_5': ['a_4', 'a_7', 'a_6']}
+DEBUG 2021-10-04 14:04:33,411[pattern_generator.py:gen_patterns:1207]   a_5
+0   90
+1  107
+2  103
+3  109
+4  110
+DEBUG 2021-10-04 14:04:34,104[experiments.py:run_experiment:350]we are on join graph number 2
+DEBUG 2021-10-04 14:04:34,124[pattern_generator.py:gen_patterns:730]{'max_rel_index': 3, 'max_attr_index': 16, 'dtypes': {'win': 'nominal', 'season_name': 'nominal', 'a_1': 'ordinal', 'a_2': 'nominal', 'a_3': 'nominal', 'a_4': 'ordinal', 'a_5': 'ordinal', 'a_6': 'ordinal', 'a_7': 'ordinal', 'a_8': 'ordinal', 'a_9': 'ordinal', 'a_10': 'ordinal', 'a_11': 'ordinal', 'a_12': 'ordinal', 'a_13': 'nominal', 'a_14': 'nominal', 'pnumber': 'nominal', 'is_user': 'nominal', 'a_15': 'ordinal', 'a_16': 'nominal'}, 1: {'key': 1, 'label': 'PT', 'columns': {'win': 'win', 'season_name': 'season_name', 'a_1': 'prov_team_team__id', 'a_2': 'prov_team_team', 'a_3': 'prov_game_game__date', 'a_4': 'prov_game_home__points', 'a_5': 'prov_game_away__points', 'a_6': 'prov_game_home__possessions', 'a_7': 'prov_game_away__possessions', 'a_8': 'prov_game_home__id', 'a_9': 'prov_game_away__id', 'a_10': 'prov_game_winner__id', 'a_11': 'prov_game_season__id', 'a_12': 'prov_season_season__id', 'a_13': 'prov_season_season__name', 'a_14': 'prov_season_season__type', 'pnumber': 'pnumber', 'is_user': 'is_user'}, 'renamed_rel': 'A_1', 'rel_min_attr_index': 0, 'rel_max_attr_index': 14}, 2: {'key': 2, 'label': 'team', 'columns': {'a_15': 'team_id', 'a_16': 'team'}, 'renamed_rel': 'A_2', 'rel_min_attr_index': 14, 'rel_max_attr_index': 16}}
+DEBUG 2021-10-04 14:04:34,128[pattern_generator.py:gen_patterns:892]sample size : 100
+DEBUG 2021-10-04 14:04:34,179[pattern_generator.py:gen_patterns:1012]             a_14 a_16
+0  regular season  GSW
+DEBUG 2021-10-04 14:04:34,213[pattern_generator.py:gen_patterns:1055][{'nominal_values': [['a_14', 'regular season'], ['a_16', 'GSW']], 'np_recall': 1.0}]
+DEBUG 2021-10-04 14:04:34,213[pattern_generator.py:gen_patterns:1056]1
+DEBUG 2021-10-04 14:04:34,239[pattern_generator.py:gen_patterns:1167]{0: [['a_4', 0, 0], ['a_5', 0, 0], ['a_6', 0, 0], ['a_7', 0, 0]]}
+DEBUG 2021-10-04 14:04:34,240[pattern_generator.py:gen_patterns:1187]a_5
+DEBUG 2021-10-04 14:04:34,240[pattern_generator.py:gen_patterns:1193]lagrge number of num attrs
+DEBUG 2021-10-04 14:04:34,240[pattern_generator.py:gen_patterns:1194]['a_5']
+DEBUG 2021-10-04 14:04:34,240[pattern_generator.py:gen_patterns:1195]{'a_5': ['a_4', 'a_7', 'a_6']}
+DEBUG 2021-10-04 14:04:34,241[pattern_generator.py:gen_patterns:1207]   a_5
+0  107
+1  101
+2  124
+3   63
+4  115
+DEBUG 2021-10-04 14:04:34,849[experiments.py:run_experiment:350]we are on join graph number 3
+DEBUG 2021-10-04 14:04:34,866[pattern_generator.py:gen_patterns:730]{'max_rel_index': 3, 'max_attr_index': 16, 'dtypes': {'win': 'nominal', 'season_name': 'nominal', 'a_1': 'ordinal', 'a_2': 'nominal', 'a_3': 'nominal', 'a_4': 'ordinal', 'a_5': 'ordinal', 'a_6': 'ordinal', 'a_7': 'ordinal', 'a_8': 'ordinal', 'a_9': 'ordinal', 'a_10': 'ordinal', 'a_11': 'ordinal', 'a_12': 'ordinal', 'a_13': 'nominal', 'a_14': 'nominal', 'pnumber': 'nominal', 'is_user': 'nominal', 'a_15': 'ordinal', 'a_16': 'nominal'}, 1: {'key': 1, 'label': 'PT', 'columns': {'win': 'win', 'season_name': 'season_name', 'a_1': 'prov_team_team__id', 'a_2': 'prov_team_team', 'a_3': 'prov_game_game__date', 'a_4': 'prov_game_home__points', 'a_5': 'prov_game_away__points', 'a_6': 'prov_game_home__possessions', 'a_7': 'prov_game_away__possessions', 'a_8': 'prov_game_home__id', 'a_9': 'prov_game_away__id', 'a_10': 'prov_game_winner__id', 'a_11': 'prov_game_season__id', 'a_12': 'prov_season_season__id', 'a_13': 'prov_season_season__name', 'a_14': 'prov_season_season__type', 'pnumber': 'pnumber', 'is_user': 'is_user'}, 'renamed_rel': 'A_1', 'rel_min_attr_index': 0, 'rel_max_attr_index': 14}, 2: {'key': 2, 'label': 'team', 'columns': {'a_15': 'team_id', 'a_16': 'team'}, 'renamed_rel': 'A_2', 'rel_min_attr_index': 14, 'rel_max_attr_index': 16}}
+DEBUG 2021-10-04 14:04:34,867[pattern_generator.py:gen_patterns:892]sample size : 100
+DEBUG 2021-10-04 14:04:34,903[pattern_generator.py:gen_patterns:1012]              a_14  a_16
+0   regular season  None
+1   regular season   GSW
+2   regular season   LAC
+3   regular season   UTA
+4   regular season   MIN
+5   regular season   PHX
+6   regular season   HOU
+7   regular season   NOP
+8   regular season   ATL
+9   regular season   POR
+10  regular season   MIA
+11  regular season   SAC
+12  regular season   DAL
+13  regular season   TOR
+14  regular season   WAS
+15  regular season   CLE
+16  regular season   MEM
+17  regular season   BKN
+18  regular season   CHI
+19  regular season   DEN
+20  regular season   DET
+21  regular season   PHI
+22  regular season   ORL
+23  regular season   OKC
+24  regular season   LAL
+25  regular season   SAS
+DEBUG 2021-10-04 14:04:34,946[pattern_generator.py:gen_patterns:1055][{'nominal_values': [['a_14', 'regular season']], 'np_recall': 1.0}, {'nominal_values': [['a_14', 'regular season'], ['a_16', 'GSW']], 'np_recall': 0.5583333333333333}]
+DEBUG 2021-10-04 14:04:34,947[pattern_generator.py:gen_patterns:1056]2
+DEBUG 2021-10-04 14:04:34,969[pattern_generator.py:gen_patterns:1167]{0: [['a_4', 0, 0], ['a_5', 0, 0], ['a_6', 0, 0], ['a_7', 0, 0]]}
+DEBUG 2021-10-04 14:04:34,970[pattern_generator.py:gen_patterns:1187]a_5
+DEBUG 2021-10-04 14:04:34,970[pattern_generator.py:gen_patterns:1193]lagrge number of num attrs
+DEBUG 2021-10-04 14:04:34,970[pattern_generator.py:gen_patterns:1194]['a_5']
+DEBUG 2021-10-04 14:04:34,970[pattern_generator.py:gen_patterns:1195]{'a_5': ['a_4', 'a_7', 'a_6']}
+DEBUG 2021-10-04 14:04:34,970[pattern_generator.py:gen_patterns:1207]   a_5
+0  109
+1  131
+2  130
+3   85
+4  108
+DEBUG 2021-10-04 14:04:35,560[experiments.py:run_experiment:350]we are on join graph number 4
+DEBUG 2021-10-04 14:04:35,577[pattern_generator.py:gen_patterns:730]{'max_rel_index': 3, 'max_attr_index': 16, 'dtypes': {'win': 'nominal', 'season_name': 'nominal', 'a_1': 'ordinal', 'a_2': 'nominal', 'a_3': 'nominal', 'a_4': 'ordinal', 'a_5': 'ordinal', 'a_6': 'ordinal', 'a_7': 'ordinal', 'a_8': 'ordinal', 'a_9': 'ordinal', 'a_10': 'ordinal', 'a_11': 'ordinal', 'a_12': 'ordinal', 'a_13': 'nominal', 'a_14': 'nominal', 'pnumber': 'nominal', 'is_user': 'nominal', 'a_15': 'ordinal', 'a_16': 'nominal'}, 1: {'key': 1, 'label': 'PT', 'columns': {'win': 'win', 'season_name': 'season_name', 'a_1': 'prov_team_team__id', 'a_2': 'prov_team_team', 'a_3': 'prov_game_game__date', 'a_4': 'prov_game_home__points', 'a_5': 'prov_game_away__points', 'a_6': 'prov_game_home__possessions', 'a_7': 'prov_game_away__possessions', 'a_8': 'prov_game_home__id', 'a_9': 'prov_game_away__id', 'a_10': 'prov_game_winner__id', 'a_11': 'prov_game_season__id', 'a_12': 'prov_season_season__id', 'a_13': 'prov_season_season__name', 'a_14': 'prov_season_season__type', 'pnumber': 'pnumber', 'is_user': 'is_user'}, 'renamed_rel': 'A_1', 'rel_min_attr_index': 0, 'rel_max_attr_index': 14}, 2: {'key': 2, 'label': 'team', 'columns': {'a_15': 'team_id', 'a_16': 'team'}, 'renamed_rel': 'A_2', 'rel_min_attr_index': 14, 'rel_max_attr_index': 16}}
+DEBUG 2021-10-04 14:04:35,581[pattern_generator.py:gen_patterns:892]sample size : 100
+DEBUG 2021-10-04 14:04:35,627[pattern_generator.py:gen_patterns:1012]              a_14  a_16
+0   regular season  None
+1   regular season   GSW
+2   regular season   POR
+3   regular season   SAS
+4   regular season   LAC
+5   regular season   DEN
+6   regular season   OKC
+7   regular season   NOP
+8   regular season   DAL
+9   regular season   PHX
+10  regular season   LAL
+11  regular season   PHI
+12  regular season   NYK
+13  regular season   TOR
+14  regular season   WAS
+15  regular season   CHA
+16  regular season   CLE
+17  regular season   MIN
+18  regular season   ATL
+19  regular season   BKN
+20  regular season   SAC
+21  regular season   IND
+22  regular season   MEM
+23  regular season   UTA
+24  regular season   MIL
+25  regular season   CHI
+26  regular season   BOS
+27  regular season   DET
+DEBUG 2021-10-04 14:04:35,670[pattern_generator.py:gen_patterns:1055][{'nominal_values': [['a_14', 'regular season']], 'np_recall': 1.0}, {'nominal_values': [['a_14', 'regular season'], ['a_16', 'GSW']], 'np_recall': 0.44166666666666665}]
+DEBUG 2021-10-04 14:04:35,671[pattern_generator.py:gen_patterns:1056]2
+DEBUG 2021-10-04 14:04:35,693[pattern_generator.py:gen_patterns:1167]{0: [['a_4', 0, 0], ['a_5', 0, 0], ['a_6', 0, 0], ['a_7', 0, 0]]}
+DEBUG 2021-10-04 14:04:35,693[pattern_generator.py:gen_patterns:1187]a_5
+DEBUG 2021-10-04 14:04:35,694[pattern_generator.py:gen_patterns:1193]lagrge number of num attrs
+DEBUG 2021-10-04 14:04:35,694[pattern_generator.py:gen_patterns:1194]['a_5']
+DEBUG 2021-10-04 14:04:35,694[pattern_generator.py:gen_patterns:1195]{'a_5': ['a_4', 'a_7', 'a_6']}
+DEBUG 2021-10-04 14:04:35,695[pattern_generator.py:gen_patterns:1207]   a_5
+0   92
+1  116
+2   85
+3   88
+4  130
+DEBUG 2021-10-04 14:04:36,289[experiments.py:run_experiment:350]we are on join graph number 5
+DEBUG 2021-10-04 14:04:36,307[pattern_generator.py:gen_patterns:730]{'max_rel_index': 3, 'max_attr_index': 17, 'dtypes': {'win': 'nominal', 'season_name': 'nominal', 'a_1': 'ordinal', 'a_2': 'nominal', 'a_3': 'nominal', 'a_4': 'ordinal', 'a_5': 'ordinal', 'a_6': 'ordinal', 'a_7': 'ordinal', 'a_8': 'ordinal', 'a_9': 'ordinal', 'a_10': 'ordinal', 'a_11': 'ordinal', 'a_12': 'ordinal', 'a_13': 'nominal', 'a_14': 'nominal', 'pnumber': 'nominal', 'is_user': 'nominal', 'a_15': 'nominal', 'a_16': 'nominal', 'a_17': 'ordinal'}, 1: {'key': 1, 'label': 'PT', 'columns': {'win': 'win', 'season_name': 'season_name', 'a_1': 'prov_team_team__id', 'a_2': 'prov_team_team', 'a_3': 'prov_game_game__date', 'a_4': 'prov_game_home__points', 'a_5': 'prov_game_away__points', 'a_6': 'prov_game_home__possessions', 'a_7': 'prov_game_away__possessions', 'a_8': 'prov_game_home__id', 'a_9': 'prov_game_away__id', 'a_10': 'prov_game_winner__id', 'a_11': 'prov_game_season__id', 'a_12': 'prov_season_season__id', 'a_13': 'prov_season_season__name', 'a_14': 'prov_season_season__type', 'pnumber': 'pnumber', 'is_user': 'is_user'}, 'renamed_rel': 'A_1', 'rel_min_attr_index': 0, 'rel_max_attr_index': 14}, 2: {'key': 2, 'label': 'season', 'columns': {'a_15': 'season_name', 'a_16': 'season_type', 'a_17': 'season_id'}, 'renamed_rel': 'A_2', 'rel_min_attr_index': 14, 'rel_max_attr_index': 17}}
+DEBUG 2021-10-04 14:04:36,309[pattern_generator.py:gen_patterns:892]sample size : 100
+DEBUG 2021-10-04 14:04:36,345[pattern_generator.py:gen_patterns:1012]             a_14     a_15            a_16
+0  regular season     None  regular season
+1  regular season  2015-16  regular season
+2  regular season  2012-13  regular season
+DEBUG 2021-10-04 14:04:36,368[pattern_generator.py:gen_patterns:1055][{'nominal_values': [['a_14', 'regular season'], ['a_16', 'regular season']], 'np_recall': 1.0}, {'nominal_values': [['a_14', 'regular season'], ['a_15', '2015-16'], ['a_16', 'regular season']], 'np_recall': 0.6083333333333333}, {'nominal_values': [['a_14', 'regular season'], ['a_15', '2012-13'], ['a_16', 'regular season']], 'np_recall': 0.39166666666666666}]
+DEBUG 2021-10-04 14:04:36,368[pattern_generator.py:gen_patterns:1056]3
+DEBUG 2021-10-04 14:04:36,391[pattern_generator.py:gen_patterns:1167]{0: [['a_4', 0, 0], ['a_5', 0, 0], ['a_6', 0, 0], ['a_7', 0, 0]]}
+DEBUG 2021-10-04 14:04:36,391[pattern_generator.py:gen_patterns:1187]a_5
+DEBUG 2021-10-04 14:04:36,392[pattern_generator.py:gen_patterns:1193]lagrge number of num attrs
+DEBUG 2021-10-04 14:04:36,392[pattern_generator.py:gen_patterns:1194]['a_5']
+DEBUG 2021-10-04 14:04:36,392[pattern_generator.py:gen_patterns:1195]{'a_5': ['a_4', 'a_7', 'a_6']}
+DEBUG 2021-10-04 14:04:36,393[pattern_generator.py:gen_patterns:1207]   a_5
+0  104
+1  106
+2  132
+3   89
+4  114
+DEBUG 2021-10-04 14:04:37,030[experiments.py:run_experiment:476]total number of patterns 83
+ERROR 2021-10-04 14:04:37,076[app.py:log_exception:1454]Exception on /explanation [EXP]
+Traceback (most recent call last):
+  File "/home/juseung/cajade/lib/python3.8/site-packages/flask/app.py", line 2070, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/juseung/cajade/lib/python3.8/site-packages/flask/app.py", line 1515, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/juseung/cajade/lib/python3.8/site-packages/flask/app.py", line 1513, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/juseung/cajade/lib/python3.8/site-packages/flask/app.py", line 1499, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**req.view_args)
+  File "/home/juseung/CaJaDe/demo/app.py", line 206, in explanation
+    globals()['cursor'].execute(query2)
+psycopg2.InterfaceError: cursor already closed
+INFO 2021-10-04 14:04:37,081[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:04:37] "[35m[1mEXP /explanation HTTP/1.1[0m" 500 -
+INFO 2021-10-04 14:12:18,096[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 14:12:21,683[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:12:21] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 14:12:21,743[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:12:21] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 14:12:21,876[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:12:21] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+INFO 2021-10-04 14:14:53,807[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 14:14:55,308[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:14:55] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 14:14:55,367[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:14:55] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 14:15:08,934[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 14:15:10,533[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:15:10] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 14:15:10,596[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:15:10] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 14:17:45,267[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 14:17:46,952[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:17:46] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 14:17:47,086[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:17:47] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 14:18:50,875[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 14:18:52,322[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:18:52] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 14:18:52,418[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:18:52] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 14:19:09,435[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 14:19:10,894[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:19:10] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 14:19:10,957[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:19:10] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 14:20:49,705[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 14:20:51,190[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:20:51] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 14:20:51,275[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:20:51] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 14:21:24,328[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 14:21:25,959[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:21:25] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 14:21:26,065[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:21:26] "[36mGET /static/main.css HTTP/1.1[0m" 304 -
+INFO 2021-10-04 14:25:52,889[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 14:25:54,456[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:25:54] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 14:25:54,525[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:25:54] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 14:29:21,905[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 14:29:24,154[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:29:24] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 14:29:24,243[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:29:24] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 14:30:01,683[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 14:30:03,023[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:30:03] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 14:30:03,117[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:30:03] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 14:30:22,429[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 14:30:23,775[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:30:23] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 14:30:23,828[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:30:23] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 14:31:17,186[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 14:31:18,823[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:31:18] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 14:31:18,984[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:31:18] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 14:32:10,877[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 14:32:12,317[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:32:12] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 14:32:12,423[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:32:12] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 14:36:44,127[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 14:36:45,904[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:36:45] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 14:36:45,994[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:36:45] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 14:37:39,075[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 14:37:40,408[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:37:40] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 14:37:40,550[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:37:40] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 14:38:12,801[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 14:38:14,201[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:38:14] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 14:38:14,271[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:38:14] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 14:39:54,307[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 14:39:56,041[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:39:56] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 14:39:56,197[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:39:56] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 14:40:37,087[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 14:40:40,634[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:40:40] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 14:40:40,731[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:40:40] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 14:40:59,067[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:40:59] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 14:50:00,884[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 14:50:02,428[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:50:02] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 14:50:02,565[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:50:02] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 14:50:51,122[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 14:50:52,515[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:50:52] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 14:50:52,633[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:50:52] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 14:53:42,106[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 14:53:43,532[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:53:43] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 14:53:43,636[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:53:43] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 14:55:03,196[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 14:55:04,514[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:55:04] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 14:55:04,606[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:55:04] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 14:55:13,747[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 14:55:15,462[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:55:15] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 14:55:15,568[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:55:15] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 14:58:35,422[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 14:58:36,755[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:58:36] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 14:58:36,889[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 14:58:36] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 16:43:40,122[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 16:43:42,483[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 16:43:42] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 16:43:42,573[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 16:43:42] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 16:43:42,797[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 16:43:42] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+INFO 2021-10-04 19:14:48,556[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 19:14:50,533[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 19:14:50] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 19:14:50,605[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 19:14:50] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 19:14:50,749[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 19:14:50] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+INFO 2021-10-04 19:15:53,307[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 19:15:56,815[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 19:15:56] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 19:15:56,873[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 19:15:56] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 19:19:07,707[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 19:19:09,380[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 19:19:09] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 19:19:09,480[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 19:19:09] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 19:22:11,583[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 19:22:13,329[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 19:22:13] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 19:22:13,389[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 19:22:13] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 19:22:42,037[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 19:22:43,664[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 19:22:43] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 19:22:43,751[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 19:22:43] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 19:23:18,190[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 19:23:20,056[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 19:23:20] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 19:23:20,144[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 19:23:20] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 19:24:28,307[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 19:24:29,758[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 19:24:29] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 19:24:29,856[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 19:24:29] "[36mGET /static/main.css HTTP/1.1[0m" 304 -
+INFO 2021-10-04 19:25:38,189[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 19:25:39,774[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 19:25:39] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 19:25:39,879[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 19:25:39] "[36mGET /static/main.css HTTP/1.1[0m" 304 -
+INFO 2021-10-04 19:26:08,937[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 19:26:10,226[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 19:26:10] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 19:26:10,328[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 19:26:10] "[36mGET /static/main.css HTTP/1.1[0m" 304 -
+INFO 2021-10-04 19:26:22,531[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 19:26:23,699[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 19:26:23] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 19:26:23,776[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 19:26:23] "[36mGET /static/main.css HTTP/1.1[0m" 304 -
+INFO 2021-10-04 19:27:59,580[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 19:28:01,004[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 19:28:01] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 19:28:01,091[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 19:28:01] "[36mGET /static/main.css HTTP/1.1[0m" 304 -
+INFO 2021-10-04 19:28:49,378[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 19:28:50,817[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 19:28:50] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 19:28:50,926[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 19:28:50] "[36mGET /static/main.css HTTP/1.1[0m" 304 -
+INFO 2021-10-04 19:29:01,287[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 19:29:01] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 19:47:37,303[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 19:47:38,793[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 19:47:38] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 19:47:38,857[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 19:47:38] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 19:49:49,325[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 19:49:50,737[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 19:49:50] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 19:49:50,821[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 19:49:50] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 19:50:43,918[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 19:50:45,330[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 19:50:45] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 19:50:45,461[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 19:50:45] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 19:51:49,130[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 19:51:50,792[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 19:51:50] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 19:51:50,897[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 19:51:50] "[36mGET /static/main.css HTTP/1.1[0m" 304 -
+INFO 2021-10-04 19:52:17,035[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 19:52:18,535[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 19:52:18] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 19:52:18,633[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 19:52:18] "[36mGET /static/main.css HTTP/1.1[0m" 304 -
+INFO 2021-10-04 19:53:33,517[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 19:53:35,273[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 19:53:35] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 19:53:35,352[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 19:53:35] "[36mGET /static/main.css HTTP/1.1[0m" 304 -
+INFO 2021-10-04 19:58:44,405[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 19:58:45,918[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 19:58:45] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 19:58:45,991[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 19:58:45] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 20:06:32,744[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 20:06:34,498[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:06:34] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 20:06:34,575[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:06:34] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 20:06:34,649[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:06:34] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+INFO 2021-10-04 20:07:19,046[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 20:07:21,068[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:07:21] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 20:07:21,136[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:07:21] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 20:07:41,246[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 20:07:42,822[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:07:42] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 20:07:42,976[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:07:42] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 20:07:58,566[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 20:08:00,010[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:08:00] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 20:08:00,111[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:08:00] "[36mGET /static/main.css HTTP/1.1[0m" 304 -
+INFO 2021-10-04 20:08:32,909[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 20:08:34,653[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:08:34] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 20:08:34,725[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:08:34] "[36mGET /static/main.css HTTP/1.1[0m" 304 -
+INFO 2021-10-04 20:08:48,467[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 20:08:49,871[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:08:49] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 20:08:49,971[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:08:49] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 20:09:03,729[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 20:09:05,413[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:09:05] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 20:09:05,492[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:09:05] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 20:09:25,869[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 20:09:27,370[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:09:27] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 20:09:27,452[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:09:27] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 20:09:39,644[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 20:09:40,873[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:09:40] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 20:09:40,957[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:09:40] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 20:10:04,717[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:10:04] "POST /db/ HTTP/1.1" 200 -
+INFO 2021-10-04 20:10:04,751[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:10:04] "[36mGET /static/main.css HTTP/1.1[0m" 304 -
+DEBUG 2021-10-04 20:10:09,446[app.py:ajax:123]
+  SELECT *    FROM team         
+INFO 2021-10-04 20:10:09,447[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:10:09] "POST /ajax HTTP/1.1" 200 -
+INFO 2021-10-04 20:10:19,533[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 20:10:20,863[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:10:20] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 20:10:20,952[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:10:20] "GET /static/main.css HTTP/1.1" 200 -
+DEBUG 2021-10-04 20:10:30,415[app.py:ajax:123]
+  SELECT *    FROM team         
+ERROR 2021-10-04 20:10:30,416[app.py:log_exception:1454]Exception on /ajax [POST]
+Traceback (most recent call last):
+  File "/home/juseung/cajade/lib/python3.8/site-packages/flask/app.py", line 2070, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/juseung/cajade/lib/python3.8/site-packages/flask/app.py", line 1515, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/juseung/cajade/lib/python3.8/site-packages/flask/app.py", line 1513, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/juseung/cajade/lib/python3.8/site-packages/flask/app.py", line 1499, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**req.view_args)
+  File "/home/juseung/CaJaDe/demo/app.py", line 124, in ajax
+    cursor.execute(query)
+NameError: name 'cursor' is not defined
+INFO 2021-10-04 20:10:30,426[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:10:30] "[35m[1mPOST /ajax HTTP/1.1[0m" 500 -
+INFO 2021-10-04 20:10:41,132[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:10:41] "POST /db/ HTTP/1.1" 200 -
+INFO 2021-10-04 20:10:41,170[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:10:41] "[36mGET /static/main.css HTTP/1.1[0m" 304 -
+DEBUG 2021-10-04 20:10:46,922[app.py:ajax:123]
+  SELECT *    FROM game         
+INFO 2021-10-04 20:10:47,039[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:10:47] "POST /ajax HTTP/1.1" 200 -
+INFO 2021-10-04 20:11:18,449[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 20:11:20,292[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:11:20] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 20:11:20,385[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:11:20] "[36mGET /static/main.css HTTP/1.1[0m" 304 -
+ERROR 2021-10-04 20:11:36,178[app.py:log_exception:1454]Exception on /db/ [GET]
+Traceback (most recent call last):
+  File "/home/juseung/cajade/lib/python3.8/site-packages/flask/app.py", line 2070, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/juseung/cajade/lib/python3.8/site-packages/flask/app.py", line 1515, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/juseung/cajade/lib/python3.8/site-packages/flask/app.py", line 1513, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/juseung/cajade/lib/python3.8/site-packages/flask/app.py", line 1499, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**req.view_args)
+  File "/home/juseung/CaJaDe/demo/app.py", line 97, in db_connect
+    db_connection_info=info,
+NameError: name 'info' is not defined
+INFO 2021-10-04 20:11:36,180[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:11:36] "[35m[1mGET /db/ HTTP/1.1[0m" 500 -
+INFO 2021-10-04 20:12:07,370[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 20:12:09,136[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:12:09] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 20:12:09,235[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:12:09] "[36mGET /static/main.css HTTP/1.1[0m" 304 -
+INFO 2021-10-04 20:12:27,426[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 20:12:28,757[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:12:28] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 20:12:28,852[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:12:28] "[36mGET /static/main.css HTTP/1.1[0m" 304 -
+INFO 2021-10-04 20:12:47,893[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 20:12:49,125[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:12:49] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 20:12:49,218[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:12:49] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 20:13:03,880[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 20:13:05,236[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:13:05] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 20:13:05,348[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:13:05] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 20:13:12,170[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 20:13:13,344[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:13:13] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 20:13:13,443[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:13:13] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 20:15:33,439[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:15:33] "POST /db/ HTTP/1.1" 200 -
+INFO 2021-10-04 20:15:33,482[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:15:33] "[36mGET /static/main.css HTTP/1.1[0m" 304 -
+DEBUG 2021-10-04 20:15:38,272[app.py:ajax:123]
+  SELECT *    FROM team         
+INFO 2021-10-04 20:15:38,274[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:15:38] "POST /ajax HTTP/1.1" 200 -
+INFO 2021-10-04 20:16:10,109[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 20:16:12,713[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:16:12] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 20:16:12,843[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:16:12] "[36mGET /static/main.css HTTP/1.1[0m" 304 -
+INFO 2021-10-04 20:16:24,034[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:16:24] "POST /db/ HTTP/1.1" 200 -
+INFO 2021-10-04 20:16:24,060[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:16:24] "[36mGET /static/main.css HTTP/1.1[0m" 304 -
+DEBUG 2021-10-04 20:16:29,188[app.py:ajax:123]
+  SELECT *    FROM team         
+INFO 2021-10-04 20:16:29,190[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:16:29] "POST /ajax HTTP/1.1" 200 -
+INFO 2021-10-04 20:16:37,387[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:16:37] "GET /db/ HTTP/1.1" 200 -
+INFO 2021-10-04 20:17:17,362[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 20:17:18,865[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:17:18] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 20:17:18,987[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:17:18] "[36mGET /static/main.css HTTP/1.1[0m" 304 -
+INFO 2021-10-04 20:17:22,965[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:17:22] "POST /db/ HTTP/1.1" 200 -
+INFO 2021-10-04 20:17:23,002[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:17:23] "[36mGET /static/main.css HTTP/1.1[0m" 304 -
+DEBUG 2021-10-04 20:17:26,137[app.py:ajax:123]
+  SELECT *    FROM team         
+INFO 2021-10-04 20:17:26,139[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:17:26] "POST /ajax HTTP/1.1" 200 -
+INFO 2021-10-04 20:17:45,816[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 20:17:47,403[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:17:47] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 20:17:47,500[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:17:47] "[36mGET /static/main.css HTTP/1.1[0m" 304 -
+INFO 2021-10-04 20:17:53,447[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:17:53] "POST /db/ HTTP/1.1" 200 -
+INFO 2021-10-04 20:17:53,505[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:17:53] "[36mGET /static/main.css HTTP/1.1[0m" 304 -
+DEBUG 2021-10-04 20:17:57,039[app.py:ajax:123]
+  SELECT *    FROM team         
+INFO 2021-10-04 20:17:57,040[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:17:57] "POST /ajax HTTP/1.1" 200 -
+INFO 2021-10-04 20:18:50,789[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 20:18:52,208[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:18:52] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 20:18:52,260[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:18:52] "[36mGET /static/main.css HTTP/1.1[0m" 304 -
+INFO 2021-10-04 20:19:04,301[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:19:04] "POST /db/ HTTP/1.1" 200 -
+INFO 2021-10-04 20:19:04,336[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:19:04] "[36mGET /static/main.css HTTP/1.1[0m" 304 -
+DEBUG 2021-10-04 20:19:07,356[app.py:ajax:123]
+  SELECT *    FROM team         
+INFO 2021-10-04 20:19:07,357[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:19:07] "POST /ajax HTTP/1.1" 200 -
+INFO 2021-10-04 20:19:20,076[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 20:19:21,373[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:19:21] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 20:19:21,471[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:19:21] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 20:19:28,373[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 20:19:29,637[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:19:29] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 20:19:29,746[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:19:29] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 20:19:37,333[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 20:19:38,586[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:19:38] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 20:19:38,699[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:19:38] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 20:19:50,847[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 20:19:52,191[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:19:52] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 20:19:52,296[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:19:52] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 20:19:58,180[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 20:19:59,566[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:19:59] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 20:19:59,657[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:19:59] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 20:20:18,553[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:20:18] "POST /db/ HTTP/1.1" 200 -
+INFO 2021-10-04 20:20:18,658[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:20:18] "[36mGET /static/main.css HTTP/1.1[0m" 304 -
+DEBUG 2021-10-04 20:20:22,373[app.py:ajax:123]
+  SELECT *    FROM team         
+INFO 2021-10-04 20:20:22,376[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:20:22] "POST /ajax HTTP/1.1" 200 -
+INFO 2021-10-04 20:20:42,003[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 20:20:43,284[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:20:43] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 20:20:43,364[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:20:43] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 20:20:51,106[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 20:20:52,387[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:20:52] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 20:20:52,488[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:20:52] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 20:21:08,174[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 20:21:10,221[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:21:10] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 20:21:10,287[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:21:10] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 20:28:00,301[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 20:28:02,501[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:28:02] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 20:28:02,613[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:28:02] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 20:35:47,637[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 20:35:49,157[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:35:49] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 20:35:49,226[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:35:49] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 20:36:57,187[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 20:36:58,622[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:36:58] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 20:36:58,686[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:36:58] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 20:37:10,995[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 20:37:12,546[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:37:12] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 20:37:12,634[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:37:12] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 20:37:19,662[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 20:37:21,064[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:37:21] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 20:37:21,157[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:37:21] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 20:37:28,622[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 20:37:30,190[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:37:30] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 20:37:30,261[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:37:30] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 20:39:30,246[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 20:39:32,198[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:39:32] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 20:39:32,264[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:39:32] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 20:40:21,189[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 20:40:22,598[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:40:22] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 20:40:22,702[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:40:22] "[36mGET /static/main.css HTTP/1.1[0m" 304 -
+INFO 2021-10-04 20:40:34,944[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 20:40:36,549[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:40:36] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 20:40:36,615[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:40:36] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 20:40:45,255[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 20:40:46,498[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:40:46] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 20:40:46,598[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:40:46] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 20:41:00,046[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:41:00] "POST /db/ HTTP/1.1" 200 -
+INFO 2021-10-04 20:41:00,095[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:41:00] "[36mGET /static/main.css HTTP/1.1[0m" 304 -
+DEBUG 2021-10-04 20:41:03,484[app.py:ajax:123]
+  SELECT *    FROM team         
+INFO 2021-10-04 20:41:03,485[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:41:03] "POST /ajax HTTP/1.1" 200 -
+INFO 2021-10-04 20:41:39,942[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 20:41:41,267[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:41:41] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 20:41:41,355[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:41:41] "GET /static/main.css HTTP/1.1" 200 -
+INFO 2021-10-04 20:41:45,659[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:41:45] "POST /db/ HTTP/1.1" 200 -
+INFO 2021-10-04 20:41:45,696[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:41:45] "[36mGET /static/main.css HTTP/1.1[0m" 304 -
+DEBUG 2021-10-04 20:41:48,635[app.py:ajax:123]
+  SELECT *    FROM team         
+INFO 2021-10-04 20:41:48,637[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:41:48] "POST /ajax HTTP/1.1" 200 -
+INFO 2021-10-04 20:42:05,803[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 20:42:07,481[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:42:07] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 20:42:07,571[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:42:07] "[36mGET /static/main.css HTTP/1.1[0m" 304 -
+INFO 2021-10-04 20:42:17,395[_internal.py:_log:225] * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO 2021-10-04 20:42:18,632[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:42:18] "GET / HTTP/1.1" 200 -
+INFO 2021-10-04 20:42:18,714[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:42:18] "[36mGET /static/main.css HTTP/1.1[0m" 304 -
+INFO 2021-10-04 20:42:22,696[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:42:22] "POST /db/ HTTP/1.1" 200 -
+INFO 2021-10-04 20:42:22,737[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:42:22] "[36mGET /static/main.css HTTP/1.1[0m" 304 -
+DEBUG 2021-10-04 20:42:26,163[app.py:ajax:123]
+  SELECT *    FROM team         
+INFO 2021-10-04 20:42:26,164[_internal.py:_log:225]127.0.0.1 - - [04/Oct/2021 20:42:26] "POST /ajax HTTP/1.1" 200 -

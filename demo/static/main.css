@@ -23,9 +23,19 @@ svg {
     background-color: white;
     border: 5px solid black;
 }
+.input-group1{
+  display: inline;
+}
+.input-group2{
+  display: inline;
+}
 
 .input-group-run {
-	width: 10%;
+	width: 28%;
+}
+
+.form-control{
+  font-size: 15px;
 }
 
 body::-webkit-scrollbar{
