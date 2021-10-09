@@ -1,26 +1,31 @@
-from sg_generator import Schema_Graph_Generator
+from src.provenance_getter import provenance_getter
+from src.gprom_wrapper import  GProMWrapper
+from src.jg_generator import Join_Graph_Generator
+from src.jg_materializer import Join_Graph_Materializer
+from src.pattern_generator import Pattern_Generator
+from src.sg_generator import Schema_Graph_Generator
+from src.workloads import mimic_workloads, nba_workloads
+from src.case_study import mimic_cases, nba_cases
+from src.instrumentation import ExecStats
+from src.renaming import encode
+import src.config
 from networkx import MultiGraph
 import networkx as nx
 import psycopg2
-from provenance_getter import provenance_getter
-from gprom_wrapper import  GProMWrapper
-from jg_generator import Join_Graph_Generator
-from jg_materializer import Join_Graph_Materializer
-from pattern_generator import Pattern_Generator
 import colorful
 import logging 
-from renaming import encode
 import re
 import colorful
 import random
-import config
-from instrumentation import ExecStats
 from statistics import mean 
 import argparse
 from datetime import datetime
 from time import strftime
-from workloads import mimic_workloads, nba_workloads
-from case_study import mimic_cases, nba_cases
+
+
+#####
+##import app.py
+###from app import colNum
 
 logger = logging.getLogger(__name__)
 
@@ -201,31 +206,33 @@ def InsertStats(conn, stats_trackers, stats_relation_name, schema, exp_time, exp
         )
 
 
-def run_experiment(result_schema,
-                   user_query,
-                   user_questions,
-                   user_questions_map,
-                   user_specified_attrs,
-                   user_name,
-                   password,
-                   host,
-                   port,
-                   dbname, 
-                   sample_rate_for_s,
-                   lca_s_max_size,
-                   lca_s_min_size,
-                   maximum_edges,
-                   min_recall_threshold,
-                   numercial_attr_filter_method,
-                   f1_sample_rate,
-                   f1_sample_type,
+def run_experiment(conn=None,
+                   result_schema='demotest',
+                   user_query = ("provenance of (select count(*) as win, s.season_name from team t, game g, season s where t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' group by s.season_name);",'test'),
+                   user_questions = ["season_name='2015-16'","season_name='2012-13'"],
+                   user_questions_map = {'yes':'2015-16', 'no':'2012-13'},
+                   user_specified_attrs=[('team','team'),('season','season_name')],
+                   user_name='lchenjie',
+                   password='1234',
+                   host='localhost',
+                   port='5432',
+                   dbname='nba', 
+                   sample_rate_for_s=0.1,
+                   lca_s_max_size=100,
+                   lca_s_min_size=100,
+                   maximum_edges=1,
+                   min_recall_threshold=0.2,
+                   numercial_attr_filter_method='y',
+                   f1_sample_rate=0.3,
+                   f1_sample_type='s',
                    exclude_high_cost_jg = (False, 'f'),
                    f1_calculation_type = 'o',
                    user_assigned_max_num_pred = 3,
                    f1_min_sample_size_threshold=100,
                    lca_eval_mode=False,
-                   statstracker=ExperimentParams()):
-    
+                   statstracker=ExperimentParams(),
+                   gui=False):
+    # added a gui parameter, if true bypass pt creation step
     # f1_calculation_type: "o": evaluate on original materialized jg
     #                      "s": evaluate on a sampled materialized jg only sample size is decided
     #                           based on f1_sample_rate and f1_min_sample_size_threshold
@@ -263,10 +270,12 @@ def run_experiment(result_schema,
       logger.debug(f'{k} : {v}')
 
 
-    conn = psycopg2.connect(f"dbname={dbname} user={user_name} password={password} port={port}")
-
-    conn.autocommit = True
-
+    if(conn is None):
+      conn = psycopg2.connect(f"dbname={dbname} user={user_name} password={password} port={port}")
+      conn.autocommit = True
+    else:
+      conn = conn
+      
     w = GProMWrapper(user= user_name, passwd=password, host=host, 
         port=port, db=dbname, frontend='', backend='postgres', options={})
 
@@ -274,9 +283,11 @@ def run_experiment(result_schema,
     G = MultiGraph()
     sg, attr_dict = scj.generate_graph(G)
     pg = provenance_getter(conn = conn, gprom_wrapper = w, db_dict=attr_dict)
+
+    if(not gui):
+      pg.create_original_pt(user_query[0])
         
-    user_pt_size, pt_dict, pt_relations = pg.gen_provenance_table(query=user_query[0],
-                                                    user_questions=user_questions, 
+    user_pt_size, pt_dict, pt_relations = pg.gen_provenance_table(user_questions=user_questions, 
                                                     user_specified_attrs=user_specified_attrs)
 
     attr_dict['PT'] = pt_dict
@@ -481,7 +492,7 @@ def run_experiment(result_schema,
       InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=patterns_all, pattern_relation_name='patterns', schema=result_schema, exp_time=exp_time, result_type=f1_calculation_type)
       InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=global_rankings, pattern_relation_name='global_results', schema=result_schema, exp_time=exp_time, result_type=f1_calculation_type)
       InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=topk_from_top_jgs, pattern_relation_name='topk_patterns_from_top_jgs', schema=result_schema, exp_time=exp_time, result_type=f1_calculation_type)
-    conn.close()
+    # conn.close()
 
 
 def drop_jg_views(conn):
@@ -498,8 +509,7 @@ def drop_jg_views(conn):
         cur.execute(q)
         conn.commit()
 
-
-if __name__ == '__main__':
+def main():
 
   parser = argparse.ArgumentParser(description='Running experiments of CaJaDe')
 
@@ -567,12 +577,24 @@ if __name__ == '__main__':
 
 
 
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+  # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    #####
+    ##print("colNum: "+colNum)
+    #####
   user_query = "provenance of (select count(*) as win, s.season_name from team t, game g, season s where t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' group by s.season_name);"
-  u_query = (user_query, 'gsw wins : 15 vs 12')
+  # u_query = (user_query, 'gsw wins : 15 vs 12') 
+  u_query = (user_query, 'demo')
   u_question =["season_name='2015-16'","season_name='2012-13'"]
   user_specified_attrs = [('team','team'),('season','season_name')]
+
+
+
+  # user_query = "provenance of (select team from team);"
+  # # u_query = (user_query, 'gsw wins : 15 vs 12') 
+  # u_query = (user_query, 'demo')
+  # u_question = ["team='BOS'","team='DET'"]
+  # user_specified_attrs = [('team', 'team')]
+
 
   # user_query = 'provenance of (select insurance, 1.0*SUM(hospital_expire_flag)/count(*) as death_rate from admissions group by insurance);'
   # u_query = (user_query, 'death rate: medicare vs private')
@@ -739,3 +761,5 @@ if __name__ == '__main__':
       #       lca_eval_mode=eval_lca,
       #       )
 
+if __name__ == '__main__':
+  main()
