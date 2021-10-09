@@ -224,14 +224,15 @@ def run_experiment(conn=None,
                    min_recall_threshold=0.2,
                    numercial_attr_filter_method='y',
                    f1_sample_rate=0.3,
-                   f1_sample_type='s.0',
+                   f1_sample_type='s',
                    exclude_high_cost_jg = (False, 'f'),
                    f1_calculation_type = 'o',
                    user_assigned_max_num_pred = 3,
                    f1_min_sample_size_threshold=100,
                    lca_eval_mode=False,
-                   statstracker=ExperimentParams()):
-    
+                   statstracker=ExperimentParams(),
+                   gui=False):
+    # added a gui parameter, if true bypass pt creation step
     # f1_calculation_type: "o": evaluate on original materialized jg
     #                      "s": evaluate on a sampled materialized jg only sample size is decided
     #                           based on f1_sample_rate and f1_min_sample_size_threshold
@@ -282,9 +283,11 @@ def run_experiment(conn=None,
     G = MultiGraph()
     sg, attr_dict = scj.generate_graph(G)
     pg = provenance_getter(conn = conn, gprom_wrapper = w, db_dict=attr_dict)
+
+    if(not gui):
+      pg.create_original_pt(user_query[0])
         
-    user_pt_size, pt_dict, pt_relations = pg.gen_provenance_table(query=user_query[0],
-                                                    user_questions=user_questions, 
+    user_pt_size, pt_dict, pt_relations = pg.gen_provenance_table(user_questions=user_questions, 
                                                     user_specified_attrs=user_specified_attrs)
 
     attr_dict['PT'] = pt_dict
@@ -489,7 +492,7 @@ def run_experiment(conn=None,
       InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=patterns_all, pattern_relation_name='patterns', schema=result_schema, exp_time=exp_time, result_type=f1_calculation_type)
       InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=global_rankings, pattern_relation_name='global_results', schema=result_schema, exp_time=exp_time, result_type=f1_calculation_type)
       InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=topk_from_top_jgs, pattern_relation_name='topk_patterns_from_top_jgs', schema=result_schema, exp_time=exp_time, result_type=f1_calculation_type)
-    conn.close()
+    # conn.close()
 
 
 def drop_jg_views(conn):

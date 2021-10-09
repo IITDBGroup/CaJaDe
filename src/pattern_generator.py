@@ -1003,7 +1003,7 @@ class Pattern_Generator:
 
                 # limit 10 patterns per jg for now
 
-                # logger.debug(pattern_creation_q)
+                logger.debug(pattern_creation_q)
                 self.cur.execute(pattern_creation_q)
 
                 self.stats.stopTimer('LCA')

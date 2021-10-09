@@ -3,6 +3,7 @@ from flask import render_template, request, jsonify, redirect, url_for, flash
 import psycopg2 as pg2
 from networkx import MultiGraph
 from src.sg_generator import Schema_Graph_Generator
+from src.gprom_wrapper import run_command, GProMWrapper
 from src.experiments import run_experiment
 from flask.logging import default_handler
 import logging
@@ -36,6 +37,8 @@ def db_connect(active_table='nba'):
         db_pswd = form_data['dbpswd']
         db_port = form_data['port']
         db_host = form_data['host']
+        logger.debug(db_port)
+        logger.debug(db_host)
         globals()['conn'] = pg2.connect(database=db_name, 
             user=db_user, 
             password=db_pswd,
@@ -115,10 +118,7 @@ def ajax():
 
 
   query = f"""
-  SELECT {slt} \
-  {", {}".format(agg) if agg!="" else ""} FROM {frm} \
-  {"WHERE {}".format(where) if where !="" else ""} \
-  {"GROUP BY {}".format(grp) if grp !="" else ""} \
+  SELECT {slt} {", {}".format(agg) if agg!="" else ""} FROM {frm} {"WHERE {}".format(where) if where !="" else ""} {"GROUP BY {}".format(grp) if grp !="" else ""} \
   """
   logger.debug(query)
   cursor.execute(query)
@@ -130,82 +130,72 @@ def ajax():
 ######
 @app.route('/explanation',methods=['EXP'])
 def explanation():
+    # query data 
     data = request.get_json()
 
-    # tdArr = data["tdArr"]
-    # colNum = data["colNum"]
-    # colData = data["colData"]
-    # rangelen = len(tdArr)
+    tdArr = data["tdArr"]
+    colNum = data["colNum"]
+    colData = data["colData"]
+    rangelen = len(tdArr)
 
-    # tmp1 = []
-    # tmp2 = []
+    tmp1 = []
+    tmp2 = []
     
     # logger.debug(query)
 
 
-    # for i in range(0, rangelen):
-    #   if i<colNum:
-    #       tmp1.append(tdArr[i])
-    #   else:
-    #       tmp2.append(tdArr[i])
+    for i in range(0, rangelen):
+      if i<colNum:
+          tmp1.append(tdArr[i])
+      else:
+          tmp2.append(tdArr[i])
 
     uQuery = "provenance of ("+query+");"
-    #map_yes = ""
-    #map_no = ""
 
-    # run_experiment(conn=globals()['conn'],
-    #                 result_schema='demotest',
-    #                 user_query=(uQuery, 'test'),
-    #                 user_questions = ["season_name='2015-16'","season_name='2012-13'"],
-    #                 user_questions_map = {'yes':'2015-16', 'no':'2012-13'},
-    #                 user_specified_attrs=[('team','team'),('season','season_name')])
+    # construct information needed for user question
+    gen_pt_full(uQuery) # create pt_full
+    dtype_q = """
+    SELECT ic.column_name, ic.data_type  
+    FROM information_schema.tables it, information_schema.columns ic 
+    WHERE it.table_name = ic.table_name AND it.table_name='pt_full';
+    """
+    cursor.execute(dtype_q)
+
+    pg_numeric_list = ['smallint','integer','bigint','decimal','numeric',
+    'real','double precision','smallserial','serial','bigserial']
+
+    raw_dtypes = [list(x) for x in cursor.fetchall()]
+
+    for d in raw_dtypes:
+        if(d[1] in pg_numeric_list):
+            d[1] = 'numeric'
+        else:
+            d[1] = 'string'
+
+    ddict={x[0]:x[1] for x in raw_dtypes} 
+    # query result datatypes, we only need to know whether attribute is numeric or not
+
+    for i in range(len(colData)):
+        if(ddict[colData[i]]=='string'):
+            tmp1[i] = f"'{tmp1[i]}'"
+            tmp2[i] = f"'{tmp2[i]}'"
+
+    u1 = ' AND '.join(['='.join(x) for x in list(zip(colData, tmp1))]) 
+    u2 = ' AND '.join(['='.join(x) for x in list(zip(colData, tmp2))]) 
+
+    logger.debug(f"u1: {u1}")
+    logger.debug(f"u2: {u2}")
+
+    run_experiment(conn=globals()['conn'],
+                    result_schema='dynamic',
+                    user_query=(uQuery, 'test'),
+                    user_questions = [u1,u2],
+                    user_questions_map = {'yes': u1.replace("'", "''"), 'no': u2.replace("'", "''")},
+                    user_specified_attrs=[],
+                    gui=True)
     # print(uQuery)
-    # run_experiment(conn=globals()['conn'],
-    #             result_schema='demotest',
-    #             user_query=(uQuery, 'test'),
-    #             user_questions = ["team='BOS'","team='DET'"],
-    #             user_questions_map = {'yes':'BOS', 'no':'DET'},
-    #             user_specified_attrs=[('team','team')]
-    #             )
-    
-    # def run_experiment(conn=None,
-    #                result_schema='demotest',
-    #                user_query = ("provenance of (select count(*) as win, s.season_name from team t, game g, season s where t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' group by s.season_name);",'test'),
-    #                user_questions = ["season_name='2015-16'","season_name='2012-13'"],
-    #                user_questions_map = {'yes':'2015-16', 'no':'2012-13'},
-    #                user_specified_attrs=[('team','team'),('season','season_name')],
-    #                user_name='juseung',
-    #                password='1234',
-    #                host='localhost',
-    #                port='5432',
-    #                dbname='nba', 
-    #                sample_rate_for_s=0.1,
-    #                lca_s_max_size=100,
-    #                lca_s_min_size=100,
-    #                maximum_edges=1,
-    #                min_recall_threshold=0.2,
-    #                numercial_attr_filter_method='y',
-    #                f1_sample_rate=0.3,
-    #                f1_sample_type='s.0',
-    #                exclude_high_cost_jg = (False, 'f'),
-    #                f1_calculation_type = 'o',
-    #                user_assigned_max_num_pred = 3,
-    #                f1_min_sample_size_threshold=100,
-    #                lca_eval_mode=False,
-    #                statstracker=ExperimentParams()):
 
-
-    run_experiment(conn=globals()['conn'])
-
-    # globals()['conn'] = pg2.connect(database=db_name, 
-    #         user=db_user, 
-    #         password=db_pswd,
-    #         port=db_port,
-    #         host=db_host)
-    # globals()['conn'].autocommit = True
-    # globals()['cursor2'] = conn.cursor()
-
-    query2 = "select p_desc from demotest.global_results"
+    query2 = "select p_desc from dynamic.global_results"
     globals()['cursor'].execute(query2)
     # cursor2.execute(query2)
     exp_list = globals()['cursor'].fetchall()
@@ -238,10 +228,21 @@ def convert_to_graph_json(ll):
 
     return l_json
 
+def gen_pt_full(query):
+    gprom_wrapper = GProMWrapper(user= db_user, passwd=db_pswd, host=db_host, 
+        port=db_port, db=db_name, frontend='', backend='postgres',)    
 
-    
-
-
+    code, output = gprom_wrapper.runQuery(query)
+    if(code==0):
+        drop_pt_full = "DROP TABLE IF EXISTS pt_full CASCADE;"
+        gen_pt_full_query = output.decode("utf-8")
+        # logger.debug(f'gen_original_pt_query:\n {gen_original_pt_query}')
+        pt_full_table = f"CREATE TABLE pt_full AS {gen_pt_full_query};"
+        cursor.execute(drop_pt_full)
+        cursor.execute(pt_full_table)
+        conn.commit()
+    else:
+        logger.debug("error when running gprom command")
 
 if __name__ == '__main__':
     app.run(debug=True)
