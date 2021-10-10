@@ -7,12 +7,15 @@ from src.gprom_wrapper import run_command, GProMWrapper
 from src.experiments import run_experiment
 from flask.logging import default_handler
 import logging
+import re
 
 logger = logging.getLogger()
 logger.addHandler(default_handler)
 
 app = Flask(__name__)
 
+
+two_cols = re.compile('\w+\.\w+\s{0,}!?(<|>|<=|>=|=|<>|!=)\s{0,}\w+\.\w+\s{0,}')
 
 @app.route("/")
 def index():
@@ -108,10 +111,16 @@ def db_connect(active_table='nba'):
 def ajax():
   data = request.get_json()
   
-  slt = data["slt"]
-  agg = data["agg"]
-  frm = data["frm"]
-  where = data["where"]
+  global slt 
+  global agg 
+  global frm 
+  global where 
+  global grp 
+  
+  slt = data["slt"]  
+  agg = data["agg"]  
+  frm = data["frm"]  
+  where = data["where"]  
   grp = data["grp"]
 
   global query
@@ -186,12 +195,44 @@ def explanation():
     logger.debug(f"u1: {u1}")
     logger.debug(f"u2: {u2}")
 
+    # adding user specified attrs
+    # rules: 
+    # 1) group by attributes
+    # 2) where clause if certain attributes have equal to some constant
+    # 3) TBD
+    user_specified_attrs = []
+    table_mappings = {}
+    tables = [x.strip() for x in frm.split(',')]
+
+    for t in tables:
+        t_and_a = re.split(r'\s{1,}', t)
+        if(len(t_and_a)==1):
+            table_mappings[t_and_a[0]] = t_and_a[0]
+        else:
+            table_mappings[t_and_a[1]] = t_and_a[0]
+
+    # handle where
+
+    ands = re.split("and", where, flags=re.IGNORECASE)
+
+    for a in ands:
+        if(not two_cols.search(a)):
+            table, attr = [x.strip() for x in re.split(r'(<|>|<=|>=|=|<>|!=)', a)[0].split('.')]
+            user_specified_attrs.append((table_mappings[table], attr))
+
+    groups = [x.strip() for x in grp.split(',')]
+    for g in groups:
+        table, attr = [x.strip() for x in g.split('.')]
+        user_specified_attrs.append((table_mappings[table], attr))
+
+    logger.debug(f"user_specified_attrs : {user_specified_attrs}")
+
     run_experiment(conn=globals()['conn'],
                     result_schema='dynamic',
                     user_query=(uQuery, 'test'),
                     user_questions = [u1,u2],
                     user_questions_map = {'yes': u1.replace("'", "''"), 'no': u2.replace("'", "''")},
-                    user_specified_attrs=[],
+                    user_specified_attrs=list(set(user_specified_attrs)),
                     gui=True)
     # print(uQuery)
 
