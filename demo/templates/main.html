@@ -419,7 +419,8 @@
             if (data.result2){
               exp_len = data.result2.length;
               exp_data = data.result2;
-              exp_table(exp_data,exp_len);
+              graphData = data.result3;
+              exp_table(exp_data,exp_len,graphData);
             } 
             else {
               alert("No data");
@@ -431,7 +432,7 @@
 		      }
         })
 
-        function exp_table(exp_data,exp_len){          
+        function exp_table(exp_data,exp_len,graphData){          
           let expHtml = "";
 
           expHtml = "<table class=\"table table-bordered\" sellspacing=\"0\" width=\"90%\" id=\"exp\">";
@@ -444,6 +445,85 @@
 
           $("#explanation_table").empty();
 		      $("#explanation_table").append(expHtml);
+
+          /////////////////////////////////////////////////////////////   
+          
+          var svg = d3.select("#explanation_graph")            
+                      .append("svg")
+                      .attr("width", 400)
+                      .attr("height", 300);
+                      var simulation = d3
+            .forceSimulation(graphData.nodes)
+            .force("charge", d3.forceManyBody().strength(-30))
+            .force("center", d3.forceCenter(width / 2, height / 2))
+            .force("link", d3.forceLink(graphData.links).id(d => d.name))
+            .on("tick", ticked);
+
+          var links = svg
+              .append("g")
+              .selectAll("line")
+              .data(graphData.links)
+              .enter()
+              .append("line")
+              .attr("stroke-width", 3)
+              .style("stroke", "orange");
+          var drag = d3
+              .drag()
+              .on("start", dragstarted)
+              .on("drag", dragged)
+              .on("end", dragended);
+          var nodes_with_text = svg
+                .append("g")
+                .selectAll("g")
+                .data(graphData.nodes)
+                .enter()
+                .append("g")
+                .call(drag);
+          var circles = nodes_with_text
+                .append("circle")
+                .attr("r", 15)
+                .attr("fill", "red");
+          var texts = nodes_with_text
+                .append("text").text(function(d){
+                  return d.name
+                  }
+          );
+          function ticked() {
+              nodes_with_text.attr("transform", function(d){
+                  return "translate(" + d.x + ", " + d.y + ")";
+                });
+
+              links
+              .attr("x1", function(d) {
+                  return d.source.x;
+              })
+              .attr("y1", function(d) {
+                  return d.source.y;
+              })
+              .attr("x2", function(d) {
+                  return d.target.x;
+              })
+              .attr("y2", function(d) {
+                  return d.target.y;
+              });
+              console.log(simulation.alpha());
+          }
+          function dragstarted(d) {
+              simulation.alphaTarget(0.3).restart();
+              d.fx = d3.event.x;
+              d.fy = d3.event.y;
+          }
+          function dragged(d) {
+              d.fx = d3.event.x;
+              d.fy = d3.event.y;
+          }
+          function dragended(d) {
+              simulation.alphaTarget(0);
+              d.fx = null;
+              d.fy = null;
+          }
+          /////////////////////////////////////////////////////////////
+   
         }
 
       }
@@ -489,7 +569,10 @@
 
 		</div><br>
     <div id="explanation_table" style="overflow: auto; height: 200px;"></div><br>
-      </div>
+
+    <div id="explanation_graph"></div>
+
+    </div>
 
     </div>
     <div class="col-md-3"> 

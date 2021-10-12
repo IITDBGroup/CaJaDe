@@ -86,6 +86,8 @@ def db_connect(active_table='nba'):
         sgg = Schema_Graph_Generator(conn)
 
         graph, attr_dict = sgg.generate_graph(g)
+        logger.debug(graph)
+        logger.debug(attr_dict)
 
         globals()['json_schema'] = convert_to_graph_json(graph.edges.data())
 
@@ -228,22 +230,66 @@ def explanation():
     logger.debug(f"user_specified_attrs : {user_specified_attrs}")
 
     run_experiment(conn=globals()['conn'],
-                    result_schema='dynamic',
+                    result_schema='oct11',
                     user_query=(uQuery, 'test'),
                     user_questions = [u1,u2],
                     user_questions_map = {'yes': u1.replace("'", "''"), 'no': u2.replace("'", "''")},
                     user_specified_attrs=list(set(user_specified_attrs)),
+                    maximum_edges=2,
+                    f1_sample_rate=0.3,
+                    f1_calculation_type = 's',
+                    user_assigned_max_num_pred=2,
+                    min_recall_threshold=0.5,
                     gui=True)
     # print(uQuery)
 
-    query2 = "select p_desc from dynamic.global_results"
+    query2 = "select p_desc from oct11.global_results"
     globals()['cursor'].execute(query2)
-    # cursor2.execute(query2)
     exp_list = globals()['cursor'].fetchall()
 
-    # exp_list = cursor2.fetchall()
+    query3 = "select distinct jg_details from oct11.global_results"
+    globals()['cursor'].execute(query3)
+    jg_detail_list = globals()['cursor'].fetchall()
+    jg = joinGraph(jg_detail_list)
+    
+    return jsonify(result = "success-explanation", result2 = exp_list, result3 = jg)
 
-    return jsonify(result = "success-explanation", result2 = exp_list)
+def joinGraph(jg_detail_list):
+    graphData = {"nodes":[], "links":[]}
+    node_list = []
+    list_length = len(jg_detail_list)
+
+    #for i in range (0, list_length):
+    jg_tmp = str(jg_detail_list[0])
+    jg_tmp = jg_tmp.split('\'')[1] #test for the first jg
+    print("jg_tmp:")
+    print(jg_tmp)
+
+    if '|' not in jg_tmp:
+        node_list.append('PT')
+        graphData['nodes'].append({"name": "PT"})
+    else:               
+        getNodes = jg_tmp.split('|')
+        for i in range(0, len(getNodes)):
+            nodes = getNodes[i].split(',')
+            two_nodes = []
+
+            for j in range(0, len(nodes)):
+                if 'cond' not in nodes[j]:
+
+                    x = nodes[j].split(' ')
+                    nodeName = x[len(x)-1]
+
+                    if nodeName not in node_list:
+                        node_list.append(nodeName)
+                        graphData['nodes'].append({"name": nodeName})
+                    
+                    two_nodes.append(nodeName)                  
+            
+            graphData['links'].append({"source": two_nodes[0], "target": two_nodes[1] })
+    return graphData
+            
+         
 
 
 def convert_to_graph_json(ll):
