@@ -334,6 +334,7 @@
       var len;
 
       var count=1;
+      var graphData;
 
       function selectRows(elem){        
           bgcolor = $(elem).css("background-color");
@@ -419,7 +420,10 @@
             if (data.result2){
               exp_len = data.result2.length;
               exp_data = data.result2;
-              graphData = data.result3;
+              graphData = data.result3; //graphData.push(data.result3);
+              // document.write(graphData); ///////////////
+              // document.write(data.result3); 
+
               exp_table(exp_data,exp_len,graphData);
             } 
             else {
@@ -447,86 +451,125 @@
 		      $("#explanation_table").append(expHtml);
 
           /////////////////////////////////////////////////////////////   
-          
-          var svg = d3.select("#explanation_graph")            
-                      .append("svg")
-                      .attr("width", 400)
-                      .attr("height", 300);
-                      var simulation = d3
-            .forceSimulation(graphData.nodes)
-            .force("charge", d3.forceManyBody().strength(-30))
-            .force("center", d3.forceCenter(width / 2, height / 2))
-            .force("link", d3.forceLink(graphData.links).id(d => d.name))
-            .on("tick", ticked);
+          console.log('#############:graphData.length: '+graphData.length);
+          //jg_table_id = "jg_table_"+String(0);
+          jghtml = "<table class=\"table table-bordered\" sellspacing=\"0\" width=\"90%\" id=\"jg_table\">";
+          //jghtml = "<table class=\"table table-bordered\" sellspacing=\"0\" width=\"90%\" id="+jg_table_id+">";
+          jghtml += "<tbody>";
+          jghtml += "<tr><td style=\"text-align: center;\"></td></tr>";
+          // for(var j=0;j<graphData.length;j++){
+          //   jg_table_id = "jg_table_"+String(j);
+          //   jghtml += "<tr id="+jg_table_id+"><td style=\"text-align: center;\"></td></tr>";
+          //   //jghtml += "<tr><td style=\"text-align: center;\"></td></tr>";
 
-          var links = svg
-              .append("g")
-              .selectAll("line")
-              .data(graphData.links)
-              .enter()
-              .append("line")
-              .attr("stroke-width", 3)
-              .style("stroke", "orange");
-          var drag = d3
-              .drag()
-              .on("start", dragstarted)
-              .on("drag", dragged)
-              .on("end", dragended);
-          var nodes_with_text = svg
+          // }
+          jghtml += "</tbody></table>";
+          //$("#explanation_graph").append(jghtml);
+
+          for(var j=0;j<graphData.length;j++){
+            gd_tmp = graphData[j]; //[j]
+
+            var svg = d3.select("#explanation_graph") //var svg = d3.select("#"+jg_table_id)            
+                        .append("svg")
+                        .attr("width", 400)
+                        .attr("height", 300);
+            console.log('#############:gd_tmp',j);
+            console.log('#############:gd_tmp.links',gd_tmp.links);
+            if(gd_tmp.links.length == 0){
+              console.log('#############:link NUll');
+              var simulation = d3
+              .forceSimulation(gd_tmp.nodes)
+              .force("charge", d3.forceManyBody().strength(-30))
+              .force("center", d3.forceCenter(width / 2, height / 2))
+              .on("tick", ticked);
+            }else{
+              console.log('#############:link NOT NUll');
+              var simulation = d3
+              .forceSimulation(gd_tmp.nodes)
+              .force("charge", d3.forceManyBody().strength(-30))
+              .force("center", d3.forceCenter(width / 2, height / 2))
+              .force("link", d3.forceLink(gd_tmp.links).id(d => d.name))
+              .on("tick", ticked);
+              var links =  svg
                 .append("g")
-                .selectAll("g")
-                .data(graphData.nodes)
+                .selectAll("line")
+                .data(gd_tmp.links)
                 .enter()
-                .append("g")
-                .call(drag);
-          var circles = nodes_with_text
-                .append("circle")
-                .attr("r", 15)
-                .attr("fill", "red");
-          var texts = nodes_with_text
-                .append("text").text(function(d){
-                  return d.name
-                  }
-          );
-          function ticked() {
+                .append("line")
+                .attr("stroke-width", 3)
+                .style("stroke", "orange");
+            }
+            var drag = d3
+                .drag()
+                .on("start", dragstarted)
+                .on("drag", dragged)
+                .on("end", dragended);
+            var nodes_with_text = svg
+                  .append("g")
+                  .selectAll("g")
+                  .data(gd_tmp.nodes)
+                  .enter()
+                  .append("g")
+                  .call(drag);
+            var circles = nodes_with_text
+                  .append("circle")
+                  .attr("r", 15)
+                  .attr("fill", "red");
+            var texts = nodes_with_text
+                  .append("text").text(function(d){
+                    return d.name
+                    }
+            );
+          ///}  ///
+         
+            function ticked() {
               nodes_with_text.attr("transform", function(d){
                   return "translate(" + d.x + ", " + d.y + ")";
                 });
+                
+              if(gd_tmp.links.length != 0){
+                console.log('#############ticked():link NOT NUll');
+                link
+                .attr("x1", function(d) {
+                    return d.source.x;
+                })
+                .attr("y1", function(d) {
+                    return d.source.y;
+                })
+                .attr("x2", function(d) {
+                    return d.target.x;
+                })
+                .attr("y2", function(d) {
+                    return d.target.y;
+                });
+              }
+            }
+          ///} ///
+            
+            function dragstarted(d) {
+                simulation.alphaTarget(0.3).restart();
+                d.fx = d3.event.x;
+                d.fy = d3.event.y;
+            }
+            function dragged(d) {
+                d.fx = d3.event.x;
+                d.fy = d3.event.y;
+            }
+            function dragended(d) {
+                simulation.alphaTarget(0);
+                d.fx = null;
+                d.fy = null;
+            }
 
-              links
-              .attr("x1", function(d) {
-                  return d.source.x;
-              })
-              .attr("y1", function(d) {
-                  return d.source.y;
-              })
-              .attr("x2", function(d) {
-                  return d.target.x;
-              })
-              .attr("y2", function(d) {
-                  return d.target.y;
-              });
-              console.log(simulation.alpha());
-          }
-          function dragstarted(d) {
-              simulation.alphaTarget(0.3).restart();
-              d.fx = d3.event.x;
-              d.fy = d3.event.y;
-          }
-          function dragged(d) {
-              d.fx = d3.event.x;
-              d.fy = d3.event.y;
-          }
-          function dragended(d) {
-              simulation.alphaTarget(0);
-              d.fx = null;
-              d.fy = null;
-          }
+          } ///       
+
+          
           /////////////////////////////////////////////////////////////
    
         }
-
-      }
+       
+          //} //
+      }     
 		</script>
     
 
@@ -570,7 +613,7 @@
 		</div><br>
     <div id="explanation_table" style="overflow: auto; height: 200px;"></div><br>
 
-    <div id="explanation_graph"></div>
+    <div id="explanation_graph" style="overflow-x: auto; height: 320px; white-space:nowrap;"></div>
 
     </div>
 
