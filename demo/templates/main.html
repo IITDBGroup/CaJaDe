@@ -467,9 +467,9 @@
           //$("#explanation_graph").append(jghtml);
 
           for(var j=0;j<graphData.length;j++){
-            gd_tmp = graphData[j]; //[j]
+            gd_tmp = graphData[j];
 
-            var svg = d3.select("#explanation_graph") //var svg = d3.select("#"+jg_table_id)            
+            var svg = d3.select("#explanation_graph")       
                         .append("svg")
                         .attr("width", 400)
                         .attr("height", 300);
@@ -479,26 +479,46 @@
               console.log('#############:link NUll');
               var simulation = d3
               .forceSimulation(gd_tmp.nodes)
-              .force("charge", d3.forceManyBody().strength(-30))
+              .force("charge", d3.forceManyBody().strength(-1500))
               .force("center", d3.forceCenter(width / 2, height / 2))
+              .force("collide", d3.forceCollide().radius(function(d){return d.value*8}))
               .on("tick", ticked);
             }else{
               console.log('#############:link NOT NUll');
               var simulation = d3
               .forceSimulation(gd_tmp.nodes)
-              .force("charge", d3.forceManyBody().strength(-30))
+              .force("charge", d3.forceManyBody().strength(-1500))
               .force("center", d3.forceCenter(width / 2, height / 2))
               .force("link", d3.forceLink(gd_tmp.links).id(d => d.name))
+              .force("collide", d3.forceCollide().radius(function(d){return d.value*8}))
               .on("tick", ticked);
-              var links =  svg
+              var link =  svg
                 .append("g")
                 .selectAll("line")
                 .data(gd_tmp.links)
                 .enter()
                 .append("line")
-                .attr("stroke-width", 3)
-                .style("stroke", "orange");
+                .attr("stroke-width", 5)
+                .attr("stroke", "#999");
+
             }
+            ///
+            // var node = svg.append("g")
+            //               .attr("class", "circle-node-holder")
+            //               .selectAll("g")
+            //               .data(gd_tmp.nodes)
+            //               .enter()
+            //               .append("g")
+            //               .each(function(d){
+            //                 d3.select(this).append("circle")
+            //                                 .attr("r", d.value*5).attr("fill", "#6fbc5b");
+            //                 d3.select(this).append("text").text(d.id)
+            //                                 .attr("dy",6)
+            //                                 .style("text-anchor", "middle")
+            //                                 .attr("class", "node-label")
+            //               }).call(drag);
+            
+            //
             var drag = d3
                 .drag()
                 .on("start", dragstarted)
@@ -513,16 +533,18 @@
                   .call(drag);
             var circles = nodes_with_text
                   .append("circle")
-                  .attr("r", 15)
-                  .attr("fill", "red");
+                  .attr("r", 25) //15
+                  .attr("fill", "#6fbc5b");
             var texts = nodes_with_text
-                  .append("text").text(function(d){
-                    return d.name
-                    }
-            );
-          ///}  ///
+                  .append("text")
+                  .text(function(d){ return d.name})
+                  .style("text-anchor", "middle")
+                  .attr("class", "node-label");
+            //}  ///
          
             function ticked() {
+              ////
+              //node.attr("transform", function(d){ return "translate(" + d.x + ", " + d.y + ")";});
               nodes_with_text.attr("transform", function(d){
                   return "translate(" + d.x + ", " + d.y + ")";
                 });
@@ -544,7 +566,7 @@
                 });
               }
             }
-          ///} ///
+            ///} ///
             
             function dragstarted(d) {
                 simulation.alphaTarget(0.3).restart();
