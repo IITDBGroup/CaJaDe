@@ -1,54 +1,46 @@
 # **CaJaDe**
-The source codes are located  **src**/  folder. After importing databases to **postgres**, simply go to **src/** folder, 
+This is the branch used to submit to  [SIGMOD 2021 Reproducibility](https://reproducibility.sigmod.org/)
 
-It is recommended that you use **virtualenv** or similar virtual environment to deploy the code,
+TODOs:
 
-1. once you are in the virtual environment, run
+- Set up docker environment
+  - Linux 
+  - GProm
+  - Python with same package versions
+  - Postgres with same version on Debussy
+- Prepare datasets
+  - NBA: just directly dump from Debussy
+  - MIMIC: give instructions and scripts to prepare dataset due to restriction on access
+- Experiments:
+  - 2 Scalability graphs : NBA + MIMIC
+  - 4 Graphs on LCA sample size: NBA only
+  - 2 Graphs Sampling effects on runtime and quality: NBA +MIMIC
+  - Query workloads 5 NBA + 5 MIMIC
+  - 2 Comparisons
+    - CAPE (what to do about this given some packages may require different verisons?)
+    -  Explanation tables
+- Case Study and User Study: 
+  - NBA and MIMIC
+  - Do we need to do anything about user study?
 
-`pip install requirements.txt`
+## 1. Datasets
 
-2. **CaJaDe** uses ***GProM*** as the backend provenance generation system, please refer to [GProM](https://github.com/IITDBGroup/gprom) to install along with your **Postgresql** before going forward 
-3. We use **NBA** dataset as the demo dataset. User can download different sizes of the dataset in [here](https://drive.google.com/drive/folders/10IkUk9n7vT-2OHQCZKi1apr8y_IrnbvW?usp=sharing). After extracting the `.sql` file, run `psql -h  [hostname] -p [port] -U [username] -d [your precreated db name] < [your .sql file]`to import database to your local **Postgresql**, e.g, `psql -h localhost -p 5432 -U postgres -d nba_db < nba.sql` 
-4. After you've done first 3 steps, you are ready to go :)
-
-run  
-
-`python experiments.py -h`
-
-user could select specify the following flags to run experiments
-
-```
-usage: experiments.py [-h] [-M] [-F] [-o] [-s] [-m] [-H] [-P] [-t] -U  -p  -d
-
-Running experiments of CaJaDe
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -M , --maximum_edges 
-                        Maximum number of edges allowed in a join graph
-                        (default: 3)
-  -F , --f1_sample_rate 
-                        Sample rate of apt when calculating the f1 score
-                        (default: 1.0)
-  -o , --optimized      use opt or not (y: yes, n: no), (default: y)
-  -s , --db_size        scale factor of database, (default: 1.0)
-  -m , --min_recall_threshold 
-                        recall threshold when calculating f1 score (default:
-                        1.0)
-  -H , --db_host        database host, (default: localhost)
-  -P , --port           database port, (default: 5432)
-  -t , --f1_calc_type   f1 score type (s sample, o original), (default: s)
-
-required named arguments:
-  -U , --user_name      owner of the database (required)
-  -p , --password       password to the database (required)
-  -d , --db_name        database name (required)
-```
-
-and follow the instructions popped out to run the experiment.
-
-The result of the experiment will be saved under the schema name `exp_%Y_%m_%d_%H_%M_%S` inside the database user chooses to use.
+- NBA dataset: NBA (National Basketball Association) dataset were extracted from [this cite][http://www.pbpstats.com/]. This dataset will be available in the reproducibility repo
+- MIMIC dataset:  in order to access MIMIC (Medical Information Mart for Intensive Care) dataset, it requires user to finish the steps listed [here][https://mimic.mit.edu/docs/gettingstarted/] before starting working with the data. We do not provide the dataset in this reproducibility repository due to the policy. However, we provide the scripts needed to prepare the processed MIMIC dataset used in the experiments.
 
 
 
+## **2. System Specs**
 
+All experiments were executed on a server with the following specs:
+
+| Element          | Description                                                  |
+| ---------------- | ------------------------------------------------------------ |
+| CPU              | 2 x AMD Opteron(tm) Processor 4238, 3.3Ghz                   |
+| Caches (per CPU) | L1 (288KiB), L2(6 MiB), L3(6 MiB)                            |
+| Memory           | 128GB (DDR3 1333MHz)                                         |
+| RAID Controller  | LSI Logic / Symbios Logic MegaRAID SAS 2108 [Liberator] (rev 05), 512MB cache |
+| RAID Config      | 4 x 1TB, configured as RAID 5                                |
+| Disks            | 4 x 1TB 7.2K RPM Near-Line SAS 6Gbps (DELL CONSTELLATION ES.3) |
+
+## 
