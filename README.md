@@ -25,8 +25,9 @@ TODOs:
 
 ## 1. Datasets
 
-- NBA dataset: NBA (National Basketball Association) dataset were extracted from [this cite][http://www.pbpstats.com/]. This dataset will be available in the reproducibility repo
-- MIMIC dataset:  in order to access MIMIC (Medical Information Mart for Intensive Care) dataset, it requires user to finish the steps listed [here][https://mimic.mit.edu/docs/gettingstarted/] before starting working with the data. We do not provide the dataset in this reproducibility repository due to the policy. However, we provide the scripts needed to prepare the processed MIMIC dataset used in the experiments.
+- NBA dataset: NBA (National Basketball Association) dataset were extracted from [this cite](http://www.pbpstats.com/). This dataset will be available in the reproducibility repo
+- MIMIC dataset:  in order to access MIMIC (Medical Information Mart for Intensive Care) dataset, it requires user to finish the steps listed [here](https://mimic.mit.edu/docs/gettingstarted/)
+-  before starting working with the data. We do not provide the dataset in this reproducibility repository due to the policy. However, we provide the scripts needed to prepare the processed MIMIC dataset used in the experiments.
 
 
 
