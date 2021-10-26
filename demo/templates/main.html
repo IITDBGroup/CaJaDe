@@ -433,17 +433,20 @@
           let sumHtml = "";
           var numOfExp = "The number of explanations: "+exp_len;
           sumHtml = "<table class=\"table table-bordered\" sellspacing=\"0\" width=\"90%\" id=\"exp\"><tbody>";
-          sumHtml += "<tr><td style=\"text-align: center;\">Summary</td></tr>";
-          sumHtml += "<tr><td style=\"text-align: center;\">1."+ numOfExp +"</td></tr>";
-          sumHtml += "<tr><td style=\"text-align: center;\">2. Distinct Recall</td></tr>";
+          sumHtml += "<tr><td style=\"text-align: left;\">Summary</td></tr>";
+          sumHtml += "<tr><td style=\"text-align: left;\">1."+ numOfExp +"</td></tr>";
+          //sumHtml += "<tr><td style=\"text-align: center;\">2. Distinct Recall</td></tr>";
+          sumHtml += "<tr><td style=\"text-align: left;\">2. Distinct Recall: ";
           for(var i=0;i<recallData.length;i++){
-            sumHtml += "<tr><td style=\"text-align: center;\">"+ recallData[i] +"</td></tr>";
+            sumHtml += " | "+recallData[i];
           }
-          sumHtml += "<tr><td style=\"text-align: center;\">3. Distinct Precision</td></tr>";
-          for(var i=0;i<precisionData.length;i++){
-            sumHtml += "<tr><td style=\"text-align: center;\">"+ precisionData[i] +"</td></tr>";
+          sumHtml += " |</td></tr>";
+          sumHtml += "<tr><td style=\"text-align: left;\">3. Distinct Precision:";
+          for(var j=0;j<precisionData.length;j++){
+            sumHtml += " | "+precisionData[j];
           }
-          sumHtml += "</tbody></table>";
+          sumHtml += " |</td></tr></tbody></table>";
+
           $("#explanation_summary").empty();
           $("#explanation_summary").append(sumHtml)
         }
@@ -453,7 +456,7 @@
 
           expHtml = "<table class=\"table table-bordered\" sellspacing=\"0\" width=\"90%\" id=\"exp\">";
           expHtml += "<tbody>";
-          console.log("#####exp_len: ", exp_len);
+         
           for(var i=0;i<exp_len;i++){
             expHtml += "<tr><td style=\"text-align: center;\">"+ exp_data[i] +"</td></tr>";
           }
@@ -505,6 +508,10 @@
                         .append("g")
                         .on("mouseover", mouseover) ////
                         .on("mouseout", mouseout) ////
+                        .on("mousemove", mousemove) ////
+                        // .on("mouseover", () => (tooltip.style("visibility", "visible").text("Circle!")))
+                        // .on("mousemove", () => (tooltip.style("top", (d3.event.pageY - 10) + "px").style("left", (d3.event.pageX + 10) + "px")))
+                        // .on("mouseout", () => (tooltip.style("visibility", "hidden")))
                         .call(drag);
                     var circles = nodes_with_text
                         .append("circle")
@@ -515,6 +522,10 @@
                         .text(function(d){ return d.name})
                         .style("text-anchor", "middle")
                         .attr("class", "node-label");
+                    var tooltip = d3.select("#explanation_graph")
+                                    .append("div")
+                                    .style("position", "absolute")
+                                    .style("visibility", "hidden");
 
                     simulation.on("tick", function() {
                         link
@@ -545,11 +556,16 @@
                       d3.select(this).select("circle").transition()
                         .duration(750)
                         .attr("r", 35);
+                      tooltip.style("visibility", "visible").text("I'm a circle!");
                     }
                     function mouseout() {
                       d3.select(this).select("circle").transition()
                         .duration(750)
                         .attr("r", 25);
+                      tooltip.style("visibility", "hidden");
+                    }
+                    function mousemove(){
+                      tooltip.style("top", (d3.event.pageY - 10) + "px").style("left", (d3.event.pageX + 10) + "px");
                     }
                 });
             };
@@ -600,9 +616,9 @@
 		  </div>
 
 		</div><br>
-    <div id="explanation_table" style="overflow: auto; height: 200px;"></div><br>
-    <div id="explanation_summary" style="overflow-x: auto; height: 320px; white-space:nowrap;"></div>
-    <div id="explanation_graph" style="overflow-x: auto; height: 320px; white-space:nowrap;"></div>
+    <div id="explanation_table" style="overflow: auto; height: 200px; margin-bottom: 20px;"></div><br><br><br>
+    <div id="explanation_summary" style="overflow-x: auto; height: 185px; white-space:nowrap; margin-bottom: 20px;"></div>
+    <div id="explanation_graph" style="overflow-x: auto; height: 320px; white-space:nowrap; margin-bottom: 20px;"></div>
 
 
     </div>
