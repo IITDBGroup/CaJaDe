@@ -45,7 +45,11 @@ body::-webkit-scrollbar{
 body::-webkit-scrollbar-thumb{
   background-color: #444444;
 }
-
+#explanation_summary{
+  font-size: 14px;
+  font-weight: bold;
+  color: #111;
+}
 #explanation_graph .node-label{
   font-size: 22px;
   font-weight: bold;

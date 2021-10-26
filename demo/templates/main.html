@@ -413,9 +413,12 @@
             if (data.result2){
               exp_len = data.result2.length;
               exp_data = data.result2;
-              graphData = data.result3; 
+              graphData = data.result3;
+              recallData = data.result4;
+              precisionData = data.result5;
 
               exp_table(exp_data,exp_len,graphData);
+              exp_summary(exp_len, recallData, precisionData);
             } 
             else {
               alert("No data");
@@ -426,13 +429,31 @@
 		        alert(error);
 		      }
         })
+        function exp_summary(exp_len, recallData, precisionData){
+          let sumHtml = "";
+          var numOfExp = "The number of explanations: "+exp_len;
+          sumHtml = "<table class=\"table table-bordered\" sellspacing=\"0\" width=\"90%\" id=\"exp\"><tbody>";
+          sumHtml += "<tr><td style=\"text-align: center;\">Summary</td></tr>";
+          sumHtml += "<tr><td style=\"text-align: center;\">1."+ numOfExp +"</td></tr>";
+          sumHtml += "<tr><td style=\"text-align: center;\">2. Distinct Recall</td></tr>";
+          for(var i=0;i<recallData.length;i++){
+            sumHtml += "<tr><td style=\"text-align: center;\">"+ recallData[i] +"</td></tr>";
+          }
+          sumHtml += "<tr><td style=\"text-align: center;\">3. Distinct Precision</td></tr>";
+          for(var i=0;i<precisionData.length;i++){
+            sumHtml += "<tr><td style=\"text-align: center;\">"+ precisionData[i] +"</td></tr>";
+          }
+          sumHtml += "</tbody></table>";
+          $("#explanation_summary").empty();
+          $("#explanation_summary").append(sumHtml)
+        }
 
         function exp_table(exp_data,exp_len,graphData){          
           let expHtml = "";
 
           expHtml = "<table class=\"table table-bordered\" sellspacing=\"0\" width=\"90%\" id=\"exp\">";
           expHtml += "<tbody>";
-          
+          console.log("#####exp_len: ", exp_len);
           for(var i=0;i<exp_len;i++){
             expHtml += "<tr><td style=\"text-align: center;\">"+ exp_data[i] +"</td></tr>";
           }
@@ -458,7 +479,7 @@
 
                     var simulation = d3
                         .forceSimulation(graph.nodes)
-                        .force("charge", d3.forceManyBody().strength(-1400))
+                        .force("charge", d3.forceManyBody().strength(-1500))
                         .force("center", d3.forceCenter(width / 2, height / 2))
                         .force("link", d3.forceLink(graph.links).id(d => d.name));
 
@@ -482,6 +503,8 @@
                         .data(graph.nodes)
                         .enter()
                         .append("g")
+                        .on("mouseover", mouseover) ////
+                        .on("mouseout", mouseout) ////
                         .call(drag);
                     var circles = nodes_with_text
                         .append("circle")
@@ -517,6 +540,16 @@
                         simulation.alphaTarget(0);
                         d.fx = null;
                         d.fy = null;
+                    }
+                    function mouseover() {
+                      d3.select(this).select("circle").transition()
+                        .duration(750)
+                        .attr("r", 35);
+                    }
+                    function mouseout() {
+                      d3.select(this).select("circle").transition()
+                        .duration(750)
+                        .attr("r", 25);
                     }
                 });
             };
@@ -568,8 +601,9 @@
 
 		</div><br>
     <div id="explanation_table" style="overflow: auto; height: 200px;"></div><br>
-
+    <div id="explanation_summary" style="overflow-x: auto; height: 320px; white-space:nowrap;"></div>
     <div id="explanation_graph" style="overflow-x: auto; height: 320px; white-space:nowrap;"></div>
+
 
     </div>
 
