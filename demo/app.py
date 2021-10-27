@@ -257,15 +257,19 @@ def explanation():
     jg = joinGraph(jg_detail_list)
     print(jg)
 
-    query4 = "select distinct recall from "+resultSchemaName+".global_results"
+    query4 = "select distinct fscore from "+resultSchemaName+".global_results"
     globals()['cursor'].execute(query4)
-    recall_list = globals()['cursor'].fetchall()
+    fscore_list = globals()['cursor'].fetchall()
 
-    query5 = "select distinct precision from "+resultSchemaName+".global_results"
-    globals()['cursor'].execute(query5)
-    precision_list = globals()['cursor'].fetchall()
+    # query4 = "select distinct recall from "+resultSchemaName+".global_results"
+    # globals()['cursor'].execute(query4)
+    # recall_list = globals()['cursor'].fetchall()
+
+    # query5 = "select distinct precision from "+resultSchemaName+".global_results"
+    # globals()['cursor'].execute(query5)
+    # precision_list = globals()['cursor'].fetchall()
     
-    return jsonify(result = "success-explanation", result2 = exp_list, result3 = jg, result4 = recall_list, result5 = precision_list) #
+    return jsonify(result = "success-explanation", result2 = exp_list, result3 = jg, result4 = fscore_list) #
 
 def joinGraph(jg_detail_list):
     gd_list = [] ##

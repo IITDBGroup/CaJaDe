@@ -59,3 +59,22 @@ body::-webkit-scrollbar-thumb{
   stroke-width: 1px;
   text-anchor: middle;
 }
+
+/* */
+.line {
+  fill: none;
+  stroke: #ffab00;
+  stroke-width: 3;
+}
+.overlay {
+fill: none;
+pointer-events: all;
+}
+.dot {
+  fill: #ffab00;
+  stroke: #fff;
+}
+.focus circle {
+fill: none;
+stroke: steelblue;
+}

@@ -414,11 +414,12 @@
               exp_len = data.result2.length;
               exp_data = data.result2;
               graphData = data.result3;
-              recallData = data.result4;
-              precisionData = data.result5;
+              fscoreData = data.result4;
+              // recallData = data.result4;
+              // precisionData = data.result5;
 
               exp_table(exp_data,exp_len,graphData);
-              exp_summary(exp_len, recallData, precisionData);
+              exp_summary(exp_len, fscoreData); //exp_summary(exp_len, recallData, precisionData);
             } 
             else {
               alert("No data");
@@ -429,26 +430,73 @@
 		        alert(error);
 		      }
         })
-        function exp_summary(exp_len, recallData, precisionData){
+        function exp_summary(exp_len, fscoreData){ //(exp_len, recallData, precisionData)
           let sumHtml = "";
           var numOfExp = "The number of explanations: "+exp_len;
           sumHtml = "<table class=\"table table-bordered\" sellspacing=\"0\" width=\"90%\" id=\"exp\"><tbody>";
           sumHtml += "<tr><td style=\"text-align: left;\">Summary</td></tr>";
           sumHtml += "<tr><td style=\"text-align: left;\">1."+ numOfExp +"</td></tr>";
-          //sumHtml += "<tr><td style=\"text-align: center;\">2. Distinct Recall</td></tr>";
-          sumHtml += "<tr><td style=\"text-align: left;\">2. Distinct Recall: ";
-          for(var i=0;i<recallData.length;i++){
-            sumHtml += " | "+recallData[i];
-          }
-          sumHtml += " |</td></tr>";
-          sumHtml += "<tr><td style=\"text-align: left;\">3. Distinct Precision:";
-          for(var j=0;j<precisionData.length;j++){
-            sumHtml += " | "+precisionData[j];
-          }
-          sumHtml += " |</td></tr></tbody></table>";
-
+          // sumHtml += "<tr><td style=\"text-align: left;\">2. Distinct Recall: ";
+          // for(var i=0;i<recallData.length;i++){
+          //   sumHtml += " | "+recallData[i];
+          // }
+          // sumHtml += " |</td></tr>";
+          // sumHtml += "<tr><td style=\"text-align: left;\">3. Distinct Precision:";
+          // for(var j=0;j<precisionData.length;j++){
+          //   sumHtml += " | "+precisionData[j];
+          // }
+          // sumHtml += " |</td></tr></tbody></table>";
+          sumHtml += "</tbody></table>";
           $("#explanation_summary").empty();
           $("#explanation_summary").append(sumHtml)
+
+          
+          ///////////////////fscore-d3 graph
+          var margin = {top: 50, right: 50, bottom: 50, left: 50}, fs_width = 600, fs_height = 400;
+          var dataset = fscoreData.map((d) => {return {"y": d };});
+          var n = fscoreData.length;
+
+          var xScale = d3.scaleLinear().domain([0, n-1]).range([0, fs_width]);
+          var yScale = d3.scaleLinear().domain([0, 1]).range([fs_height, 0]);
+
+          var line = d3.line()
+                        .x(function(d, i) { return xScale(i); })
+                        .y(function(d) { return yScale(d.y); })
+                        .curve(d3.curveMonotoneX);
+
+          var svg = d3.select("#explanation_summary").append("svg")
+                      .attr("width", fs_width + margin.left + margin.right)
+                      .attr("height", fs_height + margin.top + margin.bottom)
+                      .append("g")
+                      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+          svg.append("g")
+              .attr("class", "x axis")
+              .attr("transform", "translate(0," + fs_height + ")")
+              .call(d3.axisBottom(xScale));
+
+          svg.append("g").attr("class", "y axis").call(d3.axisLeft(yScale));
+
+          svg.append("path").datum(dataset).attr("class", "line").attr("d", line);
+          svg.append("text").attr("x", (fs_width/2)).attr("y", 0-(margin.top/2)).attr("text-anchor", "middle")
+              .style("font-size", "15px").text("F Score");
+
+          svg.selectAll(".dot")
+              .data(dataset)
+              .enter().append("circle")
+              .attr("class", "dot")
+              .attr("cx", function(d, i) { return xScale(i) })
+              .attr("cy", function(d) { return yScale(d.y) })
+              .attr("r", 5);
+            //   .on("mouseover", function(a, b, c) { 
+            // 		console.log(a) 
+            //     this.attr('class', 'focus')
+            // 	})
+            //   .on("mouseout", function() {  });
+            //   .on("mousemove", mousemove);
+
+          var focus = svg.append("g").attr("class", "focus").style("display", "none");
+          ///////////////////////////////////////////////////////////////////////////////////////////
         }
 
         function exp_table(exp_data,exp_len,graphData){          
@@ -617,7 +665,7 @@
 
 		</div><br>
     <div id="explanation_table" style="overflow: auto; height: 200px; margin-bottom: 20px;"></div><br><br><br>
-    <div id="explanation_summary" style="overflow-x: auto; height: 185px; white-space:nowrap; margin-bottom: 20px;"></div>
+    <div id="explanation_summary" style="overflow-x: auto; height: 600px; white-space:nowrap; margin-bottom: 20px;"></div>
     <div id="explanation_graph" style="overflow-x: auto; height: 320px; white-space:nowrap; margin-bottom: 20px;"></div>
 
 
