@@ -448,10 +448,9 @@
           // sumHtml += " |</td></tr></tbody></table>";
           sumHtml += "</tbody></table>";
           $("#explanation_summary").empty();
-          $("#explanation_summary").append(sumHtml)
+          $("#explanation_summary").append(sumHtml);
 
-          
-          ///////////////////fscore-d3 graph
+          //////////////////fscor-d3 scatter plot
           var margin = {top: 50, right: 50, bottom: 50, left: 50}, fs_width = 600, fs_height = 400;
           var dataset = fscoreData.map((d) => {return {"y": d };});
           var n = fscoreData.length;
@@ -459,44 +458,46 @@
           var xScale = d3.scaleLinear().domain([0, n-1]).range([0, fs_width]);
           var yScale = d3.scaleLinear().domain([0, 1]).range([fs_height, 0]);
 
-          var line = d3.line()
-                        .x(function(d, i) { return xScale(i); })
-                        .y(function(d) { return yScale(d.y); })
-                        .curve(d3.curveMonotoneX);
-
-          var svg = d3.select("#explanation_summary").append("svg")
+          var svg = d3.select("#explanation_summary")
+                      .append("svg")
                       .attr("width", fs_width + margin.left + margin.right)
                       .attr("height", fs_height + margin.top + margin.bottom)
                       .append("g")
-                      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
+                      .attr("transform","translate(" + margin.left + "," + margin.top + ")");
           svg.append("g")
               .attr("class", "x axis")
               .attr("transform", "translate(0," + fs_height + ")")
               .call(d3.axisBottom(xScale));
-
           svg.append("g").attr("class", "y axis").call(d3.axisLeft(yScale));
-
-          svg.append("path").datum(dataset).attr("class", "line").attr("d", line);
           svg.append("text").attr("x", (fs_width/2)).attr("y", 0-(margin.top/2)).attr("text-anchor", "middle")
-              .style("font-size", "15px").text("F Score");
-
-          svg.selectAll(".dot")
-              .data(dataset)
-              .enter().append("circle")
-              .attr("class", "dot")
-              .attr("cx", function(d, i) { return xScale(i) })
-              .attr("cy", function(d) { return yScale(d.y) })
-              .attr("r", 5);
-            //   .on("mouseover", function(a, b, c) { 
-            // 		console.log(a) 
-            //     this.attr('class', 'focus')
-            // 	})
-            //   .on("mouseout", function() {  });
-            //   .on("mousemove", mousemove);
-
-          var focus = svg.append("g").attr("class", "focus").style("display", "none");
-          ///////////////////////////////////////////////////////////////////////////////////////////
+             .style("font-size", "15px").text("F Score");
+          var tooltip = d3.select("#explanation_summary")
+                        .append("div")
+                        .attr("class", "tooltip")
+                        .style("background-color", "#a7a7a7")
+                        .style("color", "white")
+                        .style("border-width", "1px")
+                        .style("border-radius", "5px")
+                        .style("padding", "10px")
+                        .style("position", "absolute")
+                        .style("visibility", "hidden");
+          var mouseover = function(d) {tooltip.style("opacity", 1).style("visibility", "visible").text(d.y) };
+          var mousemove = function(d) {tooltip.style("top", (d3.event.pageY - 10) + "px").style("left", (d3.event.pageX + 10) + "px")};
+          var mouseout = function(d) { tooltip.style("opacity", 0).style("visibility", "hidden") };
+          svg.append('g')
+            .selectAll("dot")
+            .data(dataset)
+            .enter()
+            .append("circle")
+            .attr("cx", function(d, i) { return xScale(i) })
+            .attr("cy", function(d) { return yScale(d.y) })
+            .attr("r", 10)
+            .style("fill", "#ffab00")
+            .style("opacity", 0.5)
+            .style("stroke", "white")
+            .on("mouseover", mouseover )
+            .on("mousemove", mousemove )
+            .on("mouseout", mouseout );
         }
 
         function exp_table(exp_data,exp_len,graphData){          
