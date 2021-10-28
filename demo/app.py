@@ -269,7 +269,7 @@ def explanation():
     # globals()['cursor'].execute(query5)
     # precision_list = globals()['cursor'].fetchall()
     
-    return jsonify(result = "success-explanation", result2 = exp_list, result3 = jg, result4 = fscore_list) #
+    return jsonify(result = "success-explanation", result2 = exp_list, result3 = jg, result4 = fscore_list)
 
 def joinGraph(jg_detail_list):
     gd_list = [] ##
@@ -292,7 +292,7 @@ def joinGraph(jg_detail_list):
             node_list.append(nodeName) #'PT'
             graphData['nodes'].append({"name": nodeName}) #"PT"
             graphData['links'].clear()
-            #graphData['links'].append({"source": two_nodes[0], "target": two_nodes[1] })
+
         else:
             if '|' not in jg_tmp:
                 getNodes = jg_tmp.split('cond')
@@ -306,7 +306,7 @@ def joinGraph(jg_detail_list):
                         node_list.append(nodeName)
                         graphData['nodes'].append({"name": nodeName})
                     two_nodes.append(nodeName)
-                graphData['links'].append({"source": two_nodes[0], "target": two_nodes[1] })
+                graphData['links'].append({"source": two_nodes[0], "target": two_nodes[1], "cond": getJGcondition(getNodes[1])})
             else:
                 getNodes = jg_tmp.split('|')
                 for i in range(0, len(getNodes)):
@@ -323,14 +323,18 @@ def joinGraph(jg_detail_list):
                                 node_list.append(nodeName)
                                 graphData['nodes'].append({"name": nodeName})
                         
-                            two_nodes.append(nodeName)                  
+                            two_nodes.append(nodeName)
+                        else:
+                             jg_condition = nodes[j]          
                 
-                    graphData['links'].append({"source": two_nodes[0], "target": two_nodes[1] })
-        gd_list.append(graphData) ##
-    return gd_list ##
-    #return graphData
-            
-         
+                    graphData['links'].append({"source": two_nodes[0], "target": two_nodes[1], "cond": getJGcondition(jg_condition) })
+        gd_list.append(graphData)
+    return gd_list
+
+def getJGcondition(tmp_cond):
+    tmp = tmp_cond.split(' ')
+    jgCondition = tmp[len(tmp)-1]
+    return jgCondition
 
 
 def convert_to_graph_json(ll):

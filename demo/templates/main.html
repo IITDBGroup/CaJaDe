@@ -542,7 +542,10 @@
                         .enter()
                         .append("line")
                         .attr("stroke-width", 5)
-                        .attr("stroke", "#999");
+                        .attr("stroke", "#999")
+                        .on("mouseover", mouseover) ////
+                        .on("mouseout", mouseout) ////
+                        .on("mousemove", mousemove); ////
 
                     var drag = d3
                         .drag()
@@ -555,26 +558,26 @@
                         .data(graph.nodes)
                         .enter()
                         .append("g")
-                        .on("mouseover", mouseover) ////
-                        .on("mouseout", mouseout) ////
-                        .on("mousemove", mousemove) ////
+                        .call(drag);
+                        // .on("mouseover", mouseover) ////
+                        // .on("mouseout", mouseout) ////
+                        // .on("mousemove", mousemove) ////
                         // .on("mouseover", () => (tooltip.style("visibility", "visible").text("Circle!")))
                         // .on("mousemove", () => (tooltip.style("top", (d3.event.pageY - 10) + "px").style("left", (d3.event.pageX + 10) + "px")))
                         // .on("mouseout", () => (tooltip.style("visibility", "hidden")))
-                        .call(drag);
-                    var circles = nodes_with_text
-                        .append("circle")
-                        .attr("r", 25)
-                        .attr("fill", "#6fbc5b");
-                    var texts = nodes_with_text
-                        .append("text")
-                        .text(function(d){ return d.name})
-                        .style("text-anchor", "middle")
-                        .attr("class", "node-label");
+                        
+                    var circles = nodes_with_text.append("circle").attr("r", 25).attr("fill", "#6fbc5b");
+                    var texts = nodes_with_text.append("text").text(function(d){ return d.name})
+                                                .style("text-anchor", "middle").attr("class", "node-label");
                     var tooltip = d3.select("#explanation_graph")
                                     .append("div")
                                     .style("position", "absolute")
-                                    .style("visibility", "hidden");
+                                    .style("visibility", "hidden")
+                                    .style("background-color", "#a7a7a7")
+                                    .style("color", "white")
+                                    .style("border-width", "1px")
+                                    .style("border-radius", "5px")
+                                    .style("padding", "10px");
 
                     simulation.on("tick", function() {
                         link
@@ -601,21 +604,12 @@
                         d.fx = null;
                         d.fy = null;
                     }
-                    function mouseover() {
-                      d3.select(this).select("circle").transition()
-                        .duration(750)
-                        .attr("r", 35);
-                      tooltip.style("visibility", "visible").text("I'm a circle!");
+                    function mouseover(d) {
+                      ////tooltip.style("visibility", "visible").text("I'm a circle!");
+                      tooltip.style("visibility", "visible").text(d.cond);
                     }
-                    function mouseout() {
-                      d3.select(this).select("circle").transition()
-                        .duration(750)
-                        .attr("r", 25);
-                      tooltip.style("visibility", "hidden");
-                    }
-                    function mousemove(){
-                      tooltip.style("top", (d3.event.pageY - 10) + "px").style("left", (d3.event.pageX + 10) + "px");
-                    }
+                    function mouseout() { tooltip.style("visibility", "hidden"); }
+                    function mousemove(){ tooltip.style("top", (d3.event.pageY - 10) + "px").style("left", (d3.event.pageX + 10) + "px"); }
                 });
             };
           })(jQuery);
