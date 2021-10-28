@@ -419,7 +419,7 @@
               // precisionData = data.result5;
 
               exp_table(exp_data,exp_len,graphData);
-              exp_summary(exp_len, fscoreData); //exp_summary(exp_len, recallData, precisionData);
+              exp_summary(exp_data, exp_len, fscoreData); //exp_summary(exp_len, recallData, precisionData);
             } 
             else {
               alert("No data");
@@ -430,7 +430,7 @@
 		        alert(error);
 		      }
         })
-        function exp_summary(exp_len, fscoreData){ //(exp_len, recallData, precisionData)
+        function exp_summary(exp_data, exp_len, fscoreData){ //(exp_len, recallData, precisionData)
           let sumHtml = "";
           var numOfExp = "The number of explanations: "+exp_len;
           sumHtml = "<table class=\"table table-bordered\" sellspacing=\"0\" width=\"90%\" id=\"exp\"><tbody>";
@@ -452,7 +452,14 @@
 
           //////////////////fscor-d3 scatter plot
           var margin = {top: 50, right: 50, bottom: 50, left: 50}, fs_width = 600, fs_height = 400;
-          var dataset = fscoreData.map((d) => {return {"y": d };});
+          //var dataset = fscoreData.map((d) => {return {"y": d };});
+          var dataset = [];
+          fscoreData.forEach(function(key,i){
+            var obj = new Object();
+            obj['x'] = exp_data[i]; obj['y'] = fscoreData[i];
+            dataset.push(obj);
+          });
+
           var n = fscoreData.length;
 
           var xScale = d3.scaleLinear().domain([0, n-1]).range([0, fs_width]);
@@ -481,7 +488,7 @@
                         .style("padding", "10px")
                         .style("position", "absolute")
                         .style("visibility", "hidden");
-          var mouseover = function(d) {tooltip.style("opacity", 1).style("visibility", "visible").text(d.y) };
+          var mouseover = function(d) {tooltip.style("opacity", 1).style("visibility", "visible").text(d.x) };
           var mousemove = function(d) {tooltip.style("top", (d3.event.pageY - 10) + "px").style("left", (d3.event.pageX + 10) + "px")};
           var mouseout = function(d) { tooltip.style("opacity", 0).style("visibility", "hidden") };
           svg.append('g')

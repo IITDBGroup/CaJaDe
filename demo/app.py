@@ -257,7 +257,7 @@ def explanation():
     jg = joinGraph(jg_detail_list)
     print(jg)
 
-    query4 = "select distinct fscore from "+resultSchemaName+".global_results"
+    query4 = "select fscore from "+resultSchemaName+".global_results" #distinct fscore
     globals()['cursor'].execute(query4)
     fscore_list = globals()['cursor'].fetchall()
 
