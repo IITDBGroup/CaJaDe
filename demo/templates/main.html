@@ -415,11 +415,12 @@
               exp_data = data.result2;
               graphData = data.result3;
               fscoreData = data.result4;
+              summaryData = data.result5; ////
               // recallData = data.result4;
               // precisionData = data.result5;
 
-              exp_table(exp_data,exp_len,graphData);
-              exp_summary(exp_data, exp_len, fscoreData); //exp_summary(exp_len, recallData, precisionData);
+              //exp_table(exp_data,exp_len,graphData);
+              exp_summary(summaryData, exp_data, exp_len, graphData); //exp_summary(summaryData, exp_data, exp_len, fscoreData); 
             } 
             else {
               alert("No data");
@@ -430,33 +431,34 @@
 		        alert(error);
 		      }
         })
-        function exp_summary(exp_data, exp_len, fscoreData){ //(exp_len, recallData, precisionData)
+        function getJGid(tmp_id){
+          tmp = tmp_id.split(' ')
+          jgID = tmp[0]
+          return jgID
+        }
+        function exp_summary(summaryData, exp_data, exp_len, graphData){ //(exp_len, recallData, precisionData)
           let sumHtml = "";
           var numOfExp = "The number of explanations: "+exp_len;
           sumHtml = "<table class=\"table table-bordered\" sellspacing=\"0\" width=\"90%\" id=\"exp\"><tbody>";
           sumHtml += "<tr><td style=\"text-align: left;\">Summary</td></tr>";
           sumHtml += "<tr><td style=\"text-align: left;\">1."+ numOfExp +"</td></tr>";
-          // sumHtml += "<tr><td style=\"text-align: left;\">2. Distinct Recall: ";
-          // for(var i=0;i<recallData.length;i++){
-          //   sumHtml += " | "+recallData[i];
-          // }
-          // sumHtml += " |</td></tr>";
-          // sumHtml += "<tr><td style=\"text-align: left;\">3. Distinct Precision:";
-          // for(var j=0;j<precisionData.length;j++){
-          //   sumHtml += " | "+precisionData[j];
-          // }
-          // sumHtml += " |</td></tr></tbody></table>";
           sumHtml += "</tbody></table>";
           $("#explanation_summary").empty();
           $("#explanation_summary").append(sumHtml);
 
-          //////////////////fscor-d3 scatter plot
-          var margin = {top: 50, right: 50, bottom: 50, left: 50}, fs_width = 600, fs_height = 400;
+          //////////////////fscor-d3 scatter plot//////////////////
+          var margin = {top: 50, right: 50, bottom: 50, left: 50}, fs_width = 800, fs_height = 600;
           //var dataset = fscoreData.map((d) => {return {"y": d };});
+          var fscoreData = [];
+          for(var i=0;i<summaryData.length;i++){
+            fscoreData.push(summaryData[i][1]);
+          }
+
           var dataset = [];
           fscoreData.forEach(function(key,i){
             var obj = new Object();
-            obj['x'] = exp_data[i]; obj['y'] = fscoreData[i];
+            obj['x'] = summaryData[i][2]; obj['y'] = fscoreData[i]; obj['id'] = getJGid(summaryData[i][0]);
+            //obj['x'] = exp_data[i]; obj['y'] = fscoreData[i]; //obj['id'] = jg_id[i];
             dataset.push(obj);
           });
 
@@ -491,7 +493,7 @@
           var mouseover = function(d) {tooltip.style("opacity", 1).style("visibility", "visible").text(d.x) };
           var mousemove = function(d) {tooltip.style("top", (d3.event.pageY - 10) + "px").style("left", (d3.event.pageX + 10) + "px")};
           var mouseout = function(d) { tooltip.style("opacity", 0).style("visibility", "hidden") };
-          svg.append('g')
+          var dots =svg.append('g')
             .selectAll("dot")
             .data(dataset)
             .enter()
@@ -505,9 +507,9 @@
             .on("mouseover", mouseover )
             .on("mousemove", mousemove )
             .on("mouseout", mouseout );
-        }
+        // }
 
-        function exp_table(exp_data,exp_len,graphData){          
+        // function exp_table(exp_data,exp_len,graphData){          
           let expHtml = "";
 
           expHtml = "<table class=\"table table-bordered\" sellspacing=\"0\" width=\"90%\" id=\"exp\">";
@@ -534,7 +536,12 @@
                     var svg = d3.select("#explanation_graph")       
                         .append("svg")
                         .attr("width", width)
-                        .attr("height", height);
+                        .attr("height", height)//;
+                        .data(graph.nodes) //
+                        .style("background-color", "white")
+                        .on("mouseenter", mouseenter)
+                        .on("mouseleave", mouseleave)
+                        .on('click', click);
 
                     var simulation = d3
                         .forceSimulation(graph.nodes)
@@ -566,12 +573,6 @@
                         .enter()
                         .append("g")
                         .call(drag);
-                        // .on("mouseover", mouseover) ////
-                        // .on("mouseout", mouseout) ////
-                        // .on("mousemove", mousemove) ////
-                        // .on("mouseover", () => (tooltip.style("visibility", "visible").text("Circle!")))
-                        // .on("mousemove", () => (tooltip.style("top", (d3.event.pageY - 10) + "px").style("left", (d3.event.pageX + 10) + "px")))
-                        // .on("mouseout", () => (tooltip.style("visibility", "hidden")))
                         
                     var circles = nodes_with_text.append("circle").attr("r", 25).attr("fill", "#6fbc5b");
                     var texts = nodes_with_text.append("text").text(function(d){ return d.name})
@@ -612,11 +613,31 @@
                         d.fy = null;
                     }
                     function mouseover(d) {
-                      ////tooltip.style("visibility", "visible").text("I'm a circle!");
                       tooltip.style("visibility", "visible").text(d.cond);
                     }
                     function mouseout() { tooltip.style("visibility", "hidden"); }
                     function mousemove(){ tooltip.style("top", (d3.event.pageY - 10) + "px").style("left", (d3.event.pageX + 10) + "px"); }
+                    ///click function
+                    function click(d){
+                      console.log("clicked!", d.id);
+                        id = d.id;
+                        ////
+                        dots.style("fill", function(d,i){
+                            if(d.id == id){
+                                return "blue";
+                            } else{
+                                return "#ffab00";
+                            }
+
+                        }).style("visibility", "visible");
+                      //tooltip.style("visibility", "visible").text("clicked: ", d.id);
+                    }
+                    function mouseenter(){
+                        svg.style("background-color", "#ffd889");
+                    }
+                    function mouseleave(){
+                        svg.style("background-color", "white");
+                    }
                 });
             };
           })(jQuery);
@@ -667,7 +688,7 @@
 
 		</div><br>
     <div id="explanation_table" style="overflow: auto; height: 200px; margin-bottom: 20px;"></div><br><br><br>
-    <div id="explanation_summary" style="overflow-x: auto; height: 600px; white-space:nowrap; margin-bottom: 20px;"></div>
+    <div id="explanation_summary" style="overflow-x: auto; height: 800px; white-space:nowrap; margin-bottom: 20px;"></div>
     <div id="explanation_graph" style="overflow-x: auto; height: 320px; white-space:nowrap; margin-bottom: 20px;"></div>
 
 

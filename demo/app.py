@@ -254,12 +254,16 @@ def explanation():
     query3 = "select distinct jg_details from "+resultSchemaName+".global_results"
     globals()['cursor'].execute(query3)
     jg_detail_list = globals()['cursor'].fetchall()
-    jg = joinGraph(jg_detail_list)
+    jg = getJoinGraph(jg_detail_list)
     print(jg)
 
     query4 = "select fscore from "+resultSchemaName+".global_results" #distinct fscore
     globals()['cursor'].execute(query4)
     fscore_list = globals()['cursor'].fetchall()
+
+    query5 = "select jg_details, fscore, p_desc from "+resultSchemaName+".global_results"
+    globals()['cursor'].execute(query5)
+    test_list = globals()['cursor'].fetchall()
 
     # query4 = "select distinct recall from "+resultSchemaName+".global_results"
     # globals()['cursor'].execute(query4)
@@ -269,9 +273,16 @@ def explanation():
     # globals()['cursor'].execute(query5)
     # precision_list = globals()['cursor'].fetchall()
     
-    return jsonify(result = "success-explanation", result2 = exp_list, result3 = jg, result4 = fscore_list)
+    return jsonify(result = "success-explanation", result2 = exp_list, result3 = jg, result4 = fscore_list, result5 = test_list)
+# def getTestList(test_list):
+#     for i in range(0, len(test_list)):
+#         tmpList = test_list[i][0]
+#         jgid = getJGid(tmpList)
+        
 
-def joinGraph(jg_detail_list):
+
+
+def getJoinGraph(jg_detail_list):
     gd_list = [] ##
     graphData = {"nodes":[], "links":[]}
     node_list = []
@@ -290,7 +301,7 @@ def joinGraph(jg_detail_list):
             print("nodeName:")
             print(nodeName)
             node_list.append(nodeName) #'PT'
-            graphData['nodes'].append({"name": nodeName}) #"PT"
+            graphData['nodes'].append({"name": nodeName, "id": getJGid(jg_tmp)}) #"PT"
             graphData['links'].clear()
 
         else:
@@ -304,11 +315,12 @@ def joinGraph(jg_detail_list):
 
                     if nodeName not in node_list:
                         node_list.append(nodeName)
-                        graphData['nodes'].append({"name": nodeName})
+                        graphData['nodes'].append({"name": nodeName, "id": getJGid(getNodes[0])})
                     two_nodes.append(nodeName)
                 graphData['links'].append({"source": two_nodes[0], "target": two_nodes[1], "cond": getJGcondition(getNodes[1])})
             else:
                 getNodes = jg_tmp.split('|')
+                jgID = getJGid(getNodes[0])
                 for i in range(0, len(getNodes)):
                     nodes = getNodes[i].split(',')
                     two_nodes = []
@@ -321,7 +333,7 @@ def joinGraph(jg_detail_list):
 
                             if nodeName not in node_list:
                                 node_list.append(nodeName)
-                                graphData['nodes'].append({"name": nodeName})
+                                graphData['nodes'].append({"name": nodeName, "id": jgID})
                         
                             two_nodes.append(nodeName)
                         else:
@@ -330,6 +342,11 @@ def joinGraph(jg_detail_list):
                     graphData['links'].append({"source": two_nodes[0], "target": two_nodes[1], "cond": getJGcondition(jg_condition) })
         gd_list.append(graphData)
     return gd_list
+
+def getJGid(tmp_jgID):
+    tmp = tmp_jgID.split(' ')
+    jgID = tmp[0]
+    return jgID
 
 def getJGcondition(tmp_cond):
     tmp = tmp_cond.split(' ')
