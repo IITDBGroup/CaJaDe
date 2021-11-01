@@ -612,38 +612,77 @@
                         d.fx = null;
                         d.fy = null;
                     }
-                    function mouseover(d) {
-                      tooltip.style("visibility", "visible").text(d.cond);
-                    }
+                    function mouseover(d) { tooltip.style("visibility", "visible").text(d.cond); }
                     function mouseout() { tooltip.style("visibility", "hidden"); }
                     function mousemove(){ tooltip.style("top", (d3.event.pageY - 10) + "px").style("left", (d3.event.pageX + 10) + "px"); }
                     ///click function
                     function click(d){
                       console.log("clicked!", d.id);
                         id = d.id;
-                        ////
                         dots.style("fill", function(d,i){
-                            if(d.id == id){
-                                return "blue";
-                            } else{
-                                return "#ffab00";
-                            }
-
-                        }).style("visibility", "visible");
+                            if(d.id == id){ return "blue";} 
+                            else{ return "#ffab00";}}).style("visibility", "visible");
                       //tooltip.style("visibility", "visible").text("clicked: ", d.id);
+                      let sumHtml = "";
+                      sumHtml = "<table class=\"table table-bordered\" sellspacing=\"0\" width=\"90%\" id=\"exp\"><tbody>";
+                      sumHtml += "<tr><td style=\"text-align: left;\">Selected Join Graph</td></tr>";
+                      sumHtml += "<tr><td style=\"text-align: left;\">1.</td></tr>";
+                      sumHtml += "</tbody></table>";
+                      $("#selectedJGexpl").empty();
+                      $("#selectedJGexpl").append(sumHtml);
+                      selectedJG(id);
                     }
-                    function mouseenter(){
-                        svg.style("background-color", "#ffd889");
-                    }
-                    function mouseleave(){
-                        svg.style("background-color", "white");
-                    }
+                    function mouseenter(){ svg.style("background-color", "#ffd889"); }
+                    function mouseleave(){ svg.style("background-color", "white"); }
                 });
             };
           })(jQuery);
 
           var svgTest = d3.select("#explanation_graph");
           $(Data).generateMultiForce(svgTest);
+          ////
+          function selectedJG(id){
+            console.log("selectedJGexpl id: ",id);
+            //
+            for(var i=0;i<Data.length;i++){
+              if(Data[i]["nodes"][0]["id"] == id){
+                    selectedDataIndex = i;
+
+                    var svg = d3.select("#selectedJGexpl").append("svg").attr("width", width).attr("height", height)
+                                .data(Data[selectedDataIndex]["nodes"]).style("background-color", "#b3ccff");
+                    var simulation = d3.forceSimulation(Data[selectedDataIndex]["nodes"])
+                                      .force("charge", d3.forceManyBody().strength(-1500))
+                                      .force("center", d3.forceCenter(width / 2, height / 2))
+                                      .force("link", d3.forceLink(Data[selectedDataIndex]["links"]).id(d => d.name));
+                    var link =  svg.append("g").selectAll("line").data(Data[selectedDataIndex]["links"]).enter()
+                                  .append("line").attr("stroke-width", 5).attr("stroke", "#999")
+                                  .on("mouseover", mouseover).on("mouseout", mouseout).on("mousemove", mousemove);
+                    var drag = d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended);
+                    var nodes_with_text = svg.append("g").selectAll("g").data(Data[selectedDataIndex]["nodes"])
+                                              .enter().append("g").call(drag);
+                    var circles = nodes_with_text.append("circle").attr("r", 25).attr("fill", "#6fbc5b");
+                    var texts = nodes_with_text.append("text").text(function(d){ return d.name})
+                                                .style("text-anchor", "middle").attr("class", "node-label");
+                    var tooltipp = d3.select("#selectedJGexpl").append("div").style("position", "absolute")
+                                      .style("visibility", "hidden").style("background-color", "#a7a7a7")
+                                      .style("color", "white").style("border-width", "1px")
+                                      .style("border-radius", "5px").style("padding", "10px");
+                    simulation.on("tick", function() {
+                        link.attr("x1", function(d) { return d.source.x; }).attr("y1", function(d) { return d.source.y; })
+                            .attr("x2", function(d) { return d.target.x; }).attr("y2", function(d) { return d.target.y; });
+
+                        nodes_with_text.attr("transform", function(d) { return "translate("+d.x+","+d.y+")"; });
+                    });
+                    function dragstarted(d) { simulation.alphaTarget(0.3).restart(); d.fx = d3.event.x; d.fy = d3.event.y; }
+                    function dragged(d) { d.fx = d3.event.x; d.fy = d3.event.y; }
+                    function dragended(d) { simulation.alphaTarget(0); d.fx = null; d.fy = null; }
+                    function mouseover(d) { tooltipp.style("visibility", "visible").text(d.cond); }
+                    function mouseout() { tooltipp.style("visibility", "hidden"); }
+                    function mousemove(){ tooltipp.style("top", (d3.event.pageY - 10) + "px").style("left", (d3.event.pageX + 10) + "px"); }
+              }
+            }  
+                    
+          }
         }
       }     
 		</script>
@@ -688,7 +727,7 @@
 
 		</div><br>
     <div id="explanation_table" style="overflow: auto; height: 200px; margin-bottom: 20px;"></div><br><br><br>
-    <div id="explanation_summary" style="overflow-x: auto; height: 800px; white-space:nowrap; margin-bottom: 20px;"></div>
+    <div id="explanation_summary" style="overflow-x: auto; height: 820px; white-space:nowrap; margin-bottom: 20px;text-align:center;"></div>
     <div id="explanation_graph" style="overflow-x: auto; height: 320px; white-space:nowrap; margin-bottom: 20px;"></div>
 
 
@@ -698,6 +737,8 @@
     <div class="col-md-3"> 
       <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <div id="schemagraph"></div>
+      </div>
+        <div id="selectedJGexpl" style="margin-top: 50px;"></div> <!----->
         <script>
           var svg = d3.select("#schemagraph")            
             .append("svg")
@@ -826,7 +867,7 @@
           </script>
 
         </script>
-      </div>
+      <!--</div> -->
     </div>
 </div>    
 </body>
