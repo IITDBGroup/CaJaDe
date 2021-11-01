@@ -12,6 +12,7 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.11.0/d3.min.js"></script>
   <script src="https://d3js.org/d3-selection-multi.v1.js"></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js'></script>
 	<link rel="stylesheet" href='../static/main.css'>
   <!-- <link rel="stylesheet" type="text/css" href="static/main.css"> -->
 	
@@ -416,6 +417,7 @@
               graphData = data.result3;
               fscoreData = data.result4;
               summaryData = data.result5; ////
+              highlightTextList = data.result6;
               // recallData = data.result4;
               // precisionData = data.result5;
 
@@ -522,6 +524,15 @@
 
           $("#explanation_table").empty();
 		      $("#explanation_table").append(expHtml);
+          /////
+          ///var keywordList = ['PT_1'];
+          for(var i=0;i<highlightTextList.length;i++){
+            var keyword = highlightTextList[i];
+            $('#explanation_table').mark(keyword, {
+                "element": "span",
+                "className": "table_highlight"
+            });
+          }
 
           /////////////////////////////////////////////////////////////
           var Data = graphData;
@@ -619,14 +630,15 @@
                     function click(d){
                       console.log("clicked!", d.id);
                         id = d.id;
+                        let fscoreY ="";
                         dots.style("fill", function(d,i){
-                            if(d.id == id){ return "blue";} 
+                            if(d.id == id){ fscoreY += " | "+d.y; return "blue";} 
                             else{ return "#ffab00";}}).style("visibility", "visible");
                       //tooltip.style("visibility", "visible").text("clicked: ", d.id);
                       let sumHtml = "";
                       sumHtml = "<table class=\"table table-bordered\" sellspacing=\"0\" width=\"90%\" id=\"exp\"><tbody>";
                       sumHtml += "<tr><td style=\"text-align: left;\">Selected Join Graph</td></tr>";
-                      sumHtml += "<tr><td style=\"text-align: left;\">1.</td></tr>";
+                      sumHtml += "<tr><td style=\"text-align: left;\">1. Corresponding Fscore:"+fscoreY+"</td></tr>";
                       sumHtml += "</tbody></table>";
                       $("#selectedJGexpl").empty();
                       $("#selectedJGexpl").append(sumHtml);
@@ -867,6 +879,12 @@
           </script>
 
         </script>
+
+        <style>
+          .table_highlight{
+              background-color: #f9ed69;
+          }
+        </style>
       <!--</div> -->
     </div>
 </div>    

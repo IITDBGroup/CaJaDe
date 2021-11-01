@@ -249,6 +249,7 @@ def explanation():
     query2 = "select p_desc from "+resultSchemaName+".global_results"
     globals()['cursor'].execute(query2)
     exp_list = globals()['cursor'].fetchall()
+    highlight_list = getHighlightTexts(exp_list)
 
     #query3 = "select distinct jg_details from oct11.global_results"
     query3 = "select distinct jg_details from "+resultSchemaName+".global_results"
@@ -273,14 +274,24 @@ def explanation():
     # globals()['cursor'].execute(query5)
     # precision_list = globals()['cursor'].fetchall()
     
-    return jsonify(result = "success-explanation", result2 = exp_list, result3 = jg, result4 = fscore_list, result5 = test_list)
+    return jsonify(result = "success-explanation", result2 = exp_list, result3 = jg, result4 = fscore_list, result5 = test_list, result6 = highlight_list)
 # def getTestList(test_list):
 #     for i in range(0, len(test_list)):
 #         tmpList = test_list[i][0]
 #         jgid = getJGid(tmpList)
         
+def getHighlightTexts(exp_list):
+    highlightTxtList = []
+    for i in range(0, len(exp_list)):
+        tmp = str(exp_list[i])
+        split_comma = tmp.split(',')
+        for j in range(0, len(split_comma)):
+            tmp_line = split_comma[j]
+            get_text = tmp_line.split('.')[0]
+            if get_text not in highlightTxtList:
+                highlightTxtList.append(get_text)
 
-
+    return highlightTxtList
 
 def getJoinGraph(jg_detail_list):
     gd_list = [] ##
