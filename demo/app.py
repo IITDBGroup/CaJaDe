@@ -309,13 +309,13 @@ def getJoinGraph(jg_detail_list):
         node_list = []
         jg_tmp = str(jg_detail_list[i]) #test for the first jg #str(jg_detail_list[0])
         jg_tmp = jg_tmp.split('\'')[1] 
-        print("jg_tmp:")
-        print(jg_tmp)
+        # print("jg_tmp:")
+        # print(jg_tmp)
 
         if 'cond' not in jg_tmp:
             nodeName = 'PT'
-            print("nodeName:")
-            print(nodeName)
+            # print("nodeName:")
+            # print(nodeName)
             node_list.append(nodeName) #'PT'
             graphData['nodes'].append({"name": nodeName, "id": getJGid(jg_tmp)}) #"PT"
             graphData['links'].clear()
@@ -333,7 +333,8 @@ def getJoinGraph(jg_detail_list):
                         node_list.append(nodeName)
                         graphData['nodes'].append({"name": nodeName, "id": getJGid(getNodes[0])})
                     two_nodes.append(nodeName)
-                graphData['links'].append({"source": two_nodes[0], "target": two_nodes[1], "cond": getJGcondition(getNodes[1])})
+                print('@@@@node_list: ', node_list)
+                graphData['links'].append({"source": two_nodes[0], "target": two_nodes[1], "cond": getJGcondition(getNodes[1],node_list)})
             else:
                 getNodes = jg_tmp.split('|')
                 jgID = getJGid(getNodes[0])
@@ -354,14 +355,14 @@ def getJoinGraph(jg_detail_list):
                             two_nodes.append(nodeName)
                         else:
                              jg_condition = nodes[j]          
-                
-                    graphData['links'].append({"source": two_nodes[0], "target": two_nodes[1], "cond": getJGcondition(jg_condition) })
+                    print('!!!!node_list: ', node_list)
+                    graphData['links'].append({"source": two_nodes[0], "target": two_nodes[1], "cond": getJGcondition(jg_condition, node_list) })
         gd_list.append(graphData)
-        print('node_list: ', node_list)
+        # print('node_list: ', node_list)
         for node in node_list:
             if node not in nodesNameList:
                 nodesNameList.append(node)
-        print('nodesNameList: ', nodesNameList)
+        # print('nodesNameList: ', nodesNameList)
     return gd_list
 
 def getJGid(tmp_jgID):
@@ -369,9 +370,14 @@ def getJGid(tmp_jgID):
     jgID = tmp[0]
     return jgID
 
-def getJGcondition(tmp_cond):
+def getJGcondition(tmp_cond, node_list): ################
     tmp = tmp_cond.split(' ')
     jgCondition = tmp[len(tmp)-1]
+    index = 1
+    for node_name in node_list:
+        replace_name = 'A_'+ str(index)
+        jgCondition = jgCondition.replace(replace_name, node_name)
+        index += 1
     return jgCondition
 
 
