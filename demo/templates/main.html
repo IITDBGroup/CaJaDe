@@ -418,6 +418,7 @@
               fscoreData = data.result4;
               summaryData = data.result5; ////
               highlightTextList = data.result6;
+              node_list = data.result7;
               // recallData = data.result4;
               // precisionData = data.result5;
 
@@ -524,7 +525,7 @@
 
           $("#explanation_table").empty();
 		      $("#explanation_table").append(expHtml);
-          /////
+          /////<Highlight Text>
           ///var keywordList = ['PT_1'];
           for(var i=0;i<highlightTextList.length;i++){
             var keyword = highlightTextList[i];
@@ -533,7 +534,59 @@
                 "className": "table_highlight"
             });
           }
+          /////<Node color>
+          var node_length = node_list.length;
+          node_color_list = [];
 
+          function generateRandomColor(node_length) {
+            while(node_color_list.length <= node_length){
+                var hue = Math.floor(Math.random() * 360);
+                var pastel = 'hsl(' + hue + ', 100%, 80%)';
+                if(node_color_list.indexOf(pastel) == -1){
+                    node_color_list.push(pastel);
+                }
+            }
+          }
+
+          generateRandomColor(node_length);
+
+          var color_index = -1;
+          var color_matching = [];
+
+          for(var i=0;i<graphData.length;i++){
+              tmp = graphData[i]["nodes"];
+              for(var j=0;j<tmp.length;j++){
+                  var obj = tmp[j];
+
+                  if(color_index <0){
+                    color_index++;
+                    obj.color = node_color_list[color_index];
+
+                    var obj_tmp = new Object();
+                    obj_tmp['name'] = obj['name']; obj_tmp['color'] = node_color_list[color_index];
+                    color_matching.push(obj_tmp);
+                  }else{
+                    matching_check = false;
+                    for(var t=0;t<color_matching.length;t++){
+                      nodeName = color_matching[t]["name"];
+                      if(nodeName == obj['name']){
+                        obj.color = color_matching[t]['color'];
+                        matching_check = true;
+                        break;
+                      }
+                    }
+                    if(matching_check == false){
+                      color_index++;
+                      obj.color = node_color_list[color_index];
+
+                      var obj_tmp = new Object();
+                      obj_tmp['name'] = obj['name']; obj_tmp['color'] = node_color_list[color_index];
+
+                      color_matching.push(obj_tmp);
+                    }
+                  }
+              }
+          }
           /////////////////////////////////////////////////////////////
           var Data = graphData;
           var width = 400, height = 300;
@@ -585,7 +638,8 @@
                         .append("g")
                         .call(drag);
                         
-                    var circles = nodes_with_text.append("circle").attr("r", 25).attr("fill", "#6fbc5b");
+                    var circles = nodes_with_text.append("circle").attr("r", 25)
+                                                  .attr("fill", function(d){ return d.color});//.attr("fill", "#6fbc5b");
                     var texts = nodes_with_text.append("text").text(function(d){ return d.name})
                                                 .style("text-anchor", "middle").attr("class", "node-label");
                     var tooltip = d3.select("#explanation_graph")
@@ -632,7 +686,7 @@
                         id = d.id;
                         let fscoreY ="";
                         dots.style("fill", function(d,i){
-                            if(d.id == id){ fscoreY += " | "+d.y; return "blue";} 
+                            if(d.id == id){ fscoreY += " | "+d.y; return "#6699ff";} //"blue" "#b3ccff"
                             else{ return "#ffab00";}}).style("visibility", "visible");
                       //tooltip.style("visibility", "visible").text("clicked: ", d.id);
                       let sumHtml = "";
@@ -672,7 +726,7 @@
                     var drag = d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended);
                     var nodes_with_text = svg.append("g").selectAll("g").data(Data[selectedDataIndex]["nodes"])
                                               .enter().append("g").call(drag);
-                    var circles = nodes_with_text.append("circle").attr("r", 25).attr("fill", "#6fbc5b");
+                    var circles = nodes_with_text.append("circle").attr("r", 25).attr("fill", function(d){ return d.color});//.attr("fill", "#6fbc5b");
                     var texts = nodes_with_text.append("text").text(function(d){ return d.name})
                                                 .style("text-anchor", "middle").attr("class", "node-label");
                     var tooltipp = d3.select("#selectedJGexpl").append("div").style("position", "absolute")

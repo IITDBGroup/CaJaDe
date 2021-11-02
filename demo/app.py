@@ -256,7 +256,10 @@ def explanation():
     globals()['cursor'].execute(query3)
     jg_detail_list = globals()['cursor'].fetchall()
     jg = getJoinGraph(jg_detail_list)
-    print(jg)
+    global nodesNameList
+    #nodesNameList = []
+    print('nodesNameList:::::::',nodesNameList)
+    #print(jg)
 
     query4 = "select fscore from "+resultSchemaName+".global_results" #distinct fscore
     globals()['cursor'].execute(query4)
@@ -274,12 +277,13 @@ def explanation():
     # globals()['cursor'].execute(query5)
     # precision_list = globals()['cursor'].fetchall()
     
-    return jsonify(result = "success-explanation", result2 = exp_list, result3 = jg, result4 = fscore_list, result5 = test_list, result6 = highlight_list)
+    return jsonify(result = "success-explanation", result2 = exp_list, result3 = jg, result4 = fscore_list, result5 = test_list, result6 = highlight_list, result7 = nodesNameList)
 # def getTestList(test_list):
 #     for i in range(0, len(test_list)):
 #         tmpList = test_list[i][0]
 #         jgid = getJGid(tmpList)
-        
+
+
 def getHighlightTexts(exp_list):
     highlightTxtList = []
     for i in range(0, len(exp_list)):
@@ -296,7 +300,8 @@ def getHighlightTexts(exp_list):
 def getJoinGraph(jg_detail_list):
     gd_list = [] ##
     graphData = {"nodes":[], "links":[]}
-    node_list = []
+    global nodesNameList
+    nodesNameList = []
     list_length = len(jg_detail_list)
 
     for i in range (0, list_length): ##
@@ -352,6 +357,11 @@ def getJoinGraph(jg_detail_list):
                 
                     graphData['links'].append({"source": two_nodes[0], "target": two_nodes[1], "cond": getJGcondition(jg_condition) })
         gd_list.append(graphData)
+        print('node_list: ', node_list)
+        for node in node_list:
+            if node not in nodesNameList:
+                nodesNameList.append(node)
+        print('nodesNameList: ', nodesNameList)
     return gd_list
 
 def getJGid(tmp_jgID):
