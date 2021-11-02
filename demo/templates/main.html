@@ -525,14 +525,34 @@
 
           $("#explanation_table").empty();
 		      $("#explanation_table").append(expHtml);
+          
           /////<Highlight Text>
-          ///var keywordList = ['PT_1'];
+          text_color_list = [];
+          function generateRandomTextColor(length) {
+              while(text_color_list.length <length){
+                  var hue = Math.floor(Math.random() * 360);
+                  var pastel = 'hsl(' + hue + ', 100%, 80%)';
+                  if(text_color_list.indexOf(pastel) == -1){
+                      text_color_list.push(pastel);
+                  }
+              }
+          }
+          generateRandomTextColor(highlightTextList.length);
+
           for(var i=0;i<highlightTextList.length;i++){
             var keyword = highlightTextList[i];
-            $('#explanation_table').mark(keyword, {
-                "element": "span",
-                "className": "table_highlight"
+            var keyword_color = text_color_list[i];
+
+            ///var custfilter = new RegExp(keyword, "ig");
+            var repstr = "<span style=\"background-color:"+keyword_color+";\">"+keyword+"</span>";
+
+            $('#explanation_table td').each(function(){
+              $(this).html($(this).html().replace(keyword,repstr));
             });
+            // $('#explanation_table').mark(keyword, {
+            //     "element": "span",
+            //     "className": "table_highlight"
+            // });
           }
           /////<Node color>
           var node_length = node_list.length;

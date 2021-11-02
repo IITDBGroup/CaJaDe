@@ -249,6 +249,8 @@ def explanation():
     query2 = "select p_desc from "+resultSchemaName+".global_results"
     globals()['cursor'].execute(query2)
     exp_list = globals()['cursor'].fetchall()
+    print('exp_list:::', exp_list)
+    #exp_list = exp_replace_name(exp_list_tmp)
     highlight_list = getHighlightTexts(exp_list)
 
     #query3 = "select distinct jg_details from oct11.global_results"
@@ -283,18 +285,50 @@ def explanation():
 #         tmpList = test_list[i][0]
 #         jgid = getJGid(tmpList)
 
+# def exp_replace_name(exp_list_tmp):
+#     exp_list = []
+#     for exp in exp_list_tmp:
+#         print('##exp: ', exp)
+#         print('##str(exp): ', str(exp))
+#         exp_tmp = str(exp).replace('(', '')
+#         exp_tmp = exp_tmp.replace(')', '')
+#         exp_tmp = exp_tmp.split('\'')[1]
+#         comma_count = exp_tmp.count(',')
+#         print('##comma_count: ', comma_count)
+#         comma_split = []
+#         tmp = exp_tmp.split(',')
+#         string_tmp = ""
+#         for i in range(0,comma_count+1):
+#             comma_split.append(tmp[i])
+#             print('##comma_split: ', comma_split)
+#             #comma_split.append(tmp.split(',')[i])
+#             str_front = comma_split[i].split('.')[0]
+#             str_front = str_front.split('_')[0]
+#             str_back = comma_split[i].split('.')[1]            
+#             string_tmp += str_front+'.'+str_back
+#             print('##str_front.str_back: ', string_tmp,'i: ',i)
+#             if i != comma_count: string_tmp += ','
+#         print('##string_tmp: ', string_tmp)
+#         exp_list.append(string_tmp)
+#     return exp_list
 
 def getHighlightTexts(exp_list):
     highlightTxtList = []
     for i in range(0, len(exp_list)):
         tmp = str(exp_list[i])
+        print('tmp: ', tmp) ###
+        tmp = tmp.replace('(', '')
+        tmp = tmp.replace(')', '')
+        tmp = tmp.replace('\'', '')
+        print('tmp: ', tmp) ###
         split_comma = tmp.split(',')
-        for j in range(0, len(split_comma)):
+        for j in range(0, len(split_comma)-1):
             tmp_line = split_comma[j]
             get_text = tmp_line.split('.')[0]
+            #get_text = get_text.split('_')[0]
             if get_text not in highlightTxtList:
                 highlightTxtList.append(get_text)
-
+    print('highlight text list: ', highlightTxtList)
     return highlightTxtList
 
 def getJoinGraph(jg_detail_list):
@@ -333,7 +367,7 @@ def getJoinGraph(jg_detail_list):
                         node_list.append(nodeName)
                         graphData['nodes'].append({"name": nodeName, "id": getJGid(getNodes[0])})
                     two_nodes.append(nodeName)
-                print('@@@@node_list: ', node_list)
+                #print('@@@@node_list: ', node_list)
                 graphData['links'].append({"source": two_nodes[0], "target": two_nodes[1], "cond": getJGcondition(getNodes[1],node_list)})
             else:
                 getNodes = jg_tmp.split('|')
@@ -355,7 +389,7 @@ def getJoinGraph(jg_detail_list):
                             two_nodes.append(nodeName)
                         else:
                              jg_condition = nodes[j]          
-                    print('!!!!node_list: ', node_list)
+                    #print('!!!!node_list: ', node_list)
                     graphData['links'].append({"source": two_nodes[0], "target": two_nodes[1], "cond": getJGcondition(jg_condition, node_list) })
         gd_list.append(graphData)
         # print('node_list: ', node_list)
