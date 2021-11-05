@@ -525,7 +525,7 @@
 
           $("#explanation_table").empty();
 		      $("#explanation_table").append(expHtml);
-          
+
           /////<Highlight Text>
           text_color_list = [];
           function generateRandomTextColor(length) {
@@ -543,11 +543,10 @@
             var keyword = highlightTextList[i];
             var keyword_color = text_color_list[i];
 
-            ///var custfilter = new RegExp(keyword, "ig");
             var repstr = "<span style=\"background-color:"+keyword_color+";\">"+keyword+"</span>";
 
             $('#explanation_table td').each(function(){
-              $(this).html($(this).html().replace(keyword,repstr));
+              $(this).html($(this).html().replaceAll(keyword,repstr)); //replace
             });
             // $('#explanation_table').mark(keyword, {
             //     "element": "span",
@@ -863,9 +862,8 @@
                 .style("stroke", "blue")
                 .attr("class", "link-line")
                 .attr("marker-end", "url(#arrow)")
-                .attr("stroke-width", function(d) {
-                  return 3;
-                });
+                .attr("stroke-width", function(d) {return 3;})
+                .on("mouseover", mouseover).on("mouseout", mouseout).on("mousemove", mousemove);
 
             // var linkText = svg.selectAll(".link")
             //     .append("text")
@@ -879,52 +877,23 @@
             //         return d.type;
             //     });
 
-            var drag = d3
-              .drag()
-              .on("start", dragstarted)
-              .on("drag", dragged)
-              .on("end", dragended);
-
-
-            var nodes_with_text = svg
-              .append("g")
-              .selectAll("g")
-              .data(graph.nodes)
-              .enter()
-              .append("g")
-              .call(drag);
-
-            var circles = nodes_with_text
-              .append("circle")
-              .attr("r", 15)
-              .attr("fill", "red");
-
-            var texts = nodes_with_text
-              .append("text").text(function(d){
-                return d.name
-                }
-              );
-
+            var drag = d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended);
+            var nodes_with_text = svg.append("g").selectAll("g").data(graph.nodes)
+                                      .enter().append("g").call(drag);
+            var circles = nodes_with_text.append("circle").attr("r", 15).attr("fill", "red");
+            var texts = nodes_with_text.append("text").text(function(d){ return d.name });
+            var tooltip_schema = d3.select("#schemagraph").append("div").style("position", "absolute")
+                                    .style("visibility", "hidden").style("background-color", "#a7a7a7")
+                                    .style("color", "white").style("border-width", "1px")
+                                    .style("border-radius", "5px").style("padding", "10px");
+            
             function ticked() {
+              nodes_with_text.attr("transform", function(d){ return "translate(" + d.x + ", " + d.y + ")";});
 
-              nodes_with_text.attr("transform", function(d){
-                return "translate(" + d.x + ", " + d.y + ")";
-              });
-
-              link
-                .attr("x1", function(d) {
-                  return d.source.x;
-                })
-                .attr("y1", function(d) {
-                  return d.source.y;
-                })
-                .attr("x2", function(d) {
-                  return d.target.x;
-                })
-                .attr("y2", function(d) {
-                  return d.target.y;
-                });
-
+              link.attr("x1", function(d) { return d.source.x; })
+                  .attr("y1", function(d) { return d.source.y; })
+                  .attr("x2", function(d) { return d.target.x; })
+                  .attr("y2", function(d) { return d.target.y; });
               // linkText
               //     .attr("x", function(d) {
               //         return ((d.source.x + d.target.x)/2);
@@ -934,31 +903,17 @@
               //     });
             };
 
-            function dragstarted(d) {
-              if (!d3.event.active) simulation.alphaTarget(0.3).restart();
-              d.fx = d.x;
-              d.fy = d.y;
-            };
-
-            function dragged(d) {
-              d.fx = d3.event.x;
-              d.fy = d3.event.y;
-            };
-
-            function dragended(d) {
-              if (!d3.event.active) simulation.alphaTarget(0);
-              d.fx = null;
-              d.fy = null;
-            };
+            function dragstarted(d) { if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+                                      d.fx = d.x; d.fy = d.y; };
+            function dragged(d) { d.fx = d3.event.x; d.fy = d3.event.y; };
+            function dragended(d) { if (!d3.event.active) simulation.alphaTarget(0);
+                                    d.fx = null; d.fy = null; };
+            function mouseover(d) { tooltip_schema.style("visibility", "visible").text(d.type); }
+            function mouseout() { tooltip_schema.style("visibility", "hidden"); }
+            function mousemove(){ tooltip_schema.style("top", (d3.event.pageY - 10) + "px").style("left", (d3.event.pageX + 10) + "px"); }
           </script>
 
         </script>
-
-        <style>
-          .table_highlight{
-              background-color: #f9ed69;
-          }
-        </style>
       <!--</div> -->
     </div>
 </div>    
