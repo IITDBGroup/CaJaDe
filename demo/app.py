@@ -260,7 +260,7 @@ def explanation():
     jg = getJoinGraph(jg_detail_list)
     global nodesNameList
     #nodesNameList = []
-    print('nodesNameList:::::::',nodesNameList)
+    #print('nodesNameList:::::::',nodesNameList)
     #print(jg)
 
     query4 = "select fscore from "+resultSchemaName+".global_results" #distinct fscore

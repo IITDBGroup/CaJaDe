@@ -450,7 +450,7 @@
           $("#explanation_summary").append(sumHtml);
 
           //////////////////fscor-d3 scatter plot//////////////////
-          var margin = {top: 50, right: 50, bottom: 50, left: 50}, fs_width = 800, fs_height = 600;
+          var margin = {top: 80, right: 80, bottom: 80, left: 80}, fs_width = 870, fs_height = 300;
           //var dataset = fscoreData.map((d) => {return {"y": d };});
           var fscoreData = [];
           for(var i=0;i<summaryData.length;i++){
@@ -467,8 +467,8 @@
 
           var n = fscoreData.length;
 
-          var xScale = d3.scaleLinear().domain([0, n-1]).range([0, fs_width]);
-          var yScale = d3.scaleLinear().domain([0, 1]).range([fs_height, 0]);
+          var xScale = d3.scaleLinear().domain([0, n-1]).range([0, fs_width]); //
+          var yScale = d3.scaleLinear().domain([0.1, 1]).range([fs_height, 0]); //[0, 1]
 
           var svg = d3.select("#explanation_summary")
                       .append("svg")
@@ -482,7 +482,11 @@
               .call(d3.axisBottom(xScale));
           svg.append("g").attr("class", "y axis").call(d3.axisLeft(yScale));
           svg.append("text").attr("x", (fs_width/2)).attr("y", 0-(margin.top/2)).attr("text-anchor", "middle")
-             .style("font-size", "15px").text("F Score");
+             .style("font-size", "15px").text("F Score Sactter Plot");
+          svg.append("text").attr("text-anchor", "end").attr("x", (fs_width/2)+margin.left)
+              .attr("y", fs_height+50).text("The number of explanations");
+          svg.append("text").attr("text-anchor", "end").attr("transform", "rotate(-90)").attr("y", -margin.left + 40)
+              .attr("x", -margin.top - fs_height/2 + 100).text("F Score");
           var tooltip = d3.select("#explanation_summary")
                         .append("div")
                         .attr("class", "tooltip")
@@ -597,7 +601,7 @@
               exp_data[i] = highlightText(exp_data[i], element, repstr);
             });
 
-            expHtml += "<tr><td style=\"text-align: center;\">"+ exp_data[i] +"</td></tr>";
+            expHtml += "<tr><td>"+ exp_data[i] +"</td></tr>"; //style=\"text-align: center;\"
           }
           expHtml += "</tbody></table>";
 
@@ -809,7 +813,7 @@
 
 		</div><br>
     <div id="explanation_table" style="overflow: auto; height: 200px; margin-bottom: 20px;"></div><br><br><br>
-    <div id="explanation_summary" style="overflow-x: auto; height: 820px; white-space:nowrap; margin-bottom: 20px;text-align:center;"></div>
+    <div id="explanation_summary" style="overflow-x: auto; height: 560px; white-space:nowrap; margin-bottom: 20px;"></div> <!--text-align:center;-->
     <div id="explanation_graph" style="overflow-x: auto; height: 320px; white-space:nowrap; margin-bottom: 20px;"></div>
 
 
