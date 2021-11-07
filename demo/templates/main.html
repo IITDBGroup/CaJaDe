@@ -512,21 +512,7 @@
             .on("mouseout", mouseout );
         // }
 
-        // function exp_table(exp_data,exp_len,graphData){          
-          let expHtml = "";
-
-          expHtml = "<table class=\"table table-bordered\" sellspacing=\"0\" width=\"90%\" id=\"exp\">";
-          expHtml += "<tbody>";
-         
-          for(var i=0;i<exp_len;i++){
-            expHtml += "<tr><td style=\"text-align: center;\">"+ exp_data[i] +"</td></tr>";
-          }
-          expHtml += "</tbody></table>";
-
-          $("#explanation_table").empty();
-		      $("#explanation_table").append(expHtml);
-
-          /////<Highlight Text>
+          /////<Generate Random Text Color>
           text_color_list = [];
           function generateRandomTextColor(length) {
               while(text_color_list.length <length){
@@ -538,21 +524,7 @@
               }
           }
           generateRandomTextColor(highlightTextList.length);
-
-          for(var i=0;i<highlightTextList.length;i++){
-            var keyword = highlightTextList[i];
-            var keyword_color = text_color_list[i];
-
-            var repstr = "<span style=\"background-color:"+keyword_color+";\">"+keyword+"</span>";
-
-            $('#explanation_table td').each(function(){
-              $(this).html($(this).html().replaceAll(keyword,repstr)); //replace
-            });
-            // $('#explanation_table').mark(keyword, {
-            //     "element": "span",
-            //     "className": "table_highlight"
-            // });
-          }
+ 
           /////<Node color>
           var node_length = node_list.length;
           node_color_list = [];
@@ -573,39 +545,64 @@
           var color_matching = [];
 
           for(var i=0;i<graphData.length;i++){
-              tmp = graphData[i]["nodes"];
-              for(var j=0;j<tmp.length;j++){
-                  var obj = tmp[j];
+            tmp = graphData[i]["nodes"];
+            for(var j=0;j<tmp.length;j++){
+                var obj = tmp[j];
 
-                  if(color_index <0){
+                if(color_index <0){
+                  color_index++;
+                  obj.color = node_color_list[color_index];
+
+                  var obj_tmp = new Object();
+                  obj_tmp['name'] = obj['name']; obj_tmp['color'] = node_color_list[color_index];
+                  color_matching.push(obj_tmp);
+                }else{
+                  matching_check = false;
+                  for(var t=0;t<color_matching.length;t++){
+                    nodeName = color_matching[t]["name"];
+                    if(nodeName == obj['name']){
+                      obj.color = color_matching[t]['color'];
+                      matching_check = true;
+                      break;
+                    }
+                  }
+                  if(matching_check == false){
                     color_index++;
                     obj.color = node_color_list[color_index];
 
                     var obj_tmp = new Object();
                     obj_tmp['name'] = obj['name']; obj_tmp['color'] = node_color_list[color_index];
+
                     color_matching.push(obj_tmp);
-                  }else{
-                    matching_check = false;
-                    for(var t=0;t<color_matching.length;t++){
-                      nodeName = color_matching[t]["name"];
-                      if(nodeName == obj['name']){
-                        obj.color = color_matching[t]['color'];
-                        matching_check = true;
-                        break;
-                      }
-                    }
-                    if(matching_check == false){
-                      color_index++;
-                      obj.color = node_color_list[color_index];
-
-                      var obj_tmp = new Object();
-                      obj_tmp['name'] = obj['name']; obj_tmp['color'] = node_color_list[color_index];
-
-                      color_matching.push(obj_tmp);
-                    }
                   }
-              }
+                }
+            }
           }
+          /////<Highlight Text>
+          function highlightText(originalTxt, searchKeyword, replaceTxt) {
+            const regex = new RegExp(searchKeyword, 'g');
+            return originalTxt.toString().replace(regex, replaceTxt);
+          }
+
+          let expHtml = "";
+          expHtml = "<table class=\"table table-bordered\" sellspacing=\"0\" width=\"90%\" id=\"exp\">";
+          expHtml += "<tbody>";
+         
+          for(var i=0;i<exp_len;i++){
+            highlightTextList.forEach(function(element){
+              var tmp_element = element.slice(0,-2);
+              var setcolor;
+              color_matching.forEach(function(d){if(d.name == tmp_element){ setcolor = d.color;}});
+              var repstr = "<span style=\"background-color:"+setcolor+";\">"+element+"</span>";
+              exp_data[i] = highlightText(exp_data[i], element, repstr);
+            });
+
+            expHtml += "<tr><td style=\"text-align: center;\">"+ exp_data[i] +"</td></tr>";
+          }
+          expHtml += "</tbody></table>";
+
+          $("#explanation_table").empty();
+		      $("#explanation_table").append(expHtml);
           /////////////////////////////////////////////////////////////
           var Data = graphData;
           var width = 400, height = 300;
