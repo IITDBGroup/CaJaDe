@@ -246,7 +246,7 @@ def explanation():
     # print(uQuery)
 
     #query2 = "select p_desc from oct11.global_results"
-    query2 = "select p_desc from "+resultSchemaName+".global_results"
+    query2 = "select id, jg_name, p_desc from "+resultSchemaName+".global_results" #"select p_desc from "+resultSchemaName+".global_results"
     globals()['cursor'].execute(query2)
     exp_list = globals()['cursor'].fetchall()
     print('exp_list:::', exp_list)
@@ -254,7 +254,7 @@ def explanation():
     highlight_list = getHighlightTexts(exp_list)
 
     #query3 = "select distinct jg_details from oct11.global_results"
-    query3 = "select distinct jg_details from "+resultSchemaName+".global_results"
+    query3 = "select distinct jg_name, jg_details from "+resultSchemaName+".global_results" #"select distinct jg_details from "+resultSchemaName+".global_results"
     globals()['cursor'].execute(query3)
     jg_detail_list = globals()['cursor'].fetchall()
     jg = getJoinGraph(jg_detail_list)
@@ -263,21 +263,47 @@ def explanation():
     #print('nodesNameList:::::::',nodesNameList)
     #print(jg)
 
-    query4 = "select fscore from "+resultSchemaName+".global_results" #distinct fscore
+    query4 = "select fscore from "+resultSchemaName+".global_results"
     globals()['cursor'].execute(query4)
     fscore_list = globals()['cursor'].fetchall()
 
-    query5 = "select jg_details, fscore, p_desc from "+resultSchemaName+".global_results"
+    query5 = "select jg_details, fscore, p_desc, jg_name from "+resultSchemaName+".global_results"
     globals()['cursor'].execute(query5)
     test_list = globals()['cursor'].fetchall()
+
+    query6 = "select jg_name, p_desc from "+resultSchemaName+".global_results"
+    globals()['cursor'].execute(query6)
+    temp = globals()['cursor'].fetchall()
+    print("**********************temp:")
+    print(temp)
+    print("**********************temp[0]")
+    print(temp[0])
+    print("**********************temp[1]")
+    print(temp[1])
+    print("**********************temp[0][0]")
+    print(temp[0][0])
+    print("**********************temp[0][1]")
+    print(temp[0][1])
+    print("**********************")
+
+    query7 = "select distinct jg_name, jg_details from "+resultSchemaName+".global_results"
+    globals()['cursor'].execute(query7)
+    test_tmp = globals()['cursor'].fetchall()
+    print("**********************test_tmp:")
+    print(test_tmp)
+    print("**********************test_tmp[0]")
+    print(test_tmp[0])
+    print("**********************test_tmp[1]")
+    print(test_tmp[1])
+    print("**********************test_tmp[0][0]")
+    print(test_tmp[0][0])
+    print("**********************test_tmp[0][1]")
+    print(test_tmp[0][1])
+    print("**********************")
 
     # query4 = "select distinct recall from "+resultSchemaName+".global_results"
     # globals()['cursor'].execute(query4)
     # recall_list = globals()['cursor'].fetchall()
-
-    # query5 = "select distinct precision from "+resultSchemaName+".global_results"
-    # globals()['cursor'].execute(query5)
-    # precision_list = globals()['cursor'].fetchall()
     
     return jsonify(result = "success-explanation", result2 = exp_list, result3 = jg, result4 = fscore_list, result5 = test_list, result6 = highlight_list, result7 = nodesNameList)
 # def getTestList(test_list):
@@ -312,51 +338,63 @@ def explanation():
 #         exp_list.append(string_tmp)
 #     return exp_list
 
+
 def getHighlightTexts(exp_list):
+    print("<<<<<<<exp_list[0]: ", exp_list[0])
+    print("<<<<<<<exp_list[0][2]: ", exp_list[0][2])
     highlightTxtList = []
     for i in range(0, len(exp_list)):
-        tmp = str(exp_list[i])
-        print('tmp: ', tmp) ###
-        tmp = tmp.replace('(', '')
-        tmp = tmp.replace(')', '')
-        tmp = tmp.replace('\'', '')
-        print('tmp: ', tmp) ###
+        tmp = exp_list[i][2]
         split_comma = tmp.split(',')
-        for j in range(0, len(split_comma)-1):
+        for j in range(0, len(split_comma)):
             tmp_line = split_comma[j]
             get_text = tmp_line.split('.')[0]
-            #get_text = get_text.split('_')[0]
             if get_text not in highlightTxtList:
                 highlightTxtList.append(get_text)
     print('highlight text list: ', highlightTxtList)
     return highlightTxtList
+    ##################################
+    # highlightTxtList = []
+    # for i in range(0, len(exp_list)):
+    #     tmp = str(exp_list[i])
+    #     ##print('tmp: ', tmp) ###
+    #     tmp = tmp.replace('(', '')
+    #     tmp = tmp.replace(')', '')
+    #     tmp = tmp.replace('\'', '')
+    #     ##print('tmp: ', tmp) ###
+    #     split_comma = tmp.split(',')
+    #     for j in range(0, len(split_comma)-1):
+    #         tmp_line = split_comma[j]
+    #         get_text = tmp_line.split('.')[0]
+    #         #get_text = get_text.split('_')[0]
+    #         if get_text not in highlightTxtList:
+    #             highlightTxtList.append(get_text)
+    # print('highlight text list: ', highlightTxtList)
+    # return highlightTxtList
 
 def getJoinGraph(jg_detail_list):
-    gd_list = [] ##
+    gd_list = []
     graphData = {"nodes":[], "links":[]}
     global nodesNameList
     nodesNameList = []
-    list_length = len(jg_detail_list)
-
-    for i in range (0, list_length): ##
+    for i in range (0, len(jg_detail_list)):
         graphData = {"nodes":[], "links":[]} ##
         node_list = []
-        jg_tmp = str(jg_detail_list[i]) #test for the first jg #str(jg_detail_list[0])
-        jg_tmp = jg_tmp.split('\'')[1] 
-        # print("jg_tmp:")
-        # print(jg_tmp)
 
-        if 'cond' not in jg_tmp:
+        cur_data = jg_detail_list[i]
+        cur_jg_name = cur_data[0]
+        cur_jg_detail = cur_data[1]
+        print("cur_jg_detail::::::")
+        print(cur_jg_detail)
+
+        if 'cond' not in cur_jg_detail:
             nodeName = 'PT'
-            # print("nodeName:")
-            # print(nodeName)
-            node_list.append(nodeName) #'PT'
-            graphData['nodes'].append({"name": nodeName, "id": getJGid(jg_tmp)}) #"PT"
+            node_list.append(nodeName)
+            graphData['nodes'].append({"name": nodeName, "id": cur_jg_name}) #"PT"
             graphData['links'].clear()
-
         else:
-            if '|' not in jg_tmp:
-                getNodes = jg_tmp.split('cond')
+            if '|' not in cur_jg_detail:
+                getNodes = cur_jg_detail.split('cond')
                 nodes = getNodes[0].split(',')
                 two_nodes = []
                 for i in range(0, len(nodes)-1):
@@ -365,39 +403,99 @@ def getJoinGraph(jg_detail_list):
 
                     if nodeName not in node_list:
                         node_list.append(nodeName)
-                        graphData['nodes'].append({"name": nodeName, "id": getJGid(getNodes[0])})
+                        graphData['nodes'].append({"name": nodeName, "id": cur_jg_name})
                     two_nodes.append(nodeName)
-                #print('@@@@node_list: ', node_list)
                 graphData['links'].append({"source": two_nodes[0], "target": two_nodes[1], "cond": getJGcondition(getNodes[1],node_list)})
             else:
-                getNodes = jg_tmp.split('|')
-                jgID = getJGid(getNodes[0])
+                getNodes = cur_jg_detail.split('|')
+                #jgID = getJGid(getNodes[0])
                 for i in range(0, len(getNodes)):
                     nodes = getNodes[i].split(',')
                     two_nodes = []
-
                     for j in range(0, len(nodes)):
                         if 'cond' not in nodes[j]:
-
                             x = nodes[j].split(' ')
                             nodeName = x[len(x)-1]
-
                             if nodeName not in node_list:
                                 node_list.append(nodeName)
-                                graphData['nodes'].append({"name": nodeName, "id": jgID})
+                                graphData['nodes'].append({"name": nodeName, "id": cur_jg_name})
                         
                             two_nodes.append(nodeName)
                         else:
-                             jg_condition = nodes[j]          
-                    #print('!!!!node_list: ', node_list)
+                            jg_condition = nodes[j]
                     graphData['links'].append({"source": two_nodes[0], "target": two_nodes[1], "cond": getJGcondition(jg_condition, node_list) })
         gd_list.append(graphData)
-        # print('node_list: ', node_list)
         for node in node_list:
             if node not in nodesNameList:
                 nodesNameList.append(node)
-        # print('nodesNameList: ', nodesNameList)
     return gd_list
+    #################################
+    # gd_list = [] ##
+    # graphData = {"nodes":[], "links":[]}
+    # global nodesNameList
+    # nodesNameList = []
+    # list_length = len(jg_detail_list)
+
+    # for i in range (0, list_length): ##
+    #     graphData = {"nodes":[], "links":[]} ##
+    #     node_list = []
+    #     jg_tmp = str(jg_detail_list[i]) #test for the first jg #str(jg_detail_list[0])
+    #     jg_tmp = jg_tmp.split('\'')[1] 
+    #     # print("jg_tmp:")
+    #     # print(jg_tmp)
+
+    #     if 'cond' not in jg_tmp:
+    #         nodeName = 'PT'
+    #         # print("nodeName:")
+    #         # print(nodeName)
+    #         node_list.append(nodeName) #'PT'
+    #         graphData['nodes'].append({"name": nodeName, "id": getJGid(jg_tmp)}) #"PT"
+    #         graphData['links'].clear()
+
+    #     else:
+    #         if '|' not in jg_tmp:
+    #             getNodes = jg_tmp.split('cond')
+    #             nodes = getNodes[0].split(',')
+    #             two_nodes = []
+    #             for i in range(0, len(nodes)-1):
+    #                 x = nodes[i].split(' ')
+    #                 nodeName = x[len(x)-1]
+
+    #                 if nodeName not in node_list:
+    #                     node_list.append(nodeName)
+    #                     graphData['nodes'].append({"name": nodeName, "id": getJGid(getNodes[0])})
+    #                 two_nodes.append(nodeName)
+    #             #print('@@@@node_list: ', node_list)
+    #             graphData['links'].append({"source": two_nodes[0], "target": two_nodes[1], "cond": getJGcondition(getNodes[1],node_list)})
+    #         else:
+    #             getNodes = jg_tmp.split('|')
+    #             jgID = getJGid(getNodes[0])
+    #             for i in range(0, len(getNodes)):
+    #                 nodes = getNodes[i].split(',')
+    #                 two_nodes = []
+
+    #                 for j in range(0, len(nodes)):
+    #                     if 'cond' not in nodes[j]:
+
+    #                         x = nodes[j].split(' ')
+    #                         nodeName = x[len(x)-1]
+
+    #                         if nodeName not in node_list:
+    #                             node_list.append(nodeName)
+    #                             graphData['nodes'].append({"name": nodeName, "id": jgID})
+                        
+    #                         two_nodes.append(nodeName)
+    #                     else:
+    #                          jg_condition = nodes[j]          
+    #                 #print('!!!!node_list: ', node_list)
+    #                 graphData['links'].append({"source": two_nodes[0], "target": two_nodes[1], "cond": getJGcondition(jg_condition, node_list) })
+    #     gd_list.append(graphData)
+    #     # print('node_list: ', node_list)
+    #     for node in node_list:
+    #         if node not in nodesNameList:
+    #             nodesNameList.append(node)
+    #     # print('nodesNameList: ', nodesNameList)
+    # return gd_list
 
 def getJGid(tmp_jgID):
     tmp = tmp_jgID.split(' ')

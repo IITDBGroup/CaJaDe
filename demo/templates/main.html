@@ -292,35 +292,22 @@
           let tableTo = (currentPage-1)*dataPerPage+dataPerPage;
           if(tableTo > totalNum) tableTo = totalNum;
 
-          
 		      chartHtml += "<tbody>";
           for(var i = tableFrom; i<tableTo;i++){
             let txtTMP = "";
 
-            for(var j=0;j<colNum;j++){
-              txtTMP += tblData[i][j];
-            }
-            if(selectedArr.indexOf(txtTMP) != -1){
-              console.log("*****selectedArr:*****");
-              chartHtml += "<tr onclick=\"selectRows(this);\" style=\"background-color: #e0e0e0;\">";
-            }else{
-              chartHtml += "<tr onclick=\"selectRows(this);\">";
-            }
+            for(var j=0;j<colNum;j++){txtTMP += tblData[i][j];}
+            if(selectedArr.indexOf(txtTMP) != -1){ chartHtml += "<tr onclick=\"selectRows(this);\" style=\"background-color: #e0e0e0;\">";}
+            else{chartHtml += "<tr onclick=\"selectRows(this);\">";}
 
-		        //chartHtml += "<tr onclick=\"selectRows(this);\">";
-
-		        for(var j=0;j<colNum;j++){
-		          chartHtml += "<td style=\"text-align: center;\">" + tblData[i][j] + "</td>";
-		        }
+		        for(var j=0;j<colNum;j++){chartHtml += "<td style=\"text-align: center;\">" + tblData[i][j] + "</td>";}
 		        chartHtml += "</tr>";
 		      }
 		      chartHtml += "</tbody></table>";
 		      
 		      $("#display").empty();
-		      $("#display").append(chartHtml);
-          
+		      $("#display").append(chartHtml);          
 		  }
-
 
 		  })
 
@@ -453,14 +440,16 @@
           var margin = {top: 80, right: 80, bottom: 80, left: 80}, fs_width = 870, fs_height = 300;
           //var dataset = fscoreData.map((d) => {return {"y": d };});
           var fscoreData = [];
+          var jgnameId = [];
           for(var i=0;i<summaryData.length;i++){
             fscoreData.push(summaryData[i][1]);
+            jgnameId.push(summaryData[i][3]);
           }
 
           var dataset = [];
           fscoreData.forEach(function(key,i){
             var obj = new Object();
-            obj['x'] = summaryData[i][2]; obj['y'] = fscoreData[i]; obj['id'] = getJGid(summaryData[i][0]);
+            obj['x'] = summaryData[i][2]; obj['y'] = fscoreData[i]; obj['id'] = jgnameId[i]; //getJGid(summaryData[i][0])
             //obj['x'] = exp_data[i]; obj['y'] = fscoreData[i]; //obj['id'] = jg_id[i];
             dataset.push(obj);
           });
@@ -514,7 +503,7 @@
             .on("mouseover", mouseover )
             .on("mousemove", mousemove )
             .on("mouseout", mouseout );
-        // }
+          // }
 
           /////<Generate Random Text Color>
           text_color_list = [];
@@ -591,23 +580,28 @@
           let expHtml = "";
           expHtml = "<table class=\"table table-bordered\" sellspacing=\"0\" width=\"90%\" id=\"exp\">";
           expHtml += "<tbody>";
-         
+          
           for(var i=0;i<exp_len;i++){
+            exp_data_pdesc = exp_data[i][2];
             highlightTextList.forEach(function(element){
               var tmp_element = element.slice(0,-2);
               var setcolor;
               color_matching.forEach(function(d){if(d.name == tmp_element){ setcolor = d.color;}});
               var repstr = "<span style=\"background-color:"+setcolor+";\">"+element+"</span>";
-              exp_data[i] = highlightText(exp_data[i], element, repstr);
+              // exp_data_pdesc = exp_data[i][2];
+              console.log("exp_data_pdesc: ", exp_data_pdesc, "| element: ", element);
+              exp_data_pdesc = highlightText(exp_data_pdesc, element, repstr);//exp_data[i] = highlightText(exp_data[i], element, repstr);
+              console.log("highlightText>>>>exp_data_pdesc: ", exp_data_pdesc);
             });
 
-            expHtml += "<tr><td>"+ exp_data[i] +"</td></tr>"; //style=\"text-align: center;\"
+            expHtml += "<tr><td>"+ exp_data_pdesc +"</td></tr>"; //exp_data[i] //style=\"text-align: center;\"
           }
           expHtml += "</tbody></table>";
 
           $("#explanation_table").empty();
 		      $("#explanation_table").append(expHtml);
           /////////////////////////////////////////////////////////////
+          /////<Join Graphs>
           var Data = graphData;
           var width = 400, height = 300;
 
@@ -717,6 +711,8 @@
                       $("#selectedJGexpl").empty();
                       $("#selectedJGexpl").append(sumHtml);
                       selectedJG(id);
+                      //filter explanation table
+                      filterExpl(id);
                     }
                     function mouseenter(){ svg.style("background-color", "#ffd889"); }
                     function mouseleave(){ svg.style("background-color", "white"); }
@@ -726,7 +722,35 @@
 
           var svgTest = d3.select("#explanation_graph");
           $(Data).generateMultiForce(svgTest);
-          ////
+          ////@@@
+          function filterExpl(id){
+            console.log("filterExpl id: ",id);
+
+            let newExpHtml = "";
+            newExpHtml = "<table class=\"table table-bordered\" sellspacing=\"0\" width=\"90%\"><tbody>";
+            
+            for(var i=0;i<exp_len;i++){
+              exp_data_jgname = exp_data[i][1];
+              if(exp_data_jgname == id){
+                console.log("exp_data_jgname == id/////////////////: ",exp_data_jgname);
+                exp_data_pdesc = exp_data[i][2];
+                highlightTextList.forEach(function(element){
+                  var tmp_element = element.slice(0,-2);
+                  var setcolor;
+                  color_matching.forEach(function(d){if(d.name == tmp_element){setcolor = d.color;}});
+                  var repstr = "<span style=\"background-color:"+setcolor+";\">"+element+"</span>";
+                  exp_data_pdesc = highlightText(exp_data_pdesc, element, repstr);
+                });
+                newExpHtml += "<tr><td>"+ exp_data_pdesc +"</td></tr>"; 
+              }
+            }
+            newExpHtml += "</tbody></table>";
+
+            $("#explanation_table").empty();
+            $("#explanation_table").append(newExpHtml);
+
+            ////////////////////////////////@@@@@@@@@@@@@@@
+          }
           function selectedJG(id){
             console.log("selectedJGexpl id: ",id);
             //
