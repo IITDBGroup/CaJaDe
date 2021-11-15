@@ -165,9 +165,7 @@
         var where = $('#query-where').val();
 		    var grp = $('#query-group').val();
 		    
-		    var postdata = {
-		      'slt':slt, 'agg':agg, 'frm':frm, 'where':where, 'grp':grp
-		    }
+		    var postdata = {'slt':slt, 'agg':agg, 'frm':frm, 'where':where, 'grp':grp}
 		    $.ajax({
 		      type: 'POST',
 		      url: '{{url_for("ajax")}}',
@@ -202,7 +200,6 @@
 		        alert('ajax failed')
 		        alert(error);
 		      }
-
 		    })
 		    
         $("#dataPerPage").change(function () {
@@ -270,9 +267,7 @@
 		        paging(totalNum, dataPerPage, pageCount, selectedPage);
 		        displayData(selectedPage, dataPerPage);
 		      });
-		    }
-
-       
+		    }       
 
 		    function displayData(currentPage, dataPerPage){
 		      let chartHtml = "";
@@ -307,8 +302,7 @@
 		      
 		      $("#display").empty();
 		      $("#display").append(chartHtml);          
-		  }
-
+		    }
 		  })
 
 		  let sltROWS = 0;
@@ -324,65 +318,105 @@
       var count=1;
 
       function selectRows(elem){        
-          bgcolor = $(elem).css("background-color");
+        bgcolor = $(elem).css("background-color");
 
-          var text = $(elem).text();          
-          var tr = $(elem);
-          td = tr.children();
+        var text = $(elem).text();          
+        var tr = $(elem);
+        td = tr.children();
 
-          cnt = selectedArr.indexOf(text);
-          len = selectedArr.length;
+        cnt = selectedArr.indexOf(text);
+        len = selectedArr.length;
 
-          if(bgcolor == "rgb(224, 224, 224)"){
-            count--;
+        if(bgcolor == "rgb(224, 224, 224)"){
+          count--;
 
-            $(elem).css("background-color", "#FFFFFF");    
-              sltROWS -= 1;
-              selectedArr.splice(cnt,1);
+          $(elem).css("background-color", "#FFFFFF");    
+          sltROWS -= 1;
+          selectedArr.splice(cnt,1);
 
-              $("#sltROWScount").empty();
-		          $("#sltROWScount").append(sltROWScnt);
-              $("#sltROWScount").append(sltROWS);
-              $('#container').empty();
-              $('#container').append(
-                "<button onclick=\"exp()\" type=\"button\" class=\"btn btn-outline-primary\" id=\"explanation\">explanation</button>"
-              ); 
+          $("#sltROWScount").empty();
+          $("#sltROWScount").append(sltROWScnt);
+          $("#sltROWScount").append(sltROWS);
+          $('#container').empty();
+          $('#container').append(
+            "<button onclick=\"exp()\" type=\"button\" class=\"btn btn-outline-primary\" id=\"explanation\">explanation</button>"
+          ); 
 
-              td.each(function(i){
-                var index = tdArr.indexOf(td.eq(i).text());
-                if(index>-1){
-                  tdArr.splice(index, 1);
-                }
-              })
-          }
+          td.each(function(i){
+            var index = tdArr.indexOf(td.eq(i).text());
+            if(index>-1){
+              tdArr.splice(index, 1);
+            }
+          })
+        }
+        else {
+          if(cnt==-1 && len<2){
+            count++;
 
-          else {
-            if(cnt==-1 && len<2){
-              count++;
+            $(elem).css("background-color", "#e0e0e0");            
+            sltROWS += 1;
+            selectedArr.push(text);
 
-              $(elem).css("background-color", "#e0e0e0");            
-              sltROWS += 1;
-              selectedArr.push(text);
+            $("#sltROWScount").empty();
+            $("#sltROWScount").append(sltROWScnt);
+            $("#sltROWScount").append(sltROWS);
 
-              $("#sltROWScount").empty();
-		          $("#sltROWScount").append(sltROWScnt);
-              $("#sltROWScount").append(sltROWS);
+            $('#container').empty();
+            $('#container').append(
+              "<button onclick=\"exp()\" type=\"button\" class=\"btn btn-outline-primary\" id=\"explanation\">explanation</button>"
+            );    
 
-              $('#container').empty();
-              $('#container').append(
-                "<button onclick=\"exp()\" type=\"button\" class=\"btn btn-outline-primary\" id=\"explanation\">explanation</button>"
-              );    
-
-              td.each(function(i){
-                tdArr.push(td.eq(i).text());
-              })      
-            } 
-          }
+            td.each(function(i){
+              tdArr.push(td.eq(i).text());
+            })      
+          } 
+        }
       }
+/////////////////////////////////////@@@@@@@@@@@@@@@@@@
+      function checkOne(element){
+        console.log("checkOne>>>>>");
+        const checkboxes = document.getElementsByName("user_checkBox");
+        checkboxes.forEach((cb) => { cb.checked = false;})
+        element.checked = true;
 
+        var checkbox = $("input[name=user_checkBox]:checked");
+        checkbox.each(function(i){
+          var tr = checkbox.parent().parent().eq(i);
+          var td = tr.children();
+          var pdes = td.eq(0).text();
+          console.log("^^^^^^^checkbox pdes:^^^^^^", pdes); ///////////////@@@@@@@@@@@@@@
+          expParser(pdes);
+        });
+      }
+      function expParser(pdes){
+        var tmp = pdes.split(',');
+        var newNodeList = [];
+        var newTargetNodeList = [];
+
+        tmp.forEach(function(d){
+          var splitByPeriod = d.split('.');
+          var targetNode = splitByPeriod[0];
+          var node = d.replace(targetNode+".","");
+          var targetNode = targetNode.split("_")[0];
+          
+          // var splitByEq = d.split('=');
+          // var node = splitByEq[1];
+          // var targetNode = splitByEq[0].split('_')[0];
+          console.log("***********node | targetNode: ", node, " | ", targetNode);
+          newNodeList.push(node);
+          newTargetNodeList.push(targetNode);
+        });
+        updateSelectedJG(newNodeList, newTargetNodeList);
+      }
+      var selectedData; // = [];
+      var selectedData_nodes;
+      var selectedData_links;
+      var selectedDataIndex;
+      var selectedDataId;
+      var tmpUpdate = new Object();
+////////////////////////////////////@@@@@@@@@@@@@@@@@@@@@
       var graphData;
-      function exp(){
-        
+      function exp(){        
         var expTEXT = "";
         for(var i=0;i<tdArr.length;i++){
           expTEXT += tdArr[i];
@@ -589,9 +623,9 @@
               color_matching.forEach(function(d){if(d.name == tmp_element){ setcolor = d.color;}});
               var repstr = "<span style=\"background-color:"+setcolor+";\">"+element+"</span>";
               // exp_data_pdesc = exp_data[i][2];
-              console.log("exp_data_pdesc: ", exp_data_pdesc, "| element: ", element);
+              //console.log("exp_data_pdesc: ", exp_data_pdesc, "| element: ", element);
               exp_data_pdesc = highlightText(exp_data_pdesc, element, repstr);//exp_data[i] = highlightText(exp_data[i], element, repstr);
-              console.log("highlightText>>>>exp_data_pdesc: ", exp_data_pdesc);
+              //console.log("highlightText>>>>exp_data_pdesc: ", exp_data_pdesc);
             });
 
             expHtml += "<tr><td>"+ exp_data_pdesc +"</td></tr>"; //exp_data[i] //style=\"text-align: center;\"
@@ -725,7 +759,7 @@
           ////@@@
           function filterExpl(id){
             console.log("filterExpl id: ",id);
-
+            
             let newExpHtml = "";
             newExpHtml = "<table class=\"table table-bordered\" sellspacing=\"0\" width=\"90%\"><tbody>";
             
@@ -741,22 +775,34 @@
                   var repstr = "<span style=\"background-color:"+setcolor+";\">"+element+"</span>";
                   exp_data_pdesc = highlightText(exp_data_pdesc, element, repstr);
                 });
-                newExpHtml += "<tr><td>"+ exp_data_pdesc +"</td></tr>"; 
+                //newExpHtml += "<tr><td>"+ exp_data_pdesc +"</td></tr>";
+                newExpHtml += "<tr><td>"+ exp_data_pdesc +"</td><td><input type=\"checkbox\" name=\"user_checkBox\" onclick=\"checkOne(this)\"></td></tr>";
               }
-            }
+            } 
             newExpHtml += "</tbody></table>";
-
+            // newExpHtml += "<button type=\"button\" class=\"btn btn-outline-primary\" id=\"checkBoxSelectBtn\" onclick=\"checkBoxSelectBtn()\">UPDATE</button>";
             $("#explanation_table").empty();
             $("#explanation_table").append(newExpHtml);
-
-            ////////////////////////////////@@@@@@@@@@@@@@@
           }
+          // function updateSelectedJG(newNodeList, newTargetNodeList){
+          //   console.log("%%%%%%%%%newNodeList: ", newNodeList);
+          //   console.log("&&&&&&&newTargetNodeList: ",newTargetNodeList);
+          // }
+
           function selectedJG(id){
             console.log("selectedJGexpl id: ",id);
             //
             for(var i=0;i<Data.length;i++){
               if(Data[i]["nodes"][0]["id"] == id){
                     selectedDataIndex = i;
+                    selectedData = Data[selectedDataIndex]; /////@@@@@@@
+                    selectedData_nodes = Data[selectedDataIndex]["nodes"];
+                    selectedData_links = Data[selectedDataIndex]["links"];
+                    selectedDataId = selectedData_nodes[0]["id"];
+                    console.log("%%%%%%%%%1%%%%%%: ", selectedData); /////@@@@@@@
+                    console.log("%%%%%%%%%2%%%%%%: ", selectedData_nodes); /////@@@@@@@
+                    console.log("%%%%%%%%%3%%%%%%: ", selectedData_links); /////@@@@@@@
+                    
 
                     var svg = d3.select("#selectedJGexpl").append("svg").attr("width", width).attr("height", height)
                                 .data(Data[selectedDataIndex]["nodes"]).style("background-color", "#b3ccff");
@@ -794,12 +840,135 @@
                     
           }
         }
-      }     
+
+      } 
+      function updateSelectedJG(newNodeList, newTargetNodeList){
+        console.log("%%%%%%%%%newNodeList: ", newNodeList);
+        console.log("&&&&&&&newTargetNodeList: ",newTargetNodeList);
+
+        console.log("%%%%%%%%%1@@@@@: ", selectedData); /////@@@@@@@
+        console.log("%%%%%%%%%2@@@@@: ", selectedData_nodes); /////@@@@@@@
+        console.log("%%%%%%%%%3@@@@@: ", selectedData_links); /////@@@@@@@
+        console.log("%%%%%%%%%4@@@@@: ", selectedDataId);
+
+        var obj_Node = [];
+        var obj_Link = [];
+
+        for(var i=0;i<selectedData["nodes"].length;i++){
+          var objNode = new Object();
+          objNode["name"] = selectedData["nodes"][i]["name"];objNode["color"] = selectedData["nodes"][i]["color"];objNode["id"] = selectedDataId;
+          obj_Node.push(objNode);
+        }
+        for(var i=0;i<newNodeList.length;i++){
+          var objNodeNew = new Object();
+          objNodeNew["name"] = newNodeList[i];objNodeNew["color"] = "hsl(0, 100%, 80%)";objNodeNew["id"] = selectedDataId;
+          obj_Node.push(objNodeNew);
+        }
+        tmpUpdate.nodes = obj_Node;
+
+        for(var j=0;j<selectedData["links"].length;j++){
+          var objLink = new Object();
+          obj_Node.forEach(function(d){
+            if(d["name"] == selectedData["links"][j]["source"]["name"]){objLink["source"] = d;}
+            if(d["name"] == selectedData["links"][j]["target"]["name"]){objLink["target"] = d;}
+          });
+          objLink["cond"] = selectedData["links"][j]["cond"];
+          obj_Link.push(objLink);
+        }
+        for(var j=0;j<newTargetNodeList.length;j++){
+          var objLink = new Object();
+          //objLink["source"] = objNodeNew[j];
+          obj_Node.forEach(function(d){
+            if(d["name"] == newNodeList[j]){objLink["source"] = d;}
+            if(d["name"] == newTargetNodeList[j]){objLink["target"] = d;}
+          });
+          objLink["cond"] = ""; ///
+          obj_Link.push(objLink);              
+        }
+        tmpUpdate.links = obj_Link;
+        console.log("^^^^^^^^^tmpUpdate::: ", tmpUpdate);
+        //////////////////////////////////////////
+        $("#selectedJGexpl").empty();
+        (function( $ ) {
+          $.fn.generateMultiForce1 = function(svgObj) {
+            return this.each(function() {
+              var graph = this;
+              var graphArea = svgObj.append("g");
+              var active = d3.select(null); ///
+
+              var svg = d3.select("#selectedJGexpl").append("svg").attr("width", width).attr("height", height).data(graph.nodes);
+                          //.on("mouseenter", mouseenter).on("mouseleave", mouseleave);
+              var simulation = d3.forceSimulation(graph.nodes).force("charge", d3.forceManyBody().strength(-1800))
+                      .force("center", d3.forceCenter(width / 2, height / 2)).force("link", d3.forceLink(graph.links).id(d => d.name));
+              var link = svg.append("g").selectAll("line").data(graph.links).enter().append("line").attr("stroke-width", 5)
+                              .attr("stroke", "#999").on("mouseover", mouseover).on("mouseout", mouseout).on("mousemove", mousemove);
+              var drag = d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended);
+              var nodes_with_text = svg.append("g").selectAll("g").data(graph.nodes).enter().append("g").call(drag);               
+              var circles = nodes_with_text.append("circle").attr("r", 25).attr("fill", function(d){ return d.color});
+              var texts = nodes_with_text.append("text").text(function(d){ return d.name}).style("text-anchor", "middle").attr("class", "node-label");
+              //#svg
+              var tooltiptest = d3.select("#selectedJGexpl").append("div").style("position", "absolute").style("visibility", "hidden").style("background-color", "#a7a7a7")
+                              .style("color", "white").style("border-width", "1px").style("border-radius", "5px").style("padding", "10px");
+              simulation.on("tick", function() {
+                  link.attr("x1", function(d) { return d.source.x; }).attr("y1", function(d) { return d.source.y; })
+                      .attr("x2", function(d) { return d.target.x; }).attr("y2", function(d) { return d.target.y; });
+                  nodes_with_text.attr("transform", function(d) { return "translate("+d.x+","+d.y+")";});
+              });
+              function dragstarted(d) {simulation.alphaTarget(0.3).restart();d.fx = d3.event.x;d.fy = d3.event.y;}
+              function dragged(d) {d.fx = d3.event.x;d.fy = d3.event.y;}
+              function dragended(d) {simulation.alphaTarget(0);d.fx = null;d.fy = null;}
+              function mouseover(d) {tooltiptest.style("visibility", "visible").text(d.cond);}
+              function mouseout() {tooltiptest.style("visibility", "hidden");}
+              function mousemove(){tooltiptest.style("top", (d3.event.pageY - 10) + "px").style("left", (d3.event.pageX + 10) + "px");}
+              // function mouseenter(){svg.style("background-color", "#ffd889");}
+              // function mouseleave(){svg.style("background-color", "white");}
+            });
+          };
+        })(jQuery);
+
+        var svg = d3.select("#selectedJGexpl").append("svgUpdate");//.attr("width", width).attr("height", height);
+        $(tmpUpdate).generateMultiForce1(svg);
+      }
+      
 		</script>
     
 
     <script>
-      
+      // function checkOne(element){
+      //   console.log("checkOne>>>>>");
+      //   const checkboxes = document.getElementsByName("user_checkBox");
+      //   checkboxes.forEach((cb) => { cb.checked = false;})
+      //   element.checked = true;
+
+
+      //   var checkbox = $("input[name=user_checkBox]:checked");
+      //   checkbox.each(function(i){
+      //     var tr = checkbox.parent().parent().eq(i);
+      //     var td = tr.children();
+      //     var pdes = td.eq(0).text();
+      //     console.log("^^^^^^^checkbox pdes:^^^^^^", pdes); ///////////////@@@@@@@@@@@@@@
+      //     expParser(pdes);
+      //   });
+      // }
+      // function expParser(pdes){
+      //   var tmp = pdes.split(',');
+      //   var newNodeList = [];
+      //   var newTargetNodeList = [];
+
+      //   tmp.forEach(function(d){
+      //     var splitByEq = d.split('=');
+      //     var node = splitByEq[1];
+      //     var targetNode = splitByEq[0].split('_')[0];
+      //     console.log("***********node | targetNode: ", node, " | ", targetNode);
+      //     newNodeList.push(node);
+      //     newTargetNodeList.push(targetNode);
+      //   });
+      //   updateSelectedJG(newNodeList, newTargetNodeList);
+      // }
+      // function updateSelectedJG(newNodeList, newTargetNodeList){
+      //       console.log("%%%%%%%%%newNodeList: ", newNodeList);
+      //       console.log("&&&&&&&newTargetNodeList: ",newTargetNodeList);
+      // }
     </script>
 		<br>
 		
@@ -837,6 +1006,7 @@
 
 		</div><br>
     <div id="explanation_table" style="overflow: auto; height: 200px; margin-bottom: 20px;"></div><br><br><br>
+    
     <div id="explanation_summary" style="overflow-x: auto; height: 560px; white-space:nowrap; margin-bottom: 20px;"></div> <!--text-align:center;-->
     <div id="explanation_graph" style="overflow-x: auto; height: 320px; white-space:nowrap; margin-bottom: 20px;"></div>
 
