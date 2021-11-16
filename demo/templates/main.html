@@ -113,26 +113,26 @@
       <!-- <h5>{{ db_connection_info }}</h5> -->
       </nav>
 
-      <div class="col-md-7">
+      <div class="col-md-6"> <!--//col-md-7-->
         <form id="query-form" method="POST" action="/run">
             <div class="col-auto" style="display: flex; flex-direction: column; justify-content: center;  ">
               <!--<div class="input-group"> -->
                 <div class="input-group1">
                   <div class="input-group-text" style="float: left;">SELECT</div>
-                  <input type="text" class="form-control" id="query-select" name="query-select" value = "count(*) as win, s.season_name" style="float: left; width: 27%;">
+                  <input type="text" class="form-control" id="query-select" name="query-select" value = "count(*) as win, s.season_name" style="float: left; width: 30%;"><!--27%;--> 
                   <div class="input-group-text" style="float: left;">,</div>
-                  <input type="text" class="form-control" id="query-aggregate" placeholder="COUNT(*)" name="query-aggregate" style="float: left; width: 27%;">
+                  <input type="text" class="form-control" id="query-aggregate" placeholder="COUNT(*)" name="query-aggregate" style="float: left; width: 21%;"><!--27%;-->  
                   <div class="input-group-text" style="float: left;">FROM</div>
                   <input type="text" class="form-control" id="query-from" name="query-from" value=" team t, game g, season s " style="float: left; width: 28%;">
                 </div>
                 <div class="input-group2">
                   <div class="input-group-text" style="float: left;">WHERE</div>
-                  <input type="text" class="form-control" id="query-where" name="query-where" value=" t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' " style="float: left; width: 27%;">
+                  <input type="text" class="form-control" id="query-where" name="query-where" value=" t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' " style="float: left; width: 30%;">
                   <div class="input-group-text" style="float: left;">GROUP BY</div>
                   <input type="text" class="form-control" id="query-group" name="query-group" value="s.season_name" style="float: left; width: 27%;">
           
-                  <div class="input-group-run" style="float: left;">  
-                    <button type="button" class="btn btn-outline-primary" id="execute" style="width: 100%">Run</button>                   
+                  <div class="input-group-run" style="float: left;">   <!--left--> 
+                    <button type="button" class="btn btn-outline-primary" id="execute" style="width: 100%;">Run</button><!--100%-->              
                   </div>
                 </div>
             <!--</div>-->
@@ -339,7 +339,7 @@
           $("#sltROWScount").append(sltROWS);
           $('#container').empty();
           $('#container').append(
-            "<button onclick=\"exp()\" type=\"button\" class=\"btn btn-outline-primary\" id=\"explanation\">explanation</button>"
+            "<button onclick=\"exp()\" type=\"button\" class=\"btn btn-outline-primary\" id=\"explanation\" style=\"width:100%;\">explanation</button>"
           ); 
 
           td.each(function(i){
@@ -363,7 +363,7 @@
 
             $('#container').empty();
             $('#container').append(
-              "<button onclick=\"exp()\" type=\"button\" class=\"btn btn-outline-primary\" id=\"explanation\">explanation</button>"
+              "<button onclick=\"exp()\" type=\"button\" class=\"btn btn-outline-primary\" id=\"explanation\" style=\"width:100%;\">explanation</button>"
             );    
 
             td.each(function(i){
@@ -397,7 +397,7 @@
           var splitByPeriod = d.split('.');
           var targetNode = splitByPeriod[0];
           var node = d.replace(targetNode+".","");
-          var targetNode = targetNode.split("_")[0];
+          var targetNode = targetNode.slice(0,-2); //split("_")[0];
           
           // var splitByEq = d.split('=');
           // var node = splitByEq[1];
@@ -471,7 +471,7 @@
           $("#explanation_summary").append(sumHtml);
 
           //////////////////fscor-d3 scatter plot//////////////////
-          var margin = {top: 80, right: 80, bottom: 80, left: 80}, fs_width = 870, fs_height = 300;
+          var margin = {top: 80, right: 80, bottom: 80, left: 80}, fs_width = 730, fs_height = 300;
           //var dataset = fscoreData.map((d) => {return {"y": d };});
           var fscoreData = [];
           var jgnameId = [];
@@ -540,6 +540,7 @@
           // }
 
           /////<Generate Random Text Color>
+          
           text_color_list = [];
           function generateRandomTextColor(length) {
               while(text_color_list.length <length){
@@ -776,7 +777,7 @@
                   exp_data_pdesc = highlightText(exp_data_pdesc, element, repstr);
                 });
                 //newExpHtml += "<tr><td>"+ exp_data_pdesc +"</td></tr>";
-                newExpHtml += "<tr><td>"+ exp_data_pdesc +"</td><td><input type=\"checkbox\" name=\"user_checkBox\" onclick=\"checkOne(this)\"></td></tr>";
+                newExpHtml += "<tr><td style=\"width:95%;\">"+ exp_data_pdesc +"</td><td style=\"width:5%;\"><input style=\"zoom:3.0;\" type=\"checkbox\" name=\"user_checkBox\" onclick=\"checkOne(this)\"></td></tr>";
               }
             } 
             newExpHtml += "</tbody></table>";
@@ -784,10 +785,6 @@
             $("#explanation_table").empty();
             $("#explanation_table").append(newExpHtml);
           }
-          // function updateSelectedJG(newNodeList, newTargetNodeList){
-          //   console.log("%%%%%%%%%newNodeList: ", newNodeList);
-          //   console.log("&&&&&&&newTargetNodeList: ",newTargetNodeList);
-          // }
 
           function selectedJG(id){
             console.log("selectedJGexpl id: ",id);
@@ -803,12 +800,12 @@
                     console.log("%%%%%%%%%2%%%%%%: ", selectedData_nodes); /////@@@@@@@
                     console.log("%%%%%%%%%3%%%%%%: ", selectedData_links); /////@@@@@@@
                     
-
-                    var svg = d3.select("#selectedJGexpl").append("svg").attr("width", width).attr("height", height)
+                    var w_selected = 580; var h_selected = 450;
+                    var svg = d3.select("#selectedJGexpl").append("svg").attr("width", w_selected).attr("height", h_selected)
                                 .data(Data[selectedDataIndex]["nodes"]).style("background-color", "#b3ccff");
                     var simulation = d3.forceSimulation(Data[selectedDataIndex]["nodes"])
                                       .force("charge", d3.forceManyBody().strength(-1500))
-                                      .force("center", d3.forceCenter(width / 2, height / 2))
+                                      .force("center", d3.forceCenter(w_selected/2, h_selected/2))
                                       .force("link", d3.forceLink(Data[selectedDataIndex]["links"]).id(d => d.name));
                     var link =  svg.append("g").selectAll("line").data(Data[selectedDataIndex]["links"]).enter()
                                   .append("line").attr("stroke-width", 5).attr("stroke", "#999")
@@ -861,7 +858,7 @@
         }
         for(var i=0;i<newNodeList.length;i++){
           var objNodeNew = new Object();
-          objNodeNew["name"] = newNodeList[i];objNodeNew["color"] = "hsl(0, 100%, 80%)";objNodeNew["id"] = selectedDataId;
+          objNodeNew["name"] = newNodeList[i];objNodeNew["color"] = "hsl(0, 100%, 80%)";objNodeNew["id"] = "attr";//selectedDataId;
           obj_Node.push(objNodeNew);
         }
         tmpUpdate.nodes = obj_Node;
@@ -895,17 +892,25 @@
               var graph = this;
               var graphArea = svgObj.append("g");
               var active = d3.select(null); ///
-
-              var svg = d3.select("#selectedJGexpl").append("svg").attr("width", width).attr("height", height).data(graph.nodes);
+              var w = 580; var h = 450;
+              var svg = d3.select("#selectedJGexpl").append("svg").attr("width", w).attr("height", h).data(graph.nodes).style("background-color", "#b3ccff");
                           //.on("mouseenter", mouseenter).on("mouseleave", mouseleave);
-              var simulation = d3.forceSimulation(graph.nodes).force("charge", d3.forceManyBody().strength(-1800))
-                      .force("center", d3.forceCenter(width / 2, height / 2)).force("link", d3.forceLink(graph.links).id(d => d.name));
+              var simulation = d3.forceSimulation(graph.nodes).force("charge", d3.forceManyBody().strength(-1700))
+                      .force("center", d3.forceCenter(w/2, h/2)).force("link", d3.forceLink(graph.links).id(d => d.name)); //;
+                      // .force("collision", rectCollide().size(function(d){return [d.width, d.height]}))
+                      // .force("collide", d3.forceCollide().strength(.01).radius(50).iterations(1)); ////@@@@
               var link = svg.append("g").selectAll("line").data(graph.links).enter().append("line").attr("stroke-width", 5)
                               .attr("stroke", "#999").on("mouseover", mouseover).on("mouseout", mouseout).on("mousemove", mousemove);
               var drag = d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended);
-              var nodes_with_text = svg.append("g").selectAll("g").data(graph.nodes).enter().append("g").call(drag);               
-              var circles = nodes_with_text.append("circle").attr("r", 25).attr("fill", function(d){ return d.color});
-              var texts = nodes_with_text.append("text").text(function(d){ return d.name}).style("text-anchor", "middle").attr("class", "node-label");
+              var nodes_with_text = svg.append("g").selectAll("g").data(graph.nodes).enter().append("g")
+                                        .attr("class", function(d){if(d.id == "attr"){return "rt";} else{return "cl";}}).call(drag);
+              d3.selectAll(".rt").append("rect").attr("width", 200).attr("height", 25).attr("x", -100).attr("y",-12.5).attr("fill", function(d){ return d.color});
+                //.append("text").text(function(d){ return d.name}).style("text-anchor", "middle").style("font-size", "10px").attr("class", "node-label");
+              d3.selectAll(".cl").append("circle").attr("r", 25).attr("fill", function(d){ return d.color});
+                //.append("text").text(function(d){ return d.name}).style("text-anchor", "middle").style("font-size", "10px").attr("class", "node-label");
+              //var circles = nodes_with_text.append("circle").attr("r", 25).attr("fill", function(d){ return d.color});
+              var texts = nodes_with_text.append("text").text(function(d){ return d.name}).style("text-anchor", "middle")
+                                          .style("font-size", function(d){if(d.id == "attr"){return "15px";} else{return "20px";}}).attr("class", "node-label");
               //#svg
               var tooltiptest = d3.select("#selectedJGexpl").append("div").style("position", "absolute").style("visibility", "hidden").style("background-color", "#a7a7a7")
                               .style("color", "white").style("border-width", "1px").style("border-radius", "5px").style("padding", "10px");
@@ -917,7 +922,8 @@
               function dragstarted(d) {simulation.alphaTarget(0.3).restart();d.fx = d3.event.x;d.fy = d3.event.y;}
               function dragged(d) {d.fx = d3.event.x;d.fy = d3.event.y;}
               function dragended(d) {simulation.alphaTarget(0);d.fx = null;d.fy = null;}
-              function mouseover(d) {tooltiptest.style("visibility", "visible").text(d.cond);}
+              //function mouseover(d) {tooltiptest.style("visibility", "visible").text(d.cond);}
+              function mouseover(d) {if(d.cond != "")tooltiptest.style("visibility", "visible").text(d.cond);}
               function mouseout() {tooltiptest.style("visibility", "hidden");}
               function mousemove(){tooltiptest.style("top", (d3.event.pageY - 10) + "px").style("left", (d3.event.pageX + 10) + "px");}
               // function mouseenter(){svg.style("background-color", "#ffd889");}
@@ -934,41 +940,6 @@
     
 
     <script>
-      // function checkOne(element){
-      //   console.log("checkOne>>>>>");
-      //   const checkboxes = document.getElementsByName("user_checkBox");
-      //   checkboxes.forEach((cb) => { cb.checked = false;})
-      //   element.checked = true;
-
-
-      //   var checkbox = $("input[name=user_checkBox]:checked");
-      //   checkbox.each(function(i){
-      //     var tr = checkbox.parent().parent().eq(i);
-      //     var td = tr.children();
-      //     var pdes = td.eq(0).text();
-      //     console.log("^^^^^^^checkbox pdes:^^^^^^", pdes); ///////////////@@@@@@@@@@@@@@
-      //     expParser(pdes);
-      //   });
-      // }
-      // function expParser(pdes){
-      //   var tmp = pdes.split(',');
-      //   var newNodeList = [];
-      //   var newTargetNodeList = [];
-
-      //   tmp.forEach(function(d){
-      //     var splitByEq = d.split('=');
-      //     var node = splitByEq[1];
-      //     var targetNode = splitByEq[0].split('_')[0];
-      //     console.log("***********node | targetNode: ", node, " | ", targetNode);
-      //     newNodeList.push(node);
-      //     newTargetNodeList.push(targetNode);
-      //   });
-      //   updateSelectedJG(newNodeList, newTargetNodeList);
-      // }
-      // function updateSelectedJG(newNodeList, newTargetNodeList){
-      //       console.log("%%%%%%%%%newNodeList: ", newNodeList);
-      //       console.log("&&&&&&&newTargetNodeList: ",newTargetNodeList);
-      // }
     </script>
 		<br>
 		
@@ -989,7 +960,7 @@
           <p id="sltROWScount"></p>
         </div>
 
-        <div style="float: right; width: 25%; text-align: right;" id="container"></div>
+        <div style="float: right; width: 22%; text-align: right;" id="container"></div>
         
       </div>
 		</div>
@@ -1014,7 +985,7 @@
     </div>
 
     </div>
-    <div class="col-md-3"> 
+    <div class="col-md-4"> <!--col-md-3--->
       <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <div id="schemagraph"></div>
       </div>
@@ -1022,11 +993,11 @@
         <script>
           var svg = d3.select("#schemagraph")            
             .append("svg")
-            .attr("width", 400)
-            .attr("height", 300);
+            .attr("width", 580) //400
+            .attr("height", 380); //300
 
           svg.append("defs").append("marker")
-              .attr("id", "arrow")
+              //.attr("id", "arrow")
               .attr("viewBox", "5 -5 10 10")
               .attr("refX", 20)
               .attr("refY", 0)
@@ -1056,7 +1027,7 @@
                 .append("line")
                 .style("stroke", "blue")
                 .attr("class", "link-line")
-                .attr("marker-end", "url(#arrow)")
+                //.attr("marker-end", "url(#arrow)")
                 .attr("stroke-width", function(d) {return 3;})
                 .on("mouseover", mouseover).on("mouseout", mouseout).on("mousemove", mousemove);
 
