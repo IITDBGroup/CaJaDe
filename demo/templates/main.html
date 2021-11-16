@@ -540,34 +540,38 @@
           // }
 
           /////<Generate Random Text Color>
-          
           text_color_list = [];
-          function generateRandomTextColor(length) {
-              while(text_color_list.length <length){
-                  var hue = Math.floor(Math.random() * 360);
-                  var pastel = 'hsl(' + hue + ', 100%, 80%)';
-                  if(text_color_list.indexOf(pastel) == -1){
-                      text_color_list.push(pastel);
-                  }
-              }
-          }
-          generateRandomTextColor(highlightTextList.length);
+          hue_list = [0,40,60,80,120,150,170,190,210,240,270,300,330,345];
+          hue_list.forEach(function(d){
+            text_color_list.push('hsl('+d+',100%,80%)');
+          });
+          // text_color_list = [];
+          // function generateRandomTextColor(length) {
+          //     while(text_color_list.length <length){
+          //         var hue = Math.floor(Math.random() * 360);
+          //         var pastel = 'hsl(' + hue + ', 100%, 80%)';
+          //         if(text_color_list.indexOf(pastel) == -1){
+          //             text_color_list.push(pastel);
+          //         }
+          //     }
+          // }
+          //generateRandomTextColor(highlightTextList.length);
  
           /////<Node color>
-          var node_length = node_list.length;
-          node_color_list = [];
+          // var node_length = node_list.length;
+          // node_color_list = [];
 
-          function generateRandomColor(node_length) {
-            while(node_color_list.length <= node_length){
-                var hue = Math.floor(Math.random() * 360);
-                var pastel = 'hsl(' + hue + ', 100%, 80%)';
-                if(node_color_list.indexOf(pastel) == -1){
-                    node_color_list.push(pastel);
-                }
-            }
-          }
+          // function generateRandomColor(node_length) {
+          //   while(node_color_list.length <= node_length){
+          //       var hue = Math.floor(Math.random() * 360);
+          //       var pastel = 'hsl(' + hue + ', 100%, 80%)';
+          //       if(node_color_list.indexOf(pastel) == -1){
+          //           node_color_list.push(pastel);
+          //       }
+          //   }
+          // }
 
-          generateRandomColor(node_length);
+          // generateRandomColor(node_length);
 
           var color_index = -1;
           var color_matching = [];
@@ -579,10 +583,10 @@
 
                 if(color_index <0){
                   color_index++;
-                  obj.color = node_color_list[color_index];
+                  obj.color = text_color_list[color_index];//node_color_list
 
                   var obj_tmp = new Object();
-                  obj_tmp['name'] = obj['name']; obj_tmp['color'] = node_color_list[color_index];
+                  obj_tmp['name'] = obj['name']; obj_tmp['color'] = text_color_list[color_index];//node_color_list
                   color_matching.push(obj_tmp);
                 }else{
                   matching_check = false;
@@ -596,10 +600,10 @@
                   }
                   if(matching_check == false){
                     color_index++;
-                    obj.color = node_color_list[color_index];
+                    obj.color = text_color_list[color_index];//node_color_list
 
                     var obj_tmp = new Object();
-                    obj_tmp['name'] = obj['name']; obj_tmp['color'] = node_color_list[color_index];
+                    obj_tmp['name'] = obj['name']; obj_tmp['color'] = text_color_list[color_index];//node_color_list
 
                     color_matching.push(obj_tmp);
                   }
@@ -802,7 +806,7 @@
                     
                     var w_selected = 580; var h_selected = 450;
                     var svg = d3.select("#selectedJGexpl").append("svg").attr("width", w_selected).attr("height", h_selected)
-                                .data(Data[selectedDataIndex]["nodes"]).style("background-color", "#b3ccff");
+                                .data(Data[selectedDataIndex]["nodes"]).style("background-color", "#ccddff"); //b3ccff
                     var simulation = d3.forceSimulation(Data[selectedDataIndex]["nodes"])
                                       .force("charge", d3.forceManyBody().strength(-1500))
                                       .force("center", d3.forceCenter(w_selected/2, h_selected/2))
@@ -858,7 +862,7 @@
         }
         for(var i=0;i<newNodeList.length;i++){
           var objNodeNew = new Object();
-          objNodeNew["name"] = newNodeList[i];objNodeNew["color"] = "hsl(0, 100%, 80%)";objNodeNew["id"] = "attr";//selectedDataId;
+          objNodeNew["name"] = newNodeList[i];objNodeNew["color"] = "hsl(20, 100%, 80%)";objNodeNew["id"] = "attr";//selectedDataId;
           obj_Node.push(objNodeNew);
         }
         tmpUpdate.nodes = obj_Node;
@@ -893,24 +897,24 @@
               var graphArea = svgObj.append("g");
               var active = d3.select(null); ///
               var w = 580; var h = 450;
-              var svg = d3.select("#selectedJGexpl").append("svg").attr("width", w).attr("height", h).data(graph.nodes).style("background-color", "#b3ccff");
+              var svg = d3.select("#selectedJGexpl").append("svg").attr("width", w).attr("height", h).data(graph.nodes).style("background-color", "#ccddff"); //#b3ccff
                           //.on("mouseenter", mouseenter).on("mouseleave", mouseleave);
-              var simulation = d3.forceSimulation(graph.nodes).force("charge", d3.forceManyBody().strength(-1700))
-                      .force("center", d3.forceCenter(w/2, h/2)).force("link", d3.forceLink(graph.links).id(d => d.name)); //;
+              var simulation = d3.forceSimulation(graph.nodes).force("charge", d3.forceManyBody().strength(-1600))
+                      .force("center", d3.forceCenter(w/2, h/2)).force("link", d3.forceLink(graph.links).id(d => d.name))//;
                       // .force("collision", rectCollide().size(function(d){return [d.width, d.height]}))
-                      // .force("collide", d3.forceCollide().strength(.01).radius(50).iterations(1)); ////@@@@
+                      .force("collide", d3.forceCollide().strength(.1).radius(50).iterations(1)); ////@@@@
               var link = svg.append("g").selectAll("line").data(graph.links).enter().append("line").attr("stroke-width", 5)
                               .attr("stroke", "#999").on("mouseover", mouseover).on("mouseout", mouseout).on("mousemove", mousemove);
               var drag = d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended);
               var nodes_with_text = svg.append("g").selectAll("g").data(graph.nodes).enter().append("g")
                                         .attr("class", function(d){if(d.id == "attr"){return "rt";} else{return "cl";}}).call(drag);
-              d3.selectAll(".rt").append("rect").attr("width", 200).attr("height", 25).attr("x", -100).attr("y",-12.5).attr("fill", function(d){ return d.color});
+              d3.selectAll(".rt").append("rect").attr("width", 150).attr("height", 25).attr("x", -75).attr("y",-12.5).attr("fill", function(d){ return d.color});
                 //.append("text").text(function(d){ return d.name}).style("text-anchor", "middle").style("font-size", "10px").attr("class", "node-label");
               d3.selectAll(".cl").append("circle").attr("r", 25).attr("fill", function(d){ return d.color});
                 //.append("text").text(function(d){ return d.name}).style("text-anchor", "middle").style("font-size", "10px").attr("class", "node-label");
               //var circles = nodes_with_text.append("circle").attr("r", 25).attr("fill", function(d){ return d.color});
               var texts = nodes_with_text.append("text").text(function(d){ return d.name}).style("text-anchor", "middle")
-                                          .style("font-size", function(d){if(d.id == "attr"){return "15px";} else{return "20px";}}).attr("class", "node-label");
+                                          .style("font-size", function(d){if(d.id == "attr"){return "12px";} else{return "20px";}}).attr("class", "node-label");
               //#svg
               var tooltiptest = d3.select("#selectedJGexpl").append("div").style("position", "absolute").style("visibility", "hidden").style("background-color", "#a7a7a7")
                               .style("color", "white").style("border-width", "1px").style("border-radius", "5px").style("padding", "10px");
