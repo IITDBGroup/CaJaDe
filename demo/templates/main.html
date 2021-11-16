@@ -541,7 +541,7 @@
 
           /////<Generate Random Text Color>
           text_color_list = [];
-          hue_list = [0,40,60,80,120,150,170,190,210,240,270,300,330,345];
+          hue_list = [0,60,80,120,150,170,190,210,240,270,300,330,345]; //13colors
           hue_list.forEach(function(d){
             text_color_list.push('hsl('+d+',100%,80%)');
           });
@@ -899,6 +899,26 @@
               var w = 580; var h = 450;
               var svg = d3.select("#selectedJGexpl").append("svg").attr("width", w).attr("height", h).data(graph.nodes).style("background-color", "#ccddff"); //#b3ccff
                           //.on("mouseenter", mouseenter).on("mouseleave", mouseleave);
+              //var gNodes = graph.nodes;
+              var keys = [];
+              var color_list = [];
+              //gNodes
+              selectedData_nodes.forEach(function(d){keys.push("relations"); color_list.push(d.color);console.log("******color:",d.color);});
+              keys.push("predicates"); color_list.push("hsl(20, 100%, 80%)");
+              console.log("*****keys: ", keys);
+              console.log("*****color_list: ", color_list);
+              var color = d3.scaleOrdinal().domain(color_list).range(keys);//var color = d3.scaleOrdinal().domain(keys).range(color_list);
+
+              var size = 20;
+              svg.selectAll("mydots").data(color_list).enter().append("rect").attr("x", 100).attr("y", function(d,i){ return 50 + i*(size+5)})
+                  .attr("width", size).attr("height", size).style("fill", function(d){ return d});
+              svg.selectAll("mylabels").data(color_list).enter().append("text").attr("x", 100 + size*1.2).attr("y", function(d,i){ return 50 + i*(size+5) + (size/2)})
+                  .style("fill", "#000000").text(function(d){ return color(d)}).attr("text-anchor", "left").style("alignment-baseline", "middle");
+              // svg.selectAll("mydots").data(keys).enter().append("rect").attr("x", 100).attr("y", function(d,i){ return 50 + i*(size+5)})
+              //     .attr("width", size).attr("height", size).style("fill", function(d){ return color(d)});
+              // svg.selectAll("mylabels").data(keys).enter().append("text").attr("x", 100 + size*1.2).attr("y", function(d,i){ return 50 + i*(size+5) + (size/2)})
+              //     .style("fill", "#000000").text(function(d){ return d}).attr("text-anchor", "left").style("alignment-baseline", "middle");
+
               var simulation = d3.forceSimulation(graph.nodes).force("charge", d3.forceManyBody().strength(-1600))
                       .force("center", d3.forceCenter(w/2, h/2)).force("link", d3.forceLink(graph.links).id(d => d.name))//;
                       // .force("collision", rectCollide().size(function(d){return [d.width, d.height]}))
