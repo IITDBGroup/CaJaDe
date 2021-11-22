@@ -91,6 +91,7 @@ def db_connect(active_table='nba'):
         logger.debug(attr_dict)
 
         globals()['json_schema'] = convert_to_graph_json(graph.edges.data())
+        logger.debug(graph.edges.data()) ####
 
         return render_template(
             "main.html",                
@@ -152,7 +153,7 @@ def explanation():
 
     tmp1 = []
     tmp2 = []
-    
+    frac_tmp = [] #@@
     # logger.debug(query)
 
 
@@ -161,7 +162,9 @@ def explanation():
           tmp1.append(tdArr[i])
       else:
           tmp2.append(tdArr[i])
-
+    frac_tmp.append(tmp1[0])#@@
+    frac_tmp.append(tmp2[0])#@@
+    
     uQuery = "provenance of ("+query+");"
 
     # construct information needed for user question
@@ -251,7 +254,7 @@ def explanation():
     # print(uQuery)
 
     #query2 = "select p_desc from oct11.global_results"
-    query2 = "select id, jg_name, p_desc from "+resultSchemaName+".global_results" #"select p_desc from "+resultSchemaName+".global_results"
+    query2 = "select id, jg_name, p_desc, is_user, recall, precision from "+resultSchemaName+".global_results" #"select p_desc from "+resultSchemaName+".global_results"
     globals()['cursor'].execute(query2)
     exp_list = globals()['cursor'].fetchall()
     print('exp_list:::', exp_list)
@@ -279,38 +282,28 @@ def explanation():
     query6 = "select jg_name, p_desc from "+resultSchemaName+".global_results"
     globals()['cursor'].execute(query6)
     temp = globals()['cursor'].fetchall()
-    print("**********************temp:")
-    print(temp)
-    print("**********************temp[0]")
-    print(temp[0])
-    print("**********************temp[1]")
-    print(temp[1])
-    print("**********************temp[0][0]")
-    print(temp[0][0])
-    print("**********************temp[0][1]")
-    print(temp[0][1])
-    print("**********************")
+    # print("**********************temp:")
+    # print(temp)
+    # print("**********************temp[0]")
+    # print(temp[0])
+    # print("**********************temp[1]")
+    # print(temp[1])
+    # print("**********************temp[0][0]")
+    # print(temp[0][0])
+    # print("**********************temp[0][1]")
+    # print(temp[0][1])
+    # print("**********************")
 
     query7 = "select distinct jg_name, jg_details from "+resultSchemaName+".global_results"
     globals()['cursor'].execute(query7)
     test_tmp = globals()['cursor'].fetchall()
-    print("**********************test_tmp:")
-    print(test_tmp)
-    print("**********************test_tmp[0]")
-    print(test_tmp[0])
-    print("**********************test_tmp[1]")
-    print(test_tmp[1])
-    print("**********************test_tmp[0][0]")
-    print(test_tmp[0][0])
-    print("**********************test_tmp[0][1]")
-    print(test_tmp[0][1])
-    print("**********************")
+
 
     # query4 = "select distinct recall from "+resultSchemaName+".global_results"
     # globals()['cursor'].execute(query4)
     # recall_list = globals()['cursor'].fetchall()
     
-    return jsonify(result = "success-explanation", result2 = exp_list, result3 = jg, result4 = fscore_list, result5 = test_list, result6 = highlight_list, result7 = nodesNameList)
+    return jsonify(result = "success-explanation", result2 = exp_list, result3 = jg, result4 = fscore_list, result5 = test_list, result6 = highlight_list, result7 = nodesNameList, result8=frac_tmp)
 # def getTestList(test_list):
 #     for i in range(0, len(test_list)):
 #         tmpList = test_list[i][0]
