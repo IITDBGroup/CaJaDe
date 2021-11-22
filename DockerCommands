@@ -1,0 +1,47 @@
+Commands used to create dump files :
+
+pg_dump -p 5433 -U japerev -t game -t lineup -t lineup_game_stats -t lineup_player -t play_for -t player -t player_game_stats -t player_salary -t season -t team -t team_game_stats nba_original > reproduce_nba1.sql
+
+pg_dump -p 5433 -U japerev -t game -t lineup -t lineup_game_stats -t lineup_player -t play_for -t player -t player_game_stats -t player_salary -t season -t team -t team_game_stats nba_rev_01 > reproduce_nba01.sql
+
+pg_dump -p 5433 -U japerev -t game -t lineup -t lineup_game_stats -t lineup_player -t play_for -t player -t player_game_stats -t player_salary -t season -t team -t team_game_stats nba_rev_05 > reproduce_nba05.sql
+
+pg_dump -p 5433 -U japerev -t game -t lineup -t lineup_game_stats -t lineup_player -t play_for -t player -t player_game_stats -t player_salary -t season -t team -t team_game_stats nba_rev_2 > reproduce_nba2.sql
+
+pg_dump -p 5433 -U japerev -t game -t lineup -t lineup_game_stats -t lineup_player -t play_for -t player -t player_game_stats -t player_salary -t season -t team -t team_game_stats nba_rev_4 > reproduce_nba4.sql
+
+pg_dump -p 5433 -U japerev -t game -t lineup -t lineup_game_stats -t lineup_player -t play_for -t player -t player_game_stats -t player_salary -t season -t team -t team_game_stats nba_rev_8 > reproduce_nba8.sql
+
+
+Docker Image: 
+
+A: cajade_postgres
+	1) find out docker container volume : inspect -f '{{ json .Mounts }}' cajade_postgres | python -m json.tool
+
+	2) command to start the container: 
+		sudo docker run -e POSTGRES_PASSWORD=cajade \
+			   -p 5436:5436 \
+		       -v /chenjie/docker_dir:/var/lib/postgresql/data \
+		       --name cajade_psql_cnet \
+		       --net cajade_net \
+		       -d cajade_postgres
+	3) sudo docker cp docker_dir/reproduce_nba01.sql cajade_postgres:/var/lib/postgresql/data
+	4) run docker container in interactive mode: 
+		docker container run -it [docker_image] /bin/bash
+	5) commit changes:
+		sudo docker commit [CONTAINER_ID] [new_image_name]
+
+	Install Gprom
+	1) ./autogen.sh
+	2) CFLAGS="-Wno-misleading-indentation -I/usr/include/postgresql/" ./configure --disable-oracle --disable-monetdb --disable-java --disable-sqlite 
+	3) make
+	4) make install
+
+B: cajade_python
+    1) 	start python image in a container: 
+        sudo docker run --name cajade_python --net cajade_net -it python:3.6 /bin/bash
+    2)  clone the cajade repo: 
+
+
+C: network
+	sudo docker network create cajade_net

@@ -1,0 +1,27 @@
+version: "2.0"
+services:
+  cajade:
+    image: cajade_python
+    depends_on:
+      - postgres
+    container_name: "cape-system"
+    volumes:
+      - .:/experiment_results
+    networks:
+       app_net:
+         ipv4_address: 17.17.0.2
+  postgres:
+    image: cajade_postgres
+    container_name: "postgres-cape"
+    ports:
+      - "5432:5432"
+    networks:
+       app_net:
+         ipv4_address: 17.17.0.3
+networks:
+  app_net:
+      driver: bridge
+      ipam:
+          config:
+              - subnet: 17.17.0.0/8
+                gateway: 17.17.0.1
