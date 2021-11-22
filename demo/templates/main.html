@@ -392,7 +392,7 @@
         var tmp = pdes.split(',');
         var newNodeList = [];
         var newTargetNodeList = [];
-
+        
         tmp.forEach(function(d){
           var splitByPeriod = d.split('.');
           var targetNode = splitByPeriod[0];
@@ -406,7 +406,7 @@
           newNodeList.push(node);
           newTargetNodeList.push(targetNode);
         });
-        updateSelectedJG(newNodeList, newTargetNodeList);
+        updateSelectedJG(newNodeList, newTargetNodeList, pdes);
       }
       var selectedData; // = [];
       var selectedData_nodes;
@@ -414,6 +414,7 @@
       var selectedDataIndex;
       var selectedDataId;
       var tmpUpdate = new Object();
+      var green; var purple;
 ////////////////////////////////////@@@@@@@@@@@@@@@@@@@@@
       var graphData;
       function exp(){        
@@ -440,6 +441,7 @@
               summaryData = data.result5; ////
               highlightTextList = data.result6;
               node_list = data.result7;
+              frac_tmp = data.result8; //@@
               // recallData = data.result4;
               // precisionData = data.result5;
 
@@ -781,7 +783,8 @@
                   exp_data_pdesc = highlightText(exp_data_pdesc, element, repstr);
                 });
                 //newExpHtml += "<tr><td>"+ exp_data_pdesc +"</td></tr>";
-                newExpHtml += "<tr><td style=\"width:95%;\">"+ exp_data_pdesc +"</td><td style=\"width:5%;\"><input style=\"zoom:3.0;\" type=\"checkbox\" name=\"user_checkBox\" onclick=\"checkOne(this)\"></td></tr>";
+                newExpHtml += "<tr><td style=\"width:90%;\">"+ exp_data_pdesc +"</td><td style=\"width:10%;\"><input style=\"zoom:4.0;\" type=\"checkbox\" name=\"user_checkBox\" onclick=\"checkOne(this)\"></td></tr>";
+                
               }
             } 
             newExpHtml += "</tbody></table>";
@@ -843,7 +846,29 @@
         }
 
       } 
-      function updateSelectedJG(newNodeList, newTargetNodeList){
+      function updateSelectedJG(newNodeList, newTargetNodeList, pdes){
+        ///<Calculate Fractions>
+        var isUser;
+        for(var i=0;i<exp_data.length;i++){
+          if(exp_data[i][2] == pdes){ isUser = exp_data[i][3]; break;}
+        }
+        //var isUser = exp_data[i][3];
+        var isUserTmp = isUser.split('AND')[0].split('=')[1];
+        console.log("isUserTmp>>>>>>>>>>>>>>>>>>>>>>>", isUserTmp);
+        var frac_green; var frac_purple;
+        frac_tmp.forEach(function(d){
+          if(parseInt(d) == parseInt(isUserTmp)){frac_green = parseInt(d);console.log("frac_green>>>>>>>>>>>>>>>>>>>>>>>", frac_green);}
+          else{frac_purple = parseInt(d);console.log("frac_purple>>>>>>>>>>>>>>>>>>>>>>>", frac_purple);}
+        })
+        var fracValue_green = Math.round(frac_green*exp_data[i][4]);
+        console.log("fracValue_green>>>>>>>>>>>>>>>>>>>>>>>", fracValue_green);
+        green = fracValue_green+'/'+frac_green;
+        console.log("green>>>>>>>>>>>>>>>>>>>>>>>", green);
+        var fracValue_purple = Math.round(frac_green/exp_data[i][5]-frac_green);
+        console.log("fracValue_purple>>>>>>>>>>>>>>>>>>>>>>>", fracValue_purple);
+        purple = fracValue_purple+'/'+frac_purple;
+        console.log("fracValue_purple>>>>>>>>>>>>>>>>>>>>>>>", purple);
+        ///////////////////////////////////////////////////////////
         console.log("%%%%%%%%%newNodeList: ", newNodeList);
         console.log("&&&&&&&newTargetNodeList: ",newTargetNodeList);
 
@@ -899,25 +924,42 @@
               var w = 580; var h = 450;
               var svg = d3.select("#selectedJGexpl").append("svg").attr("width", w).attr("height", h).data(graph.nodes).style("background-color", "#ccddff"); //#b3ccff
                           //.on("mouseenter", mouseenter).on("mouseleave", mouseleave);
-              //var gNodes = graph.nodes;
-              var keys = [];
-              var color_list = [];
-              //gNodes
-              selectedData_nodes.forEach(function(d){keys.push("relations"); color_list.push(d.color);console.log("******color:",d.color);});
-              keys.push("predicates"); color_list.push("hsl(20, 100%, 80%)");
-              console.log("*****keys: ", keys);
-              console.log("*****color_list: ", color_list);
-              var color = d3.scaleOrdinal().domain(color_list).range(keys);//var color = d3.scaleOrdinal().domain(keys).range(color_list);
-
+              ////@@@@
+              var keys = ["relations", "predicates"];
+              var shapes = ["circle", "rect"];
               var size = 20;
-              svg.selectAll("mydots").data(color_list).enter().append("rect").attr("x", 100).attr("y", function(d,i){ return 50 + i*(size+5)})
-                  .attr("width", size).attr("height", size).style("fill", function(d){ return d});
-              svg.selectAll("mylabels").data(color_list).enter().append("text").attr("x", 100 + size*1.2).attr("y", function(d,i){ return 50 + i*(size+5) + (size/2)})
-                  .style("fill", "#000000").text(function(d){ return color(d)}).attr("text-anchor", "left").style("alignment-baseline", "middle");
-              // svg.selectAll("mydots").data(keys).enter().append("rect").attr("x", 100).attr("y", function(d,i){ return 50 + i*(size+5)})
-              //     .attr("width", size).attr("height", size).style("fill", function(d){ return color(d)});
-              // svg.selectAll("mylabels").data(keys).enter().append("text").attr("x", 100 + size*1.2).attr("y", function(d,i){ return 50 + i*(size+5) + (size/2)})
-              //     .style("fill", "#000000").text(function(d){ return d}).attr("text-anchor", "left").style("alignment-baseline", "middle");
+              var color = d3.scaleOrdinal().domain(shapes).range(keys);
+              $("#legend").empty();
+              var svg_legend = d3.select("#legend").append("svg").attr("width", w).attr("height", 130).style("background-color", "#ccddff");
+              // svg_legend.append("circle").attr("cx", 200).attr("cy", 130).attr("r", 10);
+              svg_legend.append("circle").attr("cx", 110).attr("cy", 50).attr("r", 10).style("fill", "#999");
+              svg_legend.append("text").attr("x", 130).attr("y", 54).text("relations").style("font-size", "15px").attr("alignment-baseline","middle");
+              
+              svg_legend.append("rect").attr("x", 350).attr("y", 25).attr("width", size*3).attr("height", size*2).style("fill", "#33ff33");
+              svg_legend.append("text").attr("x", 360).attr("y", 50).text(green).style("font-size", "15px").attr("alignment-baseline","middle");
+              svg_legend.append("rect").attr("x", 350).attr("y", 25+size*2).attr("width", size*3).attr("height", size*2).style("fill", "#9933ff");
+              svg_legend.append("text").attr("x", 360).attr("y", 50+size*2).text(purple).style("font-size", "15px").attr("alignment-baseline","middle");
+
+              svg_legend.append("rect").attr("x", 100).attr("y", 50+size+5).attr("width", size).attr("height", size).style("fill", "#999");
+              svg_legend.append("text").attr("x", 130).attr("y", 54+size+5+6).text("predicates").style("font-size", "15px").attr("alignment-baseline","middle");
+              //.append("svg").attr("width", w).attr("height", h).style("background-color", "#ccddff"); //@@
+              // svg_legend.selectAll("mydots").data(shapes).enter().append(function(d){ return d }).attr("x", 100).attr("y", function(d,i){return 50+i*(size+5)}).attr("width", size).attr("height", size);
+              // svg_legend.selectAll("mylabels").data(shapes).enter().append("text").attr("x", 100+size*1.2).attr("y", function(d,i){ return 50 + i*(size+5) + (size/2)})
+                        // .style("fill", "#000000").text(function(d){ return color(d)}).attr("text-anchor", "left").style("alignment-baseline", "middle");
+              /////////////////
+              // var keys = [];
+              // var color_list = [];
+
+              // selectedData_nodes.forEach(function(d){keys.push("relations"); color_list.push(d.color);
+              // keys.push("predicates"); color_list.push("hsl(20, 100%, 80%)");
+              // var color = d3.scaleOrdinal().domain(color_list).range(keys);
+
+              // var size = 20;
+              // svg.selectAll("mydots").data(color_list).enter().append("rect").attr("x", 100).attr("y", function(d,i){ return 50 + i*(size+5)})
+              //     .attr("width", size).attr("height", size).style("fill", function(d){ return d});
+              // svg.selectAll("mylabels").data(color_list).enter().append("text").attr("x", 100 + size*1.2).attr("y", function(d,i){ return 50 + i*(size+5) + (size/2)})
+              //     .style("fill", "#000000").text(function(d){ return color(d)}).attr("text-anchor", "left").style("alignment-baseline", "middle");
+              /////////////////////
 
               var simulation = d3.forceSimulation(graph.nodes).force("charge", d3.forceManyBody().strength(-1600))
                       .force("center", d3.forceCenter(w/2, h/2)).force("link", d3.forceLink(graph.links).id(d => d.name))//;
@@ -1013,7 +1055,8 @@
       <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <div id="schemagraph"></div>
       </div>
-        <div id="selectedJGexpl" style="margin-top: 50px;"></div> <!----->
+      <div id="selectedJGexpl" style="margin-top: 50px;"></div>
+      <div id="legend"></div>   <!----->
         <script>
           var svg = d3.select("#schemagraph")            
             .append("svg")
