@@ -314,23 +314,32 @@
       var td;
       var cnt;
       var len;
-      var user_question_colors = new Array("#bb0ef1", "#2fdf28");
-
-      var count=1;
+      var green_color="#2fdf28";
+      var purple_color="#bb0ef1";
+      var purple_text=null;
+      var green_text=null;
+      var count=0;
+      var haspurple=false;
 
       function selectRows(elem){        
         bgcolor = $(elem).css("background-color");
-
-        var text = $(elem).text();          
+        var text = $(elem).text();
+        console.log(text);          
         var tr = $(elem);
         td = tr.children();
 
         cnt = selectedArr.indexOf(text);
         len = selectedArr.length;
 
-        if(bgcolor == "#e0e0e0"){
-          count--;
-
+        // if(bgcolor == "#e0e0e0"){
+        if(selectedArr.includes(text))
+        {
+          if(text==green_text){
+            green_text=null;
+          }
+          else{
+            purple_text=null;
+          }
           $(elem).css("background-color", "#FFFFFF");    
           sltROWS -= 1;
           selectedArr.splice(cnt,1);
@@ -352,9 +361,15 @@
         }
         else {
           if(cnt==-1 && len<2){
-            count++;
-
-            $(elem).css("background-color", "#e0e0e0");            
+            if(green_text==null){
+              $(elem).css("background-color", green_color);
+              green_text=text;      
+            }
+            else{
+              $(elem).css("background-color", purple_color);
+              purple_text=text;      
+            }
+            // $(elem).css("background-color", "#e0e0e0");            
             sltROWS += 1;
             selectedArr.push(text);
 
@@ -442,7 +457,8 @@
               summaryData = data.result5; ////
               highlightTextList = data.result6;
               node_list = data.result7;
-              frac_tmp = data.result8; //@@
+              frac_name = data.result8; 
+              frac_value = data.result9;//@@
               // recallData = data.result4;
               // precisionData = data.result5;
 
@@ -854,20 +870,49 @@
           if(exp_data[i][2] == pdes){ isUser = exp_data[i][3]; break;}
         }
         //var isUser = exp_data[i][3];
-        var isUserTmp = isUser.split('AND')[0].split('=')[1];
-        console.log("isUserTmp>>>>>>>>>>>>>>>>>>>>>>>", isUserTmp);
-        var frac_green; var frac_purple;
-        frac_tmp.forEach(function(d){
-          if(parseInt(d) == parseInt(isUserTmp)){frac_green = parseInt(d);console.log("frac_green>>>>>>>>>>>>>>>>>>>>>>>", frac_green);}
-          else{frac_purple = parseInt(d);console.log("frac_purple>>>>>>>>>>>>>>>>>>>>>>>", frac_purple);}
-        })
-        var fracValue_green = Math.round(frac_green*exp_data[i][4]);
-        console.log("fracValue_green>>>>>>>>>>>>>>>>>>>>>>>", fracValue_green);
-        green = fracValue_green+'/'+frac_green;
-        console.log("green>>>>>>>>>>>>>>>>>>>>>>>", green);
-        var fracValue_purple = Math.round(frac_green/exp_data[i][5]-frac_green);
-        console.log("fracValue_purple>>>>>>>>>>>>>>>>>>>>>>>", fracValue_purple);
-        purple = fracValue_purple+'/'+frac_purple;
+        // var isUserTmp = isUser.split('AND')[0].split('=')[1];
+        // console.log("isUserTmp>>>>>>>>>>>>>>>>>>>>>>>", isUserTmp);
+
+        // var frac_green; var frac_purple;
+        // frac_tmp.forEach(function(d){
+        //   if(parseInt(d) == parseInt(isUserTmp)){frac_green = parseInt(d);console.log("frac_green>>>>>>>>>>>>>>>>>>>>>>>", frac_green);}
+        //   else{frac_purple = parseInt(d);console.log("frac_purple>>>>>>>>>>>>>>>>>>>>>>>", frac_purple);}
+        // })
+        console.log("isUser : ", isUser);
+        console.log("green_text : ", green_text);
+        console.log("purple_text : ", purple_text);
+
+
+        if(isUser == green_text){
+          console.log("isUser == green_text!")
+          green_frac_index=frac_name.indexOf(isUser);
+          frac_green = frac_value[green_frac_index];
+          console.log("frac_green : ", frac_green);
+          frac_purple = frac_value[1-green_frac_index];
+          console.log("frac_purple : ", frac_purple);
+          var fracValue_green = Math.round(frac_green*exp_data[i][4]);
+          console.log("fracValue_green>>>>>>>>>>>>>>>>>>>>>>>", fracValue_green);
+          green = fracValue_green+'/'+frac_green;
+          console.log("green>>>>>>>>>>>>>>>>>>>>>>>", green);
+          var fracValue_purple = Math.round(frac_green/exp_data[i][5]-frac_green);
+          console.log("fracValue_purple>>>>>>>>>>>>>>>>>>>>>>>", fracValue_purple);
+          purple = fracValue_purple+'/'+frac_purple;
+        }
+        else{
+          purple_frac_index=frac_name.indexOf(isUser);
+          frac_purple = frac_value[purple_frac_index];
+          frac_green = frac_value[1-purple_frac_index];
+          var fracValue_purple = Math.round(frac_purple*exp_data[i][4]);
+          console.log("fracValue_purple>>>>>>>>>>>>>>>>>>>>>>>", fracValue_purple);
+          purple = fracValue_purple+'/'+frac_purple;
+          console.log("green>>>>>>>>>>>>>>>>>>>>>>>", green);
+          var fracValue_green = Math.round(frac_purple/exp_data[i][5]-frac_purple);
+          console.log("fracValue_green>>>>>>>>>>>>>>>>>>>>>>>", fracValue_green);
+          green = fracValue_green+'/'+frac_green;
+        }
+
+
+
         console.log("fracValue_purple>>>>>>>>>>>>>>>>>>>>>>>", purple);
         ///////////////////////////////////////////////////////////
         console.log("%%%%%%%%%newNodeList: ", newNodeList);

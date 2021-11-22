@@ -150,6 +150,7 @@ def explanation():
     colNum = data["colNum"]
     colData = data["colData"]
     rangelen = len(tdArr)
+    logger.debug(tdArr)
 
     tmp1 = []
     tmp2 = []
@@ -189,6 +190,11 @@ def explanation():
 
     ddict={x[0]:x[1] for x in raw_dtypes} 
     # query result datatypes, we only need to know whether attribute is numeric or not
+
+
+    ur1="".join(tmp1)
+    ur2="".join(tmp2)
+
 
     for i in range(len(colData)):
         if(ddict[colData[i]]=='string'):
@@ -238,7 +244,7 @@ def explanation():
                     result_schema=resultSchemaName, #'oct11',
                     user_query=(uQuery, 'test'),
                     user_questions = [u1,u2],
-                    user_questions_map = {'yes': u1.replace("'", "''"), 'no': u2.replace("'", "''")},
+                    user_questions_map = {'yes': ur1 , 'no': ur2},
                     user_specified_attrs=list(set(user_specified_attrs)),
                     user_name=db_user,
                     password=db_pswd,
@@ -247,7 +253,7 @@ def explanation():
                     dbname=db_name, 
                     maximum_edges=2,
                     f1_sample_rate=0.3,
-                    f1_calculation_type = 's',
+                    f1_calculation_type = 'o',
                     user_assigned_max_num_pred=2,
                     min_recall_threshold=0.5,
                     gui=True)
@@ -294,16 +300,27 @@ def explanation():
     # print(temp[0][1])
     # print("**********************")
 
-    query7 = "select distinct jg_name, jg_details from "+resultSchemaName+".global_results"
-    globals()['cursor'].execute(query7)
-    test_tmp = globals()['cursor'].fetchall()
+    # query7 = "select distinct jg_name, jg_details from "+resultSchemaName+".global_results"
+    # globals()['cursor'].execute(query7)
+    # test_tmp = globals()['cursor'].fetchall()
 
 
     # query4 = "select distinct recall from "+resultSchemaName+".global_results"
     # globals()['cursor'].execute(query4)
     # recall_list = globals()['cursor'].fetchall()
+
+
+    query_u1_frac = f" SELECT COUNT(*) FROM pt_full WHERE {u1};"
+    query_u2_frac = f" SELECT COUNT(*) FROM pt_full WHERE {u2};"
+    globals()['cursor'].execute(query_u1_frac)
+    frac1 = globals()['cursor'].fetchall()
+    globals()['cursor'].execute(query_u2_frac)
+    frac2 = globals()['cursor'].fetchall()
+
+    fracnames=[ur1, ur2]
+    fracvalues=[frac1, frac2] 
     
-    return jsonify(result = "success-explanation", result2 = exp_list, result3 = jg, result4 = fscore_list, result5 = test_list, result6 = highlight_list, result7 = nodesNameList, result8=frac_tmp)
+    return jsonify(result = "success-explanation", result2 = exp_list, result3 = jg, result4 = fscore_list, result5 = test_list, result6 = highlight_list, result7 = nodesNameList, result8=fracnames, result9=fracvalues)
 # def getTestList(test_list):
 #     for i in range(0, len(test_list)):
 #         tmpList = test_list[i][0]
