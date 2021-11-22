@@ -13,7 +13,11 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.11.0/d3.min.js"></script>
   <script src="https://d3js.org/d3-selection-multi.v1.js"></script>
   <script src='https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js'></script>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
 	<link rel="stylesheet" href='../static/main.css'>
+
   <!-- <link rel="stylesheet" type="text/css" href="static/main.css"> -->
 	
 	<title>Main</title>
@@ -424,6 +428,14 @@
         });
         updateSelectedJG(newNodeList, newTargetNodeList, pdes);
       }
+      function likeClicked(ele){
+        if(ele.style.color != "green"){ele.style.color = "green";}
+        console.log("likeClicked>>>>>",ele.style.color);
+      }
+      function dislikeClicked(ele){
+        if(ele.style.color != "red"){ele.style.color = "red";}
+        console.log("dislikeClicked>>>>>",ele.style.color);
+      }
       var selectedData; // = [];
       var selectedData_nodes;
       var selectedData_links;
@@ -800,8 +812,10 @@
                   exp_data_pdesc = highlightText(exp_data_pdesc, element, repstr);
                 });
                 //newExpHtml += "<tr><td>"+ exp_data_pdesc +"</td></tr>";
-                newExpHtml += "<tr><td style=\"width:90%;\">"+ exp_data_pdesc +"</td><td style=\"width:10%;\"><input style=\"zoom:4.0;\" type=\"checkbox\" name=\"user_checkBox\" onclick=\"checkOne(this)\"></td></tr>";
-                
+                newExpHtml += "<tr><td style=\"width:80%;\">"+ exp_data_pdesc +"</td><td><input style=\"zoom:4.0;\" type=\"checkbox\" name=\"user_checkBox\" onclick=\"checkOne(this)\"></td>";
+                newExpHtml += "<td style=\"width:10%;\">";
+                newExpHtml += "<button type=\"button\" class=\"btn hover1\" id=\"likeBTN\" onclick=\"likeClicked(this)\"><i class=\"fa fa-thumbs-o-up\"></i></button>";
+                newExpHtml += "<button type=\"button\" class=\"btn hover1\" id=\"dislikeBTN\" onclick=\"dislikeClicked(this)\"><i class=\"fa fa-thumbs-o-down\"></i></button></td></tr>";
               }
             } 
             newExpHtml += "</tbody></table>";

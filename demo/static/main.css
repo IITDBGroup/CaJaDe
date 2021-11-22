@@ -60,6 +60,10 @@ body::-webkit-scrollbar-thumb{
   text-anchor: middle;
 }
 
+.hover1:hover{
+  background-color: #dedede;
+}
+
 /* */
 .line {
   fill: none;
