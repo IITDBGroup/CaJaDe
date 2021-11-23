@@ -321,38 +321,20 @@ def explanation():
     fracvalues=[frac1, frac2] 
     
     return jsonify(result = "success-explanation", result2 = exp_list, result3 = jg, result4 = fscore_list, result5 = test_list, result6 = highlight_list, result7 = nodesNameList, result8=fracnames, result9=fracvalues)
-# def getTestList(test_list):
-#     for i in range(0, len(test_list)):
-#         tmpList = test_list[i][0]
-#         jgid = getJGid(tmpList)
+##@@
+@app.route('/ratingUD',methods=['UD'])
+def ratingUD():
+    data = request.get_json()
 
-# def exp_replace_name(exp_list_tmp):
-#     exp_list = []
-#     for exp in exp_list_tmp:
-#         print('##exp: ', exp)
-#         print('##str(exp): ', str(exp))
-#         exp_tmp = str(exp).replace('(', '')
-#         exp_tmp = exp_tmp.replace(')', '')
-#         exp_tmp = exp_tmp.split('\'')[1]
-#         comma_count = exp_tmp.count(',')
-#         print('##comma_count: ', comma_count)
-#         comma_split = []
-#         tmp = exp_tmp.split(',')
-#         string_tmp = ""
-#         for i in range(0,comma_count+1):
-#             comma_split.append(tmp[i])
-#             print('##comma_split: ', comma_split)
-#             #comma_split.append(tmp.split(',')[i])
-#             str_front = comma_split[i].split('.')[0]
-#             str_front = str_front.split('_')[0]
-#             str_back = comma_split[i].split('.')[1]            
-#             string_tmp += str_front+'.'+str_back
-#             print('##str_front.str_back: ', string_tmp,'i: ',i)
-#             if i != comma_count: string_tmp += ','
-#         print('##string_tmp: ', string_tmp)
-#         exp_list.append(string_tmp)
-#     return exp_list
+    likedList = data["likedList"]  
+    dislikedList = data["dislikedList"]  
+    exp_data_jgname = data["exp_data_jgname"]  
 
+    # print("############likedList###", likedList)
+    # print("############dislikedList###", dislikedList)
+    # print("############exp_data_jgname###", exp_data_jgname)
+
+    return jsonify(result = "success-explanation")
 
 def getHighlightTexts(exp_list):
     print("<<<<<<<exp_list[0]: ", exp_list[0])

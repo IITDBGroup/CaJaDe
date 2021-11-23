@@ -430,6 +430,7 @@
       }
       var likedList = [];
       var dislikedList = [];
+      var exp_data_jgname;
 
       function likeClicked(ele){
         if(ele.style.color != "green"){
@@ -457,6 +458,26 @@
         }
         //console.log("dislikeClicked>>>>>",ele.style.color);
       }
+      //@@
+      function ratingUpdate(){
+        var postdata = {'likedList':likedList, 'dislikedList':dislikedList, 'exp_data_jgname':exp_data_jgname};
+
+		    $.ajax({
+		      type: 'UD',
+		      url: '{{url_for("ratingUD")}}',
+		      data: JSON.stringify(postdata),
+		      dataType: 'JSON',
+		      contentType: "application/json",
+		      success: function(data){	
+            console.log(">>>>>success");
+          
+		      },
+		      error: function(request, status, error){ 
+		        //alert('ajax failed')
+		        alert(error);
+		      }
+		    })
+      } 
       var selectedData; // = [];
       var selectedData_nodes;
       var selectedData_links;
@@ -843,6 +864,10 @@
             // newExpHtml += "<button type=\"button\" class=\"btn btn-outline-primary\" id=\"checkBoxSelectBtn\" onclick=\"checkBoxSelectBtn()\">UPDATE</button>";
             $("#explanation_table").empty();
             $("#explanation_table").append(newExpHtml);
+            let updateBtnHtml = "";
+            updateBtnHtml += "<button type=\"button\" class=\"btn btn-outline-primary\" onclick=\"ratingUpdate()\">Update</button>";
+            
+            $("#user_rating_update").append(updateBtnHtml);
           }
 
           function selectedJG(id){
@@ -1082,7 +1107,7 @@
         var svg = d3.select("#selectedJGexpl").append("svgUpdate");//.attr("width", width).attr("height", height);
         $(tmpUpdate).generateMultiForce1(svg);
       }
-      
+
 		</script>
     
 
@@ -1123,6 +1148,7 @@
 		  </div>
 
 		</div><br>
+    <div id="user_rating_update"></div>
     <div id="explanation_table" style="overflow: auto; height: 200px; margin-bottom: 20px;"></div><br><br><br>
     
     <div id="explanation_summary" style="overflow-x: auto; height: 560px; white-space:nowrap; margin-bottom: 20px;"></div> <!--text-align:center;-->
