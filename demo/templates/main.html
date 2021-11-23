@@ -428,13 +428,34 @@
         });
         updateSelectedJG(newNodeList, newTargetNodeList, pdes);
       }
+      var likedList = [];
+      var dislikedList = [];
+
       function likeClicked(ele){
-        if(ele.style.color != "green"){ele.style.color = "green";}
-        console.log("likeClicked>>>>>",ele.style.color);
+        if(ele.style.color != "green"){
+          ele.style.color = "green";
+
+          var checkBtn = $(ele);
+          var tr = checkBtn.parent().parent();
+          var td = tr.children();
+          var pdes = td.eq(0).text();
+          likedList.push(pdes);
+          console.log("^^^^^^^likedList:^^^^^^", likedList);
+        }
+        //console.log("likeClicked>>>>>",ele.style.color);
       }
       function dislikeClicked(ele){
-        if(ele.style.color != "red"){ele.style.color = "red";}
-        console.log("dislikeClicked>>>>>",ele.style.color);
+        if(ele.style.color != "red"){
+          ele.style.color = "red";
+
+          var checkBtn = $(ele);
+          var tr = checkBtn.parent().parent();
+          var td = tr.children();
+          var pdes = td.eq(0).text();
+          dislikedList.push(pdes);
+          console.log("^^^^^^^dislikedList:^^^^^^", dislikedList);
+        }
+        //console.log("dislikeClicked>>>>>",ele.style.color);
       }
       var selectedData; // = [];
       var selectedData_nodes;
@@ -814,8 +835,8 @@
                 //newExpHtml += "<tr><td>"+ exp_data_pdesc +"</td></tr>";
                 newExpHtml += "<tr><td style=\"width:80%;\">"+ exp_data_pdesc +"</td><td><input style=\"zoom:4.0;\" type=\"checkbox\" name=\"user_checkBox\" onclick=\"checkOne(this)\"></td>";
                 newExpHtml += "<td style=\"width:10%;\">";
-                newExpHtml += "<button type=\"button\" class=\"btn hover1\" id=\"likeBTN\" onclick=\"likeClicked(this)\"><i class=\"fa fa-thumbs-o-up\"></i></button>";
-                newExpHtml += "<button type=\"button\" class=\"btn hover1\" id=\"dislikeBTN\" onclick=\"dislikeClicked(this)\"><i class=\"fa fa-thumbs-o-down\"></i></button></td></tr>";
+                newExpHtml += "<button type=\"button\" class=\"btn hover1\" id=\"likeBTN\" name=\"user_like\" onclick=\"likeClicked(this)\"><i class=\"fa fa-thumbs-o-up\"></i></button>";
+                newExpHtml += "<button type=\"button\" class=\"btn hover1\" id=\"dislikeBTN\" name=\"user_dislike\" onclick=\"dislikeClicked(this)\"><i class=\"fa fa-thumbs-o-down\"></i></button></td></tr>";
               }
             } 
             newExpHtml += "</tbody></table>";
