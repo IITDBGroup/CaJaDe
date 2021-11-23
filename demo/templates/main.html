@@ -393,6 +393,9 @@
         }
       }
 /////////////////////////////////////@@@@@@@@@@@@@@@@@@
+      var exp_len, exp_data, highlightTextList;
+      var color_matching = [];
+
       function checkOne(element){
         console.log("checkOne>>>>>");
         const checkboxes = document.getElementsByName("user_checkBox");
@@ -431,6 +434,7 @@
       var likedList = [];
       var dislikedList = [];
       var exp_data_jgname;
+      var dots;
 
       function likeClicked(ele){
         if(ele.style.color != "green"){
@@ -477,7 +481,49 @@
 		        alert(error);
 		      }
 		    })
-      } 
+      }
+      function resetClicked(){
+        $("#user_rating_update").empty();//remove update button
+        $("#selectedJGexpl").empty(); //remove selecteJG located in the right hand side       
+        $("#legend").empty(); //remove legend and fractions in the right hand side
+        $("#explanation_table").empty(); //remove filtered explanations
+
+        expTable(exp_len, exp_data, highlightTextList, color_matching); //show the entire explanation table
+        //console.log(">>>7");
+
+        dots.style("fill", "#ffab00").style("visibility", "visible"); //make fscore dot all yellow
+        //console.log(">>>8");
+      }
+      function highlightText(originalTxt, searchKeyword, replaceTxt) {
+        const regex = new RegExp(searchKeyword, 'g');
+        return originalTxt.toString().replace(regex, replaceTxt);
+      }
+      function expTable(exp_len, exp_data, highlightTextList, color_matching){
+        let expHtml = "";
+        expHtml = "<table class=\"table table-bordered\" sellspacing=\"0\" width=\"90%\" id=\"exp\">";
+        expHtml += "<tbody>";
+
+        for(var i=0;i<exp_len;i++){
+          exp_data_pdesc = exp_data[i][2];
+          highlightTextList.forEach(function(element){
+            var tmp_element = element.slice(0,-2);
+            var setcolor;
+            color_matching.forEach(function(d){if(d.name == tmp_element){ setcolor = d.color;}});
+            var repstr = "<span style=\"background-color:"+setcolor+";\">"+element+"</span>";
+            // exp_data_pdesc = exp_data[i][2];
+            //console.log("exp_data_pdesc: ", exp_data_pdesc, "| element: ", element);
+            exp_data_pdesc = highlightText(exp_data_pdesc, element, repstr);//exp_data[i] = highlightText(exp_data[i], element, repstr);
+            //console.log("highlightText>>>>exp_data_pdesc: ", exp_data_pdesc);
+          });
+
+          expHtml += "<tr><td>"+ exp_data_pdesc +"</td></tr>"; //exp_data[i] //style=\"text-align: center;\"
+        }
+        expHtml += "</tbody></table>";
+
+        $("#explanation_table").empty();
+        $("#explanation_table").append(expHtml);
+      }
+      /////////////////////////////////////////////////@@@@@@@@@@@@@@@@@@@@@@@@@@
       var selectedData; // = [];
       var selectedData_nodes;
       var selectedData_links;
@@ -513,8 +559,6 @@
               node_list = data.result7;
               frac_name = data.result8; 
               frac_value = data.result9;//@@
-              // recallData = data.result4;
-              // precisionData = data.result5;
 
               //exp_table(exp_data,exp_len,graphData);
               exp_summary(summaryData, exp_data, exp_len, graphData); //exp_summary(summaryData, exp_data, exp_len, fscoreData); 
@@ -596,7 +640,8 @@
           var mouseover = function(d) {tooltip.style("opacity", 1).style("visibility", "visible").text(d.x) };
           var mousemove = function(d) {tooltip.style("top", (d3.event.pageY - 10) + "px").style("left", (d3.event.pageX + 10) + "px")};
           var mouseout = function(d) { tooltip.style("opacity", 0).style("visibility", "hidden") };
-          var dots =svg.append('g')
+          //var dots =svg.append('g')
+          dots = svg.append('g')
             .selectAll("dot")
             .data(dataset)
             .enter()
@@ -647,7 +692,7 @@
           // generateRandomColor(node_length);
 
           var color_index = -1;
-          var color_matching = [];
+          //var color_matching = [];
 
           for(var i=0;i<graphData.length;i++){
             tmp = graphData[i]["nodes"];
@@ -688,6 +733,7 @@
             const regex = new RegExp(searchKeyword, 'g');
             return originalTxt.toString().replace(regex, replaceTxt);
           }
+          expTable(exp_len, exp_data, highlightTextList, color_matching); //@@@@@@@@@@@@@@@@@
 
           let expHtml = "";
           expHtml = "<table class=\"table table-bordered\" sellspacing=\"0\" width=\"90%\" id=\"exp\">";
@@ -864,9 +910,9 @@
             // newExpHtml += "<button type=\"button\" class=\"btn btn-outline-primary\" id=\"checkBoxSelectBtn\" onclick=\"checkBoxSelectBtn()\">UPDATE</button>";
             $("#explanation_table").empty();
             $("#explanation_table").append(newExpHtml);
+
             let updateBtnHtml = "";
-            updateBtnHtml += "<button type=\"button\" class=\"btn btn-outline-primary\" onclick=\"ratingUpdate()\">Update</button>";
-            
+            updateBtnHtml += "<button type=\"button\" class=\"btn btn-outline-primary\" onclick=\"ratingUpdate()\">Update</button>";            
             $("#user_rating_update").append(updateBtnHtml);
           }
 
@@ -975,13 +1021,13 @@
 
         console.log("fracValue_purple>>>>>>>>>>>>>>>>>>>>>>>", purple);
         ///////////////////////////////////////////////////////////
-        console.log("%%%%%%%%%newNodeList: ", newNodeList);
-        console.log("&&&&&&&newTargetNodeList: ",newTargetNodeList);
+        // console.log("%%%%%%%%%newNodeList: ", newNodeList);
+        // console.log("&&&&&&&newTargetNodeList: ",newTargetNodeList);
 
-        console.log("%%%%%%%%%1@@@@@: ", selectedData); /////@@@@@@@
-        console.log("%%%%%%%%%2@@@@@: ", selectedData_nodes); /////@@@@@@@
-        console.log("%%%%%%%%%3@@@@@: ", selectedData_links); /////@@@@@@@
-        console.log("%%%%%%%%%4@@@@@: ", selectedDataId);
+        // console.log("%%%%%%%%%1@@@@@: ", selectedData); /////@@@@@@@
+        // console.log("%%%%%%%%%2@@@@@: ", selectedData_nodes); /////@@@@@@@
+        // console.log("%%%%%%%%%3@@@@@: ", selectedData_links); /////@@@@@@@
+        // console.log("%%%%%%%%%4@@@@@: ", selectedDataId);
 
         var obj_Node = [];
         var obj_Link = [];
@@ -1148,12 +1194,15 @@
 		  </div>
 
 		</div><br>
-    <div id="user_rating_update"></div>
+
+    <div id="user_rating_update" style="width: 50%;"></div>
     <div id="explanation_table" style="overflow: auto; height: 200px; margin-bottom: 20px;"></div><br><br><br>
     
     <div id="explanation_summary" style="overflow-x: auto; height: 560px; white-space:nowrap; margin-bottom: 20px;"></div> <!--text-align:center;-->
     <div id="explanation_graph" style="overflow-x: auto; height: 320px; white-space:nowrap; margin-bottom: 20px;"></div>
-
+    <div id="reset_JGselection" style="float: left; width:50%;">
+      <button type="button" class="btn btn-outline-primary" onclick="resetClicked()">Reset</button>
+    </div>
 
     </div>
 
