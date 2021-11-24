@@ -238,6 +238,7 @@ def explanation():
         user_specified_attrs.append((table_mappings[table], attr))
 
     logger.debug(f"user_specified_attrs : {user_specified_attrs}")
+    global resultSchemaName 
     resultSchemaName = datetime.today().strftime('%B%d%H%M')
 
     run_experiment(conn=globals()['conn'],
@@ -330,6 +331,15 @@ def ratingUD():
     dislikedList = data["dislikedList"]  
     exp_data_jgname = data["exp_data_jgname"]  
 
+    exp_from_jg_based_on_userfeedback = []
+
+    for l in likedList:
+
+    updated_q = f"""
+    SELECT select id, jg_name, p_desc, is_user, recall, precision
+    FROM {resultSchemaName}.patterns
+    ORDER BY similarity(p_desc::text, {l}::text)*fscore::numeric desc limit 5;
+    """
     # print("############likedList###", likedList)
     # print("############dislikedList###", dislikedList)
     # print("############exp_data_jgname###", exp_data_jgname)
