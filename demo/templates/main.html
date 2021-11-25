@@ -560,6 +560,11 @@
 
         $("#explanation_table").empty();
         $("#explanation_table").append(expHtml);
+
+        let updateBtnHtml = "";
+        updateBtnHtml += "<button type=\"button\" class=\"btn btn-outline-primary\" onclick=\"ratingUpdate()\">Update</button>";            
+        $("#user_rating_update").append(updateBtnHtml);
+        
       }
       /////////////////////////////////////////////////@@@@@@@@@@@@@@@@@@@@@@@@@@
       var selectedData; // = [];
@@ -957,9 +962,9 @@
             $("#explanation_table").empty();
             $("#explanation_table").append(newExpHtml);
 
-            let updateBtnHtml = "";
-            updateBtnHtml += "<button type=\"button\" class=\"btn btn-outline-primary\" onclick=\"ratingUpdate()\">Update</button>";            
-            $("#user_rating_update").append(updateBtnHtml);
+            // let updateBtnHtml = "";
+            // updateBtnHtml += "<button type=\"button\" class=\"btn btn-outline-primary\" onclick=\"ratingUpdate()\">Update</button>";            
+            // $("#user_rating_update").append(updateBtnHtml);
           }
 
           function selectedJG(id){
