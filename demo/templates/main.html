@@ -429,7 +429,28 @@
           newNodeList.push(node);
           newTargetNodeList.push(targetNode);
         });
+
+        var jgName;
+        var fscoreValue;
+        var idx;
+        exp_data.forEach(function(d){
+          if(d[2] == pdes){ jgName = d[1];fscoreValue = d[6];idx = d[0];
+            console.log("***********d2 |", d[2],"|jgName: ", jgName,"|fscore: ", fscoreValue,"|idx:",idx);
+          }
+          console.log("***********jgName: ", jgName);
+        });
+        updateSelectedData(jgName);
         updateSelectedJG(newNodeList, newTargetNodeList, pdes);
+        dots.style("fill", function(d){if(d.idx == idx){return "#6699ff";}else{ return "#ffab00";}}).style("visibility", "visible");
+      }
+      function updateSelectedData(jgName){
+        graphData.forEach(function(d){
+          if(d["nodes"][0]["id"] == jgName){
+            selectedData = d;
+            selectedData_nodes = d["nodes"];
+            selectedData_links = d["links"];
+          }
+        });
       }
       var likedList = [];
       var dislikedList = [];
@@ -477,7 +498,6 @@
           
 		      },
 		      error: function(request, status, error){ 
-		        //alert('ajax failed')
 		        alert(error);
 		      }
 		    })
@@ -489,10 +509,9 @@
         $("#explanation_table").empty(); //remove filtered explanations
 
         expTable(exp_len, exp_data, highlightTextList, color_matching); //show the entire explanation table
-        //console.log(">>>7");
 
         dots.style("fill", "#ffab00").style("visibility", "visible"); //make fscore dot all yellow
-        //console.log(">>>8");
+        selectedData = []; selectedData_nodes = []; selectedData_links = []; //selectedDataIndex = []; //selectedDataId = -1;
       }
       function highlightText(originalTxt, searchKeyword, replaceTxt) {
         const regex = new RegExp(searchKeyword, 'g');
@@ -516,7 +535,12 @@
             //console.log("highlightText>>>>exp_data_pdesc: ", exp_data_pdesc);
           });
 
-          expHtml += "<tr><td>"+ exp_data_pdesc +"</td></tr>"; //exp_data[i] //style=\"text-align: center;\"
+          //expHtml += "<tr><td>"+ exp_data_pdesc +"</td></tr>"; //exp_data[i] //style=\"text-align: center;\"
+
+          expHtml += "<tr><td style=\"width:80%;\">"+ exp_data_pdesc +"</td><td><input style=\"zoom:4.0;\" type=\"checkbox\" name=\"user_checkBox\" onclick=\"checkOne(this)\"></td>";
+          expHtml += "<td style=\"width:10%;\">";
+          expHtml += "<button type=\"button\" class=\"btn hover1\" id=\"likeBTN\" name=\"user_like\" onclick=\"likeClicked(this)\"><i class=\"fa fa-thumbs-up\"></i></button>";
+          expHtml += "<button type=\"button\" class=\"btn hover1\" id=\"dislikeBTN\" name=\"user_dislike\" onclick=\"dislikeClicked(this)\"><i class=\"fa fa-thumbs-down\"></i></button></td></tr>";
         }
         expHtml += "</tbody></table>";
 
@@ -533,6 +557,7 @@
       var green; var purple;
 ////////////////////////////////////@@@@@@@@@@@@@@@@@@@@@
       var graphData;
+      var fdataset = [];
       function exp(){        
         var expTEXT = "";
         for(var i=0;i<tdArr.length;i++){
@@ -553,7 +578,7 @@
               exp_len = data.result2.length;
               exp_data = data.result2;
               graphData = data.result3;
-              fscoreData = data.result4;
+              //fscoreData = data.result4;
               summaryData = data.result5; ////
               highlightTextList = data.result6;
               node_list = data.result7;
@@ -597,12 +622,12 @@
             jgnameId.push(summaryData[i][3]);
           }
 
-          var dataset = [];
+          // var fdataset = [];
           fscoreData.forEach(function(key,i){
             var obj = new Object();
-            obj['x'] = summaryData[i][2]; obj['y'] = fscoreData[i]; obj['id'] = jgnameId[i]; //getJGid(summaryData[i][0])
+            obj['x'] = summaryData[i][2]; obj['y'] = fscoreData[i]; obj['id'] = jgnameId[i];obj['idx'] = summaryData[i][4]; //getJGid(summaryData[i][0])
             //obj['x'] = exp_data[i]; obj['y'] = fscoreData[i]; //obj['id'] = jg_id[i];
-            dataset.push(obj);
+            fdataset.push(obj);
           });
 
           var n = fscoreData.length;
@@ -622,7 +647,7 @@
               .call(d3.axisBottom(xScale));
           svg.append("g").attr("class", "y axis").call(d3.axisLeft(yScale));
           svg.append("text").attr("x", (fs_width/2)).attr("y", 0-(margin.top/2)).attr("text-anchor", "middle")
-             .style("font-size", "15px").text("F Score Sactter Plot");
+             .style("font-size", "15px").text("F Score Scatter Plot");
           svg.append("text").attr("text-anchor", "end").attr("x", (fs_width/2)+margin.left)
               .attr("y", fs_height+50).text("The number of explanations");
           svg.append("text").attr("text-anchor", "end").attr("transform", "rotate(-90)").attr("y", -margin.left + 40)
@@ -643,7 +668,7 @@
           //var dots =svg.append('g')
           dots = svg.append('g')
             .selectAll("dot")
-            .data(dataset)
+            .data(fdataset)
             .enter()
             .append("circle")
             .attr("cx", function(d, i) { return xScale(i) })
@@ -729,35 +754,40 @@
             }
           }
           /////<Highlight Text>
-          function highlightText(originalTxt, searchKeyword, replaceTxt) {
-            const regex = new RegExp(searchKeyword, 'g');
-            return originalTxt.toString().replace(regex, replaceTxt);
-          }
+          // function highlightText(originalTxt, searchKeyword, replaceTxt) {
+          //   const regex = new RegExp(searchKeyword, 'g');
+          //   return originalTxt.toString().replace(regex, replaceTxt);
+          // }
           expTable(exp_len, exp_data, highlightTextList, color_matching); //@@@@@@@@@@@@@@@@@
 
-          let expHtml = "";
-          expHtml = "<table class=\"table table-bordered\" sellspacing=\"0\" width=\"90%\" id=\"exp\">";
-          expHtml += "<tbody>";
+          // let expHtml = "";
+          // expHtml = "<table class=\"table table-bordered\" sellspacing=\"0\" width=\"90%\" id=\"exp\">";
+          // expHtml += "<tbody>";
           
-          for(var i=0;i<exp_len;i++){
-            exp_data_pdesc = exp_data[i][2];
-            highlightTextList.forEach(function(element){
-              var tmp_element = element.slice(0,-2);
-              var setcolor;
-              color_matching.forEach(function(d){if(d.name == tmp_element){ setcolor = d.color;}});
-              var repstr = "<span style=\"background-color:"+setcolor+";\">"+element+"</span>";
-              // exp_data_pdesc = exp_data[i][2];
-              //console.log("exp_data_pdesc: ", exp_data_pdesc, "| element: ", element);
-              exp_data_pdesc = highlightText(exp_data_pdesc, element, repstr);//exp_data[i] = highlightText(exp_data[i], element, repstr);
-              //console.log("highlightText>>>>exp_data_pdesc: ", exp_data_pdesc);
-            });
+          // for(var i=0;i<exp_len;i++){
+          //   exp_data_pdesc = exp_data[i][2];
+          //   highlightTextList.forEach(function(element){
+          //     var tmp_element = element.slice(0,-2);
+          //     var setcolor;
+          //     color_matching.forEach(function(d){if(d.name == tmp_element){ setcolor = d.color;}});
+          //     var repstr = "<span style=\"background-color:"+setcolor+";\">"+element+"</span>";
+          //     // exp_data_pdesc = exp_data[i][2];
+          //     //console.log("exp_data_pdesc: ", exp_data_pdesc, "| element: ", element);
+          //     exp_data_pdesc = highlightText(exp_data_pdesc, element, repstr);//exp_data[i] = highlightText(exp_data[i], element, repstr);
+          //     //console.log("highlightText>>>>exp_data_pdesc: ", exp_data_pdesc);
+          //   });
 
-            expHtml += "<tr><td>"+ exp_data_pdesc +"</td></tr>"; //exp_data[i] //style=\"text-align: center;\"
-          }
-          expHtml += "</tbody></table>";
+          //   //expHtml += "<tr><td>"+ exp_data_pdesc +"</td></tr>"; //exp_data[i] //style=\"text-align: center;\"
+            
+          //   expHtml += "<tr><td style=\"width:80%;\">"+ exp_data_pdesc +"</td><td><input style=\"zoom:4.0;\" type=\"checkbox\" name=\"user_checkBox\" onclick=\"checkOne(this)\"></td>";
+          //   expHtml += "<td style=\"width:10%;\">";
+          //   expHtml += "<button type=\"button\" class=\"btn hover1\" id=\"likeBTN\" name=\"user_like\" onclick=\"likeClicked(this)\"><i class=\"fa fa-thumbs-up\"></i></button>";
+          //   expHtml += "<button type=\"button\" class=\"btn hover1\" id=\"dislikeBTN\" name=\"user_dislike\" onclick=\"dislikeClicked(this)\"><i class=\"fa fa-thumbs-down\"></i></button></td></tr>";
+          // }
+          // expHtml += "</tbody></table>";
 
-          $("#explanation_table").empty();
-		      $("#explanation_table").append(expHtml);
+          // $("#explanation_table").empty();
+		      // $("#explanation_table").append(expHtml);
           /////////////////////////////////////////////////////////////
           /////<Join Graphs>
           var Data = graphData;
@@ -902,8 +932,8 @@
                 //newExpHtml += "<tr><td>"+ exp_data_pdesc +"</td></tr>";
                 newExpHtml += "<tr><td style=\"width:80%;\">"+ exp_data_pdesc +"</td><td><input style=\"zoom:4.0;\" type=\"checkbox\" name=\"user_checkBox\" onclick=\"checkOne(this)\"></td>";
                 newExpHtml += "<td style=\"width:10%;\">";
-                newExpHtml += "<button type=\"button\" class=\"btn hover1\" id=\"likeBTN\" name=\"user_like\" onclick=\"likeClicked(this)\"><i class=\"fa fa-thumbs-o-up\"></i></button>";
-                newExpHtml += "<button type=\"button\" class=\"btn hover1\" id=\"dislikeBTN\" name=\"user_dislike\" onclick=\"dislikeClicked(this)\"><i class=\"fa fa-thumbs-o-down\"></i></button></td></tr>";
+                newExpHtml += "<button type=\"button\" class=\"btn hover1\" id=\"likeBTN\" name=\"user_like\" onclick=\"likeClicked(this)\"><i class=\"fa fa-thumbs-up\"></i></button>";
+                newExpHtml += "<button type=\"button\" class=\"btn hover1\" id=\"dislikeBTN\" name=\"user_dislike\" onclick=\"dislikeClicked(this)\"><i class=\"fa fa-thumbs-down\"></i></button></td></tr>";
               }
             } 
             newExpHtml += "</tbody></table>";
