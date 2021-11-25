@@ -192,6 +192,9 @@ def explanation():
     # query result datatypes, we only need to know whether attribute is numeric or not
 
 
+    global ur1
+    global ur2 
+    
     ur1="".join(tmp1)
     ur2="".join(tmp2)
 
@@ -200,6 +203,9 @@ def explanation():
         if(ddict[colData[i]]=='string'):
             tmp1[i] = f"'{tmp1[i]}'"
             tmp2[i] = f"'{tmp2[i]}'"
+
+    global u1
+    global u2
 
     u1 = ' AND '.join(['='.join(x) for x in list(zip(colData, tmp1))]) 
     u2 = ' AND '.join(['='.join(x) for x in list(zip(colData, tmp2))]) 
@@ -252,13 +258,12 @@ def explanation():
                     host=db_host,
                     port=db_port,
                     dbname=db_name, 
-                    maximum_edges=2,
+                    maximum_edges=1,
                     f1_sample_rate=0.3,
                     f1_calculation_type = 'o',
                     user_assigned_max_num_pred=2,
                     min_recall_threshold=0.5,
                     gui=True)
-    # print(uQuery)
 
     #query2 = "select p_desc from oct11.global_results"
     query2 = "select id, jg_name, p_desc, is_user, recall, precision from "+resultSchemaName+".global_results" #"select p_desc from "+resultSchemaName+".global_results"
@@ -327,24 +332,120 @@ def explanation():
 def ratingUD():
     data = request.get_json()
 
-    likedList = data["likedList"]  
-    dislikedList = data["dislikedList"]  
+    likedList = data["likedList"] 
+    logger.debug(f"likedList: {likedList}") 
+    dislikedList = data["dislikedList"]
+    logger.debug(f"dislikedList: {dislikedList}")  
     exp_data_jgname = data["exp_data_jgname"]  
 
     exp_from_jg_based_on_userfeedback = []
-
+    liked_sims = []
+    disliked_sims = []
+    li = 0
+    di = 0
     for l in likedList:
+        li+=1
+        l_sim = f"similarity(p_desc::text, '{l}'::text) AS s{li}"
+        liked_sims.append(l_sim)
+    for d in dislikedList:
+        di+=1
+        d_sim = f"-similarity(p_desc::text, '{d}'::text) AS d{di}"
+        disliked_sims.append(d_sim)
 
-    updated_q = f"""
-    SELECT select id, jg_name, p_desc, is_user, recall, precision
+    logger.debug(f"li: {li}")
+    logger.debug(f"di: {di}")
+    liked_alias=None
+    disliked_alias=None
+
+    if(li!=0):
+        liked_alias=[f's{la}' for la in range(1, li+1)]
+    if(di!=0):
+        disliked_alias=[f'd{da}' for da in range(1, di+1)]
+    user_alias = liked_alias+disliked_alias
+    logger.debug(f"user_alias: {user_alias}")
+
+    drop_updated_view = f"DROP MATERIALIZED VIEW IF EXISTS user_updated_exp;"
+
+    updated_q_view = f"""
+    CREATE MATERIALIZED VIEW user_updated_exp AS
+    (
+    WITH update_by_user AS 
+    (
+    SELECT id, jg_name, jg_details, p_desc, is_user, recall, precision, fscore,
+    {",".join(liked_sims)}, {", ".join(disliked_sims)}
     FROM {resultSchemaName}.patterns
-    ORDER BY similarity(p_desc::text, {l}::text)*fscore::numeric desc limit 5;
+    )
+    SELECT id, jg_name, jg_details, p_desc, is_user, recall, precision, fscore
+    FROM update_by_user
+    ORDER BY ({" + ".join(user_alias)})*fscore::NUMERIC DESC LIMIT 20
+    );
     """
-    # print("############likedList###", likedList)
-    # print("############dislikedList###", dislikedList)
-    # print("############exp_data_jgname###", exp_data_jgname)
+    globals()['cursor'].execute(drop_updated_view)
+    globals()['cursor'].execute(updated_q_view)
 
-    return jsonify(result = "success-explanation")
+    #query2 = "select p_desc from oct11.global_results"
+    query2 = "select id, jg_name, p_desc, is_user, recall, precision from user_updated_exp" #"select p_desc from "+resultSchemaName+".global_results"
+    globals()['cursor'].execute(query2)
+    exp_list = globals()['cursor'].fetchall()
+    print('exp_list:::', exp_list)
+    #exp_list = exp_replace_name(exp_list_tmp)
+    highlight_list = getHighlightTexts(exp_list)
+
+    #query3 = "select distinct jg_details from oct11.global_results"
+    query3 = "select distinct jg_name, jg_details from user_updated_exp" #"select distinct jg_details from "+resultSchemaName+".global_results"
+    globals()['cursor'].execute(query3)
+    jg_detail_list = globals()['cursor'].fetchall()
+    jg = getJoinGraph(jg_detail_list)
+    global nodesNameList
+    #nodesNameList = []
+    #print('nodesNameList:::::::',nodesNameList)
+    #print(jg)
+
+    query4 = "select fscore from user_updated_exp"
+    globals()['cursor'].execute(query4)
+    fscore_list = globals()['cursor'].fetchall()
+
+    query5 = "select jg_details, fscore, p_desc, jg_name from user_updated_exp"
+    globals()['cursor'].execute(query5)
+    test_list = globals()['cursor'].fetchall()
+
+    query6 = "select jg_name, p_desc from user_updated_exp"
+    globals()['cursor'].execute(query6)
+    temp = globals()['cursor'].fetchall()
+    # print("**********************temp:")
+    # print(temp)
+    # print("**********************temp[0]")
+    # print(temp[0])
+    # print("**********************temp[1]")
+    # print(temp[1])
+    # print("**********************temp[0][0]")
+    # print(temp[0][0])
+    # print("**********************temp[0][1]")
+    # print(temp[0][1])
+    # print("**********************")
+
+    # query7 = "select distinct jg_name, jg_details from "+resultSchemaName+".global_results"
+    # globals()['cursor'].execute(query7)
+    # test_tmp = globals()['cursor'].fetchall()
+
+
+    # query4 = "select distinct recall from "+resultSchemaName+".global_results"
+    # globals()['cursor'].execute(query4)
+    # recall_list = globals()['cursor'].fetchall()
+
+
+    query_u1_frac = f" SELECT COUNT(*) FROM pt_full WHERE {u1};"
+    query_u2_frac = f" SELECT COUNT(*) FROM pt_full WHERE {u2};"
+    globals()['cursor'].execute(query_u1_frac)
+    frac1 = globals()['cursor'].fetchall()
+    globals()['cursor'].execute(query_u2_frac)
+    frac2 = globals()['cursor'].fetchall()
+
+    fracnames=[ur1, ur2]
+    fracvalues=[frac1, frac2] 
+
+    return jsonify(result = "success-explanation", result2 = exp_list, result3 = jg, result4 = fscore_list, result5 = test_list, result6 = highlight_list, result7 = nodesNameList, result8=fracnames, result9=fracvalues)
+
 
 def getHighlightTexts(exp_list):
     print("<<<<<<<exp_list[0]: ", exp_list[0])

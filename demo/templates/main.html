@@ -472,10 +472,24 @@
 		      data: JSON.stringify(postdata),
 		      dataType: 'JSON',
 		      contentType: "application/json",
-		      success: function(data){	
-            console.log(">>>>>success");
-          
-		      },
+          success: function(data){
+            if (data.result2){
+              exp_len = data.result2.length;
+              exp_data = data.result2;
+              graphData = data.result3;
+              fscoreData = data.result4;
+              summaryData = data.result5; ////
+              highlightTextList = data.result6;
+              node_list = data.result7;
+              frac_name = data.result8; 
+              frac_value = data.result9;//@@
+
+              //exp_table(exp_data,exp_len,graphData);
+              exp_summary(summaryData, exp_data, exp_len, graphData); //exp_summary(summaryData, exp_data, exp_len, fscoreData); 	
+		      }else{
+            alert("no data");
+          }
+        },
 		      error: function(request, status, error){ 
 		        //alert('ajax failed')
 		        alert(error);
@@ -533,6 +547,7 @@
       var green; var purple;
 ////////////////////////////////////@@@@@@@@@@@@@@@@@@@@@
       var graphData;
+
       function exp(){        
         var expTEXT = "";
         for(var i=0;i<tdArr.length;i++){
@@ -572,6 +587,7 @@
 		        alert(error);
 		      }
         })
+        
         function getJGid(tmp_id){
           tmp = tmp_id.split(' ')
           jgID = tmp[0]
