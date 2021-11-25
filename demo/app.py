@@ -266,7 +266,7 @@ def explanation():
                     gui=True)
 
     #query2 = "select p_desc from oct11.global_results"
-    query2 = "select id, jg_name, p_desc, is_user, recall, precision from "+resultSchemaName+".global_results" #"select p_desc from "+resultSchemaName+".global_results"
+    query2 = "select id, jg_name, p_desc, is_user, recall, precision, fscore from "+resultSchemaName+".global_results" #"select p_desc from "+resultSchemaName+".global_results"
     globals()['cursor'].execute(query2)
     exp_list = globals()['cursor'].fetchall()
     print('exp_list:::', exp_list)
@@ -287,7 +287,7 @@ def explanation():
     globals()['cursor'].execute(query4)
     fscore_list = globals()['cursor'].fetchall()
 
-    query5 = "select jg_details, fscore, p_desc, jg_name from "+resultSchemaName+".global_results"
+    query5 = "select jg_details, fscore, p_desc, jg_name, id from "+resultSchemaName+".global_results"
     globals()['cursor'].execute(query5)
     test_list = globals()['cursor'].fetchall()
 
