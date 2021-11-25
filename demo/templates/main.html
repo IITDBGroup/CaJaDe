@@ -485,7 +485,7 @@
       }
       //@@
       function ratingUpdate(){
-        var postdata = {'likedList':likedList, 'dislikedList':dislikedList, 'exp_data_jgname':exp_data_jgname};
+        var postdata = {'likedList':likedList, 'dislikedList':dislikedList};
 
 		    $.ajax({
 		      type: 'UD',
@@ -562,7 +562,8 @@
         $("#explanation_table").append(expHtml);
 
         let updateBtnHtml = "";
-        updateBtnHtml += "<button type=\"button\" class=\"btn btn-outline-primary\" onclick=\"ratingUpdate()\">Update</button>";            
+        updateBtnHtml += "<button type=\"button\" class=\"btn btn-outline-primary\" onclick=\"ratingUpdate()\">Update</button>";  
+        $("#user_rating_update").empty();             
         $("#user_rating_update").append(updateBtnHtml);
         
       }
@@ -623,403 +624,404 @@
           jgID = tmp[0]
           return jgID
         }
-        function exp_summary(summaryData, exp_data, exp_len, graphData){ //(exp_len, recallData, precisionData)
-          let sumHtml = "";
-          var numOfExp = "The number of explanations: "+exp_len;
-          sumHtml = "<table class=\"table table-bordered\" sellspacing=\"0\" width=\"90%\" id=\"exp\"><tbody>";
-          sumHtml += "<tr><td style=\"text-align: left;\">Summary</td></tr>";
-          sumHtml += "<tr><td style=\"text-align: left;\">1."+ numOfExp +"</td></tr>";
-          sumHtml += "</tbody></table>";
-          $("#explanation_summary").empty();
-          $("#explanation_summary").append(sumHtml);
 
-          //////////////////fscor-d3 scatter plot//////////////////
-          var margin = {top: 80, right: 80, bottom: 80, left: 80}, fs_width = 730, fs_height = 300;
-          //var dataset = fscoreData.map((d) => {return {"y": d };});
-          var fscoreData = [];
-          var jgnameId = [];
-          for(var i=0;i<summaryData.length;i++){
-            fscoreData.push(summaryData[i][1]);
-            jgnameId.push(summaryData[i][3]);
-          }
+      } 
 
-          // var fdataset = [];
-          fscoreData.forEach(function(key,i){
-            var obj = new Object();
-            obj['x'] = summaryData[i][2]; obj['y'] = fscoreData[i]; obj['id'] = jgnameId[i];obj['idx'] = summaryData[i][4]; //getJGid(summaryData[i][0])
-            //obj['x'] = exp_data[i]; obj['y'] = fscoreData[i]; //obj['id'] = jg_id[i];
-            fdataset.push(obj);
-          });
+      function exp_summary(summaryData, exp_data, exp_len, graphData){ //(exp_len, recallData, precisionData)
+        let sumHtml = "";
+        var numOfExp = "The number of explanations: "+exp_len;
+        sumHtml = "<table class=\"table table-bordered\" sellspacing=\"0\" width=\"90%\" id=\"exp\"><tbody>";
+        sumHtml += "<tr><td style=\"text-align: left;\">Summary</td></tr>";
+        sumHtml += "<tr><td style=\"text-align: left;\">1."+ numOfExp +"</td></tr>";
+        sumHtml += "</tbody></table>";
+        $("#explanation_summary").empty();
+        $("#explanation_summary").append(sumHtml);
 
-          var n = fscoreData.length;
+        //////////////////fscor-d3 scatter plot//////////////////
+        var margin = {top: 80, right: 80, bottom: 80, left: 80}, fs_width = 730, fs_height = 300;
+        //var dataset = fscoreData.map((d) => {return {"y": d };});
+        var fscoreData = [];
+        var jgnameId = [];
+        for(var i=0;i<summaryData.length;i++){
+          fscoreData.push(summaryData[i][1]);
+          jgnameId.push(summaryData[i][3]);
+        }
 
-          var xScale = d3.scaleLinear().domain([0, n-1]).range([0, fs_width]); //
-          var yScale = d3.scaleLinear().domain([0.1, 1]).range([fs_height, 0]); //[0, 1]
+        // var fdataset = [];
+        fscoreData.forEach(function(key,i){
+          var obj = new Object();
+          obj['x'] = summaryData[i][2]; obj['y'] = fscoreData[i]; obj['id'] = jgnameId[i];obj['idx'] = summaryData[i][4]; //getJGid(summaryData[i][0])
+          //obj['x'] = exp_data[i]; obj['y'] = fscoreData[i]; //obj['id'] = jg_id[i];
+          fdataset.push(obj);
+        });
 
-          var svg = d3.select("#explanation_summary")
-                      .append("svg")
-                      .attr("width", fs_width + margin.left + margin.right)
-                      .attr("height", fs_height + margin.top + margin.bottom)
-                      .append("g")
-                      .attr("transform","translate(" + margin.left + "," + margin.top + ")");
-          svg.append("g")
-              .attr("class", "x axis")
-              .attr("transform", "translate(0," + fs_height + ")")
-              .call(d3.axisBottom(xScale));
-          svg.append("g").attr("class", "y axis").call(d3.axisLeft(yScale));
-          svg.append("text").attr("x", (fs_width/2)).attr("y", 0-(margin.top/2)).attr("text-anchor", "middle")
-             .style("font-size", "15px").text("F Score Scatter Plot");
-          svg.append("text").attr("text-anchor", "end").attr("x", (fs_width/2)+margin.left)
-              .attr("y", fs_height+50).text("The number of explanations");
-          svg.append("text").attr("text-anchor", "end").attr("transform", "rotate(-90)").attr("y", -margin.left + 40)
-              .attr("x", -margin.top - fs_height/2 + 100).text("F Score");
-          var tooltip = d3.select("#explanation_summary")
-                        .append("div")
-                        .attr("class", "tooltip")
-                        .style("background-color", "#a7a7a7")
-                        .style("color", "white")
-                        .style("border-width", "1px")
-                        .style("border-radius", "5px")
-                        .style("padding", "10px")
-                        .style("position", "absolute")
-                        .style("visibility", "hidden");
-          var mouseover = function(d) {tooltip.style("opacity", 1).style("visibility", "visible").text(d.x) };
-          var mousemove = function(d) {tooltip.style("top", (d3.event.pageY - 10) + "px").style("left", (d3.event.pageX + 10) + "px")};
-          var mouseout = function(d) { tooltip.style("opacity", 0).style("visibility", "hidden") };
-          //var dots =svg.append('g')
-          dots = svg.append('g')
-            .selectAll("dot")
-            .data(fdataset)
-            .enter()
-            .append("circle")
-            .attr("cx", function(d, i) { return xScale(i) })
-            .attr("cy", function(d) { return yScale(d.y) })
-            .attr("r", 10)
-            .style("fill", "#ffab00")
-            .style("opacity", 0.5)
-            .style("stroke", "white")
-            .on("mouseover", mouseover )
-            .on("mousemove", mousemove )
-            .on("mouseout", mouseout );
-          // }
+        var n = fscoreData.length;
 
-          /////<Generate Random Text Color>
-          text_color_list = [];
-          hue_list = [0,60,80,120,150,170,190,210,240,270,300,330,345]; //13colors
-          hue_list.forEach(function(d){
-            text_color_list.push('hsl('+d+',100%,80%)');
-          });
-          // text_color_list = [];
-          // function generateRandomTextColor(length) {
-          //     while(text_color_list.length <length){
-          //         var hue = Math.floor(Math.random() * 360);
-          //         var pastel = 'hsl(' + hue + ', 100%, 80%)';
-          //         if(text_color_list.indexOf(pastel) == -1){
-          //             text_color_list.push(pastel);
-          //         }
-          //     }
-          // }
-          //generateRandomTextColor(highlightTextList.length);
- 
-          /////<Node color>
-          // var node_length = node_list.length;
-          // node_color_list = [];
+        var xScale = d3.scaleLinear().domain([0, n-1]).range([0, fs_width]); //
+        var yScale = d3.scaleLinear().domain([0.1, 1]).range([fs_height, 0]); //[0, 1]
 
-          // function generateRandomColor(node_length) {
-          //   while(node_color_list.length <= node_length){
-          //       var hue = Math.floor(Math.random() * 360);
-          //       var pastel = 'hsl(' + hue + ', 100%, 80%)';
-          //       if(node_color_list.indexOf(pastel) == -1){
-          //           node_color_list.push(pastel);
-          //       }
-          //   }
-          // }
+        var svg = d3.select("#explanation_summary")
+                    .append("svg")
+                    .attr("width", fs_width + margin.left + margin.right)
+                    .attr("height", fs_height + margin.top + margin.bottom)
+                    .append("g")
+                    .attr("transform","translate(" + margin.left + "," + margin.top + ")");
+        svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + fs_height + ")")
+            .call(d3.axisBottom(xScale));
+        svg.append("g").attr("class", "y axis").call(d3.axisLeft(yScale));
+        svg.append("text").attr("x", (fs_width/2)).attr("y", 0-(margin.top/2)).attr("text-anchor", "middle")
+           .style("font-size", "15px").text("F Score Scatter Plot");
+        svg.append("text").attr("text-anchor", "end").attr("x", (fs_width/2)+margin.left)
+            .attr("y", fs_height+50).text("The number of explanations");
+        svg.append("text").attr("text-anchor", "end").attr("transform", "rotate(-90)").attr("y", -margin.left + 40)
+            .attr("x", -margin.top - fs_height/2 + 100).text("F Score");
+        var tooltip = d3.select("#explanation_summary")
+                      .append("div")
+                      .attr("class", "tooltip")
+                      .style("background-color", "#a7a7a7")
+                      .style("color", "white")
+                      .style("border-width", "1px")
+                      .style("border-radius", "5px")
+                      .style("padding", "10px")
+                      .style("position", "absolute")
+                      .style("visibility", "hidden");
+        var mouseover = function(d) {tooltip.style("opacity", 1).style("visibility", "visible").text(d.x) };
+        var mousemove = function(d) {tooltip.style("top", (d3.event.pageY - 10) + "px").style("left", (d3.event.pageX + 10) + "px")};
+        var mouseout = function(d) { tooltip.style("opacity", 0).style("visibility", "hidden") };
+        //var dots =svg.append('g')
+        dots = svg.append('g')
+          .selectAll("dot")
+          .data(fdataset)
+          .enter()
+          .append("circle")
+          .attr("cx", function(d, i) { return xScale(i) })
+          .attr("cy", function(d) { return yScale(d.y) })
+          .attr("r", 10)
+          .style("fill", "#ffab00")
+          .style("opacity", 0.5)
+          .style("stroke", "white")
+          .on("mouseover", mouseover )
+          .on("mousemove", mousemove )
+          .on("mouseout", mouseout );
+        // }
 
-          // generateRandomColor(node_length);
+        /////<Generate Random Text Color>
+        text_color_list = [];
+        hue_list = [0,60,80,120,150,170,190,210,240,270,300,330,345]; //13colors
+        hue_list.forEach(function(d){
+          text_color_list.push('hsl('+d+',100%,80%)');
+        });
+        // text_color_list = [];
+        // function generateRandomTextColor(length) {
+        //     while(text_color_list.length <length){
+        //         var hue = Math.floor(Math.random() * 360);
+        //         var pastel = 'hsl(' + hue + ', 100%, 80%)';
+        //         if(text_color_list.indexOf(pastel) == -1){
+        //             text_color_list.push(pastel);
+        //         }
+        //     }
+        // }
+        //generateRandomTextColor(highlightTextList.length);
 
-          var color_index = -1;
-          //var color_matching = [];
+        /////<Node color>
+        // var node_length = node_list.length;
+        // node_color_list = [];
 
-          for(var i=0;i<graphData.length;i++){
-            tmp = graphData[i]["nodes"];
-            for(var j=0;j<tmp.length;j++){
-                var obj = tmp[j];
+        // function generateRandomColor(node_length) {
+        //   while(node_color_list.length <= node_length){
+        //       var hue = Math.floor(Math.random() * 360);
+        //       var pastel = 'hsl(' + hue + ', 100%, 80%)';
+        //       if(node_color_list.indexOf(pastel) == -1){
+        //           node_color_list.push(pastel);
+        //       }
+        //   }
+        // }
 
-                if(color_index <0){
+        // generateRandomColor(node_length);
+
+        var color_index = -1;
+        //var color_matching = [];
+
+        for(var i=0;i<graphData.length;i++){
+          tmp = graphData[i]["nodes"];
+          for(var j=0;j<tmp.length;j++){
+              var obj = tmp[j];
+
+              if(color_index <0){
+                color_index++;
+                obj.color = text_color_list[color_index];//node_color_list
+
+                var obj_tmp = new Object();
+                obj_tmp['name'] = obj['name']; obj_tmp['color'] = text_color_list[color_index];//node_color_list
+                color_matching.push(obj_tmp);
+              }else{
+                matching_check = false;
+                for(var t=0;t<color_matching.length;t++){
+                  nodeName = color_matching[t]["name"];
+                  if(nodeName == obj['name']){
+                    obj.color = color_matching[t]['color'];
+                    matching_check = true;
+                    break;
+                  }
+                }
+                if(matching_check == false){
                   color_index++;
                   obj.color = text_color_list[color_index];//node_color_list
 
                   var obj_tmp = new Object();
                   obj_tmp['name'] = obj['name']; obj_tmp['color'] = text_color_list[color_index];//node_color_list
+
                   color_matching.push(obj_tmp);
-                }else{
-                  matching_check = false;
-                  for(var t=0;t<color_matching.length;t++){
-                    nodeName = color_matching[t]["name"];
-                    if(nodeName == obj['name']){
-                      obj.color = color_matching[t]['color'];
-                      matching_check = true;
-                      break;
-                    }
-                  }
-                  if(matching_check == false){
-                    color_index++;
-                    obj.color = text_color_list[color_index];//node_color_list
-
-                    var obj_tmp = new Object();
-                    obj_tmp['name'] = obj['name']; obj_tmp['color'] = text_color_list[color_index];//node_color_list
-
-                    color_matching.push(obj_tmp);
-                  }
                 }
-            }
-          }
-          /////<Highlight Text>
-          // function highlightText(originalTxt, searchKeyword, replaceTxt) {
-          //   const regex = new RegExp(searchKeyword, 'g');
-          //   return originalTxt.toString().replace(regex, replaceTxt);
-          // }
-          expTable(exp_len, exp_data, highlightTextList, color_matching); //@@@@@@@@@@@@@@@@@
-
-          // let expHtml = "";
-          // expHtml = "<table class=\"table table-bordered\" sellspacing=\"0\" width=\"90%\" id=\"exp\">";
-          // expHtml += "<tbody>";
-          
-          // for(var i=0;i<exp_len;i++){
-          //   exp_data_pdesc = exp_data[i][2];
-          //   highlightTextList.forEach(function(element){
-          //     var tmp_element = element.slice(0,-2);
-          //     var setcolor;
-          //     color_matching.forEach(function(d){if(d.name == tmp_element){ setcolor = d.color;}});
-          //     var repstr = "<span style=\"background-color:"+setcolor+";\">"+element+"</span>";
-          //     // exp_data_pdesc = exp_data[i][2];
-          //     //console.log("exp_data_pdesc: ", exp_data_pdesc, "| element: ", element);
-          //     exp_data_pdesc = highlightText(exp_data_pdesc, element, repstr);//exp_data[i] = highlightText(exp_data[i], element, repstr);
-          //     //console.log("highlightText>>>>exp_data_pdesc: ", exp_data_pdesc);
-          //   });
-
-          //   //expHtml += "<tr><td>"+ exp_data_pdesc +"</td></tr>"; //exp_data[i] //style=\"text-align: center;\"
-            
-          //   expHtml += "<tr><td style=\"width:80%;\">"+ exp_data_pdesc +"</td><td><input style=\"zoom:4.0;\" type=\"checkbox\" name=\"user_checkBox\" onclick=\"checkOne(this)\"></td>";
-          //   expHtml += "<td style=\"width:10%;\">";
-          //   expHtml += "<button type=\"button\" class=\"btn hover1\" id=\"likeBTN\" name=\"user_like\" onclick=\"likeClicked(this)\"><i class=\"fa fa-thumbs-up\"></i></button>";
-          //   expHtml += "<button type=\"button\" class=\"btn hover1\" id=\"dislikeBTN\" name=\"user_dislike\" onclick=\"dislikeClicked(this)\"><i class=\"fa fa-thumbs-down\"></i></button></td></tr>";
-          // }
-          // expHtml += "</tbody></table>";
-
-          // $("#explanation_table").empty();
-		      // $("#explanation_table").append(expHtml);
-          /////////////////////////////////////////////////////////////
-          /////<Join Graphs>
-          var Data = graphData;
-          var width = 400, height = 300;
-
-          (function( $ ) {
-            $.fn.generateMultiForce = function(svgObj) {
-                return this.each(function() {
-                    var graph = this;
-                    var graphArea = svgObj.append("g");
-
-                    var svg = d3.select("#explanation_graph")       
-                        .append("svg")
-                        .attr("width", width)
-                        .attr("height", height)//;
-                        .data(graph.nodes) //
-                        .style("background-color", "white")
-                        .on("mouseenter", mouseenter)
-                        .on("mouseleave", mouseleave)
-                        .on('click', click);
-
-                    var simulation = d3
-                        .forceSimulation(graph.nodes)
-                        .force("charge", d3.forceManyBody().strength(-1500))
-                        .force("center", d3.forceCenter(width / 2, height / 2))
-                        .force("link", d3.forceLink(graph.links).id(d => d.name));
-
-                    var link =  svg
-                        .append("g")
-                        .selectAll("line")
-                        .data(graph.links)
-                        .enter()
-                        .append("line")
-                        .attr("stroke-width", 5)
-                        .attr("stroke", "#999")
-                        .on("mouseover", mouseover) ////
-                        .on("mouseout", mouseout) ////
-                        .on("mousemove", mousemove); ////
-
-                    var drag = d3
-                        .drag()
-                        .on("start", dragstarted)
-                        .on("drag", dragged)
-                        .on("end", dragended);
-                    var nodes_with_text = svg
-                        .append("g")
-                        .selectAll("g")
-                        .data(graph.nodes)
-                        .enter()
-                        .append("g")
-                        .call(drag);
-                        
-                    var circles = nodes_with_text.append("circle").attr("r", 25)
-                                                  .attr("fill", function(d){ return d.color});//.attr("fill", "#6fbc5b");
-                    var texts = nodes_with_text.append("text").text(function(d){ return d.name})
-                                                .style("text-anchor", "middle").attr("class", "node-label");
-                    var tooltip = d3.select("#explanation_graph")
-                                    .append("div")
-                                    .style("position", "absolute")
-                                    .style("visibility", "hidden")
-                                    .style("background-color", "#a7a7a7")
-                                    .style("color", "white")
-                                    .style("border-width", "1px")
-                                    .style("border-radius", "5px")
-                                    .style("padding", "10px");
-
-                    simulation.on("tick", function() {
-                        link
-                            .attr("x1", function(d) { return d.source.x; })
-                            .attr("y1", function(d) { return d.source.y; })
-                            .attr("x2", function(d) { return d.target.x; })
-                            .attr("y2", function(d) { return d.target.y; });
-
-                        nodes_with_text.attr("transform", function(d) {
-                            return "translate("+d.x+","+d.y+")";
-                        });
-                    });
-                    function dragstarted(d) {
-                        simulation.alphaTarget(0.3).restart();
-                        d.fx = d3.event.x;
-                        d.fy = d3.event.y;
-                    }
-                    function dragged(d) {
-                        d.fx = d3.event.x;
-                        d.fy = d3.event.y;
-                    }
-                    function dragended(d) {
-                        simulation.alphaTarget(0);
-                        d.fx = null;
-                        d.fy = null;
-                    }
-                    function mouseover(d) { tooltip.style("visibility", "visible").text(d.cond); }
-                    function mouseout() { tooltip.style("visibility", "hidden"); }
-                    function mousemove(){ tooltip.style("top", (d3.event.pageY - 10) + "px").style("left", (d3.event.pageX + 10) + "px"); }
-                    ///click function
-                    function click(d){
-                      console.log("clicked!", d.id);
-                        id = d.id;
-                        let fscoreY ="";
-                        dots.style("fill", function(d,i){
-                            if(d.id == id){ fscoreY += " | "+d.y; return "#6699ff";} //"blue" "#b3ccff"
-                            else{ return "#ffab00";}}).style("visibility", "visible");
-                      //tooltip.style("visibility", "visible").text("clicked: ", d.id);
-                      let sumHtml = "";
-                      sumHtml = "<table class=\"table table-bordered\" sellspacing=\"0\" width=\"90%\" id=\"exp\"><tbody>";
-                      sumHtml += "<tr><td style=\"text-align: left;\">Selected Join Graph</td></tr>";
-                      sumHtml += "<tr><td style=\"text-align: left;\">1. Corresponding Fscore:"+fscoreY+"</td></tr>";
-                      sumHtml += "</tbody></table>";
-                      $("#selectedJGexpl").empty();
-                      $("#selectedJGexpl").append(sumHtml);
-                      selectedJG(id);
-                      //filter explanation table
-                      filterExpl(id);
-                    }
-                    function mouseenter(){ svg.style("background-color", "#ffd889"); }
-                    function mouseleave(){ svg.style("background-color", "white"); }
-                });
-            };
-          })(jQuery);
-
-          var svgTest = d3.select("#explanation_graph");
-          $(Data).generateMultiForce(svgTest);
-          ////@@@
-          function filterExpl(id){
-            console.log("filterExpl id: ",id);
-            
-            let newExpHtml = "";
-            newExpHtml = "<table class=\"table table-bordered\" sellspacing=\"0\" width=\"90%\"><tbody>";
-            
-            for(var i=0;i<exp_len;i++){
-              exp_data_jgname = exp_data[i][1];
-              if(exp_data_jgname == id){
-                console.log("exp_data_jgname == id/////////////////: ",exp_data_jgname);
-                exp_data_pdesc = exp_data[i][2];
-                highlightTextList.forEach(function(element){
-                  var tmp_element = element.slice(0,-2);
-                  var setcolor;
-                  color_matching.forEach(function(d){if(d.name == tmp_element){setcolor = d.color;}});
-                  var repstr = "<span style=\"background-color:"+setcolor+";\">"+element+"</span>";
-                  exp_data_pdesc = highlightText(exp_data_pdesc, element, repstr);
-                });
-                //newExpHtml += "<tr><td>"+ exp_data_pdesc +"</td></tr>";
-                newExpHtml += "<tr><td style=\"width:80%;\">"+ exp_data_pdesc +"</td><td><input style=\"zoom:4.0;\" type=\"checkbox\" name=\"user_checkBox\" onclick=\"checkOne(this)\"></td>";
-                newExpHtml += "<td style=\"width:10%;\">";
-                newExpHtml += "<button type=\"button\" class=\"btn hover1\" id=\"likeBTN\" name=\"user_like\" onclick=\"likeClicked(this)\"><i class=\"fa fa-thumbs-up\"></i></button>";
-                newExpHtml += "<button type=\"button\" class=\"btn hover1\" id=\"dislikeBTN\" name=\"user_dislike\" onclick=\"dislikeClicked(this)\"><i class=\"fa fa-thumbs-down\"></i></button></td></tr>";
               }
-            } 
-            newExpHtml += "</tbody></table>";
-            // newExpHtml += "<button type=\"button\" class=\"btn btn-outline-primary\" id=\"checkBoxSelectBtn\" onclick=\"checkBoxSelectBtn()\">UPDATE</button>";
-            $("#explanation_table").empty();
-            $("#explanation_table").append(newExpHtml);
-
-            // let updateBtnHtml = "";
-            // updateBtnHtml += "<button type=\"button\" class=\"btn btn-outline-primary\" onclick=\"ratingUpdate()\">Update</button>";            
-            // $("#user_rating_update").append(updateBtnHtml);
-          }
-
-          function selectedJG(id){
-            console.log("selectedJGexpl id: ",id);
-            //
-            for(var i=0;i<Data.length;i++){
-              if(Data[i]["nodes"][0]["id"] == id){
-                    selectedDataIndex = i;
-                    selectedData = Data[selectedDataIndex]; /////@@@@@@@
-                    selectedData_nodes = Data[selectedDataIndex]["nodes"];
-                    selectedData_links = Data[selectedDataIndex]["links"];
-                    selectedDataId = selectedData_nodes[0]["id"];
-                    console.log("%%%%%%%%%1%%%%%%: ", selectedData); /////@@@@@@@
-                    console.log("%%%%%%%%%2%%%%%%: ", selectedData_nodes); /////@@@@@@@
-                    console.log("%%%%%%%%%3%%%%%%: ", selectedData_links); /////@@@@@@@
-                    
-                    var w_selected = 580; var h_selected = 450;
-                    var svg = d3.select("#selectedJGexpl").append("svg").attr("width", w_selected).attr("height", h_selected)
-                                .data(Data[selectedDataIndex]["nodes"]).style("background-color", "#ccddff"); //b3ccff
-                    var simulation = d3.forceSimulation(Data[selectedDataIndex]["nodes"])
-                                      .force("charge", d3.forceManyBody().strength(-1500))
-                                      .force("center", d3.forceCenter(w_selected/2, h_selected/2))
-                                      .force("link", d3.forceLink(Data[selectedDataIndex]["links"]).id(d => d.name));
-                    var link =  svg.append("g").selectAll("line").data(Data[selectedDataIndex]["links"]).enter()
-                                  .append("line").attr("stroke-width", 5).attr("stroke", "#999")
-                                  .on("mouseover", mouseover).on("mouseout", mouseout).on("mousemove", mousemove);
-                    var drag = d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended);
-                    var nodes_with_text = svg.append("g").selectAll("g").data(Data[selectedDataIndex]["nodes"])
-                                              .enter().append("g").call(drag);
-                    var circles = nodes_with_text.append("circle").attr("r", 25).attr("fill", function(d){ return d.color});//.attr("fill", "#6fbc5b");
-                    var texts = nodes_with_text.append("text").text(function(d){ return d.name})
-                                                .style("text-anchor", "middle").attr("class", "node-label");
-                    var tooltipp = d3.select("#selectedJGexpl").append("div").style("position", "absolute")
-                                      .style("visibility", "hidden").style("background-color", "#a7a7a7")
-                                      .style("color", "white").style("border-width", "1px")
-                                      .style("border-radius", "5px").style("padding", "10px");
-                    simulation.on("tick", function() {
-                        link.attr("x1", function(d) { return d.source.x; }).attr("y1", function(d) { return d.source.y; })
-                            .attr("x2", function(d) { return d.target.x; }).attr("y2", function(d) { return d.target.y; });
-
-                        nodes_with_text.attr("transform", function(d) { return "translate("+d.x+","+d.y+")"; });
-                    });
-                    function dragstarted(d) { simulation.alphaTarget(0.3).restart(); d.fx = d3.event.x; d.fy = d3.event.y; }
-                    function dragged(d) { d.fx = d3.event.x; d.fy = d3.event.y; }
-                    function dragended(d) { simulation.alphaTarget(0); d.fx = null; d.fy = null; }
-                    function mouseover(d) { tooltipp.style("visibility", "visible").text(d.cond); }
-                    function mouseout() { tooltipp.style("visibility", "hidden"); }
-                    function mousemove(){ tooltipp.style("top", (d3.event.pageY - 10) + "px").style("left", (d3.event.pageX + 10) + "px"); }
-              }
-            }  
-                    
           }
         }
+        /////<Highlight Text>
+        // function highlightText(originalTxt, searchKeyword, replaceTxt) {
+        //   const regex = new RegExp(searchKeyword, 'g');
+        //   return originalTxt.toString().replace(regex, replaceTxt);
+        // }
+        expTable(exp_len, exp_data, highlightTextList, color_matching); //@@@@@@@@@@@@@@@@@
 
-      } 
+        // let expHtml = "";
+        // expHtml = "<table class=\"table table-bordered\" sellspacing=\"0\" width=\"90%\" id=\"exp\">";
+        // expHtml += "<tbody>";
+        
+        // for(var i=0;i<exp_len;i++){
+        //   exp_data_pdesc = exp_data[i][2];
+        //   highlightTextList.forEach(function(element){
+        //     var tmp_element = element.slice(0,-2);
+        //     var setcolor;
+        //     color_matching.forEach(function(d){if(d.name == tmp_element){ setcolor = d.color;}});
+        //     var repstr = "<span style=\"background-color:"+setcolor+";\">"+element+"</span>";
+        //     // exp_data_pdesc = exp_data[i][2];
+        //     //console.log("exp_data_pdesc: ", exp_data_pdesc, "| element: ", element);
+        //     exp_data_pdesc = highlightText(exp_data_pdesc, element, repstr);//exp_data[i] = highlightText(exp_data[i], element, repstr);
+        //     //console.log("highlightText>>>>exp_data_pdesc: ", exp_data_pdesc);
+        //   });
+
+        //   //expHtml += "<tr><td>"+ exp_data_pdesc +"</td></tr>"; //exp_data[i] //style=\"text-align: center;\"
+          
+        //   expHtml += "<tr><td style=\"width:80%;\">"+ exp_data_pdesc +"</td><td><input style=\"zoom:4.0;\" type=\"checkbox\" name=\"user_checkBox\" onclick=\"checkOne(this)\"></td>";
+        //   expHtml += "<td style=\"width:10%;\">";
+        //   expHtml += "<button type=\"button\" class=\"btn hover1\" id=\"likeBTN\" name=\"user_like\" onclick=\"likeClicked(this)\"><i class=\"fa fa-thumbs-up\"></i></button>";
+        //   expHtml += "<button type=\"button\" class=\"btn hover1\" id=\"dislikeBTN\" name=\"user_dislike\" onclick=\"dislikeClicked(this)\"><i class=\"fa fa-thumbs-down\"></i></button></td></tr>";
+        // }
+        // expHtml += "</tbody></table>";
+
+        // $("#explanation_table").empty();
+        // $("#explanation_table").append(expHtml);
+        /////////////////////////////////////////////////////////////
+        /////<Join Graphs>
+        var Data = graphData;
+        var width = 400, height = 300;
+
+        (function( $ ) {
+          $.fn.generateMultiForce = function(svgObj) {
+              return this.each(function() {
+                  var graph = this;
+                  var graphArea = svgObj.append("g");
+
+                  var svg = d3.select("#explanation_graph")       
+                      .append("svg")
+                      .attr("width", width)
+                      .attr("height", height)//;
+                      .data(graph.nodes) //
+                      .style("background-color", "white")
+                      .on("mouseenter", mouseenter)
+                      .on("mouseleave", mouseleave)
+                      .on('click', click);
+
+                  var simulation = d3
+                      .forceSimulation(graph.nodes)
+                      .force("charge", d3.forceManyBody().strength(-1500))
+                      .force("center", d3.forceCenter(width / 2, height / 2))
+                      .force("link", d3.forceLink(graph.links).id(d => d.name));
+
+                  var link =  svg
+                      .append("g")
+                      .selectAll("line")
+                      .data(graph.links)
+                      .enter()
+                      .append("line")
+                      .attr("stroke-width", 5)
+                      .attr("stroke", "#999")
+                      .on("mouseover", mouseover) ////
+                      .on("mouseout", mouseout) ////
+                      .on("mousemove", mousemove); ////
+
+                  var drag = d3
+                      .drag()
+                      .on("start", dragstarted)
+                      .on("drag", dragged)
+                      .on("end", dragended);
+                  var nodes_with_text = svg
+                      .append("g")
+                      .selectAll("g")
+                      .data(graph.nodes)
+                      .enter()
+                      .append("g")
+                      .call(drag);
+                      
+                  var circles = nodes_with_text.append("circle").attr("r", 25)
+                                                .attr("fill", function(d){ return d.color});//.attr("fill", "#6fbc5b");
+                  var texts = nodes_with_text.append("text").text(function(d){ return d.name})
+                                              .style("text-anchor", "middle").attr("class", "node-label");
+                  var tooltip = d3.select("#explanation_graph")
+                                  .append("div")
+                                  .style("position", "absolute")
+                                  .style("visibility", "hidden")
+                                  .style("background-color", "#a7a7a7")
+                                  .style("color", "white")
+                                  .style("border-width", "1px")
+                                  .style("border-radius", "5px")
+                                  .style("padding", "10px");
+
+                  simulation.on("tick", function() {
+                      link
+                          .attr("x1", function(d) { return d.source.x; })
+                          .attr("y1", function(d) { return d.source.y; })
+                          .attr("x2", function(d) { return d.target.x; })
+                          .attr("y2", function(d) { return d.target.y; });
+
+                      nodes_with_text.attr("transform", function(d) {
+                          return "translate("+d.x+","+d.y+")";
+                      });
+                  });
+                  function dragstarted(d) {
+                      simulation.alphaTarget(0.3).restart();
+                      d.fx = d3.event.x;
+                      d.fy = d3.event.y;
+                  }
+                  function dragged(d) {
+                      d.fx = d3.event.x;
+                      d.fy = d3.event.y;
+                  }
+                  function dragended(d) {
+                      simulation.alphaTarget(0);
+                      d.fx = null;
+                      d.fy = null;
+                  }
+                  function mouseover(d) { tooltip.style("visibility", "visible").text(d.cond); }
+                  function mouseout() { tooltip.style("visibility", "hidden"); }
+                  function mousemove(){ tooltip.style("top", (d3.event.pageY - 10) + "px").style("left", (d3.event.pageX + 10) + "px"); }
+                  ///click function
+                  function click(d){
+                    console.log("clicked!", d.id);
+                      id = d.id;
+                      let fscoreY ="";
+                      dots.style("fill", function(d,i){
+                          if(d.id == id){ fscoreY += " | "+d.y; return "#6699ff";} //"blue" "#b3ccff"
+                          else{ return "#ffab00";}}).style("visibility", "visible");
+                    //tooltip.style("visibility", "visible").text("clicked: ", d.id);
+                    let sumHtml = "";
+                    sumHtml = "<table class=\"table table-bordered\" sellspacing=\"0\" width=\"90%\" id=\"exp\"><tbody>";
+                    sumHtml += "<tr><td style=\"text-align: left;\">Selected Join Graph</td></tr>";
+                    sumHtml += "<tr><td style=\"text-align: left;\">1. Corresponding Fscore:"+fscoreY+"</td></tr>";
+                    sumHtml += "</tbody></table>";
+                    $("#selectedJGexpl").empty();
+                    $("#selectedJGexpl").append(sumHtml);
+                    selectedJG(id);
+                    //filter explanation table
+                    filterExpl(id);
+                  }
+                  function mouseenter(){ svg.style("background-color", "#ffd889"); }
+                  function mouseleave(){ svg.style("background-color", "white"); }
+              });
+          };
+        })(jQuery);
+
+        var svgTest = d3.select("#explanation_graph");
+        $(Data).generateMultiForce(svgTest);
+        ////@@@
+        function filterExpl(id){
+          console.log("filterExpl id: ",id);
+          
+          let newExpHtml = "";
+          newExpHtml = "<table class=\"table table-bordered\" sellspacing=\"0\" width=\"90%\"><tbody>";
+          
+          for(var i=0;i<exp_len;i++){
+            exp_data_jgname = exp_data[i][1];
+            if(exp_data_jgname == id){
+              console.log("exp_data_jgname == id/////////////////: ",exp_data_jgname);
+              exp_data_pdesc = exp_data[i][2];
+              highlightTextList.forEach(function(element){
+                var tmp_element = element.slice(0,-2);
+                var setcolor;
+                color_matching.forEach(function(d){if(d.name == tmp_element){setcolor = d.color;}});
+                var repstr = "<span style=\"background-color:"+setcolor+";\">"+element+"</span>";
+                exp_data_pdesc = highlightText(exp_data_pdesc, element, repstr);
+              });
+              //newExpHtml += "<tr><td>"+ exp_data_pdesc +"</td></tr>";
+              newExpHtml += "<tr><td style=\"width:80%;\">"+ exp_data_pdesc +"</td><td><input style=\"zoom:4.0;\" type=\"checkbox\" name=\"user_checkBox\" onclick=\"checkOne(this)\"></td>";
+              newExpHtml += "<td style=\"width:10%;\">";
+              newExpHtml += "<button type=\"button\" class=\"btn hover1\" id=\"likeBTN\" name=\"user_like\" onclick=\"likeClicked(this)\"><i class=\"fa fa-thumbs-up\"></i></button>";
+              newExpHtml += "<button type=\"button\" class=\"btn hover1\" id=\"dislikeBTN\" name=\"user_dislike\" onclick=\"dislikeClicked(this)\"><i class=\"fa fa-thumbs-down\"></i></button></td></tr>";
+            }
+          } 
+          newExpHtml += "</tbody></table>";
+          // newExpHtml += "<button type=\"button\" class=\"btn btn-outline-primary\" id=\"checkBoxSelectBtn\" onclick=\"checkBoxSelectBtn()\">UPDATE</button>";
+          $("#explanation_table").empty();
+          $("#explanation_table").append(newExpHtml);
+
+          // let updateBtnHtml = "";
+          // updateBtnHtml += "<button type=\"button\" class=\"btn btn-outline-primary\" onclick=\"ratingUpdate()\">Update</button>";            
+          // $("#user_rating_update").append(updateBtnHtml);
+        }
+
+        function selectedJG(id){
+          console.log("selectedJGexpl id: ",id);
+          //
+          for(var i=0;i<Data.length;i++){
+            if(Data[i]["nodes"][0]["id"] == id){
+                  selectedDataIndex = i;
+                  selectedData = Data[selectedDataIndex]; /////@@@@@@@
+                  selectedData_nodes = Data[selectedDataIndex]["nodes"];
+                  selectedData_links = Data[selectedDataIndex]["links"];
+                  selectedDataId = selectedData_nodes[0]["id"];
+                  console.log("%%%%%%%%%1%%%%%%: ", selectedData); /////@@@@@@@
+                  console.log("%%%%%%%%%2%%%%%%: ", selectedData_nodes); /////@@@@@@@
+                  console.log("%%%%%%%%%3%%%%%%: ", selectedData_links); /////@@@@@@@
+                  
+                  var w_selected = 580; var h_selected = 450;
+                  var svg = d3.select("#selectedJGexpl").append("svg").attr("width", w_selected).attr("height", h_selected)
+                              .data(Data[selectedDataIndex]["nodes"]).style("background-color", "#ccddff"); //b3ccff
+                  var simulation = d3.forceSimulation(Data[selectedDataIndex]["nodes"])
+                                    .force("charge", d3.forceManyBody().strength(-1500))
+                                    .force("center", d3.forceCenter(w_selected/2, h_selected/2))
+                                    .force("link", d3.forceLink(Data[selectedDataIndex]["links"]).id(d => d.name));
+                  var link =  svg.append("g").selectAll("line").data(Data[selectedDataIndex]["links"]).enter()
+                                .append("line").attr("stroke-width", 5).attr("stroke", "#999")
+                                .on("mouseover", mouseover).on("mouseout", mouseout).on("mousemove", mousemove);
+                  var drag = d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended);
+                  var nodes_with_text = svg.append("g").selectAll("g").data(Data[selectedDataIndex]["nodes"])
+                                            .enter().append("g").call(drag);
+                  var circles = nodes_with_text.append("circle").attr("r", 25).attr("fill", function(d){ return d.color});//.attr("fill", "#6fbc5b");
+                  var texts = nodes_with_text.append("text").text(function(d){ return d.name})
+                                              .style("text-anchor", "middle").attr("class", "node-label");
+                  var tooltipp = d3.select("#selectedJGexpl").append("div").style("position", "absolute")
+                                    .style("visibility", "hidden").style("background-color", "#a7a7a7")
+                                    .style("color", "white").style("border-width", "1px")
+                                    .style("border-radius", "5px").style("padding", "10px");
+                  simulation.on("tick", function() {
+                      link.attr("x1", function(d) { return d.source.x; }).attr("y1", function(d) { return d.source.y; })
+                          .attr("x2", function(d) { return d.target.x; }).attr("y2", function(d) { return d.target.y; });
+
+                      nodes_with_text.attr("transform", function(d) { return "translate("+d.x+","+d.y+")"; });
+                  });
+                  function dragstarted(d) { simulation.alphaTarget(0.3).restart(); d.fx = d3.event.x; d.fy = d3.event.y; }
+                  function dragged(d) { d.fx = d3.event.x; d.fy = d3.event.y; }
+                  function dragended(d) { simulation.alphaTarget(0); d.fx = null; d.fy = null; }
+                  function mouseover(d) { tooltipp.style("visibility", "visible").text(d.cond); }
+                  function mouseout() { tooltipp.style("visibility", "hidden"); }
+                  function mousemove(){ tooltipp.style("top", (d3.event.pageY - 10) + "px").style("left", (d3.event.pageX + 10) + "px"); }
+            }
+          }          
+        }
+      }
+
       function updateSelectedJG(newNodeList, newTargetNodeList, pdes){
         ///<Calculate Fractions>
         var isUser;

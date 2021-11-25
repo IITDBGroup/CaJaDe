@@ -336,7 +336,6 @@ def ratingUD():
     logger.debug(f"likedList: {likedList}") 
     dislikedList = data["dislikedList"]
     logger.debug(f"dislikedList: {dislikedList}")  
-    exp_data_jgname = data["exp_data_jgname"]  
 
     exp_from_jg_based_on_userfeedback = []
     liked_sims = []
