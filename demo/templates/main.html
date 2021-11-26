@@ -154,7 +154,21 @@
       var purple_color="#bb0ef1";
       var purple_text=null;
       var green_text=null;
-      var exp_len, exp_data, graphData, highlightTextList;
+
+      // current set of variables that will be used when update based on use feedback
+      var cur_exp_len;
+      var cur_exp_data; 
+      var cur_graphData;
+      var cur_summaryData;
+      var cur_highlightTextList;
+      // original set of variables that will be used when reset
+      var original_exp_len;
+      var original_exp_data;
+      var original_graphData;
+      var original_summaryData;
+      var original_highlightTextList;
+
+ 
       var color_matching = [];
       var likedList = [];
       var dislikedList = [];
@@ -165,19 +179,9 @@
       var selectedData_links;
       var selectedDataIndex;
       var selectedDataId;
-      var green; var purple;
-      var ;
+      var green; 
+      var purple;
       var width = 400, height = 300;
-
-
-      exp_len = data.result2.length;
-      exp_data = data.result2;
-      graphData = data.result3;
-      summaryData = data.result5; ////
-      highlightTextList = data.result6;
-      node_list = data.result7;
-      frac_name = data.result8; 
-      frac_value = data.result9;//@@
 
 		  $('#execute').click(function(){
 		    let totalNum;
@@ -443,7 +447,7 @@
         var jgName;
         var fscoreValue;
         var idx;
-        exp_data.forEach(function(d){
+        cur_exp_data.forEach(function(d){
           if(d[2] == pdes){ jgName = d[1];fscoreValue = d[6];idx = d[0];
             console.log("***********d2 |", d[2],"|jgName: ", jgName,"|fscore: ", fscoreValue,"|idx:",idx);
           }
@@ -456,7 +460,7 @@
 
 
       function updateSelectedData(jgName){
-        graphData.forEach(function(d){
+        cur_graphData.forEach(function(d){
           if(d["nodes"][0]["id"] == jgName){
             selectedData = d;
             selectedData_nodes = d["nodes"];
@@ -503,17 +507,16 @@
 		      contentType: "application/json",
           success: function(data){
             if (data.result2){
-              exp_len = data.result2.length;
-              exp_data = data.result2;
-              graphData = data.result3;
-              summaryData = data.result5; ////
-              highlightTextList = data.result6;
-              node_list = data.result7;
+              cur_exp_len = data.result2.length;
+              cur_exp_data = data.result2;
+              cur_graphData = data.result3;
+              cur_summaryData = data.result5; ////
+              cur_highlightTextList = data.result6;
               frac_name = data.result8; 
               frac_value = data.result9;//@@
 
               //exp_table(exp_data,exp_len,graphData);
-              exp_summary(summaryData, exp_data, exp_len, graphData); //exp_summary(summaryData, exp_data, exp_len, fscoreData); 	
+              exp_summary(cur_summaryData, cur_exp_data, cur_exp_len, cur_graphData); //exp_summary(summaryData, exp_data, exp_len, fscoreData); 	
 		      }else{
             alert("no data");
           }
@@ -530,8 +533,8 @@
         $("#legend").empty(); //remove legend and fractions in the right hand side
         $("#explanation_table").empty(); //remove filtered explanations
 
-        expTable(exp_len, exp_data, highlightTextList, color_matching); //show the entire explanation table
-
+        // expTable(original_exp_len, original_exp_data, original_highlightTextList,color_matching); //show the entire explanation table
+        exp_summary(original_summaryData, original_exp_data, original_exp_len, original_graphData); //exp_summary(summaryData, exp_data, exp_len, fscoreData);  
         dots.style("fill", "#ffab00").style("visibility", "visible"); //make fscore dot all yellow
         selectedData = []; selectedData_nodes = []; selectedData_links = []; //selectedDataIndex = []; //selectedDataId = -1;
       }
@@ -596,17 +599,22 @@
           contentType: "application/json",
           success: function(data){
             if (data.result2){
-              exp_len = data.result2.length;
-              exp_data = data.result2;
-              graphData = data.result3;
-              summaryData = data.result5; ////
-              highlightTextList = data.result6;
-              node_list = data.result7;
+              original_exp_len = data.result2.length;
+              original_exp_data = data.result2;
+              original_graphData = data.result3;
+              original_summaryData = data.result5; ////
+              original_highlightTextList = data.result6;
+
+              cur_exp_len=original_exp_len;
+              cur_exp_data=original_exp_data;
+              cur_graphData=original_graphData;
+              cur_summaryData=original_summaryData;
+              cur_highlightTextList=original_highlightTextList;
               frac_name = data.result8; 
               frac_value = data.result9;//@@
 
               //exp_table(exp_data,exp_len,graphData);
-              exp_summary(summaryData, exp_data, exp_len, graphData); //exp_summary(summaryData, exp_data, exp_len, fscoreData); 
+              exp_summary(cur_summaryData, cur_exp_data, cur_exp_len, cur_graphData); //exp_summary(summaryData, exp_data, exp_len, fscoreData); 
             } 
             else {
               alert("No data");
@@ -627,6 +635,7 @@
       } 
 
       function exp_summary(summaryData, exp_data, exp_len, graphData){ //(exp_len, recallData, precisionData)
+        // join graph + scatter plot
         let sumHtml = "";
         var numOfExp = "The number of explanations: "+exp_len;
         sumHtml = "<table class=\"table table-bordered\" sellspacing=\"0\" width=\"90%\" id=\"exp\"><tbody>";
@@ -635,6 +644,7 @@
         sumHtml += "</tbody></table>";
         $("#explanation_summary").empty();
         $("#explanation_summary").append(sumHtml);
+        $("#explanation_graph").empty();
 
         //////////////////fscor-d3 scatter plot//////////////////
         var margin = {top: 80, right: 80, bottom: 80, left: 80}, fs_width = 730, fs_height = 300;
@@ -782,7 +792,7 @@
         //   const regex = new RegExp(searchKeyword, 'g');
         //   return originalTxt.toString().replace(regex, replaceTxt);
         // }
-        expTable(exp_len, exp_data, highlightTextList, color_matching); //@@@@@@@@@@@@@@@@@
+        expTable(cur_exp_len, cur_exp_data, cur_highlightTextList, color_matching); //@@@@@@@@@@@@@@@@@
 
         // let expHtml = "";
         // expHtml = "<table class=\"table table-bordered\" sellspacing=\"0\" width=\"90%\" id=\"exp\">";
@@ -941,10 +951,10 @@
           newExpHtml = "<table class=\"table table-bordered\" sellspacing=\"0\" width=\"90%\"><tbody>";
           
           for(var i=0;i<exp_len;i++){
-            exp_data_jgname = exp_data[i][1];
+            exp_data_jgname = cur_exp_data[i][1];
             if(exp_data_jgname == id){
               console.log("exp_data_jgname == id/////////////////: ",exp_data_jgname);
-              exp_data_pdesc = exp_data[i][2];
+              exp_data_pdesc = cur_exp_data[i][2];
               highlightTextList.forEach(function(element){
                 var tmp_element = element.slice(0,-2);
                 var setcolor;
@@ -1026,8 +1036,8 @@
         var green_frac_index;
         var tmpUpdate = new Object();
 
-        for(var i=0;i<exp_data.length;i++){
-          if(exp_data[i][2] == pdes){ isUser = exp_data[i][3]; break;}
+        for(var i=0;i<cur_exp_data.length;i++){
+          if(cur_exp_data[i][2] == pdes){ isUser = cur_exp_data[i][3]; break;}
         }
         //var isUser = exp_data[i][3];
         // var isUserTmp = isUser.split('AND')[0].split('=')[1];
@@ -1050,11 +1060,11 @@
           console.log("frac_green : ", frac_green);
           frac_purple = frac_value[1-green_frac_index];
           console.log("frac_purple : ", frac_purple);
-          var fracValue_green = Math.round(frac_green*exp_data[i][4]);
+          var fracValue_green = Math.round(frac_green*cur_exp_data[i][4]);
           console.log("fracValue_green>>>>>>>>>>>>>>>>>>>>>>>", fracValue_green);
           green = fracValue_green+'/'+frac_green;
           console.log("green>>>>>>>>>>>>>>>>>>>>>>>", green);
-          var fracValue_purple = Math.round(frac_green/exp_data[i][5]-frac_green);
+          var fracValue_purple = Math.round(frac_green/cur_exp_data[i][5]-frac_green);
           console.log("fracValue_purple>>>>>>>>>>>>>>>>>>>>>>>", fracValue_purple);
           purple = fracValue_purple+'/'+frac_purple;
         }
@@ -1062,11 +1072,11 @@
           purple_frac_index=frac_name.indexOf(isUser);
           frac_purple = frac_value[purple_frac_index];
           frac_green = frac_value[1-purple_frac_index];
-          var fracValue_purple = Math.round(frac_purple*exp_data[i][4]);
+          var fracValue_purple = Math.round(frac_purple*cur_exp_data[i][4]);
           console.log("fracValue_purple>>>>>>>>>>>>>>>>>>>>>>>", fracValue_purple);
           purple = fracValue_purple+'/'+frac_purple;
           console.log("green>>>>>>>>>>>>>>>>>>>>>>>", green);
-          var fracValue_green = Math.round(frac_purple/exp_data[i][5]-frac_purple);
+          var fracValue_green = Math.round(frac_purple/cur_exp_data[i][5]-frac_purple);
           console.log("fracValue_green>>>>>>>>>>>>>>>>>>>>>>>", fracValue_green);
           green = fracValue_green+'/'+frac_green;
         }

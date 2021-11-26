@@ -258,7 +258,7 @@ def explanation():
                     host=db_host,
                     port=db_port,
                     dbname=db_name, 
-                    maximum_edges=2,
+                    maximum_edges=1,
                     f1_sample_rate=0.3,
                     f1_calculation_type = 'o',
                     user_assigned_max_num_pred=2,
@@ -278,11 +278,7 @@ def explanation():
     globals()['cursor'].execute(query3)
     jg_detail_list = globals()['cursor'].fetchall()
     jg = getJoinGraph(jg_detail_list)
-    global nodesNameList
-    #nodesNameList = []
-    #print('nodesNameList:::::::',nodesNameList)
-    #print(jg)
-    
+
     query5 = "select jg_details, fscore, p_desc, jg_name, id from "+resultSchemaName+".global_results"
     globals()['cursor'].execute(query5)
     test_list = globals()['cursor'].fetchall()
@@ -322,7 +318,7 @@ def explanation():
     fracnames=[ur1, ur2]
     fracvalues=[frac1, frac2] 
     
-    return jsonify(result = "success-explanation", result2 = exp_list, result3 = jg, result5 = test_list, result6 = highlight_list, result7 = nodesNameList, result8=fracnames, result9=fracvalues)
+    return jsonify(result = "success-explanation", result2 = exp_list, result3 = jg, result5 = test_list, result6 = highlight_list, result8=fracnames, result9=fracvalues)
 ##@@
 @app.route('/ratingUD',methods=['UD'])
 def ratingUD():
@@ -391,10 +387,6 @@ def ratingUD():
     globals()['cursor'].execute(query3)
     jg_detail_list = globals()['cursor'].fetchall()
     jg = getJoinGraph(jg_detail_list)
-    global nodesNameList
-    #nodesNameList = []
-    #print('nodesNameList:::::::',nodesNameList)
-    #print(jg)
 
     query5 = "select jg_details, fscore, p_desc, jg_name from user_updated_exp"
     globals()['cursor'].execute(query5)
@@ -435,7 +427,7 @@ def ratingUD():
     fracnames=[ur1, ur2]
     fracvalues=[frac1, frac2] 
 
-    return jsonify(result = "success-explanation", result2 = exp_list, result3 = jg， result5 = test_list, result6 = highlight_list, result7 = nodesNameList, result8=fracnames, result9=fracvalues)
+    return jsonify(result = "success-explanation", result2 = exp_list, result3 = jg, result5 = test_list, result6 = highlight_list, result8=fracnames, result9=fracvalues)
 
 
 def getHighlightTexts(exp_list):
@@ -474,8 +466,7 @@ def getHighlightTexts(exp_list):
 def getJoinGraph(jg_detail_list):
     gd_list = []
     graphData = {"nodes":[], "links":[]}
-    global nodesNameList
-    nodesNameList = []
+
     for i in range (0, len(jg_detail_list)):
         graphData = {"nodes":[], "links":[]} ##
         node_list = []
@@ -524,9 +515,7 @@ def getJoinGraph(jg_detail_list):
                             jg_condition = nodes[j]
                     graphData['links'].append({"source": two_nodes[0], "target": two_nodes[1], "cond": getJGcondition(jg_condition, node_list) })
         gd_list.append(graphData)
-        for node in node_list:
-            if node not in nodesNameList:
-                nodesNameList.append(node)
+
     return gd_list
     #################################
     # gd_list = [] ##
