@@ -258,7 +258,7 @@ def explanation():
                     host=db_host,
                     port=db_port,
                     dbname=db_name, 
-                    maximum_edges=1,
+                    maximum_edges=2,
                     f1_sample_rate=0.3,
                     f1_calculation_type = 'o',
                     user_assigned_max_num_pred=2,
@@ -282,11 +282,7 @@ def explanation():
     #nodesNameList = []
     #print('nodesNameList:::::::',nodesNameList)
     #print(jg)
-
-    query4 = "select fscore from "+resultSchemaName+".global_results"
-    globals()['cursor'].execute(query4)
-    fscore_list = globals()['cursor'].fetchall()
-
+    
     query5 = "select jg_details, fscore, p_desc, jg_name, id from "+resultSchemaName+".global_results"
     globals()['cursor'].execute(query5)
     test_list = globals()['cursor'].fetchall()
@@ -326,7 +322,7 @@ def explanation():
     fracnames=[ur1, ur2]
     fracvalues=[frac1, frac2] 
     
-    return jsonify(result = "success-explanation", result2 = exp_list, result3 = jg, result4 = fscore_list, result5 = test_list, result6 = highlight_list, result7 = nodesNameList, result8=fracnames, result9=fracvalues)
+    return jsonify(result = "success-explanation", result2 = exp_list, result3 = jg, result5 = test_list, result6 = highlight_list, result7 = nodesNameList, result8=fracnames, result9=fracvalues)
 ##@@
 @app.route('/ratingUD',methods=['UD'])
 def ratingUD():
@@ -400,10 +396,6 @@ def ratingUD():
     #print('nodesNameList:::::::',nodesNameList)
     #print(jg)
 
-    query4 = "select fscore from user_updated_exp"
-    globals()['cursor'].execute(query4)
-    fscore_list = globals()['cursor'].fetchall()
-
     query5 = "select jg_details, fscore, p_desc, jg_name from user_updated_exp"
     globals()['cursor'].execute(query5)
     test_list = globals()['cursor'].fetchall()
@@ -443,7 +435,7 @@ def ratingUD():
     fracnames=[ur1, ur2]
     fracvalues=[frac1, frac2] 
 
-    return jsonify(result = "success-explanation", result2 = exp_list, result3 = jg, result4 = fscore_list, result5 = test_list, result6 = highlight_list, result7 = nodesNameList, result8=fracnames, result9=fracvalues)
+    return jsonify(result = "success-explanation", result2 = exp_list, result3 = jg， result5 = test_list, result6 = highlight_list, result7 = nodesNameList, result8=fracnames, result9=fracvalues)
 
 
 def getHighlightTexts(exp_list):

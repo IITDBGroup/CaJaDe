@@ -146,12 +146,41 @@
 		<script>
       var colNum;
       var colData;
+      let sltROWS = 0;
+      var selectedArr = new Array();
+      let sltROWScnt = "Total Selected Rows: ";
+      var tdArr = new Array();
+      var green_color="#2fdf28";
+      var purple_color="#bb0ef1";
+      var purple_text=null;
+      var green_text=null;
+      var exp_len, exp_data, graphData, highlightTextList;
+      var color_matching = [];
+      var likedList = [];
+      var dislikedList = [];
+      var exp_data_jgname;
+      var dots;
+      var selectedData; // = [];
+      var selectedData_nodes;
+      var selectedData_links;
+      var selectedDataIndex;
+      var selectedDataId;
+      var green; var purple;
+      var ;
+      var width = 400, height = 300;
+
+
+      exp_len = data.result2.length;
+      exp_data = data.result2;
+      graphData = data.result3;
+      summaryData = data.result5; ////
+      highlightTextList = data.result6;
+      node_list = data.result7;
+      frac_name = data.result8; 
+      frac_value = data.result9;//@@
 
 		  $('#execute').click(function(){
-		    let dataList;
 		    let totalNum;
-		    //var colNum;
-		    //let colData;
 		    let tblData;
 		    let dataPerPage;
 		    let pageCount = 5;
@@ -309,33 +338,15 @@
 		    }
 		  })
 
-		  let sltROWS = 0;
-      var selectedArr = new Array();
-      let sltROWScnt = "Total Selected Rows: ";
-
-      var str="";
-      var tdArr = new Array();
-      var td;
-      var cnt;
-      var len;
-      var green_color="#2fdf28";
-      var purple_color="#bb0ef1";
-      var purple_text=null;
-      var green_text=null;
-      var count=0;
-      var haspurple=false;
-
       function selectRows(elem){        
-        bgcolor = $(elem).css("background-color");
         var text = $(elem).text();
         console.log(text);          
         var tr = $(elem);
-        td = tr.children();
+        var td = tr.children();
 
-        cnt = selectedArr.indexOf(text);
-        len = selectedArr.length;
+        var cnt = selectedArr.indexOf(text);
+        var len = selectedArr.length;
 
-        // if(bgcolor == "#e0e0e0"){
         if(selectedArr.includes(text))
         {
           if(text==green_text){
@@ -373,7 +384,7 @@
               $(elem).css("background-color", purple_color);
               purple_text=text;      
             }
-            // $(elem).css("background-color", "#e0e0e0");            
+
             sltROWS += 1;
             selectedArr.push(text);
 
@@ -392,9 +403,7 @@
           } 
         }
       }
-/////////////////////////////////////@@@@@@@@@@@@@@@@@@
-      var exp_len, exp_data, highlightTextList;
-      var color_matching = [];
+
 
       function checkOne(element){
         console.log("checkOne>>>>>");
@@ -411,6 +420,7 @@
           expParser(pdes);
         });
       }
+
       function expParser(pdes){
         var tmp = pdes.split(',');
         var newNodeList = [];
@@ -443,6 +453,8 @@
         updateSelectedJG(newNodeList, newTargetNodeList, pdes);
         dots.style("fill", function(d){if(d.idx == idx){return "#6699ff";}else{ return "#ffab00";}}).style("visibility", "visible");
       }
+
+
       function updateSelectedData(jgName){
         graphData.forEach(function(d){
           if(d["nodes"][0]["id"] == jgName){
@@ -452,10 +464,6 @@
           }
         });
       }
-      var likedList = [];
-      var dislikedList = [];
-      var exp_data_jgname;
-      var dots;
 
       function likeClicked(ele){
         if(ele.style.color != "green"){
@@ -498,7 +506,6 @@
               exp_len = data.result2.length;
               exp_data = data.result2;
               graphData = data.result3;
-              fscoreData = data.result4;
               summaryData = data.result5; ////
               highlightTextList = data.result6;
               node_list = data.result7;
@@ -516,6 +523,7 @@
 		      }
 		    })
       }
+
       function resetClicked(){
         $("#user_rating_update").empty();//remove update button
         $("#selectedJGexpl").empty(); //remove selecteJG located in the right hand side       
@@ -527,10 +535,12 @@
         dots.style("fill", "#ffab00").style("visibility", "visible"); //make fscore dot all yellow
         selectedData = []; selectedData_nodes = []; selectedData_links = []; //selectedDataIndex = []; //selectedDataId = -1;
       }
+
       function highlightText(originalTxt, searchKeyword, replaceTxt) {
         const regex = new RegExp(searchKeyword, 'g');
         return originalTxt.toString().replace(regex, replaceTxt);
       }
+
       function expTable(exp_len, exp_data, highlightTextList, color_matching){
         let expHtml = "";
         expHtml = "<table class=\"table table-bordered\" sellspacing=\"0\" width=\"90%\" id=\"exp\">";
@@ -567,18 +577,8 @@
         $("#user_rating_update").append(updateBtnHtml);
         
       }
-      /////////////////////////////////////////////////@@@@@@@@@@@@@@@@@@@@@@@@@@
-      var selectedData; // = [];
-      var selectedData_nodes;
-      var selectedData_links;
-      var selectedDataIndex;
-      var selectedDataId;
-      var tmpUpdate = new Object();
-      var green; var purple;
-////////////////////////////////////@@@@@@@@@@@@@@@@@@@@@
-      var graphData;
 
-      var fdataset = [];
+
       function exp(){        
         var expTEXT = "";
         for(var i=0;i<tdArr.length;i++){
@@ -599,7 +599,6 @@
               exp_len = data.result2.length;
               exp_data = data.result2;
               graphData = data.result3;
-              //fscoreData = data.result4;
               summaryData = data.result5; ////
               highlightTextList = data.result6;
               node_list = data.result7;
@@ -647,7 +646,7 @@
           jgnameId.push(summaryData[i][3]);
         }
 
-        // var fdataset = [];
+        var fdataset = [];
         fscoreData.forEach(function(key,i){
           var obj = new Object();
           obj['x'] = summaryData[i][2]; obj['y'] = fscoreData[i]; obj['id'] = jgnameId[i];obj['idx'] = summaryData[i][4]; //getJGid(summaryData[i][0])
@@ -815,8 +814,7 @@
         // $("#explanation_table").append(expHtml);
         /////////////////////////////////////////////////////////////
         /////<Join Graphs>
-        var Data = graphData;
-        var width = 400, height = 300;
+
 
         (function( $ ) {
           $.fn.generateMultiForce = function(svgObj) {
@@ -934,7 +932,7 @@
         })(jQuery);
 
         var svgTest = d3.select("#explanation_graph");
-        $(Data).generateMultiForce(svgTest);
+        $(graphData).generateMultiForce(svgTest);
         ////@@@
         function filterExpl(id){
           console.log("filterExpl id: ",id);
@@ -974,12 +972,12 @@
         function selectedJG(id){
           console.log("selectedJGexpl id: ",id);
           //
-          for(var i=0;i<Data.length;i++){
-            if(Data[i]["nodes"][0]["id"] == id){
+          for(var i=0;i<graphData.length;i++){
+            if(graphData[i]["nodes"][0]["id"] == id){
                   selectedDataIndex = i;
-                  selectedData = Data[selectedDataIndex]; /////@@@@@@@
-                  selectedData_nodes = Data[selectedDataIndex]["nodes"];
-                  selectedData_links = Data[selectedDataIndex]["links"];
+                  selectedData = graphData[selectedDataIndex]; /////@@@@@@@
+                  selectedData_nodes = graphData[selectedDataIndex]["nodes"];
+                  selectedData_links = graphData[selectedDataIndex]["links"];
                   selectedDataId = selectedData_nodes[0]["id"];
                   console.log("%%%%%%%%%1%%%%%%: ", selectedData); /////@@@@@@@
                   console.log("%%%%%%%%%2%%%%%%: ", selectedData_nodes); /////@@@@@@@
@@ -987,16 +985,16 @@
                   
                   var w_selected = 580; var h_selected = 450;
                   var svg = d3.select("#selectedJGexpl").append("svg").attr("width", w_selected).attr("height", h_selected)
-                              .data(Data[selectedDataIndex]["nodes"]).style("background-color", "#ccddff"); //b3ccff
-                  var simulation = d3.forceSimulation(Data[selectedDataIndex]["nodes"])
+                              .data(graphData[selectedDataIndex]["nodes"]).style("background-color", "#ccddff"); //b3ccff
+                  var simulation = d3.forceSimulation(graphData[selectedDataIndex]["nodes"])
                                     .force("charge", d3.forceManyBody().strength(-1500))
                                     .force("center", d3.forceCenter(w_selected/2, h_selected/2))
-                                    .force("link", d3.forceLink(Data[selectedDataIndex]["links"]).id(d => d.name));
-                  var link =  svg.append("g").selectAll("line").data(Data[selectedDataIndex]["links"]).enter()
+                                    .force("link", d3.forceLink(graphData[selectedDataIndex]["links"]).id(d => d.name));
+                  var link =  svg.append("g").selectAll("line").data(graphData[selectedDataIndex]["links"]).enter()
                                 .append("line").attr("stroke-width", 5).attr("stroke", "#999")
                                 .on("mouseover", mouseover).on("mouseout", mouseout).on("mousemove", mousemove);
                   var drag = d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended);
-                  var nodes_with_text = svg.append("g").selectAll("g").data(Data[selectedDataIndex]["nodes"])
+                  var nodes_with_text = svg.append("g").selectAll("g").data(graphData[selectedDataIndex]["nodes"])
                                             .enter().append("g").call(drag);
                   var circles = nodes_with_text.append("circle").attr("r", 25).attr("fill", function(d){ return d.color});//.attr("fill", "#6fbc5b");
                   var texts = nodes_with_text.append("text").text(function(d){ return d.name})
@@ -1025,6 +1023,9 @@
       function updateSelectedJG(newNodeList, newTargetNodeList, pdes){
         ///<Calculate Fractions>
         var isUser;
+        var green_frac_index;
+        var tmpUpdate = new Object();
+
         for(var i=0;i<exp_data.length;i++){
           if(exp_data[i][2] == pdes){ isUser = exp_data[i][3]; break;}
         }
