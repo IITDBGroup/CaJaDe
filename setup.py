@@ -11,7 +11,7 @@ setup(
     install_requires=['seaborn==0.11.0',
                     'scipy==1.5.2',
                     'Flask==2.0.1',
-                    'psycopg2-binary==2.8.4',
+                    'psycopg2-binary',
                     'varclushi==0.1.0',
                     'matplotlib==3.2.1',
                     'networkx==2.5',
