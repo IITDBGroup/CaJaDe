@@ -31,7 +31,7 @@ RUN cd /gprom \
 # Clone Cajade and install
 ########################################
 RUN git clone --single-branch --branch sigmod_reproducibility https://github.com/IITDBGroup/CaJaDe.git \
-&& apt-get install -y python3-setuptools
+&& apt-get install -y python3-setuptools python3-dev
 
 RUN cd /CaJaDe \
 && python3 setup.py install \
