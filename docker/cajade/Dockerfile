@@ -40,5 +40,3 @@ RUN apt-get install --assume-yes software-properties-common \
 RUN git clone --single-branch --branch sigmod_reproducibility https://github.com/IITDBGroup/CaJaDe.git \
 && apt-get install python3-setuptools
 
-RUN cd /CaJaDe \
-&& python3.6 setup.py install \

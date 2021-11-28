@@ -17,7 +17,8 @@ setup(
                     'networkx==2.5',
                     'pandas==1.3.2',
                     'numpy==1.19.2',
-                    'colorful==0.5.4'],
+                    'colorful==0.5.4',
+                    'scikit_learn==0.23.2'],
     entry_points={
         'console_scripts': [
             'cajadexplain=src.experiments:main',
