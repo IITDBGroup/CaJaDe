@@ -45,3 +45,40 @@ B: cajade_python
 
 C: network
 	sudo docker network create cajade_net
+
+Docker Delete Image:
+docker rmi [docker image id]
+
+Docker Delete Container:
+docker rm [docker container id]
+
+
+Docker Compose:
+
+docker-compose -f docker-compose.yml up -- start all -f flag to specify which compose file to run
+docker-compose down -- shut down everything
+
+Dockerfile: 
+
+FROM node[base from an existing image]
+
+ENV [environment command]
+
+RUN [linux commands]
+
+COPY ./blah [copy the data from current folder to ./blah]
+
+CMD ["blah", "foo"] execute command blah foo
+
+build docker image from Dockerfile:
+sudo docker build -f ./Dockerfile -t iitdbgroup/2019-sigmod-reproducibility-cape-postgres .
+
+Tip: If you’re using apt, 
+you can easily see what has been installed by looking /var/log/apt/history.log, which is full of entries like this:
+
+
+Docker Volumes:
+
+named volumes:
+
+-v name:/var/blah...
