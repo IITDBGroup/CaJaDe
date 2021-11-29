@@ -1,5 +1,5 @@
 from setuptools import setup, find_packages
-
+  
 setup(
     name='CaJade',
     version='0.0.2',
@@ -7,11 +7,11 @@ setup(
     author='Author Name',
     author_email='author@gmail.com',
     description='Description of my package',
-    packages=find_packages(),    
+    packages=find_packages(),
     install_requires=['seaborn==0.11.0',
                     'scipy==1.7.1',
                     'Flask==2.0.1',
-                    'psycopg2==2.8.4',
+                    'psycopg2-binary',
                     'varclushi==0.1.0',
                     'matplotlib==3.2.1',
                     'networkx==2.5',

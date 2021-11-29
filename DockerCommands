@@ -1,16 +1,16 @@
 Commands used to create dump files :
 
-pg_dump -p 5433 -U japerev -t game -t lineup -t lineup_game_stats -t lineup_player -t play_for -t player -t player_game_stats -t player_salary -t season -t team -t team_game_stats nba_original > reproduce_nba1.sql
+pg_dump -O -x -p 5433 -U japerev -t game -t lineup -t lineup_game_stats -t lineup_player -t play_for -t player -t player_game_stats -t player_salary -t season -t team -t team_game_stats nba_rev_01 > reproduce_nba01.sql
 
-pg_dump -p 5433 -U japerev -t game -t lineup -t lineup_game_stats -t lineup_player -t play_for -t player -t player_game_stats -t player_salary -t season -t team -t team_game_stats nba_rev_01 > reproduce_nba01.sql
+pg_dump -O -x -p 5433 -U japerev -t game -t lineup -t lineup_game_stats -t lineup_player -t play_for -t player -t player_game_stats -t player_salary -t season -t team -t team_game_stats nba_rev_05 > reproduce_nba05.sql
 
-pg_dump -p 5433 -U japerev -t game -t lineup -t lineup_game_stats -t lineup_player -t play_for -t player -t player_game_stats -t player_salary -t season -t team -t team_game_stats nba_rev_05 > reproduce_nba05.sql
+pg_dump -O -x -p 5433 -U japerev -t game -t lineup -t lineup_game_stats -t lineup_player -t play_for -t player -t player_game_stats -t player_salary -t season -t team -t team_game_stats nba_original > reproduce_nba1.sql
 
-pg_dump -p 5433 -U japerev -t game -t lineup -t lineup_game_stats -t lineup_player -t play_for -t player -t player_game_stats -t player_salary -t season -t team -t team_game_stats nba_rev_2 > reproduce_nba2.sql
+pg_dump -O -x -p 5433 -U japerev -t game -t lineup -t lineup_game_stats -t lineup_player -t play_for -t player -t player_game_stats -t player_salary -t season -t team -t team_game_stats nba_rev_2 > reproduce_nba2.sql
 
-pg_dump -p 5433 -U japerev -t game -t lineup -t lineup_game_stats -t lineup_player -t play_for -t player -t player_game_stats -t player_salary -t season -t team -t team_game_stats nba_rev_4 > reproduce_nba4.sql
+pg_dump -O -x -p 5433 -U japerev -t game -t lineup -t lineup_game_stats -t lineup_player -t play_for -t player -t player_game_stats -t player_salary -t season -t team -t team_game_stats nba_rev_4 > reproduce_nba4.sql
 
-pg_dump -p 5433 -U japerev -t game -t lineup -t lineup_game_stats -t lineup_player -t play_for -t player -t player_game_stats -t player_salary -t season -t team -t team_game_stats nba_rev_8 > reproduce_nba8.sql
+pg_dump -O -x -p 5433 -U japerev -t game -t lineup -t lineup_game_stats -t lineup_player -t play_for -t player -t player_game_stats -t player_salary -t season -t team -t team_game_stats nba_rev_8 > reproduce_nba8.sql
 
 
 Docker Image: 
@@ -82,3 +82,10 @@ Docker Volumes:
 named volumes:
 
 -v name:/var/blah...
+
+
+
+docker runs :
+
+1) postgres side:
+perm@debussy:~/chenjie/CaJaDe/docker$ sudo docker run -it -p 5432:5432 -e POSTGRES_PASSWORD=reproduce  iitdbgroup/2021-sigmod-reproducibility-cajade_postgres:latest postgres
