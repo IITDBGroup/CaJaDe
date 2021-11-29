@@ -2,14 +2,14 @@ from setuptools import setup, find_packages
 
 setup(
     name='CaJade',
-    version='0.0.1',
+    version='0.0.2',
     url='https://github.com/IITDBGroup/CaJaDe',
-    author='Chenjie Li',
-    author_email='cli112@hawk.iit.edu',
+    author='Author Name',
+    author_email='author@gmail.com',
     description='Description of my package',
     packages=find_packages(),    
     install_requires=['seaborn==0.11.0',
-                    'scipy==1.5.2',
+                    'scipy==1.7.1',
                     'Flask==2.0.1',
                     'psycopg2==2.8.4',
                     'varclushi==0.1.0',

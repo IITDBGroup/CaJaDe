@@ -1,6 +1,6 @@
 import pandas as pd
 import psycopg2
-from instrumentation import ExecStats
+from src.instrumentation import ExecStats
 import argparse
 import logging
 import config

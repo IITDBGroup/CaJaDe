@@ -5,7 +5,7 @@ import re
 import itertools
 import random
 import time
-from instrumentation import ExecStats
+from src.instrumentation import ExecStats
 from statistics import mean
 from varclushi import VarClusHi
 import numpy as np

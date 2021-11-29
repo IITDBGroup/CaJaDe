@@ -1,14 +1,14 @@
-from sg_generator import Schema_Graph_Generator
+from src.sg_generator import Schema_Graph_Generator
+from src.provenance_getter import provenance_getter
+from src.gprom_wrapper import  GProMWrapper
+from src.jg_generator import Join_Graph_Generator
+from src.renaming import encode
+from src.instrumentation import ExecStats
 from networkx import MultiGraph
 import networkx as nx
 import psycopg2
-from provenance_getter import provenance_getter
-from gprom_wrapper import  GProMWrapper
-from jg_generator import Join_Graph_Generator
 import logging 
-from renaming import encode
 import re
-from instrumentation import ExecStats
 import copy
 from collections import Counter
 import pandas as pd
