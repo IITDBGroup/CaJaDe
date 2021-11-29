@@ -7,7 +7,6 @@ MAINTAINER Chenjie Li <cli112@hawk.iit.edu>
 ########################################
 # Setup GProM required prerequisites
 ########################################
-ENV DEBIAN_FRONTEND=noninteractive 
 
 RUN apt update \
 && apt install -y git \
@@ -34,4 +33,6 @@ RUN git clone --single-branch --branch sigmod_reproducibility https://github.com
 && apt-get install -y python3-setuptools python3-dev
 
 RUN cd /CaJaDe \
-&& python3 setup.py install \
+&& python3 setup.py install 
+
+ADD ./test.py ./test.py

@@ -1,29 +1,29 @@
 version: "2.0"
 services:
   cajade:
-    image: cajade_python
+    image: iitdbgroup/2021-sigmod-reproducibility-cajade_systems:latest
     depends_on:
       - postgres
-    container_name: "cajade-system"
+    container_name: "cajade-systems"
     volumes:
       - .:/experiment_results
     tty: true
     stdin_open: true
     networks:
        app_net:
-         ipv4_address: 18.18.0.2
+         ipv4_address: 10.5.0.2
   postgres:
-    image: cajade_postgres
-    container_name: "cajade-postgres"
+    image: iitdbgroup/2021-sigmod-reproducibility-cajade_postgres:latest
+    container_name: "cajade-psql"
     ports:
       - "5432:5432"
     networks:
        app_net:
-         ipv4_address: 18.18.0.3
+         ipv4_address: 10.5.0.3
 networks:
   app_net:
       driver: bridge
       ipam:
           config:
-              - subnet: 18.18.0.0/8
-                gateway: 18.18.0.1
+              - subnet: 10.5.0.0/16
+                gateway: 10.5.0.1
