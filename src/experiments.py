@@ -607,7 +607,7 @@ def main():
   now=datetime.now()
 
   if(args.result_schema=='none'):
-    str_time = now.strftime("%Y-%m-%d-%H-%M-%S")
+    str_time = now.strftime("%Y%m%d%H%M%S")
     result_schema = f"exp_{str_time}"
   else:
     result_schema = args.result_schema
