@@ -1,2 +1,3 @@
 #!/bin/bash
-sudo docker build -f ./Dockerfile -t iitdbgroup/2021-sigmod-reproducibility-cajade_systems .
+sudo docker build --no-cache -f ./Dockerfile -t 2021-sigmod-reproducibility-cajade_systems:latest .
+# sudo docker push 2021-sigmod-reproducibility-cajade_systems:latest
