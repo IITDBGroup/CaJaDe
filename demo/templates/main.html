@@ -537,6 +537,7 @@
         exp_summary(original_summaryData, original_exp_data, original_exp_len, original_graphData); //exp_summary(summaryData, exp_data, exp_len, fscoreData);  
         dots.style("fill", "#ffab00").style("visibility", "visible"); //make fscore dot all yellow
         selectedData = []; selectedData_nodes = []; selectedData_links = []; //selectedDataIndex = []; //selectedDataId = -1;
+        likedList = [];dislikedList = [];
       }
 
       function highlightText(originalTxt, searchKeyword, replaceTxt) {
@@ -955,7 +956,7 @@
             if(exp_data_jgname == id){
               console.log("exp_data_jgname == id/////////////////: ",exp_data_jgname);
               exp_data_pdesc = cur_exp_data[i][2];
-              highlightTextList.forEach(function(element){
+              cur_highlightTextList.forEach(function(element){ //highlightTextList
                 var tmp_element = element.slice(0,-2);
                 var setcolor;
                 color_matching.forEach(function(d){if(d.name == tmp_element){setcolor = d.color;}});
