@@ -521,8 +521,7 @@ def main():
   parser.add_argument('-M','--maximum_edges', metavar="\b", type=int, default=3, 
     help='Maximum number of edges allowed in a join graph (default: %(default)s)')
 
-  parser.add_argument('-Q','--user_query', metavar="\b", type=str, default="select count(*) as win, s.season_name from team t, \
-    game g, season s where t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' group by s.season_name",
+  parser.add_argument('-Q','--user_query', metavar="\b", type=str, default="select count(*) as win, s.season_name from team t, game g, season s where t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' group by s.season_name",
     help='User query: default(%(default)s)')
 
   parser.add_argument('-A','--user_question', metavar="\b", type=str, default="season_name='2015-16'|season_name='2012-13'",
