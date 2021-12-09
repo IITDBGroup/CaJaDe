@@ -271,7 +271,7 @@ def run_experiment(conn=None,
 
 
     if(conn is None):
-      conn = psycopg2.connect(f"dbname={dbname} user={user_name} password={password} port={port}")
+      conn = psycopg2.connect(f"host={host} dbname={dbname} user={user_name} password={password} port={port}")
       conn.autocommit = True
     else:
       conn = conn
