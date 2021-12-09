@@ -14,6 +14,7 @@ pg_dump -O -x -p 5433 -U japerev -t game -t lineup -t lineup_game_stats -t lineu
 
 pg_dump -O -x -p 5433 -U japerev -t player_game_stats -t team_game_stats > reproduce_cape.sql
 
+pg_dump -O -x -p 5433 -U japerev -t team_game_stats -t player_game_stats nba_cape > reproduce_cape.sql
 
 Docker Image: 
 

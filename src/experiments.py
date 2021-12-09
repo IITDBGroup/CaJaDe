@@ -30,6 +30,12 @@ from time import strftime
 logger = logging.getLogger(__name__)
 
 
+from_clause = re.compile("from(.*) where", re.IGNORECASE)
+groupby_clause = re.compile("group by (.*)", re.IGNORECASE)
+where_clause=re.compile(" where (.*)", re.IGNORECASE)
+two_cols = re.compile('\w+\.\w+\s{0,}!?(<|>|<=|>=|=|<>|!=)\s{0,}\w+\.\w+\s{0,}')
+
+
 class ExperimentParams(ExecStats):
     """
     Statistics gathered during mining
@@ -208,7 +214,7 @@ def InsertStats(conn, stats_trackers, stats_relation_name, schema, exp_time, exp
 
 def run_experiment(conn=None,
                    result_schema='demotest',
-                   user_query = ("provenance of (select count(*) as win, s.season_name from team t, game g, season s where t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' group by s.season_name);",'test'),
+                   user_query = "provenance of (select count(*) as win, s.season_name from team t, game g, season s where t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' group by s.season_name);",
                    user_questions = ["season_name='2015-16'","season_name='2012-13'"],
                    user_questions_map = {'yes':'2015-16', 'no':'2012-13'},
                    user_specified_attrs=[('team','team'),('season','season_name')],
@@ -241,7 +247,6 @@ def run_experiment(conn=None,
     #                           to measure runtime.
     
     statstracker.params['result_schema'] = "'{}'".format(result_schema)
-    statstracker.params['user_query'] = "'{}'".format(user_query[1])
     statstracker.params['user_questions']="'{}'".format(" VS ".join([x.replace("'", '') for x in user_questions]))
     statstracker.params['dbname']= "'{}'".format(dbname)
     statstracker.params['sample_rate_for_s']= "'{}'".format(sample_rate_for_s)
@@ -258,7 +263,7 @@ def run_experiment(conn=None,
     statstracker.params['f1_sample_type'] = "'{}'".format(f1_sample_type)
 
 
-    exp_desc = '__'.join([user_query[1], dbname, str(sample_rate_for_s), str(lca_s_max_size), str(lca_s_min_size), str(lca_eval_mode),
+    exp_desc = '__'.join([dbname, str(sample_rate_for_s), str(lca_s_max_size), str(lca_s_min_size), str(lca_eval_mode),
                 str(maximum_edges), str(min_recall_threshold), str(numercial_attr_filter_method), 
                 exclude_high_cost_jg[1], str(f1_calculation_type), str(f1_sample_rate), str(f1_min_sample_size_threshold)])
 
@@ -271,7 +276,7 @@ def run_experiment(conn=None,
 
 
     if(conn is None):
-      conn = psycopg2.connect(f"dbname={dbname} user={user_name} password={password} port={port}")
+      conn = psycopg2.connect(f"host={host} dbname={dbname} user={user_name} password={password} port={port}")
       conn.autocommit = True
     else:
       conn = conn
@@ -285,7 +290,7 @@ def run_experiment(conn=None,
     pg = provenance_getter(conn = conn, gprom_wrapper = w, db_dict=attr_dict)
 
     if(not gui):
-      pg.create_original_pt(user_query[0])
+      pg.create_original_pt(user_query)
         
     user_pt_size, pt_dict, pt_relations = pg.gen_provenance_table(user_questions=user_questions, 
                                                     user_specified_attrs=user_specified_attrs)
@@ -299,7 +304,7 @@ def run_experiment(conn=None,
     
     logger.debug(f"Before filtering any, we have {len(valid_result)} valid jgs \n")
 
-    jgm = Join_Graph_Materializer(conn=conn, db_dict=attr_dict, gwrapper=w, user_query=user_query[0])
+    jgm = Join_Graph_Materializer(conn=conn, db_dict=attr_dict, gwrapper=w, user_query=user_query)
     jgm.init_cost_estimator()
 
     pgen = Pattern_Generator(conn) 
@@ -516,6 +521,12 @@ def main():
   parser.add_argument('-M','--maximum_edges', metavar="\b", type=int, default=3, 
     help='Maximum number of edges allowed in a join graph (default: %(default)s)')
 
+  parser.add_argument('-Q','--user_query', metavar="\b", type=str, default="select count(*) as win, s.season_name from team t, game g, season s where t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' group by s.season_name",
+    help='User query: default(%(default)s)')
+
+  parser.add_argument('-A','--user_question', metavar="\b", type=str, default="season_name='2015-16'|season_name='2012-13'",
+    help='User question: need to strictly follow the output format of query result and use | as delimiter default(%(default)s)')
+
   parser.add_argument('-F','--f1_sample_rate', metavar="\b", type=float, default=0.3, 
     help='Sample rate of apt when calculating the f1 score (default: %(default)s)')
 
@@ -575,34 +586,54 @@ def main():
   requiredNamed.add_argument('-d','--db_name', metavar="\b", type=str, required=True,
     help='database name (required)')
 
-
+  args=parser.parse_args()
 
   # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     #####
     ##print("colNum: "+colNum)
     #####
-  user_query = "provenance of (select count(*) as win, s.season_name from team t, game g, season s where t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' group by s.season_name);"
+  # user_query = "provenance of (select count(*) as win, s.season_name from team t, game g, season s where t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' group by s.season_name);"
   # u_query = (user_query, 'gsw wins : 15 vs 12') 
-  u_query = (user_query, 'demo')
-  u_question =["season_name='2015-16'","season_name='2012-13'"]
-  user_specified_attrs = [('team','team'),('season','season_name')]
+  u_query = f"provenance of ({args.user_query});"
+  u_question = args.user_question.split('|')
+  # u_question =["season_name='2015-16'","season_name='2012-13'"]
+  # user_specified_attrs = [('team','team'),('season','season_name')]
+
+  user_specified_attrs = []
+  table_mappings = {}
+
+  frm=from_clause.search(args.user_query).group(1)
+  grp=groupby_clause.search(args.user_query).group(1)
+  where=where_clause.search(args.user_query).group(1)
+
+  tables = [x.strip() for x in frm.split(',')]
 
 
+  for t in tables:
+     t_and_a = re.split(r'\s{1,}', t)
+     if(len(t_and_a)==1):
+         table_mappings[t_and_a[0]] = t_and_a[0]
+     else:
+         table_mappings[t_and_a[1]] = t_and_a[0]
 
-  # user_query = "provenance of (select team from team);"
-  # # u_query = (user_query, 'gsw wins : 15 vs 12') 
-  # u_query = (user_query, 'demo')
-  # u_question = ["team='BOS'","team='DET'"]
-  # user_specified_attrs = [('team', 'team')]
+  # handle where
+  ands = re.split("and", where, flags=re.IGNORECASE)
 
+  for a in ands:
+     if(not two_cols.search(a)):
+         table, attr = [x.strip() for x in re.split(r'(<|>|<=|>=|=|<>|!=)', a)[0].split('.')]
+         user_specified_attrs.append((table_mappings[table], attr))
 
+  groups = [x.strip() for x in grp.split(',')]
+  for g in groups:
+     table, attr = [x.strip() for x in g.split('.')]
+     user_specified_attrs.append((table_mappings[table], attr))
   # user_query = 'provenance of (select insurance, 1.0*SUM(hospital_expire_flag)/count(*) as death_rate from admissions group by insurance);'
   # u_query = (user_query, 'death rate: medicare vs private')
   # u_question =["insurance='Private'","insurance='Medicare'"]
   # user_specified_attrs = [('admissions',  'insurance'), ('admissions', 'hospital_expire_flag')]
-  
 
-  args=parser.parse_args()
+  logger.debug(f"user_specified_attrs: {user_specified_attrs}")
 
   now=datetime.now()
 
@@ -629,7 +660,7 @@ def main():
       user_query = u_query,
       user_questions=u_question,
       # user_questions_map = {'yes':'Private', 'no':'Medicare'},
-      user_questions_map = {'yes':'2015-16', 'no':'2012-13'},
+      user_questions_map = {'yes':u_question[0].replace("'",""), 'no':u_question[1].replace("'","")},
       user_specified_attrs=user_specified_attrs,
       user_name=args.user_name,
       password=args.password,
