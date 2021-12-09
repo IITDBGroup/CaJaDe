@@ -12,6 +12,8 @@ pg_dump -O -x -p 5433 -U japerev -t game -t lineup -t lineup_game_stats -t lineu
 
 pg_dump -O -x -p 5433 -U japerev -t game -t lineup -t lineup_game_stats -t lineup_player -t play_for -t player -t player_game_stats -t player_salary -t season -t team -t team_game_stats nba_rev_8 > reproduce_nba8.sql
 
+pg_dump -O -x -p 5433 -U japerev -t player_game_stats -t team_game_stats > reproduce_cape.sql
+
 
 Docker Image: 
 
