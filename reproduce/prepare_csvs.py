@@ -2,6 +2,7 @@ from sklearn.metrics import ndcg_score
 import psycopg2
 import pandas as pd 
 import numpy as np
+import argparse
 
 
 # true_relevance = np.asarray([[10, 0, 0, 1, 5]])
@@ -16,7 +17,17 @@ import numpy as np
 # max_edge : 3
 # sample_rate : 0.05
 
-def calc_ndcg(conn, schema):
+
+def prep_workloads_csv(conn, schema):
+	pass
+
+def prep_case_study_csv(conn, schema):
+	pass
+
+def prep_scalability_csv(conn, schema):
+	pass
+
+def prep_ndcg_csv(conn, schema):
 
 	df_ret = pd.DataFrame(columns=['edge','sample_rate', 'runtime', 'ndcg_score'])
 	cur  = conn.cursor()
@@ -30,7 +41,6 @@ def calc_ndcg(conn, schema):
 		WHERE t.exp_desc = p.exp_desc AND t.maximum_edges = '{e}'
 		AND t.f1_calculation_type = 'o'"""
 		df_gt_count = pd.read_sql(gt_query, conn)
-		print(df_gt_count)
 		gt_cnt = df_gt_count['gt_cnt'].to_list()[0]
 
 		for s in sample_rates:
@@ -132,45 +142,32 @@ def calc_ndcg(conn, schema):
 
 if __name__ == '__main__':
 
-	# conn = psycopg2.connect(f"dbname=mimic_rev user=japerev port=5433")
-	# result = calc_ndcg(conn=conn, schema='f1_sample_rate_startsize_100')
-	conn = psycopg2.connect(f"dbname=nba_rev user=japerev port=5433")
-	result = calc_ndcg(conn=conn, schema='f1_sample_rate_startsize_100')
+	parser = argparse.ArgumentParser(description='reproduce graph 8(f) of CaJaDE paper')
 
-	# new
+	parser.add_argument('-H','--db_host', metavar="\b", type=str, default='localhost',
+	  help='database host, (default: %(default)s)')
+
+	parser.add_argument('-P','--port', metavar="\b", type=int, default=5432,
+	  help='database port, (default: %(default)s)')
+
+	parser.add_argument('-D','--result_schema', metavar="\b", type=str, default="none",
+	  help='result_schema_name_prefix, (default: exp_[timestamp of the start]')
+
+	requiredNamed.add_argument('-U','--user_name', metavar="\b", type=str, required=True,
+	  help='owner of the database (required)')
+
+	requiredNamed.add_argument('-p','--password', metavar="\b", type=str, required=True,
+	  help='password to the database (required)')
+
+	requiredNamed.add_argument('-d','--db_name', metavar="\b", type=str, required=True,
+	  help='database name (required)')
 
 	# %%%%%%%%%%%%%%%%%%%%%%%%%%% MIMIC %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 	# conn = psycopg2.connect(f"dbname=mimic_original user=japerev port=5433")
 	# result = calc_ndcg(conn=conn, schema='april_4_sample')
 
-	# conn = psycopg2.connect(f"dbname=mimic_original user=japerev port=5433")
-	# result = calc_ndcg(conn=conn, schema='april_4_repeat_1')
-
-	# conn = psycopg2.connect(f"dbname=mimic_original user=japerev port=5433")
-	# result = calc_ndcg(conn=conn, schema='april_4_repeat_2')
-
-	# conn = psycopg2.connect(f"dbname=mimic_original user=japerev port=5433")
-	# result = calc_ndcg(conn=conn, schema='april_4_repeat_3')
-
-	# conn = psycopg2.connect(f"dbname=mimic_original user=japerev port=5433")
-	# result = calc_ndcg(conn=conn, schema='april_4_repeat_4')
-
 	# %%%%%%%%%%%%%%%%%%%%%%%%%%% NBA %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-	# conn = psycopg2.connect(f"dbname=nba_original user=japerev port=5433")
-	# result = calc_ndcg(conn=conn, schema='april_4_sample')
-
-	# conn = psycopg2.connect(f"dbname=nba_original user=japerev port=5433")
-	# result = calc_ndcg(conn=conn, schema='april_4_repeat_1')
-
-	# conn = psycopg2.connect(f"dbname=nba_original user=japerev port=5433")
-	# result = calc_ndcg(conn=conn, schema='april_4_repeat_2')
-
-	# conn = psycopg2.connect(f"dbname=nba_original user=japerev port=5433")
-	# result = calc_ndcg(conn=conn, schema='april_4_repeat_3')
-
-	# conn = psycopg2.connect(f"dbname=nba_original user=japerev port=5433")
-	# result = calc_ndcg(conn=conn, schema='april_4_repeat_4')
-
-	print(result)
+	conn = psycopg2.connect(f"host={args.db_host} dbname={agrs.db_name} user={args.user_name} password={args.password} port={args.port}")
+	result = prep_ndcg_csv(conn=conn, schema=args.result_schema)
