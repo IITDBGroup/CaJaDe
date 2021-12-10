@@ -25,16 +25,13 @@ def prep_case_study_csv(conn, schema, outputdir):
 	pass
 
 def prep_scalability_csv(host, dbname, user, password, port, schema, dataset, outputdir):
-	db_scales = ['01', '05', '1', '2', '4', '8']
+	db_scales = ['01', '05', '2', '4', '8']
 	df = pd.DataFrame(columns=['size','f1_sample_rate','feature_reduct','lca','materialize_jg','refinment','f1_sample','jg_enumeration','f1_calc','total'])
 	for s in db_scales:
 		if(s=='01'):
 			size=0.1
 		elif(s=='05'):
 			size=0.5
-		elif(s=='1'):
-			s=''
-			size=1
 		else:
 			size=s
 		conn = psycopg2.connect(host=host, dbname=f"{dataset}{s}", user=user, password=password, port=port)

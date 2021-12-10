@@ -24,6 +24,18 @@ services:
     networks:
        app_net:
          ipv4_address: 10.5.0.4
+  et:
+    image: jayli2018/2021-sigmod-reproducibility-cajade_et:latest
+    depends_on:
+      - postgres
+    container_name: "cajade-et"
+    volumes:
+      - .:/experiment_results
+    tty: true
+    stdin_open: true
+    networks:
+       app_net:
+         ipv4_address: 10.5.0.5
   postgres:
     image: jayli2018/2021-sigmod-reproducibility-cajade_postgres:latest
     container_name: "cajade-psql"
