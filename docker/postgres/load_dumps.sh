@@ -8,3 +8,4 @@ psql -p 5432 -U cajade -d nba4  < ../datafiles/reproduce_nba4.sql
 psql -p 5432 -U cajade -d nba8  < ../datafiles/reproduce_nba8.sql
 psql -p 5432 -U cajade -d nba_cape  < ../datafiles/reproduce_cape.sql
 psql -p 5432 -U cajade -d nba_et  < ../datafiles/reproduce_et.sql
+psql -p 5432 -U cajade -d nba_lca  < ../datafiles/reproduce_lca.sql

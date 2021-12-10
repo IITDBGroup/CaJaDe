@@ -287,8 +287,11 @@ if __name__ == '__main__':
   parser.add_argument('-f','--finalize', metavar="\b", type=bool, default=False,
     help='database port, (default: %(default)s)')
 
+  parser.add_argument('-H','--db_host', metavar="\b", type=str, default='localhost',
+    help='database host, (default: %(default)s)')
+
   parser.add_argument('-D','--result_schema', metavar="\b", type=str, default="none",
-    help='result schema name that will be created in db, (default: exp_[timestamp of the start]')
+    help='result schema name that will be created in db, (default: none')
 
   requiredNamed = parser.add_argument_group('required named arguments')
 
