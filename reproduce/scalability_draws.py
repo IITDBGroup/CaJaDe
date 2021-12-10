@@ -30,7 +30,7 @@ def scalability_draw(ds_name, filename):
     pl.ioff()
     df = df.pivot(index='size', columns='f1_sample_rate', values='total')
 
-    ax=df.plot.bar(rot=0, width=0.8)
+    ax=df.plot.bar(color=['blue','yellow', 'green', 'red'], rot=0, width=0.8)
     df_07.reset_index()["expected_runtime"].plot(kind="line", style='-o',ax=ax, label='linear scaling', color='black')
 
     handles = [mpatches.Patch(color='none')]
