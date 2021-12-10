@@ -16,18 +16,18 @@ The **CaJaDE** package installs a library as well as a commandline tool `cajadex
 
 - Repository: https://github.com/IITDBGroup/cape (branch `SIGMOD-reproducibility`)
 - Programming Language: Python
-- Additional Programming Language info: we are requiring Python3. Tested versions are Python 3.6 and Python 3.8.
+- Additional Programming Language info: we are requiring Python3. Specifically, we are using Python 3.8.10 in this reproducibility submission.
 - OS for Experiments: Linux (required for docker)
-- Required libraries/packages:
-    - `tkinter` which requires a system package to be installed (see below)
-    - `postgresql` as a database backend
+- To summarize, in order to reproduce all the experiment results the following source codes are required :
+    - [**GProM**](https://github.com/IITDBGroup/gprom/tree/gprom_in_cajade) 
+    - [**CAPE**](https://github.com/IITDBGroup/cape)
+    - [**CaJaDE**](https://github.com/IITDBGroup/CaJaDe/tree/sigmod_reproducibility) (this repository will contain Explanation Table Source code)
+    -  [**PostgreSQL**](https://www.postgresql.org/) 
 
 # B) Datasets
 
 - NBA dataset: NBA (National Basketball Association) dataset were extracted from [this cite](http://www.pbpstats.com/). This dataset will be available in the reproducibility repo
-- MIMIC dataset:  in order to access MIMIC (Medical Information Mart for Intensive Care) dataset, it requires user to finish the steps listed [here](https://mimic.mit.edu/docs/gettingstarted/) before starting working with the data. We do not provide the dataset in this reproducibility repository due to the policy. However, we provide the scripts needed to prepare the processed MIMIC dataset used in the experiments.
-
-https://data.cityofchicago.org/Public-Safety/Crimes-2001-to-present/ijzp-q8t2)
+- MIMIC dataset:  in order to access MIMIC (Medical Information Mart for Intensive Care) dataset, it requires user to finish the steps listed [here](https://mimic.mit.edu/docs/gettingstarted/) before starting working with the data. We do not provide the dataset in this reproducibility repository due to the policy. However, we will provide the scripts needed to prepare the processed MIMIC dataset used in the experiments. 
 
 # C) Hardware Info
 
@@ -45,7 +45,12 @@ All runtime experiments were executed on a server with the following specs:
 
 # D) Installation, Setup, and Running Experiments
 
-Please follow these instructions to install the system and datasets for reproducibility. Please see below for an standard installation with pip. We use two docker images for  reproducibility: 1) a container running cape and 2) a container running postgres (including the datasets for the experiments).
+Please follow these instructions to install the system and datasets for reproducibility. We use 4 docker images for  reproducibility: 
+
+1. a container running CaJade, GProm
+2. a container running postgres (including the datasets for the experiments).
+3. a container running CAPE
+4. a container running Explanation Table
 
 ## Prerequisites ##
 
@@ -56,46 +61,49 @@ Please follow these instructions to install the system and datasets for reproduc
 Please clone the Cape git repository and check out the `sigmod-reproducibility` branch. This branch contains Cape as well as scripts for running experiments and plotting results.
 
 ~~~shell
-git clone --single-branch --branch sigmod-reproducibility https://github.com/IITDBGroup/cape.git
+git clone --single-branch --branch sigmod_reproducibility https://github.com/IITDBGroup/CaJaDe.git
 ~~~
 
 To check whether it was cloned correctly run:
 
 ~~~shell
-cd cape
+cd CaJaDe
 tree -d
 ~~~
 
-this should produce an output like this:
+this should produce an output like this: (**TODO**: CLEAN UP!)
 
 ~~~shell
 .
-├── capexplain
-│   ├── cl
-│   ├── database
-│   ├── dev
-│   ├── explain
-│   ├── explanation_model
-│   ├── fd
-│   ├── gui
-│   ├── pattern_miner
-│   ├── pattern_model
-│   └── similarity
+├── build
+│   ├── bdist.linux-x86_64
+│   └── lib
+│       ├── demo
+│       └── src
+├── CaJade.egg-info
+├── cape_compare
+├── demo
+│   └── __pycache__
+├── dist
 ├── docker
+│   ├── cajade
 │   ├── cape
 │   └── postgres
-├── images
+├── exp_graph
+│   ├── cape_compare
+│   └── revision
+├── Mimic_PlayGround
+├── __pycache__
 ├── reproduce
-│   ├── experiments
-│   ├── expl_param_exp
-│   │   ├── explanation_model
-│   │   ├── input
-│   │   └── similarity
-│   ├── expl_perf_exp
-│   │   └── input
-│   └── expl_qual_exp
-│       └── input
-└── testdb
+├── revision_materials
+├── src
+│   └── __pycache__
+├── Top20s
+└── user_study
+    ├── new_tables_nba
+    └── pics
+
+
 ~~~
 
 ## Start-up Docker Cluster
