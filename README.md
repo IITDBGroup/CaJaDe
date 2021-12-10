@@ -27,7 +27,7 @@ The **CaJaDE** package installs a library as well as a commandline tool `cajadex
 # B) Datasets
 
 - NBA dataset: NBA (National Basketball Association) dataset were extracted from [this cite](http://www.pbpstats.com/). This dataset will be available in the reproducibility repo
-- MIMIC dataset:  in order to access MIMIC (Medical Information Mart for Intensive Care) dataset, it requires user to finish the steps listed [here](https://mimic.mit.edu/docs/gettingstarted/) before starting working with the data. We do not provide the dataset in this reproducibility repository due to the policy. However, we will provide the scripts needed to prepare the processed MIMIC dataset used in the experiments. 
+- MIMIC dataset:  in order to access MIMIC (Medical Information Mart for Intensive Care) dataset, it requires user to finish the steps listed [here](https://mimic.mit.edu/docs/gettingstarted/) before starting working with the data. We do not provide the dataset and the experiment scripts in this initial submission due to the policy. However, we encourage reviewers to ask for permission from [here](https://mimic.mit.edu/docs/gettingstarted/) . Please contact us once you get the access to the dataset and we will provide the remaining dataset/scripts needed to reproduce the experiments related to MIMIC dataset. 
 
 # C) Hardware Info
 
@@ -114,11 +114,15 @@ We are using `docker-compose` for this. Switch to the `docker` directory inside 
 cd docker
 ~~~
 
+The following commands may require `root`
+
 Now run docker-compose which will create a `cape-system` and a `postgres-cape` container:
 
 ~~~shell
 docker-compose up -d
 ~~~
+
+Using `-d` flag will set up the containers in [detached mode](https://docs.docker.com/compose/reference/up/)
 
 To test whether the containers are running do:
 
@@ -139,26 +143,29 @@ bd3cc05dc408   jayli2018/2021-sigmod-reproducibility-cajade_postgres:latest   "d
 
 ## Run Experiments
 
-There is a main script for driving the experiments that is run from within the `cape-system` container. This script copies results to the directory from which you ran `docker-compose`. Partial experiments can be restarted and existing results (CSV and PDF files) will not be overwritten. This is because the whole experiments will run for a few days. Note that the script only runs the each experiment once (instead of 3 times as we did for the paper) to keep the runtime feasible. You can overwrite this behaviour by setting an environment variable when running the script.
+Due to the complexity to put every piece together, we have made several [docker](https://www.docker.com/) images for the reviewers' convenience to reproduce the experiments' results.
+
+There are several scripts from 3 of the containers driving the experiments. These scripts copies results to the directory from which you ran `docker-compose`.  The full set of experiments in this submission will run roughly for no more than 10 hours.  So you could finish it at once by following the instructions listed below.
+
+Once you set docker containers up, you could start by running the main experiments using the following command
 
 To start the experiments:
 
 ~~~shell
-docker exec -ti -w /usr/local/cape/reproduce/ cape-system /usr/local/cape/reproduce/script.sh
+docker exec -ti cajade-main CaJaDe/reproduce/experiments_nba.sh
 ~~~
 
 Over time you should see CSV and PDF files pop up in the `docker` folder in the cloned git repository.
-If you want to run additional repetitions for the long-running mining experiments, then you can set the number of repetitions like this, e.g., setting it to 3 repetitions:
 
-~~~shell
-docker exec -ti -w /usr/local/cape/reproduce/ -e rep=3 cape-system /usr/local/cape/reproduce/script.sh
-~~~
+script `experiments_nba.sh` will run the following experiments
 
 In our experiments we evaluated three things:
 
-- performance of the offline pattern mining algorithm
-- performance of the online explanation generation algorithm
-- quality of the generated explanations wrt. to a known ground truth
+- scalability on different sizes of dataset (Figure 7 in the paper)
+- performance on different workloads (Figure 10)
+- repeat case study queries 
+- LCA sampling effects (Figure 8(a) - 8(d))
+- F1 sample effects on runtime and quality (Figure 8(f))
 
 All generated result files will be in `docker` folder within the cape repository on your local machine. See Section F for detail.
 
