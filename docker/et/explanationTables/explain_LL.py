@@ -26,10 +26,10 @@ with open("db.conf") as conffile:
 db = pgdb.connect(host=dbconf['host'], database=dbconf['db'], user=dbconf['user'], password=dbconf['pass'])
 print "Table name=",table,"\nAlgorithm=","LL", "\nNumber of rows=", rows, "\nSample size=", samplesize, "\n"
 
-creat_lang="CREATE LANGUAGE plpython2u;"
+# creat_lang="CREATE LANGUAGE plpython2u;"
 
 cur = db.cursor()
-exec(db, cur, creat_lang)
+# exc(db, cur, creat_lang)
 sql = 'select count(*) from '+table
 exc(db,cur,sql)
 tablesize = cur.fetchall()[0][0]
