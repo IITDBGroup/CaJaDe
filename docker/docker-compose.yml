@@ -1,10 +1,10 @@
 version: "2.0"
 services:
   cajade:
-    image: iitdbgroup/2021-sigmod-reproducibility-cajade_systems:latest
+    image: jayli2018/2021-sigmod-reproducibility-cajade_systems:latest
     depends_on:
       - postgres
-    container_name: "cajade-systems"
+    container_name: "cajade-main"
     volumes:
       - .:/experiment_results
     tty: true
@@ -12,8 +12,20 @@ services:
     networks:
        app_net:
          ipv4_address: 10.5.0.2
+  cape:
+    image: jayli2018/2021-sigmod-reproducibility-cajade_cape:latest
+    depends_on:
+      - postgres
+    container_name: "cajade-cape"
+    volumes:
+      - .:/experiment_results
+    tty: true
+    stdin_open: true
+    networks:
+       app_net:
+         ipv4_address: 10.5.0.4
   postgres:
-    image: iitdbgroup/2021-sigmod-reproducibility-cajade_postgres:latest
+    image: jayli2018/2021-sigmod-reproducibility-cajade_postgres:latest
     container_name: "cajade-psql"
     ports:
       - "5432:5432"
