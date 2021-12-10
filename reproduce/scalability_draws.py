@@ -5,6 +5,8 @@ matplotlib.use('PDF')
 import pylab as pl
 from numpy import arange,power
 import matplotlib.patches as mpatches
+import warnings
+warnings.filterwarnings('ignore')
 
 
 def scalability_draw(ds_name, filename):
