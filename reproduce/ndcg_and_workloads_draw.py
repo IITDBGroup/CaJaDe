@@ -33,9 +33,8 @@ axis_label = {'runtime': 'Time (sec)',
 
 def plot_running_time_against_db_offline(ds_name, col1, col2, filename):
 
-    fname = '/home/jayli/Desktop/ndcg_nba.csv'
-    df = pd.read_csv(fname, header=0)  
-    print(df)
+    df = pd.read_csv(filename+'.csv', header=0)  
+    # print(df)
     marker_dict = {1: 'o', 2: 's', 3: '^'}
     marker_dict2 = {1: 'x', 2: '|', 3: '*'}
 
@@ -104,7 +103,7 @@ def plot_running_time_against_db_offline(ds_name, col1, col2, filename):
               ncol=3, fancybox=True, shadow=True)
 
     # plt.xlabel('sample rate', fontsize=22)
-    plt.savefig("/home/jayli/Desktop/" + ds_name + '_'+ col1+'_against_' + col2 + '.pdf', bbox_inches='tight', format='pdf')
+    plt.savefig(filename+'.pdf', bbox_inches='tight', format='pdf')
     plt.close()
 
 

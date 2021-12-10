@@ -18,12 +18,12 @@ for s in ${samplerates[@]}
 	do 
 		for e in ${maxedges[@]}
 		do
-		    cajadexplain -M ${e} -p reproduce -U japerev -P 5432 -d nba -t s -i false -F ${s} -D nba_sample
+		    cajadexplain -M ${e} -p reproduce -U cajade -P 5432 -d nba -t s -i false -F ${s} -D nba_sample
 	    done
 	done
 
 # draw it
-
+python draw_graphs.py -H localhost -G ndcg -P 5432 -D nba_sample -O ${OUTPUTDIR} -U cajade -p reproduce -d nba
 
 # nba scalability 7(a)
 # echo "experiments scability on NBA"

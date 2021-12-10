@@ -18,16 +18,16 @@ import argparse
 # sample_rate : 0.05
 
 
-def prep_workloads_csv(conn, schema):
+def prep_workloads_csv(conn, schema, outputdir):
 	pass
 
-def prep_case_study_csv(conn, schema):
+def prep_case_study_csv(conn, schema, outputdir):
 	pass
 
-def prep_scalability_csv(conn, schema):
+def prep_scalability_csv(conn, schema, outputdir):
 	pass
 
-def prep_ndcg_csv(conn, schema):
+def prep_ndcg_csv(conn, schema, dataset, outputdir):
 
 	df_ret = pd.DataFrame(columns=['edge','sample_rate', 'runtime', 'ndcg_score'])
 	cur  = conn.cursor()
@@ -128,7 +128,7 @@ def prep_ndcg_csv(conn, schema):
 	SELECT maximum_edges as edge,
 	f1_sample_rate as sample_rate, 
 	round(total::numeric,2) as runtime,
-	'-1' as ndcg_score
+	'1' as ndcg_score
 	FROM {schema}.time_and_params
 	where f1_calculation_type = 'o'
 	"""
@@ -136,6 +136,8 @@ def prep_ndcg_csv(conn, schema):
 	df_tot = pd.read_sql(tot_q, conn)
 
 	df_ret = pd.concat([df_ret, df_tot])
+
+	df_ret.to_csv(f'{outputdir}/graph_8f_{dataset}.csv', index=False)
 
 	return df_ret
 
