@@ -1,8 +1,10 @@
 import argparse
 import psycopg2
 from ndcg_and_workloads_draw import plot_running_time_against_db_offline
-from scalability_draw
+from scalability_draws import scalability_draw
 from prepare_csvs import *
+import warnings
+warnings.filterwarnings('ignore')
 
 # nba_scalability_dict = {
 # 'file_name' : 'nba_scalability.csv',
@@ -50,13 +52,13 @@ if __name__ == '__main__':
 
 	args=parser.parse_args()
 
-	conn = psycopg2.connect(f"host={args.db_host} dbname={args.db_name} user={args.user_name} password={args.password} port={args.port}")
 	if(args.graph_name=='ndcg'):
+		conn = psycopg2.connect(f"host={args.db_host} dbname={args.db_name} user={args.user_name} password={args.password} port={args.port}")
 		prep_ndcg_csv(conn=conn, schema=args.result_schema, dataset=args.db_name, outputdir=args.output_dir)
 		plot_running_time_against_db_offline(ds_name=args.db_name, col1='runtime', col2='ndcg_score', filename=f'{args.output_dir}/graph_8f_{args.db_name}')
 
 	if(args.graph_name=='scalability'):
-		prep_scalability_csv(conn=conn, schema=args.result_schema, dataset=args.db_name, outputdir=args.output_dir)
+		prep_scalability_csv(host=args.db_host, dbname=args.db_name, user=args.user_name, password=args.password, port=args.port, schema=args.result_schema, dataset=args.db_name, outputdir=args.output_dir)
 		scalability_draw(ds_name=args.db_name, filename=f'{args.output_dir}/graph_7_{args.db_name}')
 	if(args.graph_name=='casestudy'):
 		result_csv = prep_case_study_csv(conn=conn, schema=args.result_schema)
