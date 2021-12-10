@@ -318,7 +318,7 @@ class Join_Graph_Materializer:
         else:
             # based on the renaming result, change the join conditions accordingly          
             for node1, node2, cond in join_graph.graph_core.edges.data('condition'):
-                logger.debug(cond)
+                # logger.debug(cond)
                 node1_renamed = renaming_dict[node1.key]['renamed_rel']
                 node2_renamed = renaming_dict[node2.key]['renamed_rel']
                 node1_original = renaming_dict[node1.key]['label']

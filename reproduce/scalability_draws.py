@@ -7,9 +7,9 @@ from numpy import arange,power
 import matplotlib.patches as mpatches
 
 
-def scalability_draw():
-    # df=pd.read_csv('april_4_Scalability_mimic.csv')
-    df=pd.read_csv('april_4_Scalability_nba.csv')
+def scalability_draw(ds_name, filename):
+    
+    df=pd.read_csv(f'{filename}.csv')
 
     df = df.sort_values(['size', 'f1_sample_rate'], ascending=[True, True])
 
@@ -22,13 +22,6 @@ def scalability_draw():
     slope = slope_df.iloc[0].item()
 
     df_07['expected_runtime'] = df_07['size'] * slope
-
-    # ax = df_07[['size', 'expected_runtime']].plot(
-    #     x='size', linestyle='-', marker='o')
-
-    # df.plot(x='size', kind='bar',ax=ax, rot=0)
-
-    # df_07['ideal'] = df_07['total']*slope
     
     df = df.sort_values(['size', 'f1_sample_rate'], ascending=[True, True])
     df['size'] = df['size'].astype('str')
@@ -37,12 +30,6 @@ def scalability_draw():
 
     ax=df.plot.bar(rot=0, width=0.8)
     df_07.reset_index()["expected_runtime"].plot(kind="line", style='-o',ax=ax, label='linear scaling', color='black')
-
-    # df_07.plot(x='size', y='expected_runtime', style='-o', ax=ax)
-    # print(df_07)
-
-
-    # print(ratio)
 
     handles = [mpatches.Patch(color='none')]
 
@@ -56,7 +43,6 @@ def scalability_draw():
               columnspacing=0.1,framealpha=1, handles=handles, labels=['', 'linear scaling', '0.1 f1 sample', '0.3 f1 sample', '0.5 f1 sample', '0.7 f1 sample'],fontsize=5)
 
     legend1.get_frame().set_edgecolor('black')
-    # legend2.get_frame().set_edgecolor('black')
 
     
     # axis labels and tics
@@ -71,7 +57,4 @@ def scalability_draw():
     for tick in ax.yaxis.get_major_ticks():
         tick.label.set_fontsize(20) 
     
-    pl.savefig("scalability_nba_with_line_129.pdf", bbox_inches='tight')
-    
-if __name__=="__main__":
-    scalability_draw()
+    pl.savefig(f"{filename}.pdf", bbox_inches='tight')

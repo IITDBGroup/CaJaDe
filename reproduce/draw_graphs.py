@@ -1,6 +1,7 @@
 import argparse
 import psycopg2
 from ndcg_and_workloads_draw import plot_running_time_against_db_offline
+from scalability_draw
 from prepare_csvs import *
 
 # nba_scalability_dict = {
@@ -53,12 +54,16 @@ if __name__ == '__main__':
 	if(args.graph_name=='ndcg'):
 		prep_ndcg_csv(conn=conn, schema=args.result_schema, dataset=args.db_name, outputdir=args.output_dir)
 		plot_running_time_against_db_offline(ds_name=args.db_name, col1='runtime', col2='ndcg_score', filename=f'{args.output_dir}/graph_8f_{args.db_name}')
+
 	if(args.graph_name=='scalability'):
-		result_csv = prep_scalability_csv(conn=conn, schema=args.result_schema)
+		prep_scalability_csv(conn=conn, schema=args.result_schema, dataset=args.db_name, outputdir=args.output_dir)
+		scalability_draw(ds_name=args.db_name, filename=f'{args.output_dir}/graph_7_{args.db_name}')
 	if(args.graph_name=='casestudy'):
 		result_csv = prep_case_study_csv(conn=conn, schema=args.result_schema)
+
 	if(args.graph_name=='workloads'):
 		result_csv = prep_workloads_csv(conn=conn, schema=args.result_schema)
+
 	if(args.graph_name=='lca'):
 		result_csv = prep_lca_csv(conn=conn, schema=args.result_schema)
 

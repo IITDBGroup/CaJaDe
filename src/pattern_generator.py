@@ -727,7 +727,7 @@ class Pattern_Generator:
         self.cur.execute(jg_size_q)
         jg_apt_size = int(self.cur.fetchone()[0])
 
-        logger.debug(renaming_dict)
+        # logger.debug(renaming_dict)
 
         sample_f1_jg_size=0
         if(jg_apt_size!=0):
@@ -781,7 +781,7 @@ class Pattern_Generator:
                         # logger.debug(recall_dicts)
                     
                     else:
-                        logger.debug('weighted sampling!')
+                        # logger.debug('weighted sampling!')
                         recall_dicts['sample'] = {}
                         need_weighted_sampling = True
 
@@ -889,7 +889,7 @@ class Pattern_Generator:
             self.cur.execute(drop_prov_s)
 
             lca_sample_size = max([min(math.ceil(original_pt_size*s_rate_for_s), lca_s_max_size), lca_s_min_size])
-            logger.debug(f"sample size : {lca_sample_size}")
+            # logger.debug(f"sample size : {lca_sample_size}")
 
             if(lca_sample_size!=0):
                 # make sure jg result is not empty            
@@ -1009,7 +1009,7 @@ class Pattern_Generator:
                 self.stats.stopTimer('LCA')
 
                 nominal_pattern_df = pd.read_sql(get_nominal_patterns_q, self.conn)
-                logger.debug(nominal_pattern_df)
+                # logger.debug(nominal_pattern_df)
 
                 nominal_pattern_dicts = nominal_pattern_df.to_dict('records')
                 # logger.debug(nominal_pattern_dict_listcts)
@@ -1052,8 +1052,8 @@ class Pattern_Generator:
                 nominal_pattern_dict_list = nominal_pattern_dict_list[0:10]
                 # logger.debug(nominal_pattern_dict_list)
                 nominal_pattern_dict_list = [n for n in nominal_pattern_dict_list if n['np_recall']>=lca_recall_thresh]
-                logger.debug(nominal_pattern_dict_list)
-                logger.debug(len(nominal_pattern_dict_list))
+                # logger.debug(nominal_pattern_dict_list)
+                # logger.debug(len(nominal_pattern_dict_list))
                 
                 if(need_weighted_sampling==True): 
                     # if need weighted sampling, we start by sampling for 
@@ -1164,7 +1164,7 @@ class Pattern_Generator:
                             for k,v in cluster_dict.items():
                                 cluster_dict[k] = [[x,0,0] for x in v]
 
-                            logger.debug(cluster_dict)      
+                            # logger.debug(cluster_dict)      
 
                             # entropy rank in each cluster to find the highest one 
                             # as the training input variable "representing" the cluster
@@ -1184,27 +1184,27 @@ class Pattern_Generator:
                                         col[2]=1
                                 cluster_dict[k] = sorted(v, key = lambda x: (x[2],x[1],x[0]), reverse=True)
                                 representative_var_for_clust = cluster_dict[k][0][0]
-                                logger.debug(representative_var_for_clust)
+                                # logger.debug(representative_var_for_clust)
                                 if(representative_var_for_clust in attrs_from_spec_node):
                                     rep_from_last_node.append(representative_var_for_clust)
                                 rf_input_vars.append(representative_var_for_clust)
                                 correlation_dict[representative_var_for_clust] = [cora[0] for cora in cluster_dict[k][1:]]
 
-                            logger.debug("lagrge number of num attrs")
-                            logger.debug(rf_input_vars)
-                            logger.debug(correlation_dict)
+                            # logger.debug("lagrge number of num attrs")
+                            # logger.debug(rf_input_vars)
+                            # logger.debug(correlation_dict)
 
                         # finish clustering here
                         else:
                             rf_input_vars = [x for x in ordinal_pattern_attr_list if x not in jg.user_attrs] 
-                            logger.debug("smaller number of num attrs!!!!!!")
-                            logger.debug(rf_input_vars)
+                            # logger.debug("smaller number of num attrs!!!!!!")
+                            # logger.debug(rf_input_vars)
                             rep_from_last_node = [r for r in rf_input_vars if r in attrs_from_spec_node]
                             correlation_dict = {i : [] for i in rf_input_vars}
 
 
                         rf_df = cor_df[rf_input_vars]
-                        logger.debug(rf_df.head())
+                        # logger.debug(rf_df.head())
                         target = raw_df['is_user']
                         le = LabelEncoder()
                         y = le.fit(target)

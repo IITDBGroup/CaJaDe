@@ -299,10 +299,10 @@ def run_experiment(conn=None,
 
     jgg = Join_Graph_Generator(schema_graph = sg, attr_dict = attr_dict, gwrapper=w)
 
-    logger.debug('generate new valid_jgs')
+    # logger.debug('generate new valid_jgs')
     valid_result = jgg.Generate_JGs(pt_rels=pt_relations, num_edges=maximum_edges, customize=False)
     
-    logger.debug(f"Before filtering any, we have {len(valid_result)} valid jgs \n")
+    # logger.debug(f"Before filtering any, we have {len(valid_result)} valid jgs \n")
 
     jgm = Join_Graph_Materializer(conn=conn, db_dict=attr_dict, gwrapper=w, user_query=user_query)
     jgm.init_cost_estimator()
@@ -317,17 +317,11 @@ def run_experiment(conn=None,
 
 
     if(exclude_high_cost_jg[0]==False):
-      logger.debug("DO include high cost jg!!!!!!!!!!!!!")
-      logger.debug(f"before filtering intermediate, we have {len(valid_result)} jgs")
+      # logger.debug("DO include high cost jg!!!!!!!!!!!!!")
+      # logger.debug(f"before filtering intermediate, we have {len(valid_result)} jgs")
 
       intermediate_jgs = [v for v in valid_result if v.intermediate]
       valid_result = [v for v in valid_result if not v.intermediate]
-      
-      for ijg in intermediate_jgs:
-        logger.debug(ijg)
-
-      logger.debug(f"after filtering out intermediate we have {len(valid_result)} valid jgs \n")
-
 
       jgm.stats.startTimer('materialize_jg')
       for n in valid_result:
@@ -342,12 +336,12 @@ def run_experiment(conn=None,
           continue
       jgm.stats.stopTimer('materialize_jg')
 
-      logger.debug(f"before filtering redundant, we have {len(valid_result)} jgs")
+      # logger.debug(f"before filtering redundant, we have {len(valid_result)} jgs")
       valid_result = [v for v in valid_result if not v.redundant]
       jgg.stats.params['valid_jgs']=len(valid_result)
-      logger.debug(f"after filtering out redundant we have {len(valid_result)} valid jgs \n")
+      # logger.debug(f"after filtering out redundant we have {len(valid_result)} valid jgs \n")
 
-      logger.debug(f'we found {len(valid_result)} valid join graphs, now materializing and generating patterns')
+      # logger.debug(f'we found {len(valid_result)} valid join graphs, now materializing and generating patterns')
       
       jg_cnt=1
 
@@ -355,7 +349,7 @@ def run_experiment(conn=None,
         # if(str(vr)=='1: PT, 2: icustays| 2: icustays, 3: patients'):
         jg_individual_times_dict[vr] = 0
         jgm.stats.startTimer('materialize_jg')
-        logger.debug(f'we are on join graph number {jg_cnt}')
+        # logger.debug(f'we are on join graph number {jg_cnt}')
         jg_cnt+=1
         # logger.debug(vr)
         drop_if_exist_jg_view = "DROP MATERIALIZED VIEW IF EXISTS {} CASCADE;".format('jg_{}'.format(vr.jg_number))
@@ -411,15 +405,15 @@ def run_experiment(conn=None,
 
       valid_result = [v for v in valid_result if not v.redundant]
 
-      logger.debug(cost_estimate_dict)
+      # logger.debug(cost_estimate_dict)
 
       avg_cost_estimate_by_num_edges = {k:mean(v) for k,v in cost_estimate_dict.items() if v}
-      logger.debug(avg_cost_estimate_by_num_edges)
-      logger.debug(f'we found {len(valid_result)} valid join graphs, now materializing and generating patterns')
+      # logger.debug(avg_cost_estimate_by_num_edges)
+      # logger.debug(f'we found {len(valid_result)} valid join graphs, now materializing and generating patterns')
       jg_cnt=1
       for n in valid_result:
-        logger.debug(f'we are on join graph number {jg_cnt}')
-        logger.debug(n)
+        # logger.debug(f'we are on join graph number {jg_cnt}')
+        # logger.debug(n)
         jg_cnt+=1
         if(n.cost<=avg_cost_estimate_by_num_edges[n.num_edges]):
           jg_individual_times_dict[n] = 0
@@ -481,7 +475,7 @@ def run_experiment(conn=None,
 
       patterns_all = pgen.rank_patterns(ranking_type = 'global')
 
-    logger.debug(f'total number of patterns {len(patterns_all)}')
+    # logger.debug(f'total number of patterns {len(patterns_all)}')
 
     # collect stats 
     stats_trackers = [jgg.stats, jgm.stats, pgen.stats, statstracker]
@@ -508,7 +502,7 @@ def drop_jg_views(conn):
     """
     cur.execute(q_get_num_tree_views)
     all_jg_names = cur.fetchall()
-    logger.debug(all_jg_names)  
+    # logger.debug(all_jg_names)  
     for n in all_jg_names:
         q = "DROP MATERIALIZED VIEW {} CASCADE".format(n[0])
         cur.execute(q)

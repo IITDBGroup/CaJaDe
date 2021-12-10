@@ -1,18 +1,18 @@
 # SIGMOD Reproducibility for Paper "Putting Things into Context: Rich Explanations for Query Answers using Join Graphs"
 
-[https://github.com/IITDBGroup/cape/tree/sigmod-reproducibility](https://github.com/IITDBGroup/cape/tree/sigmod-reproducibility)
+[https://github.com/IITDBGroup/CaJaDe/tree/sigmod_reproducibility](https://github.com/IITDBGroup/CaJaDe/tree/sigmod_reproducibility)
 
 
 # A) Source Code Info
 
-The **CaJaDE** system is written in `Python` and uses [**PostgreSQL**](https://www.postgresql.org/) as a backend for storage.  We use [**GProM**] [https://github.com/IITDBGroup/gprom/tree/gprom_in_cajade] as the tool to generate the provenance of the query. 
+The **CaJaDE** system is written in `Python` and uses [**PostgreSQL**](https://www.postgresql.org/) as a backend for storage.  We use [**GProM**](https://github.com/IITDBGroup/gprom/tree/gprom_in_cajade) as the tool to generate the provenance of the query. 
 
-As we have some comparison experiments with 2 previous works. we provide the access to those works as well: 
+As we have some comparison experiments with 2 previous work. we provide the access to those work as well: 
 
-- For **CAPE**, you could access from [here][https://github.com/IITDBGroup/cape] `master` branch
-- For **Explanation Table** ([paper link][https://dl.acm.org/doi/10.14778/2735461.2735467]) has no public repo, but we contacted the authors and g
+- For **CAPE** ([paper link](https://dl.acm.org/doi/10.1145/3299869.3300066])), you could access cape repository from [here][https://github.com/IITDBGroup/cape] `master` branch
+- For **Explanation Table** ([paper link][https://dl.acm.org/doi/10.14778/2735461.2735467]) has no public repo, but we contacted the authors and got the source code. we include the code in a docker image which we discuss in detail in **Section D)**
 
-The **Cape** package installs a library as well as a commandline tool `capexplain`. This tool can be used to mine patterns, create explanations, and to start a GUI for interactively running queries, specifying questions, and browsing patterns and explanation. For convenience we provide a docker container.
+The **CaJaDE** package installs a library as well as a commandline tool `cajadexplain`. This tool provides the arguments needed to run a query in a given database, with provided "2 point" user question, and some parameters to produce the explanations and save the explanations in the given database schema
 
 - Repository: https://github.com/IITDBGroup/cape (branch `SIGMOD-reproducibility`)
 - Programming Language: Python
@@ -22,11 +22,12 @@ The **Cape** package installs a library as well as a commandline tool `capexplai
     - `tkinter` which requires a system package to be installed (see below)
     - `postgresql` as a database backend
 
-# B) Datasets Info
+# B) Datasets
 
-We used two real world datasets in the experiments:
-- Publication dataset extracted from DBLP: [https://dblp.uni-trier.de/](https://dblp.uni-trier.de/)
-- Crime dataset from the Chicago open data portal: [https://data.cityofchicago.org/Public-Safety/Crimes-2001-to-present/ijzp-q8t2](https://data.cityofchicago.org/Public-Safety/Crimes-2001-to-present/ijzp-q8t2)
+- NBA dataset: NBA (National Basketball Association) dataset were extracted from [this cite](http://www.pbpstats.com/). This dataset will be available in the reproducibility repo
+- MIMIC dataset:  in order to access MIMIC (Medical Information Mart for Intensive Care) dataset, it requires user to finish the steps listed [here](https://mimic.mit.edu/docs/gettingstarted/) before starting working with the data. We do not provide the dataset in this reproducibility repository due to the policy. However, we provide the scripts needed to prepare the processed MIMIC dataset used in the experiments.
+
+https://data.cityofchicago.org/Public-Safety/Crimes-2001-to-present/ijzp-q8t2)
 
 # C) Hardware Info
 
