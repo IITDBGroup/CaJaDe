@@ -42,7 +42,7 @@ def scalability_draw(ds_name, filename):
 
     legend1 = ax.legend(prop={'size': 20},loc=2,
               borderpad=0.1,labelspacing=0,handlelength=1,handletextpad=0.2,
-              columnspacing=0.1,framealpha=1, handles=handles, labels=['user={args.user_name}', 'linear scaling', '0.1 f1 sample', '0.3 f1 sample', '0.5 f1 sample', '0.7 f1 sample'],fontsize=5)
+              columnspacing=0.1,framealpha=1, handles=handles, labels=['linear scaling', '0.1 f1 sample', '0.3 f1 sample', '0.5 f1 sample', '0.7 f1 sample'],fontsize=5)
 
     legend1.get_frame().set_edgecolor('black')
 
