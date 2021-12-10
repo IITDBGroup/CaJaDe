@@ -15,8 +15,8 @@ def lca1_draw(filename):
     ax1 = fig.add_subplot(111)
 
     # DFs
-    apt1=df.query('APT==1 and is_ref!=1')
-    apt1_gt = df.query('APT==1 and is_ref==1')
+    apt1=df.query('apt==1 and is_ref!=1')
+    apt1_gt = df.query('apt==1 and is_ref==1')
 
     # colors
     col_time='red'

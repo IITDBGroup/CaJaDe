@@ -2,8 +2,11 @@ import argparse
 import psycopg2
 from ndcg_and_workloads_draw import plot_running_time_against_db_offline
 from scalability_draws import scalability_draw
+from lca1 import lca1_draw
+from lca2 import lca2_draw
 from prepare_csvs import *
 import warnings
+
 warnings.filterwarnings('ignore')
 
 # nba_scalability_dict = {
@@ -68,5 +71,6 @@ if __name__ == '__main__':
 
 	if(args.graph_name=='lca'):
 		conn = psycopg2.connect(f"host={args.db_host} dbname={args.db_name} user={args.user_name} password={args.password} port={args.port}")
-		result_csv = prep_lca_csv(conn=conn, schema=args.result_schema)
-
+		prep_lca_csv(conn=conn, schema=args.result_schema, outputdir=args.output_dir)
+		lca1_draw(f'{args.output_dir}/graph_8bc')
+		lca2_draw(f'{args.output_dir}/graph_8bc')

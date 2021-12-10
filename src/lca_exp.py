@@ -283,10 +283,7 @@ if __name__ == '__main__':
 
   parser.add_argument('-P','--port', metavar="\b", type=int, default=5432,
     help='database port, (default: %(default)s)')
-
-  parser.add_argument('-f','--finalize', metavar="\b", type=bool, default=False,
-    help='database port, (default: %(default)s)')
-
+  
   parser.add_argument('-H','--db_host', metavar="\b", type=str, default='localhost',
     help='database host, (default: %(default)s)')
 
@@ -307,7 +304,7 @@ if __name__ == '__main__':
   args=parser.parse_args()
 
 
-  conn = psycopg2.connect(f"dbname={args.db_name} user={args.user_name} port={args.port}")
+  conn = psycopg2.connect(f"dbname={args.db_name} host={args.db_host} user={args.user_name} port={args.port}")
 
 
   jn = args.jg_name
@@ -369,34 +366,24 @@ if __name__ == '__main__':
   # nba 
   if(args.db_name=='nba_lca'):
     if(jn=='jg_288'):
-      if(args.finalize==True):
-        la.finalize()
-      else:
         la.analyze(lca_sample_size=ss, jg_name=jn, renaming_dict=nba_288_rd, considered_attrs=nba_288_ca)
+        la.finalize()
 
     elif(jn=='jg_31'):
-      if(args.finalize==True):
-        la.finalize()
-      else:
         la.analyze(lca_sample_size=ss, jg_name=jn, renaming_dict=nba_31_rd, considered_attrs=nba_31_ca)
+        la.finalize()
   
   if(args.db_name=='mimic_lca'):
     if(jn=='jg_24'):
-      if(args.finalize==True):
-        la.finalize()
-      else:
         la.analyze(lca_sample_size=ss, jg_name=jn, renaming_dict=mimic_24_rd, considered_attrs=mimic_24_ca)
+        la.finalize()
 
     elif(jn=='jg_9'):
-      if(args.finalize==True):
-        la.finalize()
-      else:
         la.analyze(lca_sample_size=ss, jg_name=jn, renaming_dict=mimic_9_rd, considered_attrs=mimic_9_ca)
-    elif(jn=='jg_1'):
-      if(args.finalize==True):
         la.finalize()
-      else:
+    elif(jn=='jg_1'):
         la.analyze(lca_sample_size=ss, jg_name=jn, renaming_dict=mimic_1_rd, considered_attrs=mimic_1_ca)
+        la.finalize()
 
   # mimic
   # la.analyze(lca_sample_size=ss, jg_name=jn, renaming_dict=rd, considered_attrs=ca)
