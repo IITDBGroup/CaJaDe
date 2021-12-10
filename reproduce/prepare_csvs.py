@@ -21,23 +21,27 @@ import argparse
 def prep_workloads_csv(conn, schema, outputdir):
 	pass
 
-def prep_lca_csv(conn, dbname, dataset, outputdir):
+def prep_lca_csv(conn, schema, outputdir):
 
-	jgs = [{'schema': 'jg_288', 'ref': 2600, 'apt_name':1},
-	{'schema': 'jg_31', 'ref': 2600, 'apt_name':2}
+	jgs = [{'schema': 'jg_288_lca', 'ref': '2600', 'apt_name':'1'},
+	{'schema': 'jg_31_lca', 'ref': '15000', 'apt_name':'2'}]
 
-	df = pd.DataFrame(columns=['time', 'sample_size', 'sample_rate', 'num_match', 'apt_size', 'num_attrs'])
+	df= pd.DataFrame(columns=['time', 'sample_size', 'sample_rate', 'num_match', 'apt_size', 'num_attrs', 'is_ref'])
 	for j in jgs:
 		q = f"""
-		SELECT {j['apt_name']} as APT, time, sample_size, ROUND(samplesize::numeric/apt_size::numeric, 2) AS sample_rate,
+		SELECT '{j["apt_name"]}' as apt, time, sample_size, ROUND(sample_size::numeric/apt_size::numeric, 2) AS sample_rate,
 		num_match, apt_size, num_attrs
 		FROM {j['schema']}.result
-		SORT BY sample_size ASC
+		ORDER BY sample_size ASC
 		"""
 		s_df=pd.read_sql(q, conn)
+		# print(s_df.dtypes)
+		s_df['is_ref'] = np.where(((s_df['apt']==j['apt_name']) & (s_df['sample_size']==j['ref'])) ,1, 0)
 		df = df.append(s_df)
 
-	df.to_csv(f'{outputdir}/graph_8bc_{dataset}.csv', index=False)
+	# print(df)
+
+	df.to_csv(f'{outputdir}/graph_8bc.csv', index=False)
 
 	# id | time | sample_size | apt_size | num_result_p | num_attrs | result_schema |   exp_desc   | num_match 
 
@@ -60,7 +64,7 @@ def prep_lca_csv(conn, dbname, dataset, outputdir):
 	# 2,lca_jg_31,128.72,12800,0.19,1,66282,2,0
 	# 2,lca_jg_31,179.52,15000,0.23,10,66282,2,1
 
-	pass
+	# pass
 
 def prep_scalability_csv(host, dbname, user, password, port, schema, dataset, outputdir):
 	db_scales = ['01', '05', '2', '4', '8']

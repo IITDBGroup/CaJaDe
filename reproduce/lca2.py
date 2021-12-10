@@ -16,8 +16,8 @@ def lca2_draw(filename):
     ax1 = fig.add_subplot(111)
 
     # DFs
-    apt1=df.query('APT==2 and is_ref!=1')
-    apt1_gt = df.query('APT==2 and is_ref==1')
+    apt1=df.query('apt==2 and is_ref!=1')
+    apt1_gt = df.query('apt==2 and is_ref==1')
 
     # colors
     col_time='red'
@@ -35,6 +35,7 @@ def lca2_draw(filename):
 
     # plot lines
     ax2 = ax1.twinx()
+    apt1=apt1.sort_values(by=['sample_rate'])
     lr1=apt1.plot(x='sample_rate',y='time',kind='line',label='runtime(s)',c=col_time,marker=mymarker[1],lw=mymarkerlw, ax=ax1, legend=None)
     gt_time = apt1_gt.plot(x='sample_rate',y='time',kind='scatter',label='ref time',c=col_time,marker=mymarker[0], ax=ax1)
 

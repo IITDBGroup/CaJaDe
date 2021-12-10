@@ -1,0 +1,11 @@
+NOTICE:  drop cascades to 9 other objects
+DETAIL:  drop cascades to view jg_288_et_estimate
+drop cascades to view jg_288_et_kl
+drop cascades to view jg_288_et_sample_estimate
+drop cascades to view jg_288_et_sample_maxpats
+drop cascades to view jg_288_et_sample_subsets
+drop cascades to view jg_288_et_sample_aggpats
+drop cascades to view jg_288_et_sample_corrected
+drop cascades to view jg_288_et_richsummary
+drop cascades to view jg_288_et_sample_richsummary
+NOTICE:  drop cascades to function subsets(text,text,text,text,text,text,text,text,text,text,text,text,text,text,text,text,text,text,text,text,integer)
