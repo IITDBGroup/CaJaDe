@@ -1,0 +1,36 @@
+------------------------------------------------------------------------------
+Preparing postgres:
+------------------------------------------------------------------------------
+Install PL/Python - Python Procedural Language extention for postgres.
+
+Create postgres user (role) and fill db.conf
+        dsn=localhost:linuxdb or IP:DBname
+        user=username or postgres user/role
+        pass=password or postgres password
+
+------------------------------------------------------------------------------        
+Preparing data:
+------------------------------------------------------------------------------
+Code assumes tables of N attributes would be of the following attributes:
+id              integer                  (a unique serial)
+p              small int	         (truth value assignment 0 or 1)
+Attribute 1 character varying(64)
+     ......     character varying(64)
+Attribute N character varying(64)
+
+------------------------------------------------------------------------------
+Running explanation tool:
+------------------------------------------------------------------------------
+python explain.py <tablename> <table size> <sample size in rows>
+
+------------------------------------------------------------------------------
+Results:
+------------------------------------------------------------------------------
+An explanation table shall look like follows:
+
+<pattern>,<support of pattern>,<observed>
+
+e.g.
+Pattern 1 : A,*,*,100,0.2
+Pattern 2 : A,B,*,50,0.5
+
