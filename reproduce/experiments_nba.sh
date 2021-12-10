@@ -10,20 +10,20 @@ echo "experiments for different sample rate and different sample rate in calcula
 samplerates=(0.05 0.1 0.2 0.3 0.4 0.5 0.6 0.7)
 maxedges=(1 2 3)
 
-cajadexplain -H 10.5.0.3 -M 1 -p reproduce -U cajade -P 5432 -d nba -t o -i false  -D nba_sample
-cajadexplain -H 10.5.0.3 -M 2 -p reproduce -U cajade -P 5432 -d nba -t o -i false  -D nba_sample
-cajadexplain -H 10.5.0.3 -M 3 -p reproduce -U cajade -P 5432 -d nba -t o -i false  -D nba_sample
+# cajadexplain -H 10.5.0.3 -M 1 -p reproduce -U cajade -P 5432 -d nba -t o -i false  -D nba_sample
+# cajadexplain -H 10.5.0.3 -M 2 -p reproduce -U cajade -P 5432 -d nba -t o -i false  -D nba_sample
+# cajadexplain -H 10.5.0.3 -M 3 -p reproduce -U cajade -P 5432 -d nba -t o -i false  -D nba_sample
 
 for s in ${samplerates[@]}
 	do 
 		for e in ${maxedges[@]}
 		do
-		    cajadexplain -M ${e} -p reproduce -U cajade -P 5432 -d nba -t s -i false -F ${s} -D nba_sample
+		    cajadexplain -H 10.5.0.3 -M ${e} -p reproduce -U cajade -P 5432 -d nba -t s -i false -F ${s} -D nba_sample
 	    done
 	done
 
 # draw it
-python draw_graphs.py -H localhost -G ndcg -P 5432 -D nba_sample -O ${OUTPUTDIR} -U cajade -p reproduce -d nba
+python draw_graphs.py -H 10.5.0.3 -G ndcg -P 5432 -D nba_sample -O ${OUTPUTDIR} -U cajade -p reproduce -d nba
 
 # nba scalability 7(a)
 # echo "experiments scability on NBA"
