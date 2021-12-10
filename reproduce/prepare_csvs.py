@@ -37,7 +37,7 @@ def prep_scalability_csv(host, dbname, user, password, port, schema, dataset, ou
 			size=1
 		else:
 			size=s
-		conn = psycopg2.connect(host=host, dbname=f"{dataset}{s}", password=password, port=port)
+		conn = psycopg2.connect(host=host, dbname=f"{dataset}{s}", user=user, password=password, port=port)
 		q=f"""
 			SELECT {size} AS size, f1_sample_rate, feature_reduct, lca, materialize_jg, refinment, f1_sample, jg_enumeration, run_f1_query::numeric+check_recall::numeric AS f1_calc,
 			feature_reduct::NUMERIC +lca::NUMERIC +materialize_jg::NUMERIC +refinment::NUMERIC +f1_sample::NUMERIC +jg_enumeration::NUMERIC +run_f1_query::NUMERIC + check_recall::NUMERIC AS total

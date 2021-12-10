@@ -27,26 +27,26 @@ OUTPUTDIR=/experiment_results;
 # python3 draw_graphs.py -H 10.5.0.3 -G ndcg -P 5432 -D nba_sample -O ${OUTPUTDIR} -U cajade -p reproduce -d nba
 
 # nba scalability 7(a)
-echo "experiments scability on NBA"
-array=('01' '05' '2' '4' '8')
-rates=(0.1 0.3 0.5 0.7)
+# echo "experiments scability on NBA"
+# array=('01' '05' '2' '4' '8')
+# rates=(0.1 0.3 0.5 0.7)
 
-for s in ${array[@]}
-	do
-		for r in ${rates[@]}
-			do
-	        echo "Running Figure 7) NBA dataset:NBA scale=${s}, sample_rate=${r}"
-	        cajadexplain -H 10.5.0.3 -M 3 -p reproduce -U cajade -P 5432 -d nba${s} -t s -i false -F ${r} -D nba_scalability
-	    done
-    done
+# for s in ${array[@]}
+# 	do
+# 		for r in ${rates[@]}
+# 			do
+# 	        echo "Running Figure 7) NBA dataset:NBA scale=${s}, sample_rate=${r}"
+# 	        cajadexplain -H 10.5.0.3 -M 3 -p reproduce -U cajade -P 5432 -d nba${s} -t s -i false -F ${r} -D nba_scalability
+# 	    done
+#     done
 
 
 
-for r in ${rates[@]}
-	do
-	echo "Running scability for NBA dataset: scale=1, sample rate=${r}"
-    cajadexplain -H 10.5.0.3 -M 3 -p reproduce -U cajade -P 5432 -d nba -t s -i false -F ${r} -D nba_scalability
-    done
+# for r in ${rates[@]}
+# 	do
+# 	echo "Running scability for NBA dataset: scale=1, sample rate=${r}"
+#     cajadexplain -H 10.5.0.3 -M 3 -p reproduce -U cajade -P 5432 -d nba -t s -i false -F ${r} -D nba_scalability
+#     done
 
 # draw it
 python3 draw_graphs.py -H 10.5.0.3 -G scalability -P 5432 -D nba_scalability -O ${OUTPUTDIR} -U cajade -p reproduce -d nba
