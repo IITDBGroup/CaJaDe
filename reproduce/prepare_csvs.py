@@ -21,7 +21,45 @@ import argparse
 def prep_workloads_csv(conn, schema, outputdir):
 	pass
 
-def prep_case_study_csv(conn, schema, outputdir):
+def prep_lca_csv(conn, dbname, dataset, outputdir):
+
+	jgs = [{'schema': 'jg_288', 'ref': 2600, 'apt_name':1},
+	{'schema': 'jg_31', 'ref': 2600, 'apt_name':2}
+
+	df = pd.DataFrame(columns=['time', 'sample_size', 'sample_rate', 'num_match', 'apt_size', 'num_attrs'])
+	for j in jgs:
+		q = f"""
+		SELECT {j['apt_name']} as APT, time, sample_size, ROUND(samplesize::numeric/apt_size::numeric, 2) AS sample_rate,
+		num_match, apt_size, num_attrs
+		FROM {j['schema']}.result
+		SORT BY sample_size ASC
+		"""
+		s_df=pd.read_sql(q, conn)
+		df = df.append(s_df)
+
+	df.to_csv(f'{outputdir}/graph_8bc_{dataset}.csv', index=False)
+
+	# id | time | sample_size | apt_size | num_result_p | num_attrs | result_schema |   exp_desc   | num_match 
+
+	# APT,result_schema,time,sample_size,sample_rate,num_match,apt_size,num_attrs,is_ref
+	# 1,lca_jg_288,0.04,50,0.02,9,2621,2,0
+	# 1,lca_jg_288,0.05,100,0.04,6,2621,2,0
+	# 1,lca_jg_288,0.07,200,0.08,8,2621,2,0
+	# 1,lca_jg_288,0.18,400,0.15,8,2621,2,0
+	# 1,lca_jg_288,0.59,800,0.31,9,2621,2,0
+	# 1,lca_jg_288,2.09,1600,0.61,10,2621,2,0
+	# 1,lca_jg_288,5.61,2600,0.99,10,2621,2,1
+	# 2,lca_jg_31,0.1,50,0,1,66282,2,0
+	# 2,lca_jg_31,0.1,100,0,1,66282,2,0
+	# 2,lca_jg_31,0.12,200,0,1,66282,2,0
+	# 2,lca_jg_31,0.23,400,0.01,1,66282,2,0
+	# 2,lca_jg_31,0.62,800,0.01,1,66282,2,0
+	# 2,lca_jg_31,2.13,1600,0.02,1,66282,2,0
+	# 2,lca_jg_31,8.23,3200,0.05,1,66282,2,0
+	# 2,lca_jg_31,32.36,6400,0.1,1,66282,2,0
+	# 2,lca_jg_31,128.72,12800,0.19,1,66282,2,0
+	# 2,lca_jg_31,179.52,15000,0.23,10,66282,2,1
+
 	pass
 
 def prep_scalability_csv(host, dbname, user, password, port, schema, dataset, outputdir):

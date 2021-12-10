@@ -67,5 +67,6 @@ if __name__ == '__main__':
 		result_csv = prep_workloads_csv(conn=conn, schema=args.result_schema)
 
 	if(args.graph_name=='lca'):
+		conn = psycopg2.connect(f"host={args.db_host} dbname={args.db_name} user={args.user_name} password={args.password} port={args.port}")
 		result_csv = prep_lca_csv(conn=conn, schema=args.result_schema)
 

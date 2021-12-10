@@ -16,6 +16,8 @@ pg_dump -O -x -p 5433 -U japerev -t team_game_stats -t player_game_stats nba_cap
 
 pg_dump -O -x -p 5433 -U japerev nba_et > reproduce_et.sql
 
+pg_dump -O -x -p 5433 -U japerev nba_lca > reproduce_lca.sql
+
 
 Docker Image: 
 
