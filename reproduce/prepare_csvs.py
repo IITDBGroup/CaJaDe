@@ -24,7 +24,7 @@ def prep_workloads_csv(conn, repeat_num, schema, dbname, outputdir):
 
 	for i in range(1, repeat_num+1):
 		q = f"""
-		SELECT query_id, total, valid_jgs
+		SELECT query_id, total as runtime, valid_jgs as num_jgs
 		FROM {schema}{i}.time_and_params
 		"""
 		di = pd.read_sql(q, conn)
