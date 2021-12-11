@@ -85,16 +85,16 @@ trap "kill 0" EXIT
 # nba worloads
 
 #!/bin/bash
-echo "Experiment nba workloads "
-iters=(1 2 3)
+# echo "Experiment nba workloads "
+# iters=(1 2 3)
 
-for i in ${iters[@]}
-	do
-		cajadexplain -H 10.5.0.3 -M 3 -p reproduce -U cajade -P 5432 -d nba -t s -F 0.3 -D nba_workload${i} -W true
-		# cajadexplain -M 3 -p 123 -U lchenjie -P 5433 -d nba_original -t s -F 0.3 -D nba_workload${i} -W true
-	done
+# for i in ${iters[@]}
+# 	do
+# 		cajadexplain -H 10.5.0.3 -M 3 -p reproduce -U cajade -P 5432 -d nba -t s -F 0.3 -D nba_workload${i} -W true
+# 		# cajadexplain -M 3 -p 123 -U lchenjie -P 5433 -d nba_original -t s -F 0.3 -D nba_workload${i} -W true
+# 	done
 
-python3 draw_graphs.py -H 10.5.0.3 -G workload -P 5432 -D nba_workload -O ${OUTPUTDIR} -U cajade -p reproduce -d nba
+python3 draw_graphs.py -G workloads -P 5433 -D nba_workload -O . -U japerev -p 123 -d nba_original
 
 
 ##########################################################################################################################
@@ -102,6 +102,6 @@ python3 draw_graphs.py -H 10.5.0.3 -G workload -P 5432 -D nba_workload -O ${OUTP
 
 # cajadexplain -M 3 -p jape -U japerev -P 5433 -d nba_original -t o -m 0 -D march23 -W true
 
-cajadexplain -H 10.5.0.3 -M 3 -p reproduce -U cajade -P 5432 -d nba -t s -F 0.3 -D nba_workload${i} -C true
+# cajadexplain -H 10.5.0.3 -M 3 -p reproduce -U cajade -P 5432 -d nba -t s -F 0.3 -D nba_workload${i} -C true
 
 # python3 draw_graphs.py -H 10.5.0.3 -G casestudy -P 5432 -D lca -O ${OUTPUTDIR} -U cajade -p reproduce -d nba

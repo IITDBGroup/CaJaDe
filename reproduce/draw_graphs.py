@@ -1,6 +1,6 @@
 import argparse
 import psycopg2
-from ndcg_and_workloads_draw import plot_running_time_against_db_offline, plot_running_time_number_jg_bar
+from ndcg_and_workloads_draw import plot_running_time_against_db_offline, plot_running_time_number_jg_bar_df
 from scalability_draws import scalability_draw
 from lca1 import lca1_draw
 from lca2 import lca2_draw
@@ -42,6 +42,9 @@ if __name__ == '__main__':
 	parser.add_argument('-O','--output_dir', metavar="\b", type=str, default=".",
 	  help='output directory (csvs and pdfs), (default: ')
 
+	parser.add_argument('-R', '--repeat_num', metavar='\b', type=int, default='1',
+		help='only useful when reproduce workloads')
+
 	requiredNamed = parser.add_argument_group('required named arguments')
 
 	requiredNamed.add_argument('-U','--user_name', metavar="\b", type=str, required=True,
@@ -68,8 +71,8 @@ if __name__ == '__main__':
 
 	if(args.graph_name=='workloads'):
 		conn = psycopg2.connect(f"host={args.db_host} dbname={args.db_name} user={args.user_name} password={args.password} port={args.port}")
-		prep_workloads_csv(conn=conn, dataset=args.db_name, schema=args.result_schema, outputdir=args.output_dir)
-		plot_running_time_number_jg_bar(f'{args.output_dir}/graph_10_{args.db_name}')
+		prep_workloads_csv(conn=conn, repeat_num=args.repeat_num, schema=args.result_schema, dbname=args.db_name, outputdir=args.output_dir)
+		plot_running_time_number_jg_bar_df(f'{args.output_dir}/graph_10_{args.db_name}')
 
 	if(args.graph_name=='lca'):
 		conn = psycopg2.connect(f"host={args.db_host} dbname={args.db_name} user={args.user_name} password={args.password} port={args.port}")

@@ -18,22 +18,21 @@ import argparse
 # sample_rate : 0.05
 
 
-def prep_workloads_csv(conn, schema, dbname, outputdir):
+def prep_workloads_csv(conn, repeat_num, schema, dbname, outputdir):
 
-	df=pd.DataFrame(columns=['query_id','avg_run_time', 'num_jgs'])
+	df=pd.DataFrame(columns=['query_id','runtime', 'num_jgs'])
 
 	for i in range(1, repeat_num+1):
 		q = f"""
 		SELECT query_id, total, valid_jgs
-		FROM {dbname}.{schema}{i}
+		FROM {schema}{i}.time_and_params
 		"""
 		di = pd.read_sql(q, conn)
 		df = df.append(di)
-		
 
-	python3 draw_graphs.py -H 10.5.0.3 -G workload -P 5432 -D nba_workload -O ${OUTPUTDIR} -U cajade -p reproduce -d nba
+	# python3 draw_graphs.py -H 10.5.0.3 -G workload -P 5432 -D nba_workload -O ${OUTPUTDIR} -U cajade -p reproduce -d nba
 
-	df.to_csv(f"{args.output_dir}/graph_10_{dbname}.csv", index=False)
+	df.to_csv(f"{outputdir}/graph_10_{dbname}.csv", index=False)
 
 def prep_casestudy_csv():
 	pass 
