@@ -91,14 +91,11 @@ for i in ${iters[@]}
 		cajadexplain -H 10.5.0.3 -M 3 -p reproduce -U cajade -P 5432 -d nba -t s -F 0.3 -D nba_workload${i} -W true
 	done
 
-python3 draw_graphs.py -H 10.5.0.3 -G workloads -P 5432 -D nba_workload -O . -U japerev -p 123 -d nba -R 3
+python3 draw_graphs.py -H 10.5.0.3 -G workloads -P 5432 -D nba_workload -O ${OUTPUTDIR} -U cajade -p reproduce -d nba -R 3
 
 
 ##########################################################################################################################
 # nba case study
+cajadexplain -H 10.5.0.3 -M 3 -p reproduce -U cajade -P 5432 -d nba -t o -m 0 -F 0.3 -D casestudy -C true 
 
-# cajadexplain -M 3 -p jape -U japerev -P 5433 -d nba_original -t o -m 0 -D march23 -W true
-
-# cajadexplain -H 10.5.0.3 -M 3 -p reproduce -U cajade -P 5432 -d nba -t s -F 0.3 -D nba_workload${i} -C true
-
-# python3 draw_graphs.py -H 10.5.0.3 -G casestudy -P 5432 -D lca -O ${OUTPUTDIR} -U cajade -p reproduce -d nba
+python3 draw_graphs.py -H 10.5.0.3 -G casestudy -P 5432 -D casestudy -O ${OUTPUTDIR} -U cajade -p reproduce -d nba
