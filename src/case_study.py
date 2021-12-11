@@ -3,7 +3,7 @@
 # Q1:
 mimic_question_dict_1 = {}
 mimic_uq1 = "provenance of (select 1.0*SUM(a.hospital_expire_flag)/count(*) as death_rate, count(*) as cnt, d.chapter from admissions a, diagnoses d where a.hadm_id=d.hadm_id group by d.chapter);"
-mimic_question_dict_1['uquery'] = (mimic_uq1, 'mimic_qw_q1_diag_death_rate')
+mimic_question_dict_1['uquery'] = (mimic_uq1, 'mimic1')
 mimic_question_dict_1['question'] =["chapter='2'","chapter='13'"]
 mimic_question_dict_1['uattrs'] = [('diagnoses','chapter'),('admissions','hospital_expire_flag'), ('admissions','insurance')]
 mimic_question_dict_1['umap']= {'yes':'2', 'no':'13'}
@@ -11,7 +11,7 @@ mimic_question_dict_1['umap']= {'yes':'2', 'no':'13'}
 # Q2:
 mimic_question_dict_2 = {}
 mimic_uq2 = "provenance of (select insurance, 1.0*SUM(hospital_expire_flag)/count(*) as death_rate from admissions group by insurance);"
-mimic_question_dict_2['uquery'] = (mimic_uq2, 'mimic_qw_q2_medicaid_vs_medicare')
+mimic_question_dict_2['uquery'] = (mimic_uq2, 'mimic2')
 mimic_question_dict_2['question'] =["insurance='Medicaid'","insurance='Medicare'"]
 mimic_question_dict_2['uattrs'] = [('admissions','insurance'),('admissions','hospital_expire_flag')]
 mimic_question_dict_2['umap'] = {'yes':'Medicaid', 'no':'Medicare'}
@@ -20,7 +20,7 @@ mimic_question_dict_2['umap'] = {'yes':'Medicaid', 'no':'Medicare'}
 # Q3:
 mimic_question_dict_3 = {}
 mimic_uq3 = "provenance of (select count(*) as cnt, los_group from icustays group by los_group);"
-mimic_question_dict_3['uquery'] = (mimic_uq3, 'mimic_qw_q3_los')
+mimic_question_dict_3['uquery'] = (mimic_uq3, 'mimic3')
 mimic_question_dict_3['question'] =["los_group='x>8'","los_group='0-1'"]
 mimic_question_dict_3['uattrs'] = [('icustays','los_group'), ('icustays','los')]
 mimic_question_dict_3['umap'] = {'yes':'x>8', 'no':'0-1'}
@@ -28,7 +28,7 @@ mimic_question_dict_3['umap'] = {'yes':'x>8', 'no':'0-1'}
 
 mimic_question_dict_4 = {}
 mimic_uq4 = "provenance of (select insurance, 1.0*SUM(hospital_expire_flag)/count(*) as death_rate from admissions group by insurance);"
-mimic_question_dict_4['uquery'] = (mimic_uq2, 'mimic_qw_q2_gov_selfpay')
+mimic_question_dict_4['uquery'] = (mimic_uq4, 'mimic4')
 mimic_question_dict_4['question'] =["insurance='Medicare'","insurance='Private'"]
 mimic_question_dict_4['uattrs'] = [('admissions','insurance'),('admissions','hospital_expire_flag')]
 mimic_question_dict_4['umap'] = {'yes':'Medicare', 'no':'Private'}
