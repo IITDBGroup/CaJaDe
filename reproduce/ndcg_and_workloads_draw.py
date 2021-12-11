@@ -231,73 +231,90 @@ def plot_running_time_against_db_offline(ds_name, col1, col2, filename):
 #     plt.savefig('jg3_all_'+ col1+'_against_' + col2 + '.pdf', bbox_inches='tight', format='pdf')
 #     plt.close()
 
+def query_name(ori_name):
+    return '$Q_{w' + str(ori_name) + '}$'
 
-# def plot_running_time_number_jg_bar(two_y_axis=False):
+def plot_running_time_number_jg_bar(two_y_axis=False):
 
-#     # runtime = [596.1403151,59.20030594,84.47665596,508.7447991,36.57828403,243.8028731,695.570328,255.9841588,138.7882333,132.3358893]
-#     # jgnum = [9,4,7,9,8,17,21,17,17,11]
-#     # ptsize = [140911,23193,20916,103711,3205,157,164,155,114,132]
-#     # index=['mimic1','mimic2', 'mimic3','mimic4','mimic5', 'nba1','nba2','nba3','nba4','nba5']
-#     # runtime = [243.8028731,695.570328,255.9841588,138.7882333,132.3358893, 
-#     #     596.1403151,59.20030594,84.47665596,508.7447991,36.57828403]
-#     # jgnum = [17,21,17,17,11, 9,4,7,9,8]
-#     runtime = [269.5466475,717.2851119,276.6834949,125.0244987,263.3097157,
-#         640.2224851,64.56710558,129.6306346,574.4649469,71.77737279]
-#     runtime_std = [4.819265321,27.92007554,1.388157182,1.128634984,1.302121983,
-#         21.59339315,0.6579186283,10.45846803,12.48934078,1.356538856]
-#     jgnum = [20,21,20,17,20,9,4,8,9,9]
-#     ptsize = [157,164,155,114,132, 140911,23193,20916,103711,3205]
-#     index=['$Q_{w' + str(i) + '}$' for i in range(1, 11)]
-#     df = pd.DataFrame({'Runtime (sec)': runtime,
-#                    '\# Join Graph': jgnum}, index=index)
-#     df_err = pd.DataFrame({'Runtime (sec)': runtime_std,
-#                    '\# Join Graph': [0 for i in range(10)]}, index=index)
-#     fig = plt.figure()
-#     if two_y_axis:
-#         ax = df.plot.bar(secondary_y= '\# Join Graph' , rot=0, mark_right=False, width=0.75)
-#         # fig, ax = plt.subplots()
-#         ax1, ax2 = plt.gcf().get_axes() # gets the current figure and then the axes
-#         ax1.tick_params(axis="y", labelsize=18)
-#         ax1.set_yticks([0,200,400,600])    
-#         ax1.set_ylabel('Runtime (sec)', fontsize=18)
-#         ax2.tick_params(axis="y", labelsize=18)
-#         ax2.set_yticks([0,5,10,15,20])    
-#         ax2.set_ylabel('\# Join Graph', fontsize=18) 
-#         # plt.legend(loc=2, fontsize = 'x-large')
+    # runtime = [596.1403151,59.20030594,84.47665596,508.7447991,36.57828403,243.8028731,695.570328,255.9841588,138.7882333,132.3358893]
+    # jgnum = [9,4,7,9,8,17,21,17,17,11]
+    # ptsize = [140911,23193,20916,103711,3205,157,164,155,114,132]
+    # index=['mimic1','mimic2', 'mimic3','mimic4','mimic5', 'nba1','nba2','nba3','nba4','nba5']
+    # runtime = [243.8028731,695.570328,255.9841588,138.7882333,132.3358893, 
+    #     596.1403151,59.20030594,84.47665596,508.7447991,36.57828403]
+    # jgnum = [17,21,17,17,11, 9,4,7,9,8]
+    runtime = [269.5466475,717.2851119,276.6834949,125.0244987,263.3097157,
+        640.2224851,64.56710558,129.6306346,574.4649469,71.77737279]
+    runtime_std = [4.819265321,27.92007554,1.388157182,1.128634984,1.302121983,
+        21.59339315,0.6579186283,10.45846803,12.48934078,1.356538856]
+    jgnum = [20,21,20,17,20,9,4,8,9,9]
+    jgnum_std = [1,2,3,1,2,3,1,2,3,3]
+    # ptsize = [157,164,155,114,132, 140911,23193,20916,103711,3205]
+    index=['$Q_{w' + str(i) + '}$' for i in range(1, 11)]
+
+    df.rename(columns={'runtime':'Runtime (sec)', "num_jgs":"# Join Graph"})
+
+    df['query_id'] = df['query_id'].apply(query_name(df['query_id']))
+
+
+    df = pd.DataFrame({'Runtime (sec)': runtime,
+                   '\# Join Graph': jgnum}, index=index)
+
+    df_runtime_std = pd.DataFrame({'Runtime (sec)': runtime_std,
+                   '\# Join Graph': [0 for i in range(10)]}, index=index)
+
+    df_jg_num_std = pd.DataFrame({'Runtime (sec)': jgnum_std,
+                   '\# Join Graph': [0 for i in range(10)]}, index=index)
+
+    fig = plt.figure()
+
+    if two_y_axis:
+        ax = df.plot.bar(secondary_y= '\# Join Graph' , rot=0, mark_right=False, width=0.75)
+        # fig, ax = plt.subplots()
+        ax1, ax2 = plt.gcf().get_axes() # gets the current figure and then the axes
+        ax1.tick_params(axis="y", labelsize=18)
+        ax1.set_yticks([0,200,400,600])    
+        ax1.set_ylabel('Runtime (sec)', fontsize=18)
+        ax2.tick_params(axis="y", labelsize=18)
+        ax2.set_yticks([0,5,10,15,20])    
+        ax2.set_ylabel('\# Join Graph', fontsize=18) 
+        # plt.legend(loc=2, fontsize = 'x-large')
     
-#         h1, l1 = ax.get_legend_handles_labels()
-#         h2, l2 = ax.right_ax.get_legend_handles_labels()
-#         handles = h1+h2
-#         labels = l1+l2
-#         ax.get_legend().remove()
-#         # ax.legend(handles, labels, loc='upper left', ncol=3,
-#         #     bbox_to_anchor=(0.25, -.575))
-#         plt.legend(handles, labels, prop={'size': 16}, loc='upper left', borderpad=0.5,#labelspacing=0,
-#             handlelength=1, fancybox=True, framealpha=0.5)
+        h1, l1 = ax.get_legend_handles_labels()
+        h2, l2 = ax.right_ax.get_legend_handles_labels()
+        handles = h1+h2
+        labels = l1+l2
+        ax.get_legend().remove()
+        # ax.legend(handles, labels, loc='upper left', ncol=3,
+        #     bbox_to_anchor=(0.25, -.575))
+        plt.legend(handles, labels, prop={'size': 16}, loc='upper left', borderpad=0.5,#labelspacing=0,
+            handlelength=1, fancybox=True, framealpha=0.5)
 
-#     else:
-#         ax = fig.add_subplot(111)
-#         ax = df.plot.bar(rot=0,subplots=True, title=['', ''], yerr=df_err, error_kw=dict(lw=6, capsize=0, capthick=2))
-#         ax[0].legend(loc=0)  
-#         ax[1].legend(loc=0)  
-#         # ax[1].tick_params(axis='y', which='minor', labelsize=22)
-#         # ax[1].set_yticks(fontsize=16)
-#         # ax[0].tick_params(axis="x", labelsize=18)
-#         ax[0].tick_params(axis="y", labelsize=18)
-#         ax[0].set_yticks([0,200,400,600])    
-#         ax[0].set_ylabel('Runtime (sec)', fontsize=18)
-#         ax[1].tick_params(axis="x", labelsize=14)
-#         ax[1].tick_params(axis="y", labelsize=18)
-#         ax[1].set_yticks([0,5,10,15,20])    
-#         ax[1].set_ylabel('\# Join Graph', fontsize=18)  # we already handled the x-label with ax1
+    else:
+        ax = fig.add_subplot(111)
+        ax = df.plot.bar(rot=0,subplots=True, title=['', ''], error_kw=dict(lw=6, capsize=0, capthick=2))
+        ax[0].legend(loc=0)  
+        ax[1].legend(loc=0) 
+        ax[0].error_bar(yerr=df_runtime_std)
+        ax[1].error_bar(yerr=df_jg_num_std)
+        # ax[1].tick_params(axis='y', which='minor', labelsize=22)
+        # ax[1].set_yticks(fontsize=16)
+        # ax[0].tick_params(axis="x", labelsize=18)
+        ax[0].tick_params(axis="y", labelsize=18)
+        ax[0].set_yticks([0,200,400,600])    
+        ax[0].set_ylabel('Runtime (sec)', fontsize=18)
+        ax[1].tick_params(axis="x", labelsize=14)
+        ax[1].tick_params(axis="y", labelsize=18)
+        ax[1].set_yticks([0,5,10,15,20])    
+        ax[1].set_ylabel('\# Join Graph', fontsize=18)  # we already handled the x-label with ax1
 
 
 
-#     # ax[1].set_xticklabels(['0.05', '', '0.2', '', '0.4', '', '0.6', '', '0.8', '', '1.0'])
-#     # ax[1].set_xticks([0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])    
+    # ax[1].set_xticklabels(['0.05', '', '0.2', '', '0.4', '', '0.6', '', '0.8', '', '1.0'])
+    # ax[1].set_xticks([0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])    
     
-#     plt.savefig('workload_runtime_jgnum.pdf', bbox_inches='tight', format='pdf')
-#     plt.close()    
+    plt.savefig('workload_runtime_jgnum.pdf', bbox_inches='tight', format='pdf')
+    plt.close()    
 
 
 # plot_running_time_against_db_offline('MIMIC', 'runtime', 'ndcgscore')
@@ -311,4 +328,4 @@ def plot_running_time_against_db_offline(ds_name, col1, col2, filename):
 # plot_running_time_against_db_offline('NBA', 'runtime', 'recall')
 
 # plot_running_time_number_jg_bar(two_y_axis=True)
-# plot_running_time_number_jg_bar()
+plot_running_time_number_jg_bar()
