@@ -94,7 +94,7 @@ trap "kill 0" EXIT
 # 		# cajadexplain -M 3 -p 123 -U lchenjie -P 5433 -d nba_original -t s -F 0.3 -D nba_workload${i} -W true
 # 	done
 
-python3 draw_graphs.py -G workloads -P 5433 -D nba_workload -O . -U japerev -p 123 -d nba_original
+python3 draw_graphs.py -G workloads -P 5433 -D nba_workload -O . -U japerev -p 123 -d nba_original -R 3
 
 
 ##########################################################################################################################
