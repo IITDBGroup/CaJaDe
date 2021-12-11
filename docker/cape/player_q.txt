@@ -1,0 +1,2 @@
+player_name,season,avg_points,direction
+LeBron James,2010,26.72,low

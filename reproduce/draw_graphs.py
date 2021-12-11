@@ -1,6 +1,6 @@
 import argparse
 import psycopg2
-from ndcg_and_workloads_draw import plot_running_time_against_db_offline
+from ndcg_and_workloads_draw import plot_running_time_against_db_offline, plot_running_time_number_jg_bar
 from scalability_draws import scalability_draw
 from lca1 import lca1_draw
 from lca2 import lca2_draw
@@ -67,7 +67,9 @@ if __name__ == '__main__':
 		result_csv = prep_case_study_csv(conn=conn, schema=args.result_schema)
 
 	if(args.graph_name=='workloads'):
-		result_csv = prep_workloads_csv(conn=conn, schema=args.result_schema)
+		conn = psycopg2.connect(f"host={args.db_host} dbname={args.db_name} user={args.user_name} password={args.password} port={args.port}")
+		prep_workloads_csv(conn=conn, dataset=args.db_name, schema=args.result_schema, outputdir=args.output_dir)
+		plot_running_time_number_jg_bar(f'{args.output_dir}/graph_10_{args.db_name}')
 
 	if(args.graph_name=='lca'):
 		conn = psycopg2.connect(f"host={args.db_host} dbname={args.db_name} user={args.user_name} password={args.password} port={args.port}")

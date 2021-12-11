@@ -12,6 +12,7 @@ RUN apt-get -y update && \
 ########################################
 # Clone Cape repository
 ########################################
+ADD experiments_nba.sh player_q.txt team_q.txt ./
 RUN git clone --single-branch --branch master https://github.com/IITDBGroup/cape.git 
 ########################################
 # Install cape

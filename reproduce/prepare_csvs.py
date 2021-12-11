@@ -18,8 +18,26 @@ import argparse
 # sample_rate : 0.05
 
 
-def prep_workloads_csv(conn, schema, outputdir):
-	pass
+def prep_workloads_csv(conn, schema, dbname, outputdir):
+
+	df=pd.DataFrame(columns=['query_id','avg_run_time', 'num_jgs'])
+
+	for i in range(1, repeat_num+1):
+		q = f"""
+		SELECT query_id, total, valid_jgs
+		FROM {dbname}.{schema}{i}
+		"""
+		di = pd.read_sql(q, conn)
+		df = df.append(di)
+		
+
+	python3 draw_graphs.py -H 10.5.0.3 -G workload -P 5432 -D nba_workload -O ${OUTPUTDIR} -U cajade -p reproduce -d nba
+
+	df.to_csv(f"{args.output_dir}/graph_10_{dbname}.csv", index=False)
+
+def prep_casestudy_csv():
+	pass 
+
 
 def prep_lca_csv(conn, schema, outputdir):
 
@@ -39,32 +57,8 @@ def prep_lca_csv(conn, schema, outputdir):
 		s_df['is_ref'] = np.where(((s_df['apt']==j['apt_name']) & (s_df['sample_size']==j['ref'])) ,1, 0)
 		df = df.append(s_df)
 
-	# print(df)
-
 	df.to_csv(f'{outputdir}/graph_8bc.csv', index=False)
 
-	# id | time | sample_size | apt_size | num_result_p | num_attrs | result_schema |   exp_desc   | num_match 
-
-	# APT,result_schema,time,sample_size,sample_rate,num_match,apt_size,num_attrs,is_ref
-	# 1,lca_jg_288,0.04,50,0.02,9,2621,2,0
-	# 1,lca_jg_288,0.05,100,0.04,6,2621,2,0
-	# 1,lca_jg_288,0.07,200,0.08,8,2621,2,0
-	# 1,lca_jg_288,0.18,400,0.15,8,2621,2,0
-	# 1,lca_jg_288,0.59,800,0.31,9,2621,2,0
-	# 1,lca_jg_288,2.09,1600,0.61,10,2621,2,0
-	# 1,lca_jg_288,5.61,2600,0.99,10,2621,2,1
-	# 2,lca_jg_31,0.1,50,0,1,66282,2,0
-	# 2,lca_jg_31,0.1,100,0,1,66282,2,0
-	# 2,lca_jg_31,0.12,200,0,1,66282,2,0
-	# 2,lca_jg_31,0.23,400,0.01,1,66282,2,0
-	# 2,lca_jg_31,0.62,800,0.01,1,66282,2,0
-	# 2,lca_jg_31,2.13,1600,0.02,1,66282,2,0
-	# 2,lca_jg_31,8.23,3200,0.05,1,66282,2,0
-	# 2,lca_jg_31,32.36,6400,0.1,1,66282,2,0
-	# 2,lca_jg_31,128.72,12800,0.19,1,66282,2,0
-	# 2,lca_jg_31,179.52,15000,0.23,10,66282,2,1
-
-	# pass
 
 def prep_scalability_csv(host, dbname, user, password, port, schema, dataset, outputdir):
 	db_scales = ['01', '05', '2', '4', '8']

@@ -1,0 +1,2 @@
+team,season,sum_win,direction
+GSW,2012,47,low
