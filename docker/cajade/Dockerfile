@@ -34,5 +34,3 @@ RUN git clone --single-branch --branch sigmod_reproducibility https://github.com
 
 RUN cd /CaJaDe \
 && python3 setup.py install 
-
-ADD ./test.py ./test.py
