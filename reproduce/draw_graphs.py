@@ -9,18 +9,6 @@ import warnings
 
 warnings.filterwarnings('ignore')
 
-# nba_scalability_dict = {
-# 'file_name' : 'nba_scalability.csv',
-# # 'cols' : ['f1_sample_rate','maximum_edges','feature_reduct','lca','materialize_jg','refinment','f1_sample','jg_enumeration','f1_calc'],
-# 'cols': ['f1_sample_rate','maximum_edges','feature_reduct', 'lca', 'materialize_jg', 'refinment', 'f1_sample', 'jg_enumeration', 'run_f1_query']
-# }
-
-
-# nba_ndcg_runtime_dict = {
-# 'file_name': 'ndcg_nba.csv'
-# }
-
-# def main(graph_name, info_dict)
 
 
 if __name__ == '__main__':
@@ -79,3 +67,7 @@ if __name__ == '__main__':
 		prep_lca_csv(conn=conn, schema=args.result_schema, outputdir=args.output_dir)
 		lca1_draw(f'{args.output_dir}/graph_8bc')
 		lca2_draw(f'{args.output_dir}/graph_8bc')
+
+	if(args.graph_name=='et'):
+		conn = psycopg2.connect(f"host={args.db_host} dbname={args.db_name} user={args.user_name} password={args.password} port={args.port}")
+		prep_et_csv(conn=conn, schema=args.result_schema, outputdir=args.output_dir)

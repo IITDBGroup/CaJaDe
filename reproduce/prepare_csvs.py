@@ -5,19 +5,6 @@ import numpy as np
 import argparse
 
 
-# true_relevance = np.asarray([[10, 0, 0, 1, 5]])
-# we predict some scores (relevance) for the answers
-# scores = np.asarray([[.1, .2, .3, 4, 70]])
-
-
-
-# give sample rate and max edge size
-
-# schema : f1_sample_rate_startsize_100
-# max_edge : 3
-# sample_rate : 0.05
-
-
 def prep_workloads_csv(conn, repeat_num, schema, dbname, outputdir):
 
 	df=pd.DataFrame(columns=['query_id','runtime', 'num_jgs'])
@@ -30,12 +17,35 @@ def prep_workloads_csv(conn, repeat_num, schema, dbname, outputdir):
 		di = pd.read_sql(q, conn)
 		df = df.append(di)
 
-	# python3 draw_graphs.py -H 10.5.0.3 -G workload -P 5432 -D nba_workload -O ${OUTPUTDIR} -U cajade -p reproduce -d nba
-
 	df.to_csv(f"{outputdir}/graph_10_{dbname}.csv", index=False)
 
-def prep_casestudy_csv():
-	pass 
+
+def prep_casestudy_csv(conn, schema, dbname, outputdir):
+	
+	q=f"""
+	SELECT ranked_scores.* FROM
+	(
+	select gr.jg as join_graph, gr.p_desc as pattern_desc, gr.recall, gr.precision, gr.fscore, gr.is_user as primary_tuple
+	rank() over (PARTITION BY tp.query_id ORDER BY gr.fscore DESC)
+	from {schema}.time_and_params tp, {schema}.global_results gr
+	where tp.exp_time = gr.exp_time
+	) ranked_scores
+	where rank<=10
+	"""
+
+	df = pd.read_sql(q, conn)
+
+	df.to_csv(f"{outputdir}/casestudy_{dbname}.csv", index=False)
+
+
+def prep_et_csv(conn, schema, outputdir):
+	q = f" 
+	SELECT tp.lca_s_max_size AS sample_size, jd.timecost AS runtime
+	FROM {schema}.time_and_params tp, {schema}.jgs_time_dist jd
+	WHERE tp.exp_time=jd.exp_time AND jd.jg='1: PT, 2: player_game_stats| 2: player_game_stats, 3: player'
+	"
+	df = pd.read_sql(q, conn)
+	df.to_csv(f'{outputdir}/gragph_9.csv', index=False)
 
 
 def prep_lca_csv(conn, schema, outputdir):
