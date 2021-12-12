@@ -230,12 +230,5 @@ if __name__ == '__main__':
 	requiredNamed.add_argument('-d','--db_name', metavar="\b", type=str, required=True,
 	  help='database name (required)')
 
-	# %%%%%%%%%%%%%%%%%%%%%%%%%%% MIMIC %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-	# conn = psycopg2.connect(f"dbname=mimic_original user=japerev port=5433")
-	# result = calc_ndcg(conn=conn, schema='april_4_sample')
-
-	# %%%%%%%%%%%%%%%%%%%%%%%%%%% NBA %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 	conn = psycopg2.connect(f"host={args.db_host} dbname={agrs.db_name} user={args.user_name} password={args.password} port={args.port}")
 	result = prep_ndcg_csv(conn=conn, schema=args.result_schema)
