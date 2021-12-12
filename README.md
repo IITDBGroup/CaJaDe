@@ -2,6 +2,8 @@
 
 [https://github.com/IITDBGroup/CaJaDe/tree/sigmod_reproducibility](https://github.com/IITDBGroup/CaJaDe/tree/sigmod_reproducibility)
 
+Note: If you are viewing the PDF file, we added some additional notes in this README.
+
 
 # A) Source Code Info
 
@@ -9,8 +11,8 @@ The **CaJaDE** system is written in `Python` and uses [**PostgreSQL**](https://w
 
 As we have some comparison experiments with 2 previous work. we provide the access to those work as well: 
 
-- For **CAPE** ([paper link](https://dl.acm.org/doi/10.1145/3299869.3300066])), you could access cape repository from [here][https://github.com/IITDBGroup/cape] `master` branch
-- For **Explanation Table** ([paper link][https://dl.acm.org/doi/10.14778/2735461.2735467]) has no public repo, but we contacted the authors and got the source code. we include the code in a docker image which we discuss in detail in **Section D)**
+- For **CAPE** ([paper link](https://dl.acm.org/doi/10.1145/3299869.3300066])), you could access cape repository from [here](https://github.com/IITDBGroup/cape) `master` branch
+- For **Explanation Table** ([paper link](https://dl.acm.org/doi/10.14778/2735461.2735467])) has no public repo, but we contacted the authors and got the source code. we include the code in a docker image which we discuss in detail in **Section D)**
 
 The **CaJaDE** package installs a library as well as a commandline tool `cajadexplain`. This tool provides the arguments needed to run a query in a given database, with provided "2 point" user question, and some parameters to produce the explanations and save the explanations in the given database schema
 
@@ -103,6 +105,14 @@ docker-compose up -d
 ~~~
 
 Using `-d` flag will set up the containers in [detached mode](https://docs.docker.com/compose/reference/up/)
+
+**NOTE**: since the loading of the dataset in postgres needs a bit of time, so we recommend use non detached mode in one terminal so that you could see the process of loading data has finished in the output log:
+
+You could start running experiments when the log shows the following:
+
+```she
+LOG:  database system is ready to accept connections
+```
 
 To test whether the containers are running do:
 
