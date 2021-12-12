@@ -96,6 +96,18 @@ python3 draw_graphs.py -H 10.5.0.3 -G workloads -P 5432 -D nba_workload -O ${OUT
 
 ##########################################################################################################################
 # nba case study
-cajadexplain -H 10.5.0.3 -M 3 -p reproduce -U cajade -P 5432 -d nba -t o -m 0 -F 0.3 -D casestudy -C true 
+cajadexplain -H 10.5.0.3 -M 3 -p reproduce -U cajade -P 5432 -d nba -t o -m 0 -D casestudy -C true 
 
 python3 draw_graphs.py -H 10.5.0.3 -G casestudy -P 5432 -D casestudy -O ${OUTPUTDIR} -U cajade -p reproduce -d nba
+
+
+#########################################################################################################################
+# nba explanation table comparison
+sample_sizes=(16 64 256 512)
+
+for s in ${sample_sizes[@]}
+	do
+		cajadexplain -H 10.5.0.3 -M 2 -p reproduce -U cajade -P 5432 -d nba -t o -i false -s ${s} -S ${s} -D et_compare
+	done
+
+python3 draw_graphs.py -H 10.5.0.3 -G et -P 5432 -D et_compare -O ${OUTPUTDIR} -U cajade -p reproduce -d nba
