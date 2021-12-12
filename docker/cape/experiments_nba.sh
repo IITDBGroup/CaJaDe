@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "CAPE: mine patterns from table player_game_stats ... "
-capexplain mine -h 10.5.0.3 -u cajade -p reproduce -d nba_cape -P 5432 -t player_game_stats --numeric minutes,offposs,points,fg_two_a,fg_two_pct,fg_three_a,fg_three_pct,usage,assists,rebounds,defrebounds,offrebounds,season --summable minutes,offposs,points,fg_two_a fg_two_pct,fg_three_a,fg_three_pct,usage,assists,rebounds,defrebounds,offrebounds
+capexplain mine -h 10.5.0.3 -u cajade -p reproduce -d nba_cape -P 5432 -t player_game_stats --numeric minutes,offposs,points,fg_two_a,fg_two_pct,fg_three_a,fg_three_pct,usage,assists,rebounds,defrebounds,offrebounds,season --summable minutes,offposs,points,fg_two_a,fg_two_pct,fg_three_a,fg_three_pct,usage,assists,rebounds,defrebounds,offrebounds
 
 echo "CAPE: mine patterns from table team_game_stats ... "
 capexplain mine -h 10.5.0.3 -u cajade -p reproduce -d nba_cape -P 5432 -t team_game_stats --numeric points,fg_two_a,fg_two_pct,fg_three_a,fg_three_pct,assists,rebounds,defrebounds,offrebounds,season,win --summable points,fg_two_a,fg_two_pct,fg_three_a,fg_three_pct,assists,rebounds,defrebounds,offrebounds,win

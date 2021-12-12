@@ -251,7 +251,7 @@ def run_experiment(conn=None,
     statstracker.params['result_schema'] = "'{}'".format(result_schema)
     statstracker.params['user_questions']="'{}'".format(" VS ".join([x.replace("'", '') for x in user_questions]))
     if(eval_workload or eval_case):
-      statstracker.params['query_id']=user_query[1]
+      statstracker.params['query_id']="'{}'".format(user_query[1])
     statstracker.params['dbname']= "'{}'".format(dbname)
     statstracker.params['sample_rate_for_s']= "'{}'".format(sample_rate_for_s)
     statstracker.params['maximum_edges']="'{}'".format(maximum_edges)
@@ -357,12 +357,10 @@ def run_experiment(conn=None,
       jg_cnt=1
 
       for vr in valid_result:
-        # if(str(vr)=='1: PT, 2: icustays| 2: icustays, 3: patients'):
         jg_individual_times_dict[vr] = 0
         jgm.stats.startTimer('materialize_jg')
         # logger.debug(f'we are on join graph number {jg_cnt}')
         jg_cnt+=1
-        # logger.debug(vr)
         drop_if_exist_jg_view = "DROP MATERIALIZED VIEW IF EXISTS {} CASCADE;".format('jg_{}'.format(vr.jg_number))
         jg_query_view = "CREATE MATERIALIZED VIEW {} AS {}".format('jg_{}'.format(vr.jg_number), vr.apt_create_q)
         jgm.cur.execute(drop_if_exist_jg_view)

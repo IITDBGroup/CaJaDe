@@ -888,7 +888,11 @@ class Pattern_Generator:
             # logger.debug(drop_prov_s)
             self.cur.execute(drop_prov_s)
 
-            lca_sample_size = max([min(math.ceil(original_pt_size*s_rate_for_s), lca_s_max_size), lca_s_min_size])
+
+            if(lca_s_max_size==lca_s_min_size):
+                lca_sample_size=lca_s_max_size
+            else:
+                lca_sample_size = max([min(math.ceil(original_pt_size*s_rate_for_s), lca_s_max_size), lca_s_min_size])
             # logger.debug(f"sample size : {lca_sample_size}")
 
             if(lca_sample_size!=0):
