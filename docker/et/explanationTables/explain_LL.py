@@ -18,7 +18,7 @@ samplesize = sys.argv[3] # sample size
 opt = '0'
 
 dbconf = {}
-with open("db.conf") as conffile:
+with open("/ExplanationTable/db.conf") as conffile:
     for line in conffile:
         name, var = line.partition("=")[::2]
         dbconf[name.strip()] = var.strip()
