@@ -10,4 +10,4 @@ echo "CAPE: explain player Lebron James Points low in 2010 ... "
 capexplain explain -h 10.5.0.3  -u cajade -p reproduce -d nba_cape -P 5432 --qtable player_game_stats --ptable pattern.player_game_stats --ufile player_q.txt --ofile ./experiment_results/player_exps.txt 
 
 echo "CAPE: explain team GSW wins low in 2012 ... "
-capexplain explain -h 10.5.0.3  -u cajade -p reproduce -d nba_cape -P 5432 --qtable team_game_stats --ptable pattern.team_game_stats --ufile team_q.txt --ofile ./experiment_results/player_exps.txt 
+capexplain explain -h 10.5.0.3  -u cajade -p reproduce -d nba_cape -P 5432 --qtable team_game_stats --ptable pattern.team_game_stats --ufile team_q.txt --ofile ./experiment_results/team_exps.txt 
