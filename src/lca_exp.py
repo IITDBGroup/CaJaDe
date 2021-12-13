@@ -304,7 +304,7 @@ if __name__ == '__main__':
   args=parser.parse_args()
 
 
-  conn = psycopg2.connect(f"dbname={args.db_name} host={args.db_host} user={args.user_name} port={args.port}")
+  conn = psycopg2.connect(f"dbname={args.db_name} password={args.password} host={args.db_host} user={args.user_name} port={args.port}")
 
 
   jn = args.jg_name
