@@ -25,7 +25,7 @@ def prep_casestudy_csv(conn, schema, dbname, outputdir):
 	q=f"""
 	SELECT ranked_scores.* FROM
 	(
-	select gr.jg as join_graph, gr.p_desc as pattern_desc, gr.recall, gr.precision, gr.fscore, gr.is_user as primary_tuple,
+	select tp.query_id as query_number, gr.jg as join_graph, gr.p_desc as pattern_desc, gr.recall, gr.precision, gr.fscore, gr.is_user as primary_tuple,
 	rank() over (PARTITION BY tp.query_id ORDER BY gr.fscore DESC)
 	from {schema}.time_and_params tp, {schema}.global_results gr
 	where tp.exp_time = gr.exp_time
