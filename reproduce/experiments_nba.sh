@@ -58,8 +58,8 @@ python3 /CaJaDe/reproduce/draw_graphs.py -H 10.5.0.3 -G scalability -P 5432 -D n
 # # nba lca sampling Figure 8 b) and Figure 8 c)
 # # Figure 8 b)
 
-jg1sample_sizes = (50 100 200 400 1600 2600)
-jg2sample_sizes = (50 100 200 400 800 1600 3200 6400 12800 15000)
+jg1sample_sizes=(50 100 200 400 1600 2600)
+jg2sample_sizes=(50 100 200 400 800 1600 3200 6400 12800 15000)
 
 
 for s1 in ${jg1sample_sizes[@]}
