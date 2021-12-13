@@ -45,7 +45,7 @@ def prep_et_csv(conn, schema, outputdir):
 	WHERE tp.exp_time=jd.exp_time AND jd.jg='1: PT, 2: player_game_stats| 2: player_game_stats, 3: player'
 	"""
 	df = pd.read_sql(q, conn)
-	df.to_csv(f'{outputdir}/gragph_9.csv', index=False)
+	df.to_csv(f'{outputdir}/figure_9_cajade.csv', index=False)
 
 
 def prep_lca_csv(conn, schema, outputdir):

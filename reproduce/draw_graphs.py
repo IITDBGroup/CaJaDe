@@ -55,7 +55,7 @@ if __name__ == '__main__':
 		prep_scalability_csv(host=args.db_host, dbname=args.db_name, user=args.user_name, password=args.password, port=args.port, schema=args.result_schema, dataset=args.db_name, outputdir=args.output_dir)
 		scalability_draw(ds_name=args.db_name, filename=f'{args.output_dir}/graph_7_{args.db_name}')
 	if(args.graph_name=='casestudy'):
-		result_csv = prep_case_study_csv(conn=conn, schema=args.result_schema)
+		prep_casestudy_csv(conn=conn, dbname=args.result_schema, outputdir=args.output_dir)
 
 	if(args.graph_name=='workloads'):
 		conn = psycopg2.connect(f"host={args.db_host} dbname={args.db_name} user={args.user_name} password={args.password} port={args.port}")
