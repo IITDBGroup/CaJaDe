@@ -101,7 +101,7 @@ python3 /CaJaDe/reproduce/draw_graphs.py -H 10.5.0.3 -G casestudy -P 5432 -D cas
 
 
 #########################################################################################################################
-nba explanation table comparison
+# nba explanation table comparison
 sample_sizes=(16 64 256 512)
 
 for s in ${sample_sizes[@]}
