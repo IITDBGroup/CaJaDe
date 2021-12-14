@@ -19,6 +19,7 @@ def lca2_draw(filename):
     apt1=df.query('apt==2 and is_ref!=1')
     apt1_gt = df.query('apt==2 and is_ref==1')
 
+    max_y=apt1_gt['time'].max()
     # colors
     col_time='red'
     col_match='blue'
@@ -47,7 +48,7 @@ def lca2_draw(filename):
     # # legends
 
     ax1.xaxis.set_ticks(np.arange(0,0.3, 0.05))
-    ax1.yaxis.set_ticks(np.arange(0,200, 30))
+    ax1.yaxis.set_ticks(np.arange(0,max_y, 30))
     ax2.yaxis.set_ticks(np.arange(0,12,1))
 
     ax1.xaxis.set_tick_params(labelsize=15)
@@ -74,5 +75,4 @@ def lca2_draw(filename):
 
     plt.show()
 
-    plt.savefig(f"{filename}_8c.pdf", bbox_inches='tight')
-
+    plt.savefig(f"{filename}_8c_test.pdf", bbox_inches='tight')
