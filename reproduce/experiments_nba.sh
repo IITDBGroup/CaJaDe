@@ -5,9 +5,9 @@ OUTPUTDIR=/experiment_results;
 # nba sample and recall threshold 8(f)
 trap "kill 0" EXIT 
 
-###########################################################################################################################
+##########################################################################################################################
 # f1 sample effects on runtime and quality 
-# echo "experiments for different sample rate and different sample rate in calculating F-score"
+echo "experiments for different sample rate and different sample rate in calculating F-score"
 samplerates=(0.05 0.1 0.2 0.3 0.4 0.5 0.6 0.7)
 maxedges=(1 2 3)
 
