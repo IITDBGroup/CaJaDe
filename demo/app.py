@@ -66,7 +66,7 @@ def db_connect(active_table='nba'):
             cursor.fetchall()
         ))
 
-        cajade_sys_tables = ['con_info', 'rel_keys']
+        cajade_sys_tables = ['con_info', 'rel_keys', 'pt', 'table_attr', 'pt_full']
 
         globals()['db_tables'] = [t for t in db_tables_raw if t not in cajade_sys_tables]
         globals()['db_schemas'] = {}

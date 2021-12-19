@@ -83,7 +83,7 @@ class Pattern_Generator:
                         continue
                     else:
                         if(re_a_index>=v_o['rel_min_attr_index'] and re_a_index<=v_o['rel_max_attr_index']):
-                            pending_pattern['desc'].append(f"{v_o['label']}_{k_o}.{renaming_dict[k_o]['columns'][ot[0]]}{ot[1]}{ot[2]}")
+                            pending_pattern['desc'].append(f"{v_o['label']}_{k_o}.{renaming_dict[k_o]['columns'][ot[0]]}{ot[1]}{round(float(ot[2]),2)}")
                             pending_pattern['tokens'][f"{v_o['label']}_{k_o}.{renaming_dict[k_o]['columns'][ot[0]]}"]=f"{ot[2]}"
                             break
 
