@@ -39,6 +39,8 @@ services:
   postgres:
     image: jayli2018/2021-sigmod-reproducibility-cajade_postgres:latest
     container_name: "cajade-psql"
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: "trust"
     ports:
       - "5440:5432"
     networks:
