@@ -30,7 +30,7 @@ from time import strftime
 logger = logging.getLogger(__name__)
 
 
-from_clause = re.compile("from(.*) where", re.IGNORECASE)
+from_clause = re.compile("from(.*) [where|group]", re.IGNORECASE)
 groupby_clause = re.compile("group by (.*)", re.IGNORECASE)
 where_clause=re.compile(" where (.*)", re.IGNORECASE)
 two_cols = re.compile('\w+\.\w+\s{0,}!?(<|>|<=|>=|=|<>|!=)\s{0,}\w+\.\w+\s{0,}')
@@ -530,6 +530,9 @@ def main():
   parser.add_argument('-A','--user_question', metavar="\b", type=str, default="season_name='2015-16'|season_name='2012-13'",
     help='User question: need to strictly follow the output format of query result and use | as delimiter default(%(default)s)')
 
+  parser.add_argument('-a','--user_specified_attrs', metavar="\b", type=str, default="none",
+    help='Manually Specifiy Attributes: pairs with each has format "table_name,attr_name", delimited with | (%(default)s)')
+
   parser.add_argument('-F','--f1_sample_rate', metavar="\b", type=float, default=0.3, 
     help='Sample rate of apt when calculating the f1 score (default: %(default)s)')
 
@@ -598,39 +601,43 @@ def main():
   # user_query = "provenance of (select count(*) as win, s.season_name from team t, game g, season s where t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' group by s.season_name);"
   # u_query = (user_query, 'gsw wins : 15 vs 12') 
   u_query = f"provenance of ({args.user_query});"
+  # logger.debug(u_query)
   u_question = args.user_question.split('|')
+  # logger.debug(u_question)
   # u_question =["season_name='2015-16'","season_name='2012-13'"]
   # user_specified_attrs = [('team','team'),('season','season_name')]
 
   user_specified_attrs = []
-  table_mappings = {}
+  if(args.user_specified_attrs=='none'):
 
-  frm=from_clause.search(args.user_query).group(1)
-  grp=groupby_clause.search(args.user_query).group(1)
-  where=where_clause.search(args.user_query).group(1)
+    table_mappings = {}
+    frm=from_clause.search(args.user_query).group(1)
+    tables = [x.strip() for x in frm.split(',')]
+    for t in tables:
+       t_and_a = re.split(r'\s{1,}', t)
+       if(len(t_and_a)==1):
+           table_mappings[t_and_a[0]] = t_and_a[0]
+       else:
+           table_mappings[t_and_a[1]] = t_and_a[0]
 
-  tables = [x.strip() for x in frm.split(',')]
+    grp=groupby_clause.search(args.user_query).group(1)
+    groups = [x.strip() for x in grp.split(',')]
+    for g in groups:
+       table, attr = [x.strip() for x in g.split('.')]
+       user_specified_attrs.append((table_mappings[table], attr))
 
+    if(where_clause.search(args.user_query)):
+      where=where_clause.search(args.user_query).group(1)
+      # handle where
+      ands = re.split("and", where, flags=re.IGNORECASE)
+      for a in ands:
+         if(not two_cols.search(a)):
+             table, attr = [x.strip() for x in re.split(r'(<|>|<=|>=|=|<>|!=)', a)[0].split('.')]
+             user_specified_attrs.append((table_mappings[table], attr))
 
-  for t in tables:
-     t_and_a = re.split(r'\s{1,}', t)
-     if(len(t_and_a)==1):
-         table_mappings[t_and_a[0]] = t_and_a[0]
-     else:
-         table_mappings[t_and_a[1]] = t_and_a[0]
+  else:
+    user_specified_attrs=[tuple(a.split(',')) for a in args.user_specified_attrs.split("|")]
 
-  # handle where
-  ands = re.split("and", where, flags=re.IGNORECASE)
-
-  for a in ands:
-     if(not two_cols.search(a)):
-         table, attr = [x.strip() for x in re.split(r'(<|>|<=|>=|=|<>|!=)', a)[0].split('.')]
-         user_specified_attrs.append((table_mappings[table], attr))
-
-  groups = [x.strip() for x in grp.split(',')]
-  for g in groups:
-     table, attr = [x.strip() for x in g.split('.')]
-     user_specified_attrs.append((table_mappings[table], attr))
   # user_query = 'provenance of (select insurance, 1.0*SUM(hospital_expire_flag)/count(*) as death_rate from admissions group by insurance);'
   # u_query = (user_query, 'death rate: medicare vs private')
   # u_question =["insurance='Private'","insurance='Medicare'"]

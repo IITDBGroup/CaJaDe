@@ -75,4 +75,4 @@ def lca2_draw(filename):
 
     plt.show()
 
-    plt.savefig(f"{filename}_8c_test.pdf", bbox_inches='tight')
+    plt.savefig(f"{filename}_8c.pdf", bbox_inches='tight')
