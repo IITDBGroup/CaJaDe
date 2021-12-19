@@ -39,6 +39,7 @@
                 </button>
                 <div class="dropdown-menu">
                    <form id="db-credentials" action="{{ url_for('db_connect')}}" method="post">
+                   <!--<form id="db-credentials" action="#" onsubmit="return dbConnect()" method="post">-->
                        <label for="dbname">DB Name:</label>
                        <input type="text" id="dbname" name="dbname">
                        
@@ -74,14 +75,14 @@
 </nav>
 
 <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
-
+<!--  href="#" onclick="tableList();return false;">  -->
 <div class="container-fluid">
     <div class="row">
       <nav class="col-md-2 d-none d-md-block bg-light sidebar">
         {% set active_table = active_table|default("adult") %}
         <ul class="nav flex-column mb-2">
             {% for i in db_tables %}
-                <li class="nav-item">
+                <li class="nav-item" id="tableList"> <!--id="tableList"-->
                     <a {% if i|string == active_table|string %}class="active nav-link"
                                                    {% else %}class="nav-link"{% endif %}
                        href="{{ url_for('db_connect', active_table=i)|e }}">
@@ -1179,15 +1180,18 @@
               /////////////////////
 
               var simulation = d3.forceSimulation(graph.nodes).force("charge", d3.forceManyBody().strength(-1600))
-                      .force("center", d3.forceCenter(w/2, h/2)).force("link", d3.forceLink(graph.links).id(d => d.name))//;
+                      .force("center", d3.forceCenter(w/2, h/2))
+                      .force("link", d3.forceLink(graph.links).id(d => d.name).distance(function(d){if(d.source.id=="attr" || d.target.id=="attr"){return 35;}else{return 100;}}));//;
                       // .force("collision", rectCollide().size(function(d){return [d.width, d.height]}))
-                      .force("collide", d3.forceCollide().strength(.1).radius(50).iterations(1)); ////@@@@
+                      //.force("collide", d3.forceCollide().strength(.1).radius(50).iterations(1))//; ////@@@@
+                      //.force("charge", function(d){ if(d.id=="attr"){return d3.forceManyBody().strength(-1500);} else{return d3.forceManyBody().strength(-2000);}});
               var link = svg.append("g").selectAll("line").data(graph.links).enter().append("line").attr("stroke-width", 5)
                               .attr("stroke", "#999").on("mouseover", mouseover).on("mouseout", mouseout).on("mousemove", mousemove);
               var drag = d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended);
               var nodes_with_text = svg.append("g").selectAll("g").data(graph.nodes).enter().append("g")
                                         .attr("class", function(d){if(d.id == "attr"){return "rt";} else{return "cl";}}).call(drag);
-              d3.selectAll(".rt").append("rect").attr("width", 150).attr("height", 25).attr("x", -75).attr("y",-12.5).attr("fill", function(d){ return d.color});
+              ///d3.selectAll(".rt").append("rect").attr("width", 150).attr("height", 25).attr("x", -75).attr("y",-12.5).attr("fill", function(d){ return d.color});
+              d3.selectAll(".rt").append("rect").attr("width", 50).attr("height", 50).attr("x", -25).attr("y",-25).attr("fill", function(d){ return d.color});
                 //.append("text").text(function(d){ return d.name}).style("text-anchor", "middle").style("font-size", "10px").attr("class", "node-label");
               d3.selectAll(".cl").append("circle").attr("r", 25).attr("fill", function(d){ return d.color});
                 //.append("text").text(function(d){ return d.name}).style("text-anchor", "middle").style("font-size", "10px").attr("class", "node-label");
@@ -1201,13 +1205,14 @@
                   link.attr("x1", function(d) { return d.source.x; }).attr("y1", function(d) { return d.source.y; })
                       .attr("x2", function(d) { return d.target.x; }).attr("y2", function(d) { return d.target.y; });
                   //nodes_with_text.attr("transform", function(d) { return "translate("+d.x+","+d.y+")";});
-                  nodes_with_text.attr("transform", function(d) { if(d.id=="attr"){return "translate("+Math.max(150, Math.min(w-150, d.x))+","+Math.max(25, Math.min(h-25, d.y))+")";} else{return "translate("+Math.max(25, Math.min(w-25, d.x))+","+Math.max(25, Math.min(h-25, d.y))+")";}});
+                  //nodes_with_text.attr("transform", function(d) { if(d.id=="attr"){return "translate("+Math.max(150, Math.min(w-150, d.x))+","+Math.max(25, Math.min(h-25, d.y))+")";} else{return "translate("+Math.max(25, Math.min(w-25, d.x))+","+Math.max(25, Math.min(h-25, d.y))+")";}});
+                  nodes_with_text.attr("transform", function(d) { return "translate("+Math.max(25, Math.min(w-25, d.x))+","+Math.max(25, Math.min(h-25, d.y))+")";});
                   // nodes_with_text.attr("cx", function(d){return d.x = Math.max(25, Math.min(w-25, d.x));})
                   //                 .attr("cy", function(d){return d.y = Math.max(25, Math.min(h-25, d.y));});
               });
-              function dragstarted(d) {simulation.alphaTarget(0.3).restart();d.fx = d3.event.x;d.fy = d3.event.y;}
+              function dragstarted(d) {if(!d3.event.active) simulation.alphaTarget(0.3).restart();d.fx = d3.event.x;d.fy = d3.event.y;}
               function dragged(d) {d.fx = d3.event.x;d.fy = d3.event.y;}
-              function dragended(d) {simulation.alphaTarget(0);d.fx = null;d.fy = null;}
+              function dragended(d) {if(!d3.event.active) simulation.alphaTarget(0);d.fx = null;d.fy = null;}
               //function mouseover(d) {tooltiptest.style("visibility", "visible").text(d.cond);}
               function mouseover(d) {if(d.cond != "")tooltiptest.style("visibility", "visible").text(d.cond);}
               function mouseout() {tooltiptest.style("visibility", "hidden");}
