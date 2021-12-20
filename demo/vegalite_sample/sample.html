@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<head>
+  <title>Vega Lite Bar Chart</title>
+  <meta charset="utf-8">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.js" charset="utf-8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vega/2.6.5/vega.js" charset="utf-8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vega-lite/1.3.1/vega-lite.js" charset="utf-8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vega-embed/2.2.0/vega-embed.js" charset="utf-8"></script>
+
+  
+</head>
+<body>
+  <!-- Container for the visualization -->
+  <div id="vis"></div>
+
+  <script>
+  // Assign the specification to a local variable vlSpec.
+  var vlSpec = {
+    "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+    "data": {"url": "user.csv"},
+    "mark": "bar",
+    "encoding": {
+        "x": {"field": "player_name"},
+        "y": {"field": "player_id"}
+    }
+  };
+
+  var embedSpec = {
+    mode: "vega-lite",  // Instruct Vega-Embed to use the Vega-Lite compiler
+    spec: vlSpec
+    // You can add more vega-embed configuration properties here.
+    // See https://github.com/vega/vega/wiki/Embed-Vega-Web-Components#configuration-propeties for more information.
+  };
+
+  // Embed the visualization in the container with id `vis`
+  vg.embed("#vis", embedSpec, function(error, result) {
+    // Callback receiving the View instance and parsed Vega spec
+    // result.view is the View, which resides under the '#vis' element
+  });
+  </script>
+</body>
+</html>
+
