@@ -111,6 +111,7 @@ def db_connect(active_table='nba'):
             db_schemas=db_schemas,
             schema_graph_data=json_schema)
 
+
 @app.route('/ajax', methods=['POST'])
 def ajax():
   data = request.get_json()
