@@ -1351,12 +1351,11 @@
                                     .style("border-radius", "5px").style("padding", "10px");
             
             function ticked() {
-              nodes_with_text.attr("transform", function(d){ return "translate(" + d.x + ", " + d.y + ")";});
+              nodes_with_text.attr("transform", function(d) { return "translate("+Math.max(15, Math.min(sg_width-15, d.x))+","+Math.max(15, Math.min(sg_height-15, d.y))+")";});
+              //nodes_with_text.attr("transform", function(d){ return "translate(" + d.x + ", " + d.y + ")";});
 
-              link.attr("x1", function(d) { return d.source.x; })
-                  .attr("y1", function(d) { return d.source.y; })
-                  .attr("x2", function(d) { return d.target.x; })
-                  .attr("y2", function(d) { return d.target.y; });
+              link.attr("x1", function(d) { return d.source.x; }).attr("y1", function(d) { return d.source.y; })
+                  .attr("x2", function(d) { return d.target.x; }).attr("y2", function(d) { return d.target.y; });
               // linkText
               //     .attr("x", function(d) {
               //         return ((d.source.x + d.target.x)/2);
@@ -1365,12 +1364,10 @@
               //         return ((d.source.y + d.target.y)/2);
               //     });
             };
-
-            function dragstarted(d) { if (!d3.event.active) simulation.alphaTarget(0.3).restart();
-                                      d.fx = d.x; d.fy = d.y; };
+            function dragstarted(d) {if(!d3.event.active) simulation.alphaTarget(0.3).restart();d.fx = d3.event.x;d.fy = d3.event.y;}
+            //function dragstarted(d) { if (!d3.event.active) simulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; };
             function dragged(d) { d.fx = d3.event.x; d.fy = d3.event.y; };
-            function dragended(d) { if (!d3.event.active) simulation.alphaTarget(0);
-                                    d.fx = null; d.fy = null; };
+            function dragended(d) { if (!d3.event.active) simulation.alphaTarget(0); d.fx = null; d.fy = null; };
             function mouseover(d) { tooltip_schema.style("visibility", "visible").text(d.type); }
             function mouseout() { tooltip_schema.style("visibility", "hidden"); }
             function mousemove(){ tooltip_schema.style("top", (d3.event.pageY - 10) + "px").style("left", (d3.event.pageX + 10) + "px"); }
