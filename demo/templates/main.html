@@ -142,6 +142,7 @@
                 </div>
             <!--</div>-->
       	</form>
+        <h1 id="status">non val</h1>
 
 
 		<script>
@@ -593,20 +594,40 @@
 
 		    var postdata_exp = { 'tdArr': tdArr, 'colNum': colNum, 'colData': colData}
 
+        // start explanation
         $.ajax({
           type: 'EXP',
-          url: '{{url_for("explanation")}}',
+          url: '{{url_for("start_explanation")}}',
           data: JSON.stringify(postdata_exp),
           dataType: 'JSON',
-          contentType: "application/json",
+          contentType: "application/json"
+        })
+
+
+        // periodically retrieve result
+        var intervalid = setInterval(ajaxCall, 1000); //5000 MS = 5s
+
+        function ajaxCall() {
+        $.ajax({
+          type: 'EXP',
+          url: '{{url_for("retrieve_explanation")}}',
+          // data: JSON.stringify(postdata_exp),
+          dataType: 'JSON',
+          // contentType: "application/json"
           success: function(data){
-            if (data.result2){
+            running = data.isrunning;
+            status = data.status;
+            $('#status').text(status);
+            console.log(data.result2);
+            if (data.result2!='null'){
               original_exp_len = data.result2.length;
               original_exp_data = data.result2;
               original_graphData = data.result3;
               original_summaryData = data.result5; ////
               original_highlightTextList = data.result6;
-
+              if(!running){
+                clearInterval(intervalid);
+              }
               cur_exp_len=original_exp_len;
               cur_exp_data=original_exp_data;
               cur_graphData=original_graphData;
@@ -618,15 +639,16 @@
               //exp_table(exp_data,exp_len,graphData);
               exp_summary(cur_summaryData, cur_exp_data, cur_exp_len, cur_graphData); //exp_summary(summaryData, exp_data, exp_len, fscoreData); 
             } 
-            else {
-              alert("No data");
-            }
+            // else {
+            //   alert("No data");
+            // }
           },
-		      error: function(request, status, error){ 
-		        alert('ajax failed')
-		        alert(error);
-		      }
+          error: function(request, status, error){ 
+            alert('ajax failed')
+            alert(error);
+          }
         })
+      }
         
         function getJGid(tmp_id){
           tmp = tmp_id.split(' ')

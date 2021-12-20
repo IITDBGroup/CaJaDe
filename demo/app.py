@@ -9,6 +9,7 @@ from flask.logging import default_handler
 import logging
 import re
 from datetime import datetime
+import threading
 
 logger = logging.getLogger()
 logger.addHandler(default_handler)
@@ -142,8 +143,8 @@ def ajax():
   return jsonify(result = "success", result2 = data_list, result3=colnames)
 
 ######
-@app.route('/explanation',methods=['EXP'])
-def explanation():
+@app.route('/start_explanation',methods=['EXP'])
+def start_explanation():
     # query data 
     data = request.get_json()
 
@@ -246,47 +247,100 @@ def explanation():
 
     logger.debug(f"user_specified_attrs : {user_specified_attrs}")
     global resultSchemaName 
-    resultSchemaName = datetime.today().strftime('%B%d%H%M')
+    resultSchemaName = datetime.today().strftime('%B%d%H%M').lower()
 
-    run_experiment(conn=globals()['conn'],
-                    result_schema=resultSchemaName, #'oct11',
-                    user_query=(uQuery, 'test'),
-                    user_questions = [u1,u2],
-                    user_questions_map = {'yes': ur1 , 'no': ur2},
-                    user_specified_attrs=list(set(user_specified_attrs)),
-                    user_name=db_user,
-                    password=db_pswd,
-                    host=db_host,
-                    port=db_port,
-                    dbname=db_name, 
-                    maximum_edges=2,
-                    f1_sample_rate=0.3,
-                    f1_calculation_type = 'o',
-                    user_assigned_max_num_pred=2,
-                    min_recall_threshold=0.5,
-                    gui=True)
+    exp_conn = pg2.connect(database=db_name, 
+        user=db_user, 
+        password=db_pswd,
+        port=db_port,
+        host=db_host)
+    exp_conn.autocommit = True
 
-    #query2 = "select p_desc from oct11.global_results"
-    query2 = "select id, jg_name, p_desc, is_user, recall, precision, fscore from "+resultSchemaName+".global_results" #"select p_desc from "+resultSchemaName+".global_results"
-    globals()['cursor'].execute(query2)
-    exp_list = globals()['cursor'].fetchall()
-    print('exp_list:::', exp_list)
-    #exp_list = exp_replace_name(exp_list_tmp)
-    highlight_list = getHighlightTexts(exp_list)
+    globals()['cthread'] = threading.Thread(target=run_experiment, kwargs={'conn': exp_conn,
+        'result_schema': resultSchemaName, 
+        'user_query': (uQuery, 'test'), 
+        'user_questions' : [u1,u2],
+        'user_questions_map' : {'yes': ur1 , 'no': ur2},
+        'user_specified_attrs' : list(set(user_specified_attrs)),
+        'user_name' : db_user,
+        'password' : db_pswd,
+        'host' : db_host,
+        'port' : db_port,
+        'dbname' : db_name, 
+        'maximum_edges' : 2,
+        'f1_sample_rate' : 0.3,
+        'f1_calculation_type' : 'o',
+        'user_assigned_max_num_pred' : 2,
+        'min_recall_threshold' : 0.5,
+        'gui': True
+        }
+    )
+    logger.debug('starting thread')
+    cthread.start()
 
-    #query3 = "select distinct jg_details from oct11.global_results"
-    query3 = "select distinct jg_name, jg_details from "+resultSchemaName+".global_results" #"select distinct jg_details from "+resultSchemaName+".global_results"
-    globals()['cursor'].execute(query3)
-    jg_detail_list = globals()['cursor'].fetchall()
-    jg = getJoinGraph(jg_detail_list)
+    resp = jsonify(success=True)
+    return resp
 
-    query5 = "select jg_details, fscore, p_desc, jg_name, id from "+resultSchemaName+".global_results"
-    globals()['cursor'].execute(query5)
-    test_list = globals()['cursor'].fetchall()
+    # run_experiment(conn=globals()['conn'],
+    #                 result_schema=resultSchemaName, #'oct11',
+    #                 user_query=(uQuery, 'test'),
+    #                 user_questions = [u1,u2],
+    #                 user_questions_map = {'yes': ur1 , 'no': ur2},
+    #                 user_specified_attrs=list(set(user_specified_attrs)),
+    #                 user_name=db_user,
+    #                 password=db_pswd,
+    #                 host=db_host,
+    #                 port=db_port,
+    #                 dbname=db_name, 
+    #                 maximum_edges=2,
+    #                 f1_sample_rate=0.3,
+    #                 f1_calculation_type = 'o',
+    #                 user_assigned_max_num_pred=2,
+    #                 min_recall_threshold=0.5,
+    #                 gui=True)
 
-    query6 = "select jg_name, p_desc from "+resultSchemaName+".global_results"
-    globals()['cursor'].execute(query6)
-    temp = globals()['cursor'].fetchall()
+@app.route('/retrieve_explanation',methods=['EXP'])
+def retrieve_explanation():
+
+    fracnames= 'null'
+    fracvalues= 'null'
+    exp_list = 'null'
+    jg = 'null'
+    test_list = 'null'
+    highlight_list = 'null'
+    status = 'running'
+
+    check_schema_q = f"SELECT schema_name FROM information_schema.schemata WHERE schema_name = '{resultSchemaName}';"
+    cursor.execute(check_schema_q)
+    cur_res = cursor.fetchone()
+    logger.debug(check_schema_q)
+    logger.debug(f"cursor result: {cur_res}")
+    if(cur_res):
+        status = 'processing jgs'
+        #query2 = "select p_desc from oct11.global_results"
+        query2 = "select id, jg_name, p_desc, is_user, recall, precision, fscore from "+resultSchemaName+".topk_patterns_from_top_jgs" #"select p_desc from "+resultSchemaName+".global_results"
+        globals()['cursor'].execute(query2)
+        exp_list = globals()['cursor'].fetchall()
+        print('exp_list:::', exp_list)
+        #exp_list = exp_replace_name(exp_list_tmp)
+        highlight_list = getHighlightTexts(exp_list)
+
+        #query3 = "select distinct jg_details from oct11.global_results"
+        query3 = "select distinct jg_name, jg_details from "+resultSchemaName+".topk_patterns_from_top_jgs" #"select distinct jg_details from "+resultSchemaName+".global_results"
+        globals()['cursor'].execute(query3)
+        jg_detail_list = globals()['cursor'].fetchall()
+        jg = getJoinGraph(jg_detail_list)
+
+        query5 = "select jg_details, fscore, p_desc, jg_name, id from "+resultSchemaName+".topk_patterns_from_top_jgs"
+        globals()['cursor'].execute(query5)
+        test_list = globals()['cursor'].fetchall()
+
+        query6 = "select jg_name, p_desc from "+resultSchemaName+".topk_patterns_from_top_jgs"
+        globals()['cursor'].execute(query6)
+        temp = globals()['cursor'].fetchall()
+
+    alive = cthread.is_alive()
+    logger.debug(f"alive: {alive}")
     # print("**********************temp:")
     # print(temp)
     # print("**********************temp[0]")
@@ -307,19 +361,20 @@ def explanation():
     # query4 = "select distinct recall from "+resultSchemaName+".global_results"
     # globals()['cursor'].execute(query4)
     # recall_list = globals()['cursor'].fetchall()
+    if(not alive):
+        status='finished'
+        query_u1_frac = f" SELECT COUNT(*) FROM pt_full WHERE {u1};"
+        query_u2_frac = f" SELECT COUNT(*) FROM pt_full WHERE {u2};"
+        globals()['cursor'].execute(query_u1_frac)
+        frac1 = globals()['cursor'].fetchall()
+        globals()['cursor'].execute(query_u2_frac)
+        frac2 = globals()['cursor'].fetchall()
 
-
-    query_u1_frac = f" SELECT COUNT(*) FROM pt_full WHERE {u1};"
-    query_u2_frac = f" SELECT COUNT(*) FROM pt_full WHERE {u2};"
-    globals()['cursor'].execute(query_u1_frac)
-    frac1 = globals()['cursor'].fetchall()
-    globals()['cursor'].execute(query_u2_frac)
-    frac2 = globals()['cursor'].fetchall()
-
-    fracnames=[ur1, ur2]
-    fracvalues=[frac1, frac2] 
+        fracnames=[ur1, ur2]
+        fracvalues=[frac1, frac2] 
     
-    return jsonify(result = "success-explanation", result2 = exp_list, result3 = jg, result5 = test_list, result6 = highlight_list, result8=fracnames, result9=fracvalues)
+    return jsonify(result = "success-explanation", result2 = exp_list, result3 = jg, result5 = test_list, result6 = highlight_list, 
+        result8=fracnames, result9=fracvalues, isrunning=alive, status=status)
 ##@@
 @app.route('/ratingUD',methods=['UD'])
 def ratingUD():

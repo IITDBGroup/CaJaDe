@@ -63,7 +63,7 @@ class GProMWrapper:
         gprom_cmd+=['-query', quotedQuery]
         # create one string
         gprom_cmd=' '.join(map(str,gprom_cmd))
-        print(gprom_cmd)
+        # print(gprom_cmd)
         return gprom_cmd
 
    def executeAndCollectErrors(self,query,errorloglevel=3,mode='sql',frontend='',inputdb='', ec_options=False):

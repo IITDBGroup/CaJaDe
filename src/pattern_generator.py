@@ -120,7 +120,7 @@ class Pattern_Generator:
         return pending_pattern
 
     def top_pattern_from_one_jg(self, jg):
-        if(jg in self.pattern_by_jg):
+        if(jg in self.pattern_by_jg and self.pattern_by_jg[jg]):
             return self.pattern_diversification(self.pattern_by_jg[jg])
 
 
@@ -730,7 +730,7 @@ class Pattern_Generator:
         self.cur.execute(jg_size_q)
         jg_apt_size = int(self.cur.fetchone()[0])
 
-        logger.debug(renaming_dict)
+        # logger.debug(renaming_dict)
 
         sample_f1_jg_size=0
         if(jg_apt_size!=0):
@@ -784,7 +784,7 @@ class Pattern_Generator:
                         # logger.debug(recall_dicts)
                     
                     else:
-                        logger.debug('weighted sampling!')
+                        # logger.debug('weighted sampling!')
                         recall_dicts['sample'] = {}
                         need_weighted_sampling = True
 
@@ -1006,13 +1006,13 @@ class Pattern_Generator:
 
                 # limit 10 patterns per jg for now
 
-                logger.debug(pattern_creation_q)
+                # logger.debug(pattern_creation_q)
                 self.cur.execute(pattern_creation_q)
 
                 self.stats.stopTimer('LCA')
 
                 nominal_pattern_df = pd.read_sql(get_nominal_patterns_q, self.conn)
-                logger.debug(nominal_pattern_df)
+                # logger.debug(nominal_pattern_df)
 
                 nominal_pattern_dicts = nominal_pattern_df.to_dict('records')
                 # logger.debug(nominal_pattern_dict_listcts)

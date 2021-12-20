@@ -70,7 +70,7 @@ class Join_Graph_Materializer:
         return which base table the renamed_attribute belongs to 
         and if it is a part of the keys and the pkeys of that base table
         """
-        logger.debug(renamed_attribute)
+        # logger.debug(renamed_attribute)
         if(extract_pattern.search(renamed_attribute)):
             re_a_index = int(re.findall(r'([0-9]+)', renamed_attribute)[0])
 
@@ -224,7 +224,7 @@ class Join_Graph_Materializer:
             else:
                 ec_info_dicts = []
                 ec_id = 1
-                logger.debug(ecs_more_than_one)
+                # logger.debug(ecs_more_than_one)
                 for ec in ecs_more_than_one:
                     for renamed_a in ec:
                         col_info_dict = self.get_col_info(renamed_a, self.db_dict, jg_rename_dict, ec_id)
@@ -320,7 +320,7 @@ class Join_Graph_Materializer:
         else:
             # based on the renaming result, change the join conditions accordingly          
             for node1, node2, cond in join_graph.graph_core.edges.data('condition'):
-                logger.debug(cond)
+                # logger.debug(cond)
                 node1_renamed = renaming_dict[node1.key]['renamed_rel']
                 node2_renamed = renaming_dict[node2.key]['renamed_rel']
                 node1_original = renaming_dict[node1.key]['label']

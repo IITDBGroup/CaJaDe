@@ -108,7 +108,10 @@ def InsertPatterns(conn, exp_desc, patterns, pattern_relation_name, schema, exp_
 
   # logger.debug(patterns[0:5])
 
+
   cur = conn.cursor()
+
+  cur.execute('CREATE SCHEMA IF NOT EXISTS '+schema)
 
   cols = ['exp_time', 'exp_desc', 'is_user', 'jg', 'jg_details', 'jg_name', 'num_edges', 'p_desc', 
   'recall', 'precision', 'fscore', 'sample_recall', 'sample_precision', 'sample_F1']
@@ -256,7 +259,9 @@ def run_experiment(conn=None,
     statstracker.params['f1_sample_rate'] = "'{}'".format(f1_sample_rate)
     statstracker.params['f1_min_sample_size_threshold'] = "'{}'".format(f1_min_sample_size_threshold)
     statstracker.params['f1_sample_type'] = "'{}'".format(f1_sample_type)
+    statstracker.params['gui'] = "'{}'".format(str(gui))
 
+    exp_time = datetime.now().strftime("%Y_%m_%d__%H_%M_%S")
 
     exp_desc = '__'.join([user_query[1], dbname, str(sample_rate_for_s), str(lca_s_max_size), str(lca_s_min_size), str(lca_eval_mode),
                 str(maximum_edges), str(min_recall_threshold), str(numercial_attr_filter_method), 
@@ -294,10 +299,10 @@ def run_experiment(conn=None,
 
     jgg = Join_Graph_Generator(schema_graph = sg, attr_dict = attr_dict, gwrapper=w)
 
-    logger.debug('generate new valid_jgs')
+    # logger.debug('generate new valid_jgs')
     valid_result = jgg.Generate_JGs(pt_rels=pt_relations, num_edges=maximum_edges, customize=False)
     
-    logger.debug(f"Before filtering any, we have {len(valid_result)} valid jgs \n")
+    # logger.debug(f"Before filtering any, we have {len(valid_result)} valid jgs \n")
 
     jgm = Join_Graph_Materializer(conn=conn, db_dict=attr_dict, gwrapper=w, user_query=user_query[0])
     jgm.init_cost_estimator()
@@ -339,12 +344,12 @@ def run_experiment(conn=None,
           continue
       jgm.stats.stopTimer('materialize_jg')
 
-      logger.debug(f"before filtering redundant, we have {len(valid_result)} jgs")
+      # logger.debug(f"before filtering redundant, we have {len(valid_result)} jgs")
       valid_result = [v for v in valid_result if not v.redundant]
       jgg.stats.params['valid_jgs']=len(valid_result)
-      logger.debug(f"after filtering out redundant we have {len(valid_result)} valid jgs \n")
+      # logger.debug(f"after filtering out redundant we have {len(valid_result)} valid jgs \n")
 
-      logger.debug(f'we found {len(valid_result)} valid join graphs, now materializing and generating patterns')
+      # logger.debug(f'we found {len(valid_result)} valid join graphs, now materializing and generating patterns')
       
       jg_cnt=1
 
@@ -352,7 +357,7 @@ def run_experiment(conn=None,
         # if(str(vr)=='1: PT, 2: icustays| 2: icustays, 3: patients'):
         jg_individual_times_dict[vr] = 0
         jgm.stats.startTimer('materialize_jg')
-        logger.debug(f'we are on join graph number {jg_cnt}')
+        # logger.debug(f'we are on join graph number {jg_cnt}')
         jg_cnt+=1
         # logger.debug(vr)
         drop_if_exist_jg_view = "DROP MATERIALIZED VIEW IF EXISTS {} CASCADE;".format('jg_{}'.format(vr.jg_number))
@@ -384,9 +389,11 @@ def run_experiment(conn=None,
                             user_assigned_num_pred_cap=user_assigned_max_num_pred
                             )
         if(gui):
+          logger.debug("gui mode! insert by jg!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
           patterns_to_insert = pgen.top_pattern_from_one_jg(vr)
-          InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=patterns_to_insert, pattern_relation_name='topk_patterns_from_top_jgs', schema=result_schema, 
-            exp_time=exp_time, result_type=f1_calculation_type)
+          if(patterns_to_insert):
+            InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=patterns_to_insert, pattern_relation_name='topk_patterns_from_top_jgs', schema=result_schema, 
+              exp_time=exp_time, result_type=f1_calculation_type)
         pgen.stats.stopTimer('per_jg_timer')
         jg_individual_times_dict[vr] = pgen.stats.time['per_jg_timer']
         pgen.stats.resetTimer('per_jg_timer')
@@ -412,15 +419,15 @@ def run_experiment(conn=None,
 
       valid_result = [v for v in valid_result if not v.redundant]
 
-      logger.debug(cost_estimate_dict)
+      # logger.debug(cost_estimate_dict)
 
       avg_cost_estimate_by_num_edges = {k:mean(v) for k,v in cost_estimate_dict.items() if v}
-      logger.debug(avg_cost_estimate_by_num_edges)
-      logger.debug(f'we found {len(valid_result)} valid join graphs, now materializing and generating patterns')
+      # logger.debug(avg_cost_estimate_by_num_edges)
+      # logger.debug(f'we found {len(valid_result)} valid join graphs, now materializing and generating patterns')
       jg_cnt=1
       for n in valid_result:
-        logger.debug(f'we are on join graph number {jg_cnt}')
-        logger.debug(n)
+        # logger.debug(f'we are on join graph number {jg_cnt}')
+        # logger.debug(n)
         jg_cnt+=1
         if(n.cost<=avg_cost_estimate_by_num_edges[n.num_edges]):
           jg_individual_times_dict[n] = 0
@@ -456,8 +463,10 @@ def run_experiment(conn=None,
                             user_assigned_num_pred_cap=user_assigned_max_num_pred
                           )
           if(gui):
+            logger.debug("gui mode! insert by jg!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             patterns_to_insert = pgen.top_pattern_from_one_jg(n)
-            InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=patterns_to_insert, pattern_relation_name='topk_patterns_from_top_jgs', schema=result_schema, 
+            if(patterns_to_insert):
+              InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=patterns_to_insert, pattern_relation_name='topk_patterns_from_top_jgs', schema=result_schema, 
               exp_time=exp_time, result_type=f1_calculation_type)
           pgen.stats.stopTimer('per_jg_timer')
           jg_individual_times_dict[vr] = pgen.stats.time['per_jg_timer']
@@ -490,7 +499,6 @@ def run_experiment(conn=None,
     # collect stats 
     stats_trackers = [jgg.stats, jgm.stats, pgen.stats, statstracker]
 
-    exp_time = datetime.now().strftime("%Y_%m_%d__%H_%M_%S")
     Create_Stats_Table(conn=conn, stats_trackers=stats_trackers, stats_relation_name='time_and_params', schema=result_schema)
     InsertStats(conn=conn, stats_trackers=stats_trackers, stats_relation_name='time_and_params', schema=result_schema, exp_time=exp_time, exp_desc=exp_desc)
     if(lca_eval_mode):
