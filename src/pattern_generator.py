@@ -117,9 +117,12 @@ class Pattern_Generator:
         pending_pattern['num_edges'] = pending_pattern['join_graph'].num_edges
         pending_pattern['is_user'] = user_questions_map[pending_pattern['is_user']]
         # logger.debug(pending_pattern)
-
-
         return pending_pattern
+
+    def top_pattern_from_one_jg(self, jg):
+        if(jg in self.pattern_by_jg):
+            return self.pattern_diversification(self.pattern_by_jg[jg])
+
 
     def topk_jg_patterns(self, num_jg=3, k_p=5, sortby='avg'):
         """

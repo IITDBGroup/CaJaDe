@@ -302,7 +302,9 @@ def run_experiment(conn=None,
     jgm = Join_Graph_Materializer(conn=conn, db_dict=attr_dict, gwrapper=w, user_query=user_query[0])
     jgm.init_cost_estimator()
 
-    pgen = Pattern_Generator(conn) 
+
+    pgen = Pattern_Generator(conn)
+
 
     pattern_ranked_within_jg = {}
     jg_individual_times_dict = {}
@@ -312,8 +314,8 @@ def run_experiment(conn=None,
 
 
     if(exclude_high_cost_jg[0]==False):
-      logger.debug("DO include high cost jg!!!!!!!!!!!!!")
-      logger.debug(f"before filtering intermediate, we have {len(valid_result)} jgs")
+      # logger.debug("DO include high cost jg!!!!!!!!!!!!!")
+      # logger.debug(f"before filtering intermediate, we have {len(valid_result)} jgs")
 
       intermediate_jgs = [v for v in valid_result if v.intermediate]
       valid_result = [v for v in valid_result if not v.intermediate]
@@ -321,7 +323,7 @@ def run_experiment(conn=None,
       for ijg in intermediate_jgs:
         logger.debug(ijg)
 
-      logger.debug(f"after filtering out intermediate we have {len(valid_result)} valid jgs \n")
+      # logger.debug(f"after filtering out intermediate we have {len(valid_result)} valid jgs \n")
 
 
       jgm.stats.startTimer('materialize_jg')
@@ -381,6 +383,10 @@ def run_experiment(conn=None,
                             f1_calculation_min_size=f1_min_sample_size_threshold,
                             user_assigned_num_pred_cap=user_assigned_max_num_pred
                             )
+        if(gui):
+          patterns_to_insert = pgen.top_pattern_from_one_jg(vr)
+          InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=patterns_to_insert, pattern_relation_name='topk_patterns_from_top_jgs', schema=result_schema, 
+            exp_time=exp_time, result_type=f1_calculation_type)
         pgen.stats.stopTimer('per_jg_timer')
         jg_individual_times_dict[vr] = pgen.stats.time['per_jg_timer']
         pgen.stats.resetTimer('per_jg_timer')
@@ -449,7 +455,10 @@ def run_experiment(conn=None,
                             f1_calculation_min_size=f1_min_sample_size_threshold,
                             user_assigned_num_pred_cap=user_assigned_max_num_pred
                           )
-
+          if(gui):
+            patterns_to_insert = pgen.top_pattern_from_one_jg(n)
+            InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=patterns_to_insert, pattern_relation_name='topk_patterns_from_top_jgs', schema=result_schema, 
+              exp_time=exp_time, result_type=f1_calculation_type)
           pgen.stats.stopTimer('per_jg_timer')
           jg_individual_times_dict[vr] = pgen.stats.time['per_jg_timer']
           pgen.stats.resetTimer('per_jg_timer')
@@ -489,9 +498,10 @@ def run_experiment(conn=None,
     if(not lca_eval_mode):
       Create_jg_time_stats(conn=conn, stats_relation_name='jgs_time_dist', schema=result_schema)
       Insert_jg_time_stats(conn=conn, jg_time_dict=jg_individual_times_dict, stats_relation_name ='jgs_time_dist', schema=result_schema, exp_time=exp_time, exp_desc=exp_desc)
-      InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=patterns_all, pattern_relation_name='patterns', schema=result_schema, exp_time=exp_time, result_type=f1_calculation_type)
       InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=global_rankings, pattern_relation_name='global_results', schema=result_schema, exp_time=exp_time, result_type=f1_calculation_type)
-      InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=topk_from_top_jgs, pattern_relation_name='topk_patterns_from_top_jgs', schema=result_schema, exp_time=exp_time, result_type=f1_calculation_type)
+      InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=patterns_all, pattern_relation_name='patterns', schema=result_schema, exp_time=exp_time, result_type=f1_calculation_type)
+      if(not gui):
+        InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=topk_from_top_jgs, pattern_relation_name='topk_patterns_from_top_jgs', schema=result_schema, exp_time=exp_time, result_type=f1_calculation_type)
     # conn.close()
 
 
