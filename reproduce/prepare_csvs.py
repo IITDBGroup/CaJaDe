@@ -83,7 +83,7 @@ def prep_scalability_csv(host, dbname, user, password, port, schema, dataset, ou
 		q=f"""
 			SELECT {size} AS size, f1_sample_rate, feature_reduct, lca, materialize_jg, refinment, f1_sample, jg_enumeration, run_f1_query::numeric+check_recall::numeric AS f1_calc,
 			feature_reduct::NUMERIC +lca::NUMERIC +materialize_jg::NUMERIC +refinment::NUMERIC +f1_sample::NUMERIC +jg_enumeration::NUMERIC +run_f1_query::NUMERIC + check_recall::NUMERIC AS total
-			FROM {dataset}{s}.{schema}.time_and_params
+			FROM {schema}.time_and_params
 			"""
 		s_df=pd.read_sql(q, conn)
 		conn.close()
