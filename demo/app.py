@@ -10,6 +10,7 @@ import logging
 import re
 from datetime import datetime
 import threading
+import math
 
 logger = logging.getLogger()
 logger.addHandler(default_handler)
@@ -308,15 +309,27 @@ def retrieve_explanation():
     jg = 'null'
     test_list = 'null'
     highlight_list = 'null'
-    status = 'running'
+    status = 'join graph enumeration'
+    progress_width = 10
 
     check_schema_q = f"SELECT schema_name FROM information_schema.schemata WHERE schema_name = '{resultSchemaName}';"
     cursor.execute(check_schema_q)
     cur_res = cursor.fetchone()
     logger.debug(check_schema_q)
     logger.debug(f"cursor result: {cur_res}")
+
+    alive = cthread.is_alive()
+    logger.debug(f"alive: {alive}")
+    
     if(cur_res):
-        status = 'processing jgs'
+        unique_jg_q = "select count(distinct jg) from "+resultSchemaName+".topk_patterns_from_top_jgs"
+        cursor.execute(unique_jg_q)
+        processed_jg_cnt = int(cursor.fetchone()[0])
+
+        total_jgs_q = "select valid_jgs from " + resultSchemaName + "_gui.total_jgs";
+        cursor.execute(total_jgs_q)
+        total_jgs_cnt = int(cursor.fetchone()[0])
+
         #query2 = "select p_desc from oct11.global_results"
         query2 = "select id, jg_name, p_desc, is_user, recall, precision, fscore from "+resultSchemaName+".topk_patterns_from_top_jgs" #"select p_desc from "+resultSchemaName+".global_results"
         globals()['cursor'].execute(query2)
@@ -339,42 +352,25 @@ def retrieve_explanation():
         globals()['cursor'].execute(query6)
         temp = globals()['cursor'].fetchall()
 
-    alive = cthread.is_alive()
-    logger.debug(f"alive: {alive}")
-    # print("**********************temp:")
-    # print(temp)
-    # print("**********************temp[0]")
-    # print(temp[0])
-    # print("**********************temp[1]")
-    # print(temp[1])
-    # print("**********************temp[0][0]")
-    # print(temp[0][0])
-    # print("**********************temp[0][1]")
-    # print(temp[0][1])
-    # print("**********************")
+        status = f'processing join graph ({processed_jg_cnt}/{total_jgs_cnt})'
 
-    # query7 = "select distinct jg_name, jg_details from "+resultSchemaName+".global_results"
-    # globals()['cursor'].execute(query7)
-    # test_tmp = globals()['cursor'].fetchall()
+        if(not alive):
+            progress_width = 100
+            status='finished'
+            query_u1_frac = f" SELECT COUNT(*) FROM pt_full WHERE {u1};"
+            query_u2_frac = f" SELECT COUNT(*) FROM pt_full WHERE {u2};"
+            globals()['cursor'].execute(query_u1_frac)
+            frac1 = globals()['cursor'].fetchall()
+            globals()['cursor'].execute(query_u2_frac)
+            frac2 = globals()['cursor'].fetchall()
 
+            fracnames=[ur1, ur2]
+            fracvalues=[frac1, frac2] 
+        else:
+            progress_width = math.ceil(10+90*float(processed_jg_cnt/total_jgs_cnt))
 
-    # query4 = "select distinct recall from "+resultSchemaName+".global_results"
-    # globals()['cursor'].execute(query4)
-    # recall_list = globals()['cursor'].fetchall()
-    if(not alive):
-        status='finished'
-        query_u1_frac = f" SELECT COUNT(*) FROM pt_full WHERE {u1};"
-        query_u2_frac = f" SELECT COUNT(*) FROM pt_full WHERE {u2};"
-        globals()['cursor'].execute(query_u1_frac)
-        frac1 = globals()['cursor'].fetchall()
-        globals()['cursor'].execute(query_u2_frac)
-        frac2 = globals()['cursor'].fetchall()
-
-        fracnames=[ur1, ur2]
-        fracvalues=[frac1, frac2] 
-    
     return jsonify(result = "success-explanation", result2 = exp_list, result3 = jg, result5 = test_list, result6 = highlight_list, 
-        result8=fracnames, result9=fracvalues, isrunning=alive, status=status)
+        result8=fracnames, result9=fracvalues, isrunning=alive, status=status, bar_width=progress_width)
 ##@@
 @app.route('/ratingUD',methods=['UD'])
 def ratingUD():

@@ -347,7 +347,11 @@ def run_experiment(conn=None,
       # logger.debug(f"before filtering redundant, we have {len(valid_result)} jgs")
       valid_result = [v for v in valid_result if not v.redundant]
       jgg.stats.params['valid_jgs']=len(valid_result)
-      # logger.debug(f"after filtering out redundant we have {len(valid_result)} valid jgs \n")
+      if(gui):
+        Create_Stats_Table(conn=conn, stats_trackers=[jgg.stats], stats_relation_name='total_jgs', schema=f"{result_schema}_gui")
+        InsertStats(conn=conn, stats_trackers=[jgg.stats], stats_relation_name='total_jgs', schema=f"{result_schema}_gui", exp_time=exp_time, exp_desc=exp_desc)
+
+      # logger.debug(f"after filtering out redund[]ant we have {len(valid_result)} valid jgs \n")
 
       # logger.debug(f'we found {len(valid_result)} valid join graphs, now materializing and generating patterns')
       
@@ -425,56 +429,58 @@ def run_experiment(conn=None,
       # logger.debug(avg_cost_estimate_by_num_edges)
       # logger.debug(f'we found {len(valid_result)} valid join graphs, now materializing and generating patterns')
       jg_cnt=1
+
+      valid_result = [n for n in valid_result if n.cost<=avg_cost_estimate_by_num_edges[n.num_edges]]
+      jgg.stats.params['valid_jgs']=len(valid_result)
+      if(gui):
+        Create_Stats_Table(conn=conn, stats_trackers=[jgg.stats], stats_relation_name='total_jgs', schema=f"{result_schema}_gui")
+        InsertStats(conn=conn, stats_trackers=[jgg.stats], stats_relation_name='total_jgs', schema=f"{result_schema}_gui", exp_time=exp_time, exp_desc=exp_desc)
+
       for n in valid_result:
         # logger.debug(f'we are on join graph number {jg_cnt}')
         # logger.debug(n)
         jg_cnt+=1
-        if(n.cost<=avg_cost_estimate_by_num_edges[n.num_edges]):
-          jg_individual_times_dict[n] = 0
-          jgg.stats.params['valid_jgs']+=1
-          cost_friendly_jgs.append(n) 
-          jgm.stats.startTimer('materialize_jg')
-          drop_if_exist_jg_view = "DROP MATERIALIZED VIEW IF EXISTS {} CASCADE;".format('jg_{}'.format(n.jg_number))
-          jg_query_view = "CREATE MATERIALIZED VIEW {} AS {}".format('jg_{}'.format(n.jg_number), n.apt_create_q)
-          jgm.cur.execute(drop_if_exist_jg_view)
-          jgm.cur.execute(jg_query_view)
-          jgm.stats.stopTimer('materialize_jg')
-          apt_size_query = f"SELECT count(*) FROM jg_{n.jg_number}"
-          jgm.cur.execute(apt_size_query)
-          apt_size = int(jgm.cur.fetchone()[0])
-          pgen.stats.startTimer('per_jg_timer')
-          pgen.gen_patterns(jg=n,
-                            jg_name=f"jg_{n.jg_number}", 
-                            renaming_dict=n.renaming_dict, 
-                            skip_cols=n.ignored_attrs, 
-                            s_rate_for_s=sample_rate_for_s,
-                            lca_s_max_size = lca_s_max_size,
-                            lca_s_min_size = lca_s_min_size,
-                            just_lca = lca_eval_mode,
-                            lca_recall_thresh=min_recall_threshold,
-                            numercial_attr_filter_method = numercial_attr_filter_method,
-                            user_pt_size=user_pt_size,
-                            original_pt_size = apt_size,
-                            user_questions_map = user_questions_map,
-                            f1_calculation_type = f1_calculation_type,
-                            f1_calculation_sample_rate=f1_sample_rate,
-                            f1_sample_type = f1_sample_type,
-                            f1_calculation_min_size=f1_min_sample_size_threshold,
-                            user_assigned_num_pred_cap=user_assigned_max_num_pred
-                          )
-          if(gui):
-            logger.debug("gui mode! insert by jg!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-            patterns_to_insert = pgen.top_pattern_from_one_jg(n)
-            if(patterns_to_insert):
-              InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=patterns_to_insert, pattern_relation_name='topk_patterns_from_top_jgs', schema=result_schema, 
-              exp_time=exp_time, result_type=f1_calculation_type)
-          pgen.stats.stopTimer('per_jg_timer')
-          jg_individual_times_dict[vr] = pgen.stats.time['per_jg_timer']
-          pgen.stats.resetTimer('per_jg_timer')
-        else:
-          not_cost_friendly_jgs.append(n)
-
-      jgg.stats.params['valid_jgs_cost_high']=len(not_cost_friendly_jgs)
+        # if(n.cost<=avg_cost_estimate_by_num_edges[n.num_edges]):
+        jg_individual_times_dict[n] = 0
+        cost_friendly_jgs.append(n) 
+        jgm.stats.startTimer('materialize_jg')
+        drop_if_exist_jg_view = "DROP MATERIALIZED VIEW IF EXISTS {} CASCADE;".format('jg_{}'.format(n.jg_number))
+        jg_query_view = "CREATE MATERIALIZED VIEW {} AS {}".format('jg_{}'.format(n.jg_number), n.apt_create_q)
+        jgm.cur.execute(drop_if_exist_jg_view)
+        jgm.cur.execute(jg_query_view)
+        jgm.stats.stopTimer('materialize_jg')
+        apt_size_query = f"SELECT count(*) FROM jg_{n.jg_number}"
+        jgm.cur.execute(apt_size_query)
+        apt_size = int(jgm.cur.fetchone()[0])
+        pgen.stats.startTimer('per_jg_timer')
+        pgen.gen_patterns(jg=n,
+                          jg_name=f"jg_{n.jg_number}", 
+                          renaming_dict=n.renaming_dict, 
+                          skip_cols=n.ignored_attrs, 
+                          s_rate_for_s=sample_rate_for_s,
+                          lca_s_max_size = lca_s_max_size,
+                          lca_s_min_size = lca_s_min_size,
+                          just_lca = lca_eval_mode,
+                          lca_recall_thresh=min_recall_threshold,
+                          numercial_attr_filter_method = numercial_attr_filter_method,
+                          user_pt_size=user_pt_size,
+                          original_pt_size = apt_size,
+                          user_questions_map = user_questions_map,
+                          f1_calculation_type = f1_calculation_type,
+                          f1_calculation_sample_rate=f1_sample_rate,
+                          f1_sample_type = f1_sample_type,
+                          f1_calculation_min_size=f1_min_sample_size_threshold,
+                          user_assigned_num_pred_cap=user_assigned_max_num_pred
+                        )
+        if(gui):
+          logger.debug("gui mode! insert by jg!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+          patterns_to_insert = pgen.top_pattern_from_one_jg(n)
+          if(patterns_to_insert):
+            InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=patterns_to_insert, pattern_relation_name='topk_patterns_from_top_jgs', schema=result_schema, 
+            exp_time=exp_time, result_type=f1_calculation_type)
+        pgen.stats.stopTimer('per_jg_timer')
+        jg_individual_times_dict[vr] = pgen.stats.time['per_jg_timer']
+        pgen.stats.resetTimer('per_jg_timer')
 
     if(lca_eval_mode):
       patterns_all = pgen.pattern_pool

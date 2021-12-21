@@ -82,3 +82,17 @@ pointer-events: all;
 fill: none;
 stroke: steelblue;
 }
+
+#probar {
+  width: 0%;
+  height: 30px;
+  background-color: #04AA6D;
+  text-align: center; /* To center it horizontally (if you want) */
+  line-height: 30px; /* To center it vertically */
+  color: black;
+}
+
+#progress {
+  width: 100%;
+  background-color: #ddd;
+}
