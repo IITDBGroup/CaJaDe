@@ -1203,9 +1203,10 @@
               //     .style("fill", "#000000").text(function(d){ return color(d)}).attr("text-anchor", "left").style("alignment-baseline", "middle");
               /////////////////////
 
-              var simulation = d3.forceSimulation(graph.nodes).force("charge", d3.forceManyBody().strength(-1600))
+              var simulation = d3.forceSimulation(graph.nodes).force("charge", d3.forceManyBody().strength(-1800))
                       .force("center", d3.forceCenter(w/2, h/2))
-                      .force("link", d3.forceLink(graph.links).id(d => d.name).distance(function(d){if(d.source.id=="attr" || d.target.id=="attr"){return 35;}else{return 100;}}));//;
+                      /////.force("collision", d3.forceCollide().radius(function(d){if(d.id=="attr"){return 100} else{return 50}}))
+                      .force("link", d3.forceLink(graph.links).id(d => d.name).distance(function(d){if(d.source.id=="attr" || d.target.id=="attr"){return 70}else{return 20}}));//;
                       // .force("collision", rectCollide().size(function(d){return [d.width, d.height]}))
                       //.force("collide", d3.forceCollide().strength(.1).radius(50).iterations(1))//; ////@@@@
                       //.force("charge", function(d){ if(d.id=="attr"){return d3.forceManyBody().strength(-1500);} else{return d3.forceManyBody().strength(-2000);}});
@@ -1215,7 +1216,10 @@
               var nodes_with_text = svg.append("g").selectAll("g").data(graph.nodes).enter().append("g")
                                         .attr("class", function(d){if(d.id == "attr"){return "rt";} else{return "cl";}}).call(drag);
               ///d3.selectAll(".rt").append("rect").attr("width", 150).attr("height", 25).attr("x", -75).attr("y",-12.5).attr("fill", function(d){ return d.color});
-              d3.selectAll(".rt").append("rect").attr("width", 50).attr("height", 50).attr("x", -25).attr("y",-25).attr("fill", function(d){ return d.color});
+              d3.selectAll(".rt").append("rect").attr("width", function(d){ return d.name.length*7}).attr("height", 40)
+                .attr("x", function(d){return -(d.name.length*7)/2}).attr("y",-20).attr("fill", function(d){ return d.color});
+//d.name.length*5+20
+              ///////////d3.selectAll(".rt").append("rect").attr("width", 50).attr("height", 50).attr("x", -25).attr("y",-25).attr("fill", function(d){ return d.color});
                 //.append("text").text(function(d){ return d.name}).style("text-anchor", "middle").style("font-size", "10px").attr("class", "node-label");
               d3.selectAll(".cl").append("circle").attr("r", 25).attr("fill", function(d){ return d.color});
                 //.append("text").text(function(d){ return d.name}).style("text-anchor", "middle").style("font-size", "10px").attr("class", "node-label");
@@ -1230,7 +1234,9 @@
                       .attr("x2", function(d) { return d.target.x; }).attr("y2", function(d) { return d.target.y; });
                   //nodes_with_text.attr("transform", function(d) { return "translate("+d.x+","+d.y+")";});
                   //nodes_with_text.attr("transform", function(d) { if(d.id=="attr"){return "translate("+Math.max(150, Math.min(w-150, d.x))+","+Math.max(25, Math.min(h-25, d.y))+")";} else{return "translate("+Math.max(25, Math.min(w-25, d.x))+","+Math.max(25, Math.min(h-25, d.y))+")";}});
-                  nodes_with_text.attr("transform", function(d) { return "translate("+Math.max(25, Math.min(w-25, d.x))+","+Math.max(25, Math.min(h-25, d.y))+")";});
+                  nodes_with_text.attr("transform", function(d) { if(d.id=="attr"){return "translate("+Math.max(d.name.length*7/2, Math.min(w-d.name.length*7/2, d.x))+","+Math.max(20, Math.min(h-20, d.y))+")";} else{return "translate("+Math.max(25, Math.min(w-25, d.x))+","+Math.max(25, Math.min(h-25, d.y))+")";}});
+
+                  ////////////////////nodes_with_text.attr("transform", function(d) { return "translate("+Math.max(50, Math.min(w-50, d.x))+","+Math.max(50, Math.min(h-50, d.y))+")";});
                   // nodes_with_text.attr("cx", function(d){return d.x = Math.max(25, Math.min(w-25, d.x));})
                   //                 .attr("cy", function(d){return d.y = Math.max(25, Math.min(h-25, d.y));});
               });
