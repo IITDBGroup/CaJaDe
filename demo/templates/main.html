@@ -616,9 +616,9 @@
           success: function(data){
             running = data.isrunning;
             status = data.status;
-            width = data.bar_width;
+            bar_width = data.bar_width;
             // $('#status').text(status);
-            bar.style.width = width + "%";
+            bar.style.width = bar_width + "%";
             bar.innerHTML = status;
             console.log(data.result2);
             if (data.result2!='null'){
@@ -1296,7 +1296,7 @@
     <div id="explanation_table" style="overflow: auto; height: 200px; margin-bottom: 20px;"></div><br><br><br>
     
     <div id="explanation_summary" style="overflow-x: auto; height: 560px; white-space:nowrap; margin-bottom: 20px;"></div> <!--text-align:center;-->
-    <div id="explanation_graph" style="overflow-x: auto; width: 500px; height: 320px; white-space:nowrap; margin-bottom: 20px;"></div>
+    <div id="explanation_graph" style="overflow-x: auto; height: 320px; white-space:nowrap; margin-bottom: 20px;"></div>
     <div id="reset_JGselection" style="float: left; width:50%;">
       <button type="button" class="btn btn-outline-primary" onclick="resetClicked()">Reset</button>
     </div>
