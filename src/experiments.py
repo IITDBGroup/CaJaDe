@@ -118,10 +118,12 @@ def InsertPatterns(conn, exp_desc, patterns, pattern_relation_name, schema, exp_
 
   cols_with_types = ''
 
-  for col in cols[:-1]:
+  for col in cols:
       cols_with_types += col+' varchar,'
 
-  cols_with_types+=cols[-1]+' varchar'
+  cols_with_types+='user_question_map jsonb, pattern_attr_mappings jsonb'
+
+  cols.extend(['user_question_map', 'pattern_attr_mappings'])
 
   cur.execute('create table IF NOT EXISTS ' + schema + '.' + pattern_relation_name + ' (' +
                            'id serial primary key,' +
@@ -140,28 +142,29 @@ def InsertPatterns(conn, exp_desc, patterns, pattern_relation_name, schema, exp_
       jg_details = repr(p['join_graph']).replace("'", "''")
       if(result_type=='s' or result_type=='o'):
         patterns_to_insert.append(f"('{exp_time}','{exp_desc}', '{p['is_user']}', '{jg_print}', '{jg_details}', '{p['jg_name']}', '{p['num_edges']}', '{p_print}', \
-          '{p['recall']}', '{p['precision']}','{p['F1']}', '', '', '')")
+          '{p['recall']}', '{p['precision']}','{p['F1']}', '', '', '', '{p['user_question_map']}', '{p['pattern_attr_mappings']}')")
       elif(result_type=='e'):
         patterns_to_insert.append(f"('{exp_time}','{exp_desc}', '{p['is_user']}', '{jg_print}', '{jg_details}', '{p['jg_name']}', '{p['num_edges']}', '{p_print}', \
-          '{p['recall']}', '{p['precision']}','{p['F1']}','{p['sample_recall']}', '{p['sample_precision']}', '{p['sample_F1']}')")
+          '{p['recall']}', '{p['precision']}','{p['F1']}','{p['sample_recall']}', '{p['sample_precision']}', '{p['sample_F1']}', '{p['user_question_map']}', \
+           '{p['pattern_attr_mappings']}')")
       else:
         patterns_to_insert.append(f"('{exp_time}','{exp_desc}', '{p['is_user']}', '{jg_print}', '', '{p['num_edges']}', '{p_print}', \
-          '{p['recall']}', '{p['precision']}','','', '', '')")
+          '{p['recall']}', '{p['precision']}','','', '', '', '{p['user_question_map']}', '{p['pattern_attr_mappings']}')")
     else:
       cur.execute(
           'INSERT INTO ' + schema + '.' + pattern_relation_name + ' ('+ ','.join(cols) +')' + ' values '+ ', '.join(patterns_to_insert)
           )
       patterns_to_insert = []
       if(result_type=='s' or result_type=='o'):
-        patterns_to_insert.append(f"('{exp_time}','{exp_desc}', '{p['is_user']}', '{jg_print}', '{jg_details}', '{p['jg_name']}', '{p['num_edges']}', '{p_print}', \
-          '{p['recall']}', '{p['precision']}','{p['F1']}', '', '', '')")
+       patterns_to_insert.append(f"('{exp_time}','{exp_desc}', '{p['is_user']}', '{jg_print}', '{jg_details}', '{p['jg_name']}', '{p['num_edges']}', '{p_print}', \
+         '{p['recall']}', '{p['precision']}','{p['F1']}', '', '', '', '{p['user_question_map']}', '{p['pattern_attr_mappings']}')")
       elif(result_type=='e'):
-        patterns_to_insert.append(f"('{exp_time}','{exp_desc}', '{p['is_user']}', '{jg_print}', '{jg_details}', '{p['jg_name']}', '{p['num_edges']}', '{p_print}', \
-          '{p['recall']}', '{p['precision']}','{p['F1']}','{p['sample_recall']}', '{p['sample_precision']}', '{p['sample_F1']}')")
+       patterns_to_insert.append(f"('{exp_time}','{exp_desc}', '{p['is_user']}', '{jg_print}', '{jg_details}', '{p['jg_name']}', '{p['num_edges']}', '{p_print}', \
+         '{p['recall']}', '{p['precision']}','{p['F1']}','{p['sample_recall']}', '{p['sample_precision']}', '{p['sample_F1']}', '{p['user_question_map']}', \
+          '{p['pattern_attr_mappings']}')")
       else:
-        patterns_to_insert.append(f"('{exp_time}','{exp_desc}', '{p['is_user']}', '{jg_print}', '{jg_details}', '', '{p['num_edges']}', '{p_print}', \
-          '{p['recall']}', '{p['precision']}','','', '', '')")
-
+        patterns_to_insert.append(f"('{exp_time}','{exp_desc}', '{p['is_user']}', '{jg_print}', '', '{p['num_edges']}', '{p_print}', \
+         '{p['recall']}', '{p['precision']}','','', '', '', '{p['user_question_map']}', '{p['pattern_attr_mappings']}')")
 
       cur_batch_size=1
 

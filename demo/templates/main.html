@@ -13,7 +13,9 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.11.0/d3.min.js"></script>
   <script src="https://d3js.org/d3-selection-multi.v1.js"></script>
   <script src='https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js'></script>
-
+  <script src="https://cdn.jsdelivr.net/npm/vega@5.21.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.2.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.20.2"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 	<link rel="stylesheet" href='../static/main.css'>
@@ -143,6 +145,71 @@
           <div id="probar">0%</div>
         </div>
 
+
+          <br>
+          
+          <div class="row">
+            <br>
+            <div style="display: inline;">
+              <div style="float: left; width: 33%; padding: 10px;">
+                <p>Show
+                <select id="dataPerPage" class="form-select" style="width: 70px; display: inline;" onchange="changeRowsSelect()">
+                  <option value="10">10</option>
+                  <option value="15">15</option>
+                  <option value="20">20</option>
+                </select>
+                Rows</p>
+              </div>
+              <div style="float: left; padding: 10px; width: 41%; text-align: right;" class="col-md-5">
+                <p id="sltROWScount"></p>
+              </div>
+              <div style="float: right; width: 22%; text-align: right;" id="container"></div>
+            </div>
+          </div>
+
+          <div id="display" style="overflow: auto;"></div><br>    
+
+          <div id="pageInfo" style="display: inline;" class="col-md-12">
+            <div style="float: left;">
+              <p id="displayCount"></p>
+            </div>
+            <div style="float: right;">
+              <ul id="pagingul" class="col-md-6"></ul>
+            </div>
+          </div><br>
+
+          <div id="user_rating_update" style="width: 50%;"></div>
+          <div id="explanation_table" style="overflow: auto; height: 200px; margin-bottom: 20px;"></div><br><br><br>
+          
+          <div id="explanation_summary" style="overflow-x: auto; height: 560px; white-space:nowrap; margin-bottom: 20px;"></div> <!--text-align:center;-->
+          <div id="explanation_graph" style="overflow-x: auto; height: 320px; white-space:nowrap; margin-bottom: 20px;"></div>
+          <div id="reset_JGselection" style="float: left; width:50%;">
+            <button type="button" class="btn btn-outline-primary" onclick="resetClicked()">Reset</button>
+          </div>
+
+          </div>
+
+          </div>
+            <div class="col-md-4"> <!--col-md-3--->
+              <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <div id="schemagraph"></div>
+              </div>
+              <div id="selectedJGexpl" style="margin-top: 50px;"></div>
+              <div id="legend"></div>   <!----->
+              <div>
+                <button id="plot" type="button" class="btn btn-outline-primary">DrawPattern</button>
+              </div>
+              <!-- <div class="row"> -->
+                  <div  id='vis'></div>
+                <!-- </div>   -->
+                <!-- <div class="row"> -->
+                  <div >
+                    <!-- <div id='viz-nominal-options'></div> -->
+                    <select id='viz-options' onchange="config_and_draw()"></select>
+                  </div>
+                <!-- </div> -->
+            </div>
+
 		<script>
       var colNum;
       var colData;
@@ -167,7 +234,6 @@
       var original_graphData;
       var original_summaryData;
       var original_highlightTextList;
-
  
       var color_matching = [];
       var likedList = [];
@@ -182,6 +248,7 @@
       var green; 
       var purple;
       var width = 600, height = 300;
+      var selected_pattern_desc=null;
 
 		  $('#execute').click(function(){
 		    let totalNum;
@@ -420,6 +487,7 @@
           var tr = checkbox.parent().parent().eq(i);
           var td = tr.children();
           var pdes = td.eq(0).text();
+          selected_pattern_desc = pdes;
           console.log("^^^^^^^checkbox pdes:^^^^^^", pdes); ///////////////@@@@@@@@@@@@@@
           expParser(pdes);
         });
@@ -456,8 +524,28 @@
         updateSelectedData(jgName);
         updateSelectedJG(newNodeList, newTargetNodeList, pdes);
         dots.style("fill", function(d){if(d.idx == idx){return "#6699ff";}else{ return "#ffab00";}}).style("visibility", "visible");
-      }
 
+        // show default pattern graph
+        var pattern_numeric_to_draw = $('#viz-numerical-options').val();
+        var pattern_nominal_to_draw = [];
+        $('#viz-nominal-options input:checked').each(function() {
+          pattern_nominal_to_draw.push($(this).attr('value'));
+        });
+
+        $.ajax({
+          type: 'POST',
+          url: '{{url_for("draw")}}',
+          data: JSON.stringify({"numeric": pattern_numeric_to_draw, 
+              "nominal": pattern_nominal_to_draw, "pattern_desc": selected_pattern_desc, "first_call": 'yes'}),
+          dataType: 'JSON',
+          contentType: "application/json",
+          success: function(data){
+            plot_example(data.data, data.pattern_config, data.plot_type);
+            config_plot_options(data.cols, data.chosen_col);
+            // config_plot_options(data.num_cols, type='numerical');
+        }
+      })
+      }
 
       function updateSelectedData(jgName){
         cur_graphData.forEach(function(d){
@@ -532,6 +620,8 @@
         $("#selectedJGexpl").empty(); //remove selecteJG located in the right hand side       
         $("#legend").empty(); //remove legend and fractions in the right hand side
         $("#explanation_table").empty(); //remove filtered explanations
+        $("#viz-options").empty();
+        $("#vis").empty();
 
         // expTable(original_exp_len, original_exp_data, original_highlightTextList,color_matching); //show the entire explanation table
         exp_summary(original_summaryData, original_exp_data, original_exp_len, original_graphData); //exp_summary(summaryData, exp_data, exp_len, fscoreData);  
@@ -813,44 +903,8 @@
               }
           }
         }
-        /////<Highlight Text>
-        // function highlightText(originalTxt, searchKeyword, replaceTxt) {
-        //   const regex = new RegExp(searchKeyword, 'g');
-        //   return originalTxt.toString().replace(regex, replaceTxt);
-        // }
+
         expTable(cur_exp_len, cur_exp_data, cur_highlightTextList, color_matching); //@@@@@@@@@@@@@@@@@
-
-        // let expHtml = "";
-        // expHtml = "<table class=\"table table-bordered\" sellspacing=\"0\" width=\"90%\" id=\"exp\">";
-        // expHtml += "<tbody>";
-        
-        // for(var i=0;i<exp_len;i++){
-        //   exp_data_pdesc = exp_data[i][2];
-        //   highlightTextList.forEach(function(element){
-        //     var tmp_element = element.slice(0,-2);
-        //     var setcolor;
-        //     color_matching.forEach(function(d){if(d.name == tmp_element){ setcolor = d.color;}});
-        //     var repstr = "<span style=\"background-color:"+setcolor+";\">"+element+"</span>";
-        //     // exp_data_pdesc = exp_data[i][2];
-        //     //console.log("exp_data_pdesc: ", exp_data_pdesc, "| element: ", element);
-        //     exp_data_pdesc = highlightText(exp_data_pdesc, element, repstr);//exp_data[i] = highlightText(exp_data[i], element, repstr);
-        //     //console.log("highlightText>>>>exp_data_pdesc: ", exp_data_pdesc);
-        //   });
-
-        //   //expHtml += "<tr><td>"+ exp_data_pdesc +"</td></tr>"; //exp_data[i] //style=\"text-align: center;\"
-          
-        //   expHtml += "<tr><td style=\"width:80%;\">"+ exp_data_pdesc +"</td><td><input style=\"zoom:4.0;\" type=\"checkbox\" name=\"user_checkBox\" onclick=\"checkOne(this)\"></td>";
-        //   expHtml += "<td style=\"width:10%;\">";
-        //   expHtml += "<button type=\"button\" class=\"btn hover1\" id=\"likeBTN\" name=\"user_like\" onclick=\"likeClicked(this)\"><i class=\"fa fa-thumbs-up\"></i></button>";
-        //   expHtml += "<button type=\"button\" class=\"btn hover1\" id=\"dislikeBTN\" name=\"user_dislike\" onclick=\"dislikeClicked(this)\"><i class=\"fa fa-thumbs-down\"></i></button></td></tr>";
-        // }
-        // expHtml += "</tbody></table>";
-
-        // $("#explanation_table").empty();
-        // $("#explanation_table").append(expHtml);
-        /////////////////////////////////////////////////////////////
-        /////<Join Graphs>
-
 
         (function( $ ) {
           $.fn.generateMultiForce = function(svgObj) {
@@ -1218,7 +1272,6 @@
               ///d3.selectAll(".rt").append("rect").attr("width", 150).attr("height", 25).attr("x", -75).attr("y",-12.5).attr("fill", function(d){ return d.color});
               d3.selectAll(".rt").append("rect").attr("width", function(d){ return d.name.length*7}).attr("height", 40)
                 .attr("x", function(d){return -(d.name.length*7)/2}).attr("y",-20).attr("fill", function(d){ return d.color});
-//d.name.length*5+20
               ///////////d3.selectAll(".rt").append("rect").attr("width", 50).attr("height", 50).attr("x", -25).attr("y",-25).attr("fill", function(d){ return d.color});
                 //.append("text").text(function(d){ return d.name}).style("text-anchor", "middle").style("font-size", "10px").attr("class", "node-label");
               d3.selectAll(".cl").append("circle").attr("r", 25).attr("fill", function(d){ return d.color});
@@ -1257,66 +1310,150 @@
         $(tmpUpdate).generateMultiForce1(svg);
       }
 
-		</script>
-    
+        function config_plot_options(cols, chosen_col){
+          console.log("chosen_col: ", chosen_col);
+          // console.log("type: ", type);
+          // if(type=='numerical'){
+          $('#viz-options').empty();
+          var dropdown = document.getElementById('viz-options');
+          // dropdown='';
 
-    <script>
-    </script>
-		<br>
-		
-		<div class="row2">
-      <br>
-		  <div style="display: inline;">
-        <div style="float: left; width: 33%; padding: 10px;">
-		      <p>Show
-		      <select id="dataPerPage" class="form-select" style="width: 70px; display: inline;" onchange="changeRowsSelect()">
-		        <option value="10">10</option>
-		        <option value="15">15</option>
-		        <option value="20">20</option>
-		      </select>
-		      Rows</p>
-		    </div>
+          for(var i=0;i<cols.length;i++){
+            var opt = document.createElement("option"); 
+            opt.text = cols[i];
+            opt.value = cols[i];
+            dropdown.appendChild(opt);
+          }
 
-        <div style="float: left; padding: 10px; width: 41%; text-align: right;" class="col-md-5">
-          <p id="sltROWScount"></p>
-        </div>
+          if(chosen_col!='null'){
+            $("#viz-options").val(chosen_col);
+          }
+        }
+            // }
+            // }else{// create the necessary elements
+              // checks = document.getElementById('viz-nominal-options')
+              // checks.innerHTML = '';
+              // for(var i=0;i<cols.length;i++){
+              //   var label= document.createElement("label");
+              //   var description = document.createTextNode(cols[i]);
+              //   var checkbox = document.createElement("input");
 
-        <div style="float: right; width: 22%; text-align: right;" id="container"></div>
-        
-      </div>
-		</div>
+              //   checkbox.type = "checkbox";    // make the element a checkbox
+              //   checkbox.name = "pattern_nominals";      // give it a name we can check on the server side
+              //   checkbox.value = cols[i];         // make its value "pair"
+              //   checkbox.checked = true;
+              //   checkbox.onclick = function() {
+              //     config_and_draw();
+              //   } 
 
-		<div id="display" style="overflow: auto;"></div><br>    
+              //   // label.appendChild(checkbox);   // add the box to the element
+              //   label.appendChild(description);// add the description to the element
 
-		<div id="pageInfo" style="display: inline;" class="col-md-12">
-		  <div style="float: left;">
-		    <p id="displayCount"></p>
-		  </div>
-		  <div style="float: right;">
-		    <ul id="pagingul" class="col-md-6"></ul>
-		  </div>
+              //   linebreak = document.createElement("br");
 
-		</div><br>
+              //   checks.appendChild(label);
+              //   checks.appendChild(checkbox);
+              //   checks.appendChild(linebreak);
+              // }
+          //   }
+          // }
 
-    <div id="user_rating_update" style="width: 50%;"></div>
-    <div id="explanation_table" style="overflow: auto; height: 200px; margin-bottom: 20px;"></div><br><br><br>
-    
-    <div id="explanation_summary" style="overflow-x: auto; height: 560px; white-space:nowrap; margin-bottom: 20px;"></div> <!--text-align:center;-->
-    <div id="explanation_graph" style="overflow-x: auto; height: 320px; white-space:nowrap; margin-bottom: 20px;"></div>
-    <div id="reset_JGselection" style="float: left; width:50%;">
-      <button type="button" class="btn btn-outline-primary" onclick="resetClicked()">Reset</button>
-    </div>
+        function config_and_draw(){
+          var col_to_draw = $('#viz-options').val();
+          // var pattern_nominal_to_draw = [];
+          // $('#viz-nominal-options input:checked').each(function() {
+          //   pattern_nominal_to_draw.push($(this).attr('value'));
+          // });
 
-    </div>
+          $.ajax({
+            type: 'POST',
+            url: '{{url_for("draw")}}',
+            data: JSON.stringify({"col_to_draw": col_to_draw, "pattern_desc": selected_pattern_desc, "first_call": 'no'}),
+            dataType: 'JSON',
+            contentType: "application/json",
+            success: function(data){
+              plot_example(data.data, data.pattern_config, data.plot_type);
+            }
+          })
+          // console.log("pattern_numeric_to_draw: ", pattern_numeric_to_draw);
+          // console.log("pattern_nominal_to_draw: ", pattern_nominal_to_draw);
+        }
 
-    </div>
-    <div class="col-md-4"> <!--col-md-3--->
-      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <div id="schemagraph"></div>
-      </div>
-      <div id="selectedJGexpl" style="margin-top: 50px;"></div>
-      <div id="legend"></div>   <!----->
-        <script>
+        String.prototype.format = function () {
+          var i = 0, args = arguments;
+          return this.replace(/{}/g, function () {
+            return typeof args[i] != 'undefined' ? args[i++] : '';
+          });
+        };
+
+        function plot_example(plotdata, pattern_config=null, plot_type='numeric'){
+          console.log("pattern_config: ", pattern_config);
+          console.log("pattern_config.col_to_draw: ", pattern_config.col_to_draw);
+          console.log("pattern_config.pattern_value: ", pattern_config.pattern_value);
+
+          var testformat;
+          if(plot_type=='nominal'){
+            testformat = "datum['{}']=='{}'".format(pattern_config.col_to_draw, pattern_config.pattern_value);
+          }else{
+            testformat = "datum['{}'] {} '{}'".format(pattern_config.col_to_draw, pattern_config.pattern_condition,
+             pattern_config.pattern_value);
+          }
+          console.log(testformat);
+          console.log(plotdata);
+
+          if(plot_type=='numeric'){
+            var vlSpec = {
+              "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+              "data": {"name": "mydata", "values": plotdata},
+              "facet": {"row": {"field": "user_question"}},
+              "spec": {
+                "mark": "bar",
+                "encoding": {
+                  "x": {
+                    "bin": {"binned": true, "step": pattern_config.bin_size},
+                    "field": pattern_config.col_to_draw,
+                    "type": "quantitative",
+                    "axis": {"labelAngle": 45}
+                  },
+                  "y": {"aggregate": "count", "type": "quantitative"},
+                  "color": {
+                    "condition": [{"test": testformat,
+                                   "value": "red"}]
+                  }
+                }
+                }
+              }
+          }else{
+            var vlSpec = {
+              "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+              // "description": "A simple bar chart with embedded data.",
+              "data": { "name": "mydata", "values": plotdata},
+              "facet": {"row": {"field": "user_question"}},
+              "spec": {
+                "mark": "bar",
+                "encoding": {
+                  "x": {
+                    "field": pattern_config.col_to_draw , 
+                    "type": "nominal", 
+                    "axis": {"labelAngle": 45}
+                  },
+                  "y": {
+                    "field": "cnt", 
+                    "type": "quantitative"
+                  },
+                  "color": {"condition": 
+                  [{"test": testformat, 
+                    "value": "red"}]
+                  // [{"test": "datum['${pattern_config.col_to_draw}']=={'${pattern_config.pattern_value}'", 
+                  //   "value": "red"}]
+                  }
+                }
+              }
+            }
+          } 
+          vegaEmbed('#vis', vlSpec);
+        }
+
           var svg = d3.select("#schemagraph")            
             .append("svg")
             .attr("width", 580) //400
@@ -1401,9 +1538,8 @@
             function mouseover(d) { tooltip_schema.style("visibility", "visible").text(d.type); }
             function mouseout() { tooltip_schema.style("visibility", "hidden"); }
             function mousemove(){ tooltip_schema.style("top", (d3.event.pageY - 10) + "px").style("left", (d3.event.pageX + 10) + "px"); }
-          </script>
 
-        </script>
+      </script>
       <!--</div> -->
     </div>
 </div>    

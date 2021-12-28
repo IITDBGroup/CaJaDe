@@ -16,6 +16,7 @@ from copy import deepcopy
 import datetime
 import heapq
 from operator import itemgetter
+import json
 
 
 logger = logging.getLogger(__name__)
@@ -63,6 +64,7 @@ class Pattern_Generator:
 
         pending_pattern['desc'] = []
         pending_pattern['tokens'] = {}
+        pattern_attr_data_mappings = {}
 
         for nt in pending_pattern['nominal_values']:
             re_a_index = int(re.findall(r'([0-9]+)', nt[0])[0])
@@ -71,6 +73,7 @@ class Pattern_Generator:
                     continue
                 else:
                     if(re_a_index>=v_n['rel_min_attr_index'] and re_a_index<=v_n['rel_max_attr_index']):
+                        pattern_attr_data_mappings[f"{v_n['label']}_{k_n}.{renaming_dict[k_n]['columns'][nt[0]]}"] = [nt[0], renaming_dict['dtypes'][nt[0]]]
                         pending_pattern['desc'].append(f"{v_n['label']}_{k_n}.{renaming_dict[k_n]['columns'][nt[0]]}={nt[1]}")
                         pending_pattern['tokens'][f"{v_n['label']}_{k_n}.{renaming_dict[k_n]['columns'][nt[0]]}"]=f"{nt[1]}"
                         break
@@ -83,6 +86,8 @@ class Pattern_Generator:
                         continue
                     else:
                         if(re_a_index>=v_o['rel_min_attr_index'] and re_a_index<=v_o['rel_max_attr_index']):
+                            pattern_attr_data_mappings[f"{v_o['label']}_{k_o}.{renaming_dict[k_o]['columns'][ot[0]]}"] = \
+                                                      [ot[0], renaming_dict['dtypes'][ot[0]]]
                             pending_pattern['desc'].append(f"{v_o['label']}_{k_o}.{renaming_dict[k_o]['columns'][ot[0]]}{ot[1]}{round(float(ot[2]),2)}")
                             pending_pattern['tokens'][f"{v_o['label']}_{k_o}.{renaming_dict[k_o]['columns'][ot[0]]}"]=f"{ot[2]}"
                             break
@@ -116,6 +121,8 @@ class Pattern_Generator:
         pending_pattern['desc'] = ','.join(sorted(pending_pattern['desc']))
         pending_pattern['num_edges'] = pending_pattern['join_graph'].num_edges
         pending_pattern['is_user'] = user_questions_map[pending_pattern['is_user']]
+        pending_pattern['user_question_map'] = json.dumps(user_questions_map)
+        pending_pattern['pattern_attr_mappings'] = json.dumps(pattern_attr_data_mappings)
         # logger.debug(pending_pattern)
         return pending_pattern
 

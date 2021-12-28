@@ -11,6 +11,8 @@ import re
 from datetime import datetime
 import threading
 import math
+import pandas as pd 
+import ast
 
 logger = logging.getLogger()
 logger.addHandler(default_handler)
@@ -19,6 +21,7 @@ app = Flask(__name__)
 
 
 two_cols = re.compile('\w+\.\w+\s{0,}!?(<|>|<=|>=|=|<>|!=)\s{0,}\w+\.\w+\s{0,}')
+pattern_triplets_re = re.compile(r'([\w\.\s]+)([<|=|>])([\w\.\s]+)')
 
 @app.route("/")
 def index():
@@ -113,6 +116,175 @@ def db_connect(active_table='nba'):
             db_schemas=db_schemas,
             schema_graph_data=json_schema)
 
+@app.route('/draw', methods=['POST'])
+def draw():
+    # receive a pattern description, and generate the data
+    # given the selected numerical and/or nominal attributes
+    # also specify the condition and bin size as config for vegalite
+
+    global pattern_cols
+    global pattern_num_cols
+    global pattern_nom_cols
+
+    chosen_col = 'null'
+
+    plot_type = None
+
+    data = request.get_json()
+    logger.debug(data)
+
+    pattern_q = f"""
+    select * from {resultSchemaName}.topk_patterns_from_top_jgs
+    where p_desc='{data['pattern_desc']}' limit 1
+    """
+    pattern_dict = pd.read_sql(pattern_q, conn).to_dict(orient='records')[0]
+    attr_map_dict = ast.literal_eval(f"{pattern_dict['pattern_attr_mappings']}")
+    questions_map = ast.literal_eval(f"{pattern_dict['user_question_map']}")
+    logger.debug(attr_map_dict)
+    pattern_triplets = [list(l) for l in re.findall(pattern_triplets_re, data['pattern_desc'])]
+    pattern_triplets_dict = {ll[0]:ll[1:] for ll in pattern_triplets}
+
+    if(data['first_call']=='yes'):
+        pattern_num_cols=[]
+        pattern_nom_cols=[]
+        for ptrip in pattern_triplets:
+            if(attr_map_dict[ptrip[0]][1]=='nominal'):
+                pattern_nom_cols.append(ptrip[0])
+            else:
+                pattern_num_cols.append(ptrip[0])
+        
+        pattern_cols = pattern_nom_cols + pattern_num_cols
+
+        if(pattern_num_cols):
+            col_to_draw = pattern_num_cols[0]
+            plot_type='numeric'
+        else:
+            col_to_draw = pattern_nom_cols[0]
+            plot_type='nominal'
+    else:
+        col_to_draw = data['col_to_draw']
+        if(col_to_draw in pattern_nom_cols):
+            plot_type='nominal'
+        else:
+            plot_type='numeric'
+
+    where_cols = [c for c in pattern_triplets if c[0]!=col_to_draw]
+    where_conds = []
+    graph_config = {}
+
+    col_to_draw_alias = attr_map_dict[col_to_draw][0]
+
+    for p in where_cols:
+        alias = attr_map_dict[p[0]][0]
+        if(p[0] in pattern_nom_cols):
+            where_conds.append(f"{alias}='{p[2]}'")
+        else:
+            where_conds.append(f"{alias}{p[1]}{p[2]}")
+
+
+    if(plot_type=='numeric'):
+        graph_config['pattern_condition'] = pattern_triplets_dict[col_to_draw][0]
+        graph_config['pattern_value'] = pattern_triplets_dict[col_to_draw][1]
+        col_to_draw=col_to_draw.replace('.', '-') 
+        # vega will have a bug when using . in col name....
+        # so replace with -
+        cols = [col_to_draw, 'user_question']
+
+        data_q = f"""
+        SELECT {col_to_draw_alias} AS "{col_to_draw}",
+        CASE
+            WHEN {pattern_dict['jg_name']}.is_user='yes' THEN '{questions_map['yes']}'
+            ELSE '{questions_map['no']}'
+        END AS user_question
+        FROM {pattern_dict['jg_name']}
+        {"WHERE " + ' AND '.join(where_conds) if where_conds else ""}
+        """
+        min_max_q = f"""
+        SELECT min({col_to_draw_alias}) as min_val, max({col_to_draw_alias}) as max_val 
+        FROM {pattern_dict['jg_name']}
+        """
+        cursor.execute(min_max_q)
+        min_val, max_val = cursor.fetchone()
+        graph_config['bin_size'] = min(10, max(0.1, round(abs(min_val-max_val)/10,2)))
+
+
+    else:
+        graph_config['pattern_value'] = pattern_triplets_dict[col_to_draw][1]
+        col_to_draw=col_to_draw.replace('.', '-') 
+        # vega will have a bug when using . in col name....
+        # so replace with -
+        cols = ['cnt', col_to_draw, 'user_question']
+        data_q = f"""
+        SELECT COUNT(*) as cnt, {col_to_draw_alias} AS "{col_to_draw}",
+        CASE 
+            WHEN {pattern_dict['jg_name']}.is_user='yes' THEN '{questions_map['yes']}'
+            ELSE '{questions_map['no']}'
+        END AS user_question
+        FROM {pattern_dict['jg_name']}
+        {"WHERE " + ' AND '.join(where_conds) if where_conds else ""}
+        GROUP BY user_question, {col_to_draw_alias};
+        """
+
+    graph_config['col_to_draw'] = col_to_draw
+    logger.debug(data_q)
+    cursor.execute(data_q)
+    data_to_draw = cursor.fetchall()
+
+    dict_data = [dict(zip(cols, t)) for t in data_to_draw]
+
+    if(data['first_call']=='yes'):
+        chosen_col = col_to_draw
+
+    return jsonify(data=dict_data, pattern_config=graph_config, plot_type=plot_type, cols=pattern_cols, chosen_col=chosen_col)
+
+
+
+    # for p in data['nominal']:
+    #     alias = df['pattern_attr_mappings'][p]
+    #     where_conds.append(f"{alias}='{pattern_triplets_dict[p][1]}'")
+
+    # if(data['numeric']!='null'):
+    #     p = data['numeric'][0]
+    #     alias = df['pattern_attr_mappings'][p][0]
+    #     # where_conds.append(f"{alias}{''.join(pattern_triplets_dict[p])}")
+    #     min_max_q = f"SELECT min({alias}) as min_val, max({alias}) as max_val FROM {df['jg_name']}"
+    #     cursor.execute(min_max_q)
+    #     min_val, max_val = cursor.fetchone()
+
+    #     graph_config['bin_size'] = min(10, max(0.1, round(abs(min_val-max_val)/10,2)))
+    # else:
+    #     graph_config['bin_size'] = 1
+
+    # data_to_draw = cursor.fetchall()
+
+    # if(data['numeric']!='null'):
+    #     plot_type="numeric"
+    #     cols = [p, 'user_question']
+    #     graph_config['x_axis'] = p
+    # else:
+    #     plot_type="nominal"
+    #     if(len(data['nominal'])>1):
+    #         print("error, no numerical and more than 1 nominal attributes!")
+    #     else:
+    #         cols = [data['nominal'][0], 'user_question']
+    #         graph_config['x_axis'] = data['nominal'][0]
+
+
+    # data_q = f"""
+    # WITH p AS
+    # (
+    #         SELECT * FROM {resultSchemaName}.topk_patterns_from_top_jgs
+    #         WHERE p_desc = '{data['pattern_desc']}'
+    # )
+    # SELECT COUNT(*) as cnt, 
+    # CASE 
+    #         WHEN {df['jg_name']}.is_user='yes' THEN p.user_question_map->'yes'
+    #         ELSE p.user_question_map->'no'
+    # END AS user_question
+    # FROM {df['jg_name']}, p
+    # WHERE {' AND '.join(where_conds)}
+    # GROUP BY user_question;
+    # """
 
 @app.route('/ajax', methods=['POST'])
 def ajax():
@@ -268,7 +440,7 @@ def start_explanation():
         'host' : db_host,
         'port' : db_port,
         'dbname' : db_name, 
-        'maximum_edges' : 2,
+        'maximum_edges' : 1,
         'f1_sample_rate' : 0.3,
         'f1_calculation_type' : 'o',
         'user_assigned_max_num_pred' : 2,
