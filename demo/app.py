@@ -440,7 +440,7 @@ def start_explanation():
         'host' : db_host,
         'port' : db_port,
         'dbname' : db_name, 
-        'maximum_edges' : 1,
+        'maximum_edges' : 2,
         'f1_sample_rate' : 0.3,
         'f1_calculation_type' : 'o',
         'user_assigned_max_num_pred' : 2,
