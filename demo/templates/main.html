@@ -179,7 +179,7 @@
           </div><br>
 
           <div id="user_rating_update" style="width: 50%;"></div>
-          <div id="explanation_table" style="overflow: auto; height: 200px; margin-bottom: 20px;"></div><br><br><br>
+          <div id="explanation_table" style="overflow: auto; height: 500px; margin-bottom: 20px;"></div><br><br><br>
           
           <div id="explanation_summary" style="overflow-x: auto; height: 560px; white-space:nowrap; margin-bottom: 20px;"></div> <!--text-align:center;-->
           <div id="explanation_graph" style="overflow-x: auto; height: 320px; white-space:nowrap; margin-bottom: 20px;"></div>
@@ -632,6 +632,11 @@
         return originalTxt.toString().replace(regex, replaceTxt);
       }
 
+      function repText(originalTxt, searchComma, replaceTxt){
+        const regex = new RegExp(searchComma, 'g');
+        return originalTxt.toString().replace(regex, replaceTxt);
+      }
+
       function expTable(exp_len, exp_data, highlightTextList, color_matching){
         let expHtml = "";
         expHtml = "<table class=\"table table-bordered\" sellspacing=\"0\" width=\"90%\" id=\"exp\">";
@@ -639,6 +644,7 @@
 
         for(var i=0;i<exp_len;i++){
           exp_data_pdesc = exp_data[i][2];
+          exp_data_pdesc = repText(exp_data_pdesc, ',', "<span>&#8743;</span>");
           highlightTextList.forEach(function(element){
             var tmp_element = element.slice(0,-2);
             var setcolor;
@@ -651,6 +657,7 @@
           });
 
           //expHtml += "<tr><td>"+ exp_data_pdesc +"</td></tr>"; //exp_data[i] //style=\"text-align: center;\"
+          // exp_data_pdesc = repText(exp_data_pdesc, ',', "<span>&#8743;</span>");
 
           expHtml += "<tr><td style=\"width:80%;\">"+ exp_data_pdesc +"</td><td><input style=\"zoom:4.0;\" type=\"checkbox\" name=\"user_checkBox\" onclick=\"checkOne(this)\"></td>";
           expHtml += "<td style=\"width:10%;\">";
@@ -1475,7 +1482,7 @@
           var simulation = d3
               .forceSimulation(graph.nodes)
               .force("link",d3.forceLink(graph.links).id(function(d) {return d.id;}).distance(120).links(graph.links))
-              .force("charge", d3.forceManyBody().strength(-200))
+              .force("charge", d3.forceManyBody().strength(-450)) //-200
               .force("center", d3.forceCenter(sg_width / 2, sg_height / 2))
               .force("collision", d3.forceCollide().radius(function(d){return d.radius*2})) //##
               .on("tick", ticked);
@@ -1507,15 +1514,15 @@
             var drag = d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended);
             var nodes_with_text = svg.append("g").selectAll("g").data(graph.nodes)
                                       .enter().append("g").call(drag);
-            var circles = nodes_with_text.append("circle").attr("r", 15).attr("fill", "red");
-            var texts = nodes_with_text.append("text").text(function(d){ return d.name });
+            var circles = nodes_with_text.append("circle").attr("r", 20).attr("fill", "red"); //15
+            var texts = nodes_with_text.append("text").text(function(d){ return d.name }).style("text-anchor", "middle");
             var tooltip_schema = d3.select("#schemagraph").append("div").style("position", "absolute")
                                     .style("visibility", "hidden").style("background-color", "#a7a7a7")
                                     .style("color", "white").style("border-width", "1px")
                                     .style("border-radius", "5px").style("padding", "10px");
             
             function ticked() {
-              nodes_with_text.attr("transform", function(d) { return "translate("+Math.max(15, Math.min(sg_width-15, d.x))+","+Math.max(15, Math.min(sg_height-15, d.y))+")";});
+              nodes_with_text.attr("transform", function(d) { return "translate("+Math.max(20, Math.min(sg_width-20, d.x))+","+Math.max(20, Math.min(sg_height-20, d.y))+")";});
               //nodes_with_text.attr("transform", function(d){ return "translate(" + d.x + ", " + d.y + ")";});
 
               link.attr("x1", function(d) { return d.source.x; }).attr("y1", function(d) { return d.source.y; })
