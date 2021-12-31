@@ -36,7 +36,7 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item dropdown">
-                <button type="button" class="btn btn-primary btn-md dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                   DB Info
                 </button>
                 <div class="dropdown-menu">
@@ -57,20 +57,21 @@
                        <label for="dbhost">DB Host:</label>
                        <input type="text" id="host" name="host" placeholder="127.0.0.1", value="127.0.0.1">
 
+                       <!-- <button type="submit" class="btn btn-primary", onclick="establish_conn()">Connect</button> -->
                        <button type="submit" class="btn btn-primary">Connect</button>
                        <button type="button" class="btn btn-secondary">Disconnect</button> 
                    </form>
                 </div> 
             </li>
-            <li class="nav-item">
+<!--             <li class="nav-item">
               <a class="nav-link active" href="#">Home</a>
-            </li>
-            <li class="nav-item">
+            </li> -->
+<!--             <li class="nav-item">
               <a class="nav-link active" href="#">Params</a>
             </li>
             <li class="nav-item">
               <a class="nav-link active" href="#">Schema Graph</a>
-            </li>
+            </li> -->
           </ul>
         </div>
     </div>
@@ -80,43 +81,26 @@
 <!--  href="#" onclick="tableList();return false;">  -->
 <div class="container-fluid">
     <div class="row">
-      <nav class="col-md-2 d-none d-md-block bg-light sidebar">
-        {% set active_table = active_table|default("adult") %}
-        <ul class="nav flex-column mb-2">
-            {% for i in db_tables %}
-                <li class="nav-item" id="tableList"> <!--id="tableList"-->
-                    <a {% if i|string == active_table|string %}class="active nav-link"
-                                                   {% else %}class="nav-link"{% endif %}
-                       href="{{ url_for('db_connect', active_table=i)|e }}">
-                        <span data-feather="file-text"></span>{{ i }}{{ caption|e }}
-                    </a>
-                </li>
-
-            {% endfor %}
-        </ul>
-
-        <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-            <span>Table Schemas</span>
-            <a class="d-flex align-items-center text-muted" href="#">
-                <span data-feather="plus-circle"></span>
-            </a>
-        </h6>
-
-        <ul class="nav flex-column mb-2 attr-list">
-            {% if db_datatype is defined%}
-              {% for attr in db_datatype[active_table] %}
-                <li class="form-check nav-item">
-                    <label class="form-check-label" for="{{ attr[0] }}">{{ attr[0] }}{{ caption|e }}</label>
-                    <input class="form-check-input ml-2" type="checkbox" name="{{ attr[0] }}" value=""
-                           id="checkbox-{{ attr[0] }}"
-                           {% if attr[1] == 'character' %}checked{% endif %}>
-
-                </li>
-              {% endfor %}
-            {% endif %}
-        </ul>
+     <nav class="col-md-1 d-none d-md-block bg-light accordion accordion-flush">
+             {% for i in db_tables %}
+             <div class="accordion-item">
+               <h2 class="accordion-header" id="heading{{ i }}">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{i}}" aria-expanded="true" aria-controls="collapse{{ i }}"> {{i}}
+                </button>
+              </h2>
+                <div id="collapse{{ i }}" class="accordion-collapse collapse" aria-labelledby="heading{{ i }}" data-bs-parent="#accordionExample">
+                  <div class="accordion-body">
+                    <ul class="list-group">
+                      {% for c in db_datatype[i]%}
+                      <li class="list-group-item">{{ c[0] }} </li>
+                      {% endfor %}
+                    </ul>
+                  </div>
+                </div>
+            </div>
+             {% endfor %}
+         </ul>
       </nav>
-
       <div class="col-md-5"> <!--//col-md-7-->
         <form id="query-form" method="POST" action="/run">
             <div class="col-auto" style="display: flex; flex-direction: column; justify-content: center;  ">
@@ -197,7 +181,7 @@
               <div id="selectedJGexpl" style="margin-top: 50px;"></div>
               <div id="legend"></div>   <!----->
               <!-- <div class="row"> -->
-                  <div  id='vis'></div>
+                  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom" id='vis'></div>
                 <!-- </div>   -->
                 <!-- <div class="row"> -->
                   <div >
@@ -491,7 +475,7 @@
       }
 
       function expParser(pdes){
-        var tmp = pdes.split(',');
+        var tmp = pdes.split(' ∧ ');
         var newNodeList = [];
         var newTargetNodeList = [];
         
@@ -632,10 +616,10 @@
         return originalTxt.toString().replace(regex, replaceTxt);
       }
 
-      function repText(originalTxt, searchComma, replaceTxt){
-        const regex = new RegExp(searchComma, 'g');
-        return originalTxt.toString().replace(regex, replaceTxt);
-      }
+      // function repText(originalTxt, searchComma, replaceTxt){
+      //   const regex = new RegExp(searchComma, 'g');
+      //   return originalTxt.toString().replace(regex, replaceTxt);
+      // }
 
       function expTable(exp_len, exp_data, highlightTextList, color_matching){
         let expHtml = "";
@@ -644,7 +628,7 @@
 
         for(var i=0;i<exp_len;i++){
           exp_data_pdesc = exp_data[i][2];
-          exp_data_pdesc = repText(exp_data_pdesc, ',', "<span>&#8743;</span>");
+          // exp_data_pdesc = repText(exp_data_pdesc, ',', "<span>&#8743;</span>");
           highlightTextList.forEach(function(element){
             var tmp_element = element.slice(0,-2);
             var setcolor;
@@ -673,7 +657,6 @@
         updateBtnHtml += "<button type=\"button\" class=\"btn btn-outline-primary\" onclick=\"ratingUpdate()\">Update</button>";  
         $("#user_rating_update").empty();             
         $("#user_rating_update").append(updateBtnHtml);
-        
       }
 
 
@@ -756,14 +739,14 @@
 
       function exp_summary(summaryData, exp_data, exp_len, graphData){ //(exp_len, recallData, precisionData)
         // join graph + scatter plot
-        let sumHtml = "";
-        var numOfExp = "The number of explanations: "+exp_len;
-        sumHtml = "<table class=\"table table-bordered\" sellspacing=\"0\" width=\"90%\" id=\"exp\"><tbody>";
-        sumHtml += "<tr><td style=\"text-align: left;\">Summary</td></tr>";
-        sumHtml += "<tr><td style=\"text-align: left;\">1."+ numOfExp +"</td></tr>";
-        sumHtml += "</tbody></table>";
+        // let sumHtml = "";
+        // var numOfExp = "The number of explanations: "+exp_len;
+        // sumHtml = "<table class=\"table table-bordered\" sellspacing=\"0\" width=\"90%\" id=\"exp\"><tbody>";
+        // sumHtml += "<tr><td style=\"text-align: left;\">Summary</td></tr>";
+        // sumHtml += "<tr><td style=\"text-align: left;\">1."+ numOfExp +"</td></tr>";
+        // sumHtml += "</tbody></table>";
         $("#explanation_summary").empty();
-        $("#explanation_summary").append(sumHtml);
+        // $("#explanation_summary").append(sumHtml);
         $("#explanation_graph").empty();
 
         //////////////////fscor-d3 scatter plot//////////////////
@@ -1008,13 +991,13 @@
                           if(d.id == id){ fscoreY += " | "+d.y; return "#6699ff";} //"blue" "#b3ccff"
                           else{ return "#ffab00";}}).style("visibility", "visible");
                     //tooltip.style("visibility", "visible").text("clicked: ", d.id);
-                    let sumHtml = "";
-                    sumHtml = "<table class=\"table table-bordered\" sellspacing=\"0\" width=\"90%\" id=\"exp\"><tbody>";
-                    sumHtml += "<tr><td style=\"text-align: left;\">Selected Join Graph</td></tr>";
-                    sumHtml += "<tr><td style=\"text-align: left;\">1. Corresponding Fscore:"+fscoreY+"</td></tr>";
-                    sumHtml += "</tbody></table>";
+                    // let sumHtml = "";
+                    // sumHtml = "<table class=\"table table-bordered\" sellspacing=\"0\" width=\"90%\" id=\"exp\"><tbody>";
+                    // sumHtml += "<tr><td style=\"text-align: left;\">Selected Join Graph</td></tr>";
+                    // sumHtml += "<tr><td style=\"text-align: left;\">1. Corresponding Fscore:"+fscoreY+"</td></tr>";
+                    // sumHtml += "</tbody></table>";
                     $("#selectedJGexpl").empty();
-                    $("#selectedJGexpl").append(sumHtml);
+                    // $("#selectedJGexpl").append(sumHtml);
                     selectedJG(id);
                     //filter explanation table
                     filterExpl(id);
@@ -1411,6 +1394,8 @@
               "data": {"name": "mydata", "values": plotdata},
               "facet": {"row": {"field": "user_question"}},
               "spec": {
+                "width": 1000,
+                "height": 200,
                 "mark": "bar",
                 "encoding": {
                   "x": {
@@ -1434,6 +1419,8 @@
               "data": { "name": "mydata", "values": plotdata},
               "facet": {"row": {"field": "user_question"}},
               "spec": {
+                "width": 1000,
+                "height": 200,
                 "mark": "bar",
                 "encoding": {
                   "x": {
@@ -1460,8 +1447,8 @@
 
           var svg = d3.select("#schemagraph")            
             .append("svg")
-            .attr("width", 580) //400
-            .attr("height", 380); //300
+            .attr("width", 600) //400
+            .attr("height", 400); //300
 
           svg.append("defs").append("marker")
               //.attr("id", "arrow")
@@ -1477,7 +1464,7 @@
           var sg_width = svg.attr("width");
           var sg_height = svg.attr("height");
 
-          var graph = {{schema_graph_data|safe}};
+          var graph = {{schema_graph_data | safe}};
 
           var simulation = d3
               .forceSimulation(graph.nodes)
@@ -1493,7 +1480,7 @@
                 .append("g")
                 .attr("class", "link")
                 .append("line")
-                .style("stroke", "blue")
+                .style("stroke", "grey")
                 .attr("class", "link-line")
                 //.attr("marker-end", "url(#arrow)")
                 .attr("stroke-width", function(d) {return 3;})
@@ -1514,7 +1501,10 @@
             var drag = d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended);
             var nodes_with_text = svg.append("g").selectAll("g").data(graph.nodes)
                                       .enter().append("g").call(drag);
-            var circles = nodes_with_text.append("circle").attr("r", 20).attr("fill", "red"); //15
+            // var circles = nodes_with_text.append("circle").attr("r", 20).attr("fill", "red"); //15
+            var circles = nodes_with_text.append("rect").attr("width", function(d){ return d.name.length*10}).attr("height", 40)
+              .attr("x", function(d){return -(d.name.length*7)/2}).attr("y",-20).attr("fill", "#a2a4fb");
+
             var texts = nodes_with_text.append("text").text(function(d){ return d.name }).style("text-anchor", "middle");
             var tooltip_schema = d3.select("#schemagraph").append("div").style("position", "absolute")
                                     .style("visibility", "hidden").style("background-color", "#a7a7a7")

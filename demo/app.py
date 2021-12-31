@@ -13,6 +13,7 @@ import threading
 import math
 import pandas as pd 
 import ast
+import decimal
 
 logger = logging.getLogger()
 logger.addHandler(default_handler)
@@ -21,7 +22,7 @@ app = Flask(__name__)
 
 
 two_cols = re.compile('\w+\.\w+\s{0,}!?(<|>|<=|>=|=|<>|!=)\s{0,}\w+\.\w+\s{0,}')
-pattern_triplets_re = re.compile(r'([\w\.\s]+)([<|=|>])([\w\.\s]+)')
+pattern_triplets_re = re.compile(r'([\w\.\s-]+)([<|=|>])([\w\.\s]+)')
 
 @app.route("/")
 def index():
@@ -134,14 +135,18 @@ def draw():
     logger.debug(data)
 
     pattern_q = f"""
-    select * from {resultSchemaName}.topk_patterns_from_top_jgs
+    select * from {resultSchemaName}.patterns
     where p_desc='{data['pattern_desc']}' limit 1
     """
     pattern_dict = pd.read_sql(pattern_q, conn).to_dict(orient='records')[0]
+    logger.debug(pattern_dict['pattern_attr_mappings'])
+    logger.debug(pattern_dict['user_question_map'])
     attr_map_dict = ast.literal_eval(f"{pattern_dict['pattern_attr_mappings']}")
     questions_map = ast.literal_eval(f"{pattern_dict['user_question_map']}")
     logger.debug(attr_map_dict)
     pattern_triplets = [list(l) for l in re.findall(pattern_triplets_re, data['pattern_desc'])]
+    pattern_triplets = [[x.strip() for x in t] for t in pattern_triplets]
+    logger.debug(pattern_triplets)
     pattern_triplets_dict = {ll[0]:ll[1:] for ll in pattern_triplets}
 
     if(data['first_call']=='yes'):
@@ -205,7 +210,7 @@ def draw():
         """
         cursor.execute(min_max_q)
         min_val, max_val = cursor.fetchone()
-        graph_config['bin_size'] = min(10, max(0.1, round(abs(min_val-max_val)/10,2)))
+        graph_config['bin_size'] = min(1, max(0.1, round(abs(float(min_val)-float(max_val))/10,2)))
 
 
     else:
@@ -230,7 +235,9 @@ def draw():
     cursor.execute(data_q)
     data_to_draw = cursor.fetchall()
 
-    dict_data = [dict(zip(cols, t)) for t in data_to_draw]
+    data_to_draw_formatted = [[float(o) if isinstance(o, decimal.Decimal) else o for o in t] for t in data_to_draw]
+
+    dict_data = [dict(zip(cols, t)) for t in data_to_draw_formatted]
 
     if(data['first_call']=='yes'):
         chosen_col = col_to_draw
@@ -660,7 +667,7 @@ def getHighlightTexts(exp_list):
     highlightTxtList = []
     for i in range(0, len(exp_list)):
         tmp = exp_list[i][2]
-        split_comma = tmp.split(',')
+        split_comma = tmp.split(' ∧ ')
         for j in range(0, len(split_comma)):
             tmp_line = split_comma[j]
             get_text = tmp_line.split('.')[0]

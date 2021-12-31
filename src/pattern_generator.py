@@ -118,7 +118,7 @@ class Pattern_Generator:
 
             pending_pattern['correlated_attrs'] = correlated_attrs_recover_dict
 
-        pending_pattern['desc'] = ','.join(sorted(pending_pattern['desc']))
+        pending_pattern['desc'] = ' ∧ '.join(sorted(pending_pattern['desc']))
         pending_pattern['num_edges'] = pending_pattern['join_graph'].num_edges
         pending_pattern['is_user'] = user_questions_map[pending_pattern['is_user']]
         pending_pattern['user_question_map'] = json.dumps(user_questions_map)

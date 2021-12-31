@@ -96,3 +96,7 @@ stroke: steelblue;
   width: 100%;
   background-color: #ddd;
 }
+
+#vis{
+  overflow: scroll;
+}
