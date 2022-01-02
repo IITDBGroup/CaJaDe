@@ -210,8 +210,12 @@ def draw():
         """
         cursor.execute(min_max_q)
         min_val, max_val = cursor.fetchone()
-        graph_config['bin_size'] = min(1, max(0.1, round(abs(float(min_val)-float(max_val))/10,2)))
-
+        num_range = abs(float(min_val)-float(max_val))
+        if(num_range>1):
+            graph_config['bin_size'] = 1
+        else:
+            graph_config['bin_size'] = 0.1
+        # graph_config['bin_size'] = min(1, max(0.1, round(abs(float(min_val)-float(max_val))/10,2)))
 
     else:
         graph_config['pattern_value'] = pattern_triplets_dict[col_to_draw][1]
@@ -231,6 +235,22 @@ def draw():
         """
 
     graph_config['col_to_draw'] = col_to_draw
+
+
+    if(not where_cols):
+        graph_title = [f"Histogram of {col_to_draw}"]
+        graph_subtitle = [""]
+    else:
+        graph_title = [f"Histogram of {col_to_draw} when: ",  ""]
+        for i in range(0, len(where_cols)-1):
+            graph_title.append([''.join(where_cols[i])+ ' ∧ '])
+        graph_title.append(''.join(where_cols[-1]))
+        graph_title.append([''])
+        if(plot_type=='numeric'):
+            graph_subtitle = [f"Red highlighted are {''.join([graph_config['col_to_draw'], graph_config['pattern_condition'], graph_config['pattern_value']])}"]
+        else:
+            graph_subtitle = ["Red highlighted are " + f"{''.join([graph_config['col_to_draw'], '=', graph_config['pattern_value']])}"]
+
     logger.debug(data_q)
     cursor.execute(data_q)
     data_to_draw = cursor.fetchall()
@@ -241,6 +261,9 @@ def draw():
 
     if(data['first_call']=='yes'):
         chosen_col = col_to_draw
+
+    graph_config['title']= graph_title
+    graph_config['subtitle']= graph_subtitle
 
     return jsonify(data=dict_data, pattern_config=graph_config, plot_type=plot_type, cols=pattern_cols, chosen_col=chosen_col)
 

@@ -81,7 +81,7 @@
 <!--  href="#" onclick="tableList();return false;">  -->
 <div class="container-fluid">
     <div class="row">
-     <nav class="col-md-1 d-none d-md-block bg-light accordion accordion-flush">
+      <nav class="col-md-1 d-none d-md-block bg-light accordion accordion-flush">
              {% for i in db_tables %}
              <div class="accordion-item">
                <h2 class="accordion-header" id="heading{{ i }}">
@@ -101,38 +101,41 @@
              {% endfor %}
          </ul>
       </nav>
-      <div class="col-md-5"> <!--//col-md-7-->
-        <form id="query-form" method="POST" action="/run">
-            <div class="col-auto" style="display: flex; flex-direction: column; justify-content: center;  ">
+      <div class="col-md-3">
+        
+        <div class="row">
+          <form id="query-form" method="POST" action="/run">
+            <div class="col-md-12" style="display: flex; flex-direction: column; justify-content: center;  ">
               <!--<div class="input-group"> -->
                 <div class="input-group1">
                   <div class="input-group-text" style="float: left;">SELECT</div>
                   <input type="text" class="form-control" id="query-select" name="query-select" value = "count(*) as win, s.season_name" style="float: left; width: 30%;"><!--27%;--> 
                   <div class="input-group-text" style="float: left;">,</div>
                   <input type="text" class="form-control" id="query-aggregate" placeholder="COUNT(*)" name="query-aggregate" style="float: left; width: 21%;"><!--27%;-->  
+                </div>
+                <div class="input-group2">
                   <div class="input-group-text" style="float: left;">FROM</div>
                   <input type="text" class="form-control" id="query-from" name="query-from" value=" team t, game g, season s " style="float: left; width: 28%;">
                 </div>
-                <div class="input-group2">
+                <div class="input-group3">
                   <div class="input-group-text" style="float: left;">WHERE</div>
                   <input type="text" class="form-control" id="query-where" name="query-where" value=" t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' " style="float: left; width: 30%;">
+                </div>
+                <div class="input-group4">
                   <div class="input-group-text" style="float: left;">GROUP BY</div>
-                  <input type="text" class="form-control" id="query-group" name="query-group" value="s.season_name" style="float: left; width: 27%;">
-          
-                  <div class="input-group-run" style="float: left;">   <!--left--> 
-                    <button type="button" class="btn btn-outline-primary" id="execute" style="width: 100%;">Run</button><!--100%-->              
+                  <input type="text" class="form-control" id="query-group" name="query-group" value="s.season_name" style="float: left; width: 27%;">          
+                  <div class="input-group-run" style="float: right;"> 
+                    <button type="button" class="btn btn-outline-primary" id="execute" style="width: 100%;">Run</button>             
                   </div>
                 </div>
-            <!-- </div> -->
-      	</form>
+            </div>
+        	</form>
         <div id="progress">
-          <div id="probar">0%</div>
+          <div class="progress-bar progress-bar-striped" id="probar">0%</div>
+        </div>
         </div>
 
-
-          <br>
-          
-          <div class="row">
+        <div class="row">
             <br>
             <div style="display: inline;">
               <div style="float: left; width: 33%; padding: 10px;">
@@ -144,52 +147,54 @@
                 </select>
                 Rows</p>
               </div>
-              <div style="float: left; padding: 10px; width: 41%; text-align: right;" class="col-md-5">
+              <div style="float: left; padding: 10px; width: 41%; text-align: right;">
                 <p id="sltROWScount"></p>
               </div>
               <div style="float: right; width: 22%; text-align: right;" id="container"></div>
             </div>
+        </div>
+
+        <div id="display" style="overflow: auto;"></div><br>    
+
+        <div id="pageInfo" style="display: inline;">
+          <div style="float: left;">
+            <p id="displayCount"></p>
           </div>
+          <div style="float: right;">
+            <ul id="pagingul" class="col-md-6"></ul>
+          </div>
+        </div><br>
+        <div id="user_rating_update" style="width: 50%;"></div>
+        <div id="explanation_table" style="overflow: auto; height: 300px; margin-bottom: 20px;"></div><br><br><br>
+        <div id="reset_JGselection" style="float: left; width:50%;">
+          <button type="button" class="btn btn-outline-primary" onclick="resetClicked()">Reset</button>
+        </div>
+      </div>
 
-          <div id="display" style="overflow: auto;"></div><br>    
-
-          <div id="pageInfo" style="display: inline;" class="col-md-12">
-            <div style="float: left;">
-              <p id="displayCount"></p>
+      <div class="col-md-4"> <!--col-md-3--->
+       <!--  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"> -->
+        <div class="row">
+          <div id="schemagraph" class="col-md-12"></div>
+        </div>
+        <!-- <div id="selectedJGexpl" style="margin-top: 50px;"></div> -->
+        <div class="row">
+          <div id="selectedJGexpl" class="col-md-12"></div>
+          <div id="legend" class="col-md-12" ></div>
+        </div>
+        <!-- <div id="explanation_graph" style="overflow-x: auto; height: 200px; white-space:nowrap; margin-bottom: 20px;"></div> -->
+        <div id="explanation_graph" style="overflow-y: auto; height: 300px;"></div>
+        <div class="row">
+          <div id="explanation_graph" class="col-md-12"></div>
+        </div>
+      </div>   
+      
+      <div class= col-md-4>
+        <div id="explanation_summary" style="overflow-x: auto; height: 300px; white-space:nowrap; margin-bottom: 20px;"></div> <!--text-align:center;-->
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom" id='vis'></div>
+            <div >
+              <select id='viz-options' onchange="config_and_draw()"></select>
             </div>
-            <div style="float: right;">
-              <ul id="pagingul" class="col-md-6"></ul>
-            </div>
-          </div><br>
-
-          <div id="user_rating_update" style="width: 50%;"></div>
-          <div id="explanation_table" style="overflow: auto; height: 500px; margin-bottom: 20px;"></div><br><br><br>
-          
-          <div id="explanation_summary" style="overflow-x: auto; height: 560px; white-space:nowrap; margin-bottom: 20px;"></div> <!--text-align:center;-->
-          <div id="explanation_graph" style="overflow-x: auto; height: 320px; white-space:nowrap; margin-bottom: 20px;"></div>
-          <div id="reset_JGselection" style="float: left; width:50%;">
-            <button type="button" class="btn btn-outline-primary" onclick="resetClicked()">Reset</button>
-          </div>
-
-          </div>
-
-          </div>
-            <div class="col-md-4"> <!--col-md-3--->
-              <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <div id="schemagraph"></div>
-              </div>
-              <div id="selectedJGexpl" style="margin-top: 50px;"></div>
-              <div id="legend"></div>   <!----->
-              <!-- <div class="row"> -->
-                  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom" id='vis'></div>
-                <!-- </div>   -->
-                <!-- <div class="row"> -->
-                  <div >
-                    <!-- <div id='viz-nominal-options'></div> -->
-                    <select id='viz-options' onchange="config_and_draw()"></select>
-                  </div>
-                <!-- </div> -->
-            </div>
+      </div>
 
 		<script>
       var colNum;
@@ -228,7 +233,7 @@
       var selectedDataId;
       var green; 
       var purple;
-      var width = 600, height = 300;
+      var width = 200, height = 200;
       var selected_pattern_desc=null;
 
 		  $('#execute').click(function(){
@@ -416,7 +421,7 @@
           $("#sltROWScount").append(sltROWS);
           $('#container').empty();
           $('#container').append(
-            "<button onclick=\"exp()\" type=\"button\" class=\"btn btn-outline-primary\" id=\"explanation\" style=\"width:100%;\">explanation</button>"
+            "<button onclick=\"exp()\" type=\"button\" class=\"btn btn-outline-primary\" id=\"explanation\" style=\"width:100%;\">Explain</button>"
           ); 
 
           td.each(function(i){
@@ -446,7 +451,7 @@
 
             $('#container').empty();
             $('#container').append(
-              "<button onclick=\"exp()\" type=\"button\" class=\"btn btn-outline-primary\" id=\"explanation\" style=\"width:100%;\">explanation</button>"
+              "<button onclick=\"exp()\" type=\"button\" class=\"btn btn-outline-primary\" id=\"explanation\" style=\"width:100%;\">Explain</button>"
             );    
 
             td.each(function(i){
@@ -750,7 +755,7 @@
         $("#explanation_graph").empty();
 
         //////////////////fscor-d3 scatter plot//////////////////
-        var margin = {top: 80, right: 80, bottom: 80, left: 80}, fs_width = 730, fs_height = 300;
+        var margin = {top: 30, right: 30, bottom: 30, left: 30}, fs_width = 550, fs_height = 240;
         //var dataset = fscoreData.map((d) => {return {"y": d };});
         var fscoreData = [];
         var jgnameId = [];
@@ -778,17 +783,17 @@
                     .attr("height", fs_height + margin.top + margin.bottom)
                     .append("g")
                     .attr("transform","translate(" + margin.left + "," + margin.top + ")");
-        svg.append("g")
-            .attr("class", "x axis")
-            .attr("transform", "translate(0," + fs_height + ")")
-            .call(d3.axisBottom(xScale));
+        // svg.append("g")
+        //     .attr("class", "x axis")
+        //     .attr("transform", "translate(0," + fs_height + ")")
+        //     .call(d3.axisBottom(xScale));
         svg.append("g").attr("class", "y axis").call(d3.axisLeft(yScale));
         svg.append("text").attr("x", (fs_width/2)).attr("y", 0-(margin.top/2)).attr("text-anchor", "middle")
-           .style("font-size", "15px").text("F Score Scatter Plot");
-        svg.append("text").attr("text-anchor", "end").attr("x", (fs_width/2)+margin.left)
-            .attr("y", fs_height+50).text("The number of explanations");
-        svg.append("text").attr("text-anchor", "end").attr("transform", "rotate(-90)").attr("y", -margin.left + 40)
-            .attr("x", -margin.top - fs_height/2 + 100).text("F Score");
+           .style("font-size", "18px").text("F Score Scatter Plot");
+        // svg.append("text").attr("text-anchor", "end").attr("x", (fs_width/2)+margin.left)
+        //     .attr("y", fs_height+50).text("The number of explanations");
+        svg.append("text").attr("text-anchor", "end").attr("transform", "rotate(-90)").attr("y", -margin.left+60)
+            .attr("x", -margin.top*2 - fs_height/2+100).text("F Score");
         var tooltip = d3.select("#explanation_summary")
                       .append("div")
                       .attr("class", "tooltip")
@@ -810,10 +815,10 @@
           .append("circle")
           .attr("cx", function(d, i) { return xScale(i) })
           .attr("cy", function(d) { return yScale(d.y) })
-          .attr("r", 10)
+          .attr("r", 5)
           .style("fill", "#ffab00")
           .style("opacity", 0.5)
-          .style("stroke", "white")
+          .style("stroke", "black")
           .on("mouseover", mouseover )
           .on("mousemove", mousemove )
           .on("mouseout", mouseout );
@@ -940,8 +945,17 @@
                       .append("g")
                       .call(drag);
                       
-                  var circles = nodes_with_text.append("circle").attr("r", 25)
-                                                .attr("fill", function(d){ return d.color});//.attr("fill", "#6fbc5b");
+                  var circles = nodes_with_text.append("rect")
+                      .attr("width", function(d){ return d.name.length*10})
+                      .attr("height", 40)
+                      .attr("x", function(d){return -5*d.name.length})
+                      .attr("y", -20)
+                      .attr("fill", function(d){ return d.color});//.attr("fill", "#6fbc5b");
+
+                  // append("rect")
+                  //     .attr("width", 10).
+                  //     .attr("height", size*2.5)
+                  
                   var texts = nodes_with_text.append("text").text(function(d){ return d.name})
                                               .style("text-anchor", "middle").attr("class", "node-label");
                   var tooltip = d3.select("#explanation_graph")
@@ -1060,7 +1074,7 @@
                   console.log("%%%%%%%%%2%%%%%%: ", selectedData_nodes); /////@@@@@@@
                   console.log("%%%%%%%%%3%%%%%%: ", selectedData_links); /////@@@@@@@
                   
-                  var w_selected = 580; var h_selected = 450;
+                  var w_selected = 600; var h_selected = 300;
                   var svg = d3.select("#selectedJGexpl").append("svg").attr("width", w_selected).attr("height", h_selected)
                               .data(graphData[selectedDataIndex]["nodes"]).style("background-color", "#ccddff"); //b3ccff
                   var simulation = d3.forceSimulation(graphData[selectedDataIndex]["nodes"])
@@ -1073,7 +1087,12 @@
                   var drag = d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended);
                   var nodes_with_text = svg.append("g").selectAll("g").data(graphData[selectedDataIndex]["nodes"])
                                             .enter().append("g").call(drag);
-                  var circles = nodes_with_text.append("circle").attr("r", 25).attr("fill", function(d){ return d.color});//.attr("fill", "#6fbc5b");
+                  var circles = nodes_with_text.append('rect')
+                      .attr("width", function(d){ return d.name.length*10})
+                      .attr("height", 40)
+                      .attr("x", function(d){return -5*d.name.length})
+                      .attr("y", -20)
+                  .attr("fill", function(d){ return d.color});//.attr("fill", "#6fbc5b");
                   var texts = nodes_with_text.append("text").text(function(d){ return d.name})
                                               .style("text-anchor", "middle").attr("class", "node-label");
                   var tooltipp = d3.select("#selectedJGexpl").append("div").style("position", "absolute")
@@ -1204,7 +1223,7 @@
               var graph = this;
               var graphArea = svgObj.append("g");
               var active = d3.select(null); ///
-              var w = 580; var h = 450;
+              var w = 600; var h = 300;
               var svg = d3.select("#selectedJGexpl").append("svg").attr("width", w).attr("height", h).data(graph.nodes).style("background-color", "#ccddff"); //#b3ccff
                           //.on("mouseenter", mouseenter).on("mouseleave", mouseleave);
               ////@@@@
@@ -1213,18 +1232,18 @@
               var size = 20;
               var color = d3.scaleOrdinal().domain(shapes).range(keys);
               $("#legend").empty();
-              var svg_legend = d3.select("#legend").append("svg").attr("width", w).attr("height", 130).style("background-color", "#ccddff");
+              var svg_legend = d3.select("#legend").append("svg").attr("width", 600).attr("height", 60).style("background-color", "#ccddff");
               // svg_legend.append("circle").attr("cx", 200).attr("cy", 130).attr("r", 10);
-              svg_legend.append("circle").attr("cx", 110).attr("cy", 50).attr("r", 10).style("fill", "#999");
-              svg_legend.append("text").attr("x", 130).attr("y", 54).text("relations").style("font-size", "15px").attr("alignment-baseline","middle");
+              // svg_legend.append("circle").attr("cx", 110).attr("cy", 50).attr("r", 10).style("fill", "#999");
+              // svg_legend.append("text").attr("x", 130).attr("y", 54).text("relations").style("font-size", "15px").attr("alignment-baseline","middle");
               
-              svg_legend.append("rect").attr("x", 350).attr("y", 25).attr("width", size*3).attr("height", size*2).style("fill", "#33ff33");
-              svg_legend.append("text").attr("x", 360).attr("y", 50).text(green).style("font-size", "15px").attr("alignment-baseline","middle");
-              svg_legend.append("rect").attr("x", 350).attr("y", 25+size*2).attr("width", size*3).attr("height", size*2).style("fill", "#9933ff");
-              svg_legend.append("text").attr("x", 360).attr("y", 50+size*2).text(purple).style("font-size", "15px").attr("alignment-baseline","middle");
+              svg_legend.append("rect").attr("x", 235).attr("y", 5).attr("width", size*3).attr("height", size*2.5).style("fill", "#33ff33");
+              svg_legend.append("text").attr("x", 245).attr("y", 28).text(green).style("font-size", "18px").attr("alignment-baseline","middle");
+              svg_legend.append("rect").attr("x", 305).attr("y", 5).attr("width", size*3).attr("height", size*2.5).style("fill", "#9933ff");
+              svg_legend.append("text").attr("x", 315).attr("y", 28).text(purple).style("font-size", "18px").attr("alignment-baseline","middle");
 
-              svg_legend.append("rect").attr("x", 100).attr("y", 50+size+5).attr("width", size).attr("height", size).style("fill", "#999");
-              svg_legend.append("text").attr("x", 130).attr("y", 54+size+5+6).text("predicates").style("font-size", "15px").attr("alignment-baseline","middle");
+              // svg_legend.append("rect").attr("x", 100).attr("y", 50+size+5).attr("width", size).attr("height", size).style("fill", "#999");
+              // svg_legend.append("text").attr("x", 130).attr("y", 54+size+5+6).text("predicates").style("font-size", "15px").attr("alignment-baseline","middle");
               //.append("svg").attr("width", w).attr("height", h).style("background-color", "#ccddff"); //@@
               // svg_legend.selectAll("mydots").data(shapes).enter().append(function(d){ return d }).attr("x", 100).attr("y", function(d,i){return 50+i*(size+5)}).attr("width", size).attr("height", size);
               // svg_legend.selectAll("mylabels").data(shapes).enter().append("text").attr("x", 100+size*1.2).attr("y", function(d,i){ return 50 + i*(size+5) + (size/2)})
@@ -1257,15 +1276,16 @@
               var nodes_with_text = svg.append("g").selectAll("g").data(graph.nodes).enter().append("g")
                                         .attr("class", function(d){if(d.id == "attr"){return "rt";} else{return "cl";}}).call(drag);
               ///d3.selectAll(".rt").append("rect").attr("width", 150).attr("height", 25).attr("x", -75).attr("y",-12.5).attr("fill", function(d){ return d.color});
-              d3.selectAll(".rt").append("rect").attr("width", function(d){ return d.name.length*7}).attr("height", 40)
-                .attr("x", function(d){return -(d.name.length*7)/2}).attr("y",-20).attr("fill", function(d){ return d.color});
+              d3.selectAll(".rt").append("rect").attr("width", function(d){ return d.name.length*10}).attr("height", 30)
+                .attr("x", function(d){return -5*d.name.length}).attr("y",-20).attr("fill", function(d){ return d.color});
               ///////////d3.selectAll(".rt").append("rect").attr("width", 50).attr("height", 50).attr("x", -25).attr("y",-25).attr("fill", function(d){ return d.color});
                 //.append("text").text(function(d){ return d.name}).style("text-anchor", "middle").style("font-size", "10px").attr("class", "node-label");
-              d3.selectAll(".cl").append("circle").attr("r", 25).attr("fill", function(d){ return d.color});
+              d3.selectAll(".cl").append("rect").attr("width", function(d){ return d.name.length*9}).attr("height", 30)
+              .attr("x", function(d){return -4.5*d.name.length}).attr("y", -20).attr("fill", function(d){ return d.color});
                 //.append("text").text(function(d){ return d.name}).style("text-anchor", "middle").style("font-size", "10px").attr("class", "node-label");
               //var circles = nodes_with_text.append("circle").attr("r", 25).attr("fill", function(d){ return d.color});
-              var texts = nodes_with_text.append("text").text(function(d){ return d.name}).style("text-anchor", "middle")
-                                          .style("font-size", function(d){if(d.id == "attr"){return "12px";} else{return "20px";}}).attr("class", "node-label");
+              var texts = nodes_with_text.append("text").text(function(d){ return d.name}).style("text-anchor", "middle").style("font-weight", "bold")
+                                          .style("font-size", function(d){if(d.id == "attr"){return "14px";} else{return "18px";}}).attr("class", "node-label");
               //#svg
               var tooltiptest = d3.select("#selectedJGexpl").append("div").style("position", "absolute").style("visibility", "hidden").style("background-color", "#a7a7a7")
                               .style("color", "white").style("border-width", "1px").style("border-radius", "5px").style("padding", "10px");
@@ -1391,11 +1411,27 @@
           if(plot_type=='numeric'){
             var vlSpec = {
               "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+              "title": {
+                "text": pattern_config.title,
+                "subtitle": pattern_config.subtitle,
+                "offset": 50,
+                "fontSize": 20,
+                "subtitleFontSize": 15,
+                "font": "Montserrat",
+                "subtitleFont": "monospace",
+                "subtitleColor": "red"
+                },
               "data": {"name": "mydata", "values": plotdata},
               "facet": {"row": {"field": "user_question"}},
+              "config": {
+                "axis": {"labelFont": "monospace", "titleFont": "monospace", "titleFontSize":15, "labelFontSize":15},
+                "header": {"labelFont": "monospace", "titleFont": "monospace", "labelFontSize":15, "titleFontSize":10},
+                "mark": {"font": "monospace"},
+                "title": {"font": "monospace", "subtitleFont": "monospace"}
+              },
               "spec": {
-                "width": 1000,
-                "height": 200,
+                "width": 500,
+                "height": 150,
                 "mark": "bar",
                 "encoding": {
                   "x": {
@@ -1404,7 +1440,11 @@
                     "type": "quantitative",
                     "axis": {"labelAngle": 45}
                   },
-                  "y": {"aggregate": "count", "type": "quantitative"},
+                  "y": {
+                    "aggregate": "count", 
+                    "type": "quantitative",
+                    "title": "count"
+                  },
                   "color": {
                     "condition": [{"test": testformat,
                                    "value": "red"}]
@@ -1415,22 +1455,38 @@
           }else{
             var vlSpec = {
               "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-              // "description": "A simple bar chart with embedded data.",
+              "title": {
+                "text": pattern_config.title,
+                "subtitle": pattern_config.subtitle,
+                "offset": 50,
+                "fontSize": 20,
+                "subtitleFontSize": 15,
+                "font": "Montserrat",
+                "subtitleFont": "monospace",
+                "subtitleColor": "red"
+                },
               "data": { "name": "mydata", "values": plotdata},
               "facet": {"row": {"field": "user_question"}},
+              "config": {
+                "axis": {"labelFont": "monospace", "titleFont": "monospace", "titleFontSize":15, "labelFontSize":15},
+                "header": {"labelFont": "monospace", "titleFont": "monospace", "labelFontSize":15, "titleFontSize":10},
+                "mark": {"font": "monospace"},
+                "title": {"font": "monospace", "subtitleFont": "monospace"}
+              },
               "spec": {
-                "width": 1000,
-                "height": 200,
-                "mark": "bar",
+                "width": 500,
+                "height": 150,
+                "mark": {"type": "bar", "width": {"band": 0.7}},
                 "encoding": {
                   "x": {
                     "field": pattern_config.col_to_draw , 
                     "type": "nominal", 
-                    "axis": {"labelAngle": 45}
+                    "axis": {"labelAngle": 30}
                   },
                   "y": {
                     "field": "cnt", 
-                    "type": "quantitative"
+                    "type": "quantitative",
+                    "title": "count"
                   },
                   "color": {"condition": 
                   [{"test": testformat, 
@@ -1448,7 +1504,7 @@
           var svg = d3.select("#schemagraph")            
             .append("svg")
             .attr("width", 600) //400
-            .attr("height", 400); //300
+            .attr("height", 300); //300
 
           svg.append("defs").append("marker")
               //.attr("id", "arrow")
@@ -1503,7 +1559,7 @@
                                       .enter().append("g").call(drag);
             // var circles = nodes_with_text.append("circle").attr("r", 20).attr("fill", "red"); //15
             var circles = nodes_with_text.append("rect").attr("width", function(d){ return d.name.length*10}).attr("height", 40)
-              .attr("x", function(d){return -(d.name.length*7)/2}).attr("y",-20).attr("fill", "#a2a4fb");
+              .attr("x", function(d){return -5*d.name.length}).attr("y", -20).attr("fill", "#a2a4fb");
 
             var texts = nodes_with_text.append("text").text(function(d){ return d.name }).style("text-anchor", "middle");
             var tooltip_schema = d3.select("#schemagraph").append("div").style("position", "absolute")
