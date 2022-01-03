@@ -1522,13 +1522,14 @@
 
           var graph = {{schema_graph_data | safe}};
 
-          var simulation = d3
-              .forceSimulation(graph.nodes)
-              .force("link",d3.forceLink(graph.links).id(function(d) {return d.id;}).distance(120).links(graph.links))
-              .force("charge", d3.forceManyBody().strength(-450)) //-200
-              .force("center", d3.forceCenter(sg_width / 2, sg_height / 2))
-              .force("collision", d3.forceCollide().radius(function(d){return d.radius*2})) //##
-              .on("tick", ticked);
+          // var simulation = d3
+          //     .forceSimulation(graph.nodes)
+          //     .force("link",d3.forceLink(graph.links).id(function(d) {return d.id;}).distance(120).links(graph.links))
+          //     .force("charge", d3.forceManyBody().strength(-450)) //-200
+          //     .force("center", d3.forceCenter(sg_width / 2, sg_height / 2))
+          //     //@@@@@@@.force("collision", d3.forceCollide().radius(function(d){return d.radius*2})) //##
+          //     .force('collision', collisionForce)
+          //     .on("tick", ticked);
 
             var link = svg.selectAll(".link")
                 .data(graph.links)
@@ -1560,13 +1561,120 @@
             // var circles = nodes_with_text.append("circle").attr("r", 20).attr("fill", "red"); //15
             var circles = nodes_with_text.append("rect").attr("width", function(d){ return d.name.length*10}).attr("height", 40)
               .attr("x", function(d){return -5*d.name.length}).attr("y", -20).attr("fill", "#a2a4fb");
-
+            ///////@@@@@
+            var collisionForce = rectCollide().size(function (d) { return [d.name.length*10, 40] })
+            //var boxForce = boundedBox().bounds([[0, 0], [sg_width, sg_height]]).size(function (d) { return [d.name.length*10, 40] })
+            ///////@@@@@
             var texts = nodes_with_text.append("text").text(function(d){ return d.name }).style("text-anchor", "middle");
             var tooltip_schema = d3.select("#schemagraph").append("div").style("position", "absolute")
                                     .style("visibility", "hidden").style("background-color", "#a7a7a7")
                                     .style("color", "white").style("border-width", "1px")
                                     .style("border-radius", "5px").style("padding", "10px");
-            
+            var simulation = d3
+              .forceSimulation(graph.nodes)
+              .force("link",d3.forceLink(graph.links).id(function(d) {return d.id;}).distance(120).links(graph.links))
+              .force("charge", d3.forceManyBody().strength(-450)) //-200
+              .force("center", d3.forceCenter(sg_width / 2, sg_height / 2))
+              //@@@@@@@.force("collision", d3.forceCollide().radius(function(d){return d.radius*2})) //##
+              .force('collision', collisionForce)
+              .on("tick", ticked);
+            function rectCollide() {
+              var nodes, sizes, masses
+              var size = constant([0, 0])
+              var strength = 1
+              var iterations = 1
+
+              function force() {
+                  var node, size, mass, xi, yi
+                  var i = -1
+                  while (++i < iterations) { iterate() }
+
+                  function iterate() {
+                      var j = -1
+                      var tree = d3.quadtree(nodes, xCenter, yCenter).visitAfter(prepare)
+
+                      while (++j < nodes.length) {
+                          node = nodes[j]
+                          size = sizes[j]
+                          mass = masses[j]
+                          xi = xCenter(node)
+                          yi = yCenter(node)
+
+                          tree.visit(apply)
+                      }
+                  }
+
+                  function apply(quad, x0, y0, x1, y1) {
+                      var data = quad.data
+                      var xSize = (size[0] + quad.size[0]) / 2
+                      var ySize = (size[1] + quad.size[1]) / 2
+                      if (data) {
+                          if (data.index <= node.index) { return }
+
+                          var x = xi - xCenter(data)
+                          var y = yi - yCenter(data)
+                          var xd = Math.abs(x) - xSize
+                          var yd = Math.abs(y) - ySize
+
+                          if (xd < 0 && yd < 0) {
+                              var l = Math.sqrt(x * x + y * y)
+                              var m = masses[data.index] / (mass + masses[data.index])
+
+                              if (Math.abs(xd) < Math.abs(yd)) {
+                                  node.vx -= (x *= xd / l * strength) * m
+                                  data.vx += x * (1 - m)
+                              } else {
+                                  node.vy -= (y *= yd / l * strength) * m
+                                  data.vy += y * (1 - m)
+                              }
+                          }
+                      }
+
+                      return x0 > xi + xSize || y0 > yi + ySize ||
+                              x1 < xi - xSize || y1 < yi - ySize
+                  }
+
+                  function prepare(quad) {
+                      if (quad.data) {
+                          quad.size = sizes[quad.data.index]
+                      } else {
+                          quad.size = [0, 0]
+                          var i = -1
+                          while (++i < 4) {
+                              if (quad[i] && quad[i].size) {
+                                  quad.size[0] = Math.max(quad.size[0], quad[i].size[0])
+                                  quad.size[1] = Math.max(quad.size[1], quad[i].size[1])
+                              }
+                          }
+                      }
+                  }
+              }
+
+              function xCenter(d) { return d.x + d.vx + sizes[d.index][0] / 2 }
+              function yCenter(d) { return d.y + d.vy + sizes[d.index][1] / 2 }
+
+              force.initialize = function (_) {
+                  sizes = (nodes = _).map(size)
+                  masses = sizes.map(function (d) { return d[0] * d[1] })
+              }
+
+              force.size = function (_) {
+                  return (arguments.length
+                        ? (size = typeof _ === 'function' ? _ : constant(_), force)
+                        : size)
+              }
+
+              force.strength = function (_) {
+                  return (arguments.length ? (strength = +_, force) : strength)
+              }
+
+              force.iterations = function (_) {
+                  return (arguments.length ? (iterations = +_, force) : iterations)
+              }
+
+              return force
+            }            
+            function constant(_) { return function () { return _ } }
             function ticked() {
               nodes_with_text.attr("transform", function(d) { return "translate("+Math.max(20, Math.min(sg_width-20, d.x))+","+Math.max(20, Math.min(sg_height-20, d.y))+")";});
               //nodes_with_text.attr("transform", function(d){ return "translate(" + d.x + ", " + d.y + ")";});
