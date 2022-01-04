@@ -109,24 +109,24 @@
               <!--<div class="input-group"> -->
                 <div class="input-group1">
                   <div class="input-group-text" style="float: left;">SELECT</div>
-                  <input type="text" class="form-control" id="query-select" name="query-select" value = "count(*) as win, s.season_name" style="float: left; width: 80%;"><!--27%;--> 
-<!--                   <div class="input-group-text" style="float: left;">,</div>
-                  <input type="text" class="form-control" id="query-aggregate" placeholder="COUNT(*)" name="query-aggregate" style="float: left; width: 21%;"> -->
+                  <input type="text" class="form-control" id="query-select" name="query-select" value = "count(*) as win, s.season_name" style="float: left; width: 30%;"><!--27%;--> 
+                  <div class="input-group-text" style="float: left;">,</div>
+                  <input type="text" class="form-control" id="query-aggregate" placeholder="COUNT(*)" name="query-aggregate" style="float: left; width: 21%;"><!--27%;-->  
                 </div>
                 <div class="input-group2">
                   <div class="input-group-text" style="float: left;">FROM</div>
-                  <input type="text" class="form-control" id="query-from" name="query-from" value=" team t, game g, season s " style="float: left; width: 83%;">
+                  <input type="text" class="form-control" id="query-from" name="query-from" value=" team t, game g, season s " style="float: left; width: 28%;">
                 </div>
                 <div class="input-group3">
                   <div class="input-group-text" style="float: left;">WHERE</div>
-                  <input type="text" class="form-control" id="query-where" name="query-where" value=" t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' " style="float: left; width: 80%;">
+                  <input type="text" class="form-control" id="query-where" name="query-where" value=" t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' " style="float: left; width: 30%;">
                 </div>
                 <div class="input-group4">
                   <div class="input-group-text" style="float: left;">GROUP BY</div>
-                  <input type="text" class="form-control" id="query-group" name="query-group" value="s.season_name" style="float: left; width: 60%;">          
-                  <!-- <div class="input-group-run" style="float: right;">  -->
-                  <button type="button" class="btn btn-outline-primary" id="execute" style="float: right; width: 18%;">Run</button>             
-                  <!-- </div> -->
+                  <input type="text" class="form-control" id="query-group" name="query-group" value="s.season_name" style="float: left; width: 27%;">          
+                  <div class="input-group-run" style="float: right;"> 
+                    <button type="button" class="btn btn-outline-primary" id="execute" style="width: 100%;">Run</button>             
+                  </div>
                 </div>
             </div>
         	</form>
@@ -139,22 +139,22 @@
             <br>
             <div style="display: inline;">
               <div style="float: left; width: 33%; padding: 10px;">
-                <p>Show
-                <select id="dataPerPage" class="form-select" style="width: 70px; display: inline;">
+                <!-- <p>Show
+                <select id="dataPerPage" class="form-select" style="width: 70px; display: inline;" onchange="changeRowsSelect()">
                   <option value="10">10</option>
                   <option value="15">15</option>
                   <option value="20">20</option>
                 </select>
-                Rows</p>
+                Rows</p> -->
               </div>
               <div style="float: left; padding: 10px; width: 41%; text-align: right;">
-                <p id="sltROWScount"></p>
+                <!-- <p id="sltROWScount"></p> -->
               </div>
               <div style="float: right; width: 22%; text-align: right;" id="container"></div>
             </div>
         </div>
 
-        <div id="display" style="overflow-y: auto; height: 300px;"></div>  
+        <div id="display" style="overflow-y: auto; height:300px;"></div><br>    
 
         <div id="pageInfo" style="display: inline;">
           <div style="float: left;">
@@ -163,14 +163,12 @@
           <div style="float: right;">
             <ul id="pagingul" class="col-md-6"></ul>
           </div>
+        </div><br>
+        <div id="user_rating_update" style="width: 50%;"></div>
+        <div id="explanation_table" style="overflow: auto; height: 300px; margin-bottom: 20px;"></div><br><br><br>
+        <div id="reset_JGselection" style="float: left; width:50%;">
+          <button type="button" class="btn btn-outline-primary" onclick="resetClicked()">Reset</button>
         </div>
-        <div class="row">
-          <div id="user_rating_update" style="width: 50%;"></div>
-          <div id="reset_JGselection" style="float: left; width:50%;">
-            <button type="button" class="btn btn-outline-primary" onclick="resetClicked()">Reset</button>
-          </div>
-        </div>
-        <div id="explanation_table" style="overflow: auto; height: 300px; margin-bottom: 20px;"></div>
       </div>
 
       <div class="col-md-4"> <!--col-md-3--->
@@ -178,7 +176,6 @@
         <div class="row">
           <div id="schemagraph" class="col-md-12"></div>
         </div>
-        <br>
         <!-- <div id="selectedJGexpl" style="margin-top: 50px;"></div> -->
         <div class="row">
           <div id="selectedJGexpl" class="col-md-12"></div>
@@ -277,8 +274,9 @@
             tdArr = [];
             sltROWS = 0;
 
-		        displayData(1, dataPerPage);
-		        paging(totalNum, dataPerPage, pageCount, 1);
+		        displayData(totalNum);//(1, dataPerPage);
+		        //paging(totalNum, dataPerPage, pageCount, 1);
+
             //selectRows();
             /***
 		        $("#dataPerPage").change(function () {
@@ -295,80 +293,80 @@
 		      }
 		    })
 		    
-        $("#dataPerPage").change(function () {
-		      dataPerPage = $("#dataPerPage").val();
-          displayData(1, dataPerPage);
-		      paging(totalNum, dataPerPage, pageCount, 1);
+        // $("#dataPerPage").change(function () {
+		    //   dataPerPage = $("#dataPerPage").val();
+        //   displayData(1, dataPerPage);
+		    //   paging(totalNum, dataPerPage, pageCount, 1);
 
-		      //paging(totalNum, dataPerPage, pageCount, globalCurrentPage);
-		      //displayData(globalCurrentPage, dataPerPge);
-		    });
+		    //   //paging(totalNum, dataPerPage, pageCount, globalCurrentPage);
+		    //   //displayData(globalCurrentPage, dataPerPge);
+		    // });
 
-		    function paging(totalNum, dataPerPage, pageCount, currentPage){
-		      let totalPageNum = Math.ceil(totalNum/dataPerPage);
-		      if(totalPageNum < pageCount){
-		        pageCount = totalPageNum;
-		      }
-		      let pageGroup = Math.ceil(currentPage/pageCount);
-		      let last = pageGroup*pageCount;
+		    // function paging(totalNum, dataPerPage, pageCount, currentPage){
+		    //   let totalPageNum = Math.ceil(totalNum/dataPerPage);
+		    //   if(totalPageNum < pageCount){
+		    //     pageCount = totalPageNum;
+		    //   }
+		    //   let pageGroup = Math.ceil(currentPage/pageCount);
+		    //   let last = pageGroup*pageCount;
 		      
-		      if(last>totalPageNum){
-		        last = totalPageNum;
-		      }
-		      let first = last - (pageCount -1);
-		      let next = last + 1;
-		      let prev = first - 1;
-		      let pageHtml = "";
+		    //   if(last>totalPageNum){
+		    //     last = totalPageNum;
+		    //   }
+		    //   let first = last - (pageCount -1);
+		    //   let next = last + 1;
+		    //   let prev = first - 1;
+		    //   let pageHtml = "";
 		      
-		      pageHtml += "<nav aria-label=\"Page navigation example\"><ul class=\"pagination\">";
+		    //   pageHtml += "<nav aria-label=\"Page navigation example\"><ul class=\"pagination\">";
 
-		      if(prev > 0){
-            pageHtml += "<li><a class=\"page-link\" href='#' id='prev' aria-label=\"Previous\"><span aria-hidden=\"true\">&laquo;</span><span class=\"sr-only\">Previous</span></a></li>";		       
-		      }
-		      for(var i = first; i<=last; i++){ 
-		        if(currentPage == i){
-              pageHtml += "<li class='on'><a class=\"page-link\" href='#' id='"+i+"'>" + i + "</a></li>";
+		    //   if(prev > 0){
+        //     pageHtml += "<li><a class=\"page-link\" href='#' id='prev' aria-label=\"Previous\"><span aria-hidden=\"true\">&laquo;</span><span class=\"sr-only\">Previous</span></a></li>";		       
+		    //   }
+		    //   for(var i = first; i<=last; i++){ 
+		    //     if(currentPage == i){
+        //       pageHtml += "<li class='on'><a class=\"page-link\" href='#' id='"+i+"'>" + i + "</a></li>";
 
-		        } else{
-              pageHtml += "<li><a class=\"page-link\" href='#' id='"+i+"'>" + i + "</a></li>";
+		    //     } else{
+        //       pageHtml += "<li><a class=\"page-link\" href='#' id='"+i+"'>" + i + "</a></li>";
 
-		        }
-		      }
-		      if(last<totalPageNum){
-            pageHtml += "<li><a class=\"page-link\" href='#' id='next' aria-label=\"Next\"><span aria-hidden=\"true\">&raquo;</span><span class=\"sr-only\">Next</span></a></li>";
-		      }
-		      pageHtml += "</ul></nav>";
-		      $("#pagingul").html(pageHtml);
+		    //     }
+		    //   }
+		    //   if(last<totalPageNum){
+        //     pageHtml += "<li><a class=\"page-link\" href='#' id='next' aria-label=\"Next\"><span aria-hidden=\"true\">&raquo;</span><span class=\"sr-only\">Next</span></a></li>";
+		    //   }
+		    //   pageHtml += "</ul></nav>";
+		    //   $("#pagingul").html(pageHtml);
 		      
-		      let displayCount = "";
-		      let currentShowingPageFrom = (currentPage*dataPerPage)-dataPerPage+1;
-		      let currentShowingPageTo = currentPage*dataPerPage;
-          if(currentShowingPageTo > totalNum) currentShowingPageTo = totalNum;
+		    //   let displayCount = "";
+		    //   let currentShowingPageFrom = (currentPage*dataPerPage)-dataPerPage+1;
+		    //   let currentShowingPageTo = currentPage*dataPerPage;
+        //   if(currentShowingPageTo > totalNum) currentShowingPageTo = totalNum;
 
-		      displayCount = "Showing "+currentShowingPageFrom+" to "+currentShowingPageTo+" of "+totalNum+" entries";
-		      $("#displayCount").text(displayCount);
+		    //   displayCount = "Showing "+currentShowingPageFrom+" to "+currentShowingPageTo+" of "+totalNum+" entries";
+		    //   //$("#displayCount").text(displayCount);
 		      
-		      $("#pagingul li a").click(function (){
-		        let $id = $(this).attr("id");
-		        selectedPage = $(this).text();
+		    //   $("#pagingul li a").click(function (){
+		    //     let $id = $(this).attr("id");
+		    //     selectedPage = $(this).text();
 		        
-		        if($id == "next") selectedPage = next;
-		        if($id == "prev") selectedPage = prev;
+		    //     if($id == "next") selectedPage = next;
+		    //     if($id == "prev") selectedPage = prev;
 		        
-		        globalCurrentPage = selectedPage;
+		    //     globalCurrentPage = selectedPage;
 		        
-		        paging(totalNum, dataPerPage, pageCount, selectedPage);
-		        displayData(selectedPage, dataPerPage);
-		      });
-		    }       
+		    //     paging(totalNum, dataPerPage, pageCount, selectedPage);
+		    //     displayData(selectedPage, dataPerPage);
+		    //   });
+		    // }       
 
-		    function displayData(currentPage, dataPerPage){
+		    function displayData(totalNum){//(currentPage, dataPerPage){
 		      let chartHtml = "";
-		      currentPage = Number(currentPage);
-		      dataPerPage = Number(dataPerPage);
+		      // currentPage = Number(currentPage);
+		      // dataPerPage = Number(dataPerPage);
 		      
 		      chartHtml = "<table class=\"table table-hover table-bordered\" sellspacing=\"0\" width=\"90%\" id=\"example\">";
-
+		      
           chartHtml += "<thead><tr>";
 		      for(var i=0;i<colNum;i++){
 		        chartHtml += "<th style=\"text-align: center;\">" + colData[i] + "</th>";
@@ -376,12 +374,12 @@
 		      
 		      chartHtml += "</tr></thead>";
 
-          let tableFrom = (currentPage-1)*dataPerPage;
-          let tableTo = (currentPage-1)*dataPerPage+dataPerPage;
-          if(tableTo > totalNum) tableTo = totalNum;
+          // let tableFrom = (currentPage-1)*dataPerPage;
+          // let tableTo = (currentPage-1)*dataPerPage+dataPerPage;
+          // if(tableTo > totalNum) tableTo = totalNum;
 
 		      chartHtml += "<tbody>";
-          for(var i = tableFrom; i<tableTo;i++){
+          for(var i=0;i<totalNum;i++){//(var i = tableFrom; i<tableTo;i++){
             let txtTMP = "";
 
             for(var j=0;j<colNum;j++){txtTMP += tblData[i][j];}
@@ -1079,9 +1077,9 @@
                   
                   var w_selected = 600; var h_selected = 300;
                   var svg = d3.select("#selectedJGexpl").append("svg").attr("width", w_selected).attr("height", h_selected)
-                              .data(graphData[selectedDataIndex]["nodes"])
+                              .data(graphData[selectedDataIndex]["nodes"]).style("background-color", "#ccddff"); //b3ccff
                   var simulation = d3.forceSimulation(graphData[selectedDataIndex]["nodes"])
-                                    .force("charge", d3.forceManyBody().strength(-1500))
+                                    .force("charge", d3.forceManyBody().strength(-1700))
                                     .force("center", d3.forceCenter(w_selected/2, h_selected/2))
                                     .force("link", d3.forceLink(graphData[selectedDataIndex]["links"]).id(d => d.name));
                   var link =  svg.append("g").selectAll("line").data(graphData[selectedDataIndex]["links"]).enter()
@@ -1099,7 +1097,7 @@
                   var texts = nodes_with_text.append("text").text(function(d){ return d.name})
                                               .style("text-anchor", "middle").attr("class", "node-label");
                   var tooltipp = d3.select("#selectedJGexpl").append("div").style("position", "absolute")
-                                    .style("visibility", "hidden")
+                                    .style("visibility", "hidden").style("background-color", "#a7a7a7")
                                     .style("color", "white").style("border-width", "1px")
                                     .style("border-radius", "5px").style("padding", "10px");
                   simulation.on("tick", function() {
@@ -1192,7 +1190,7 @@
         }
         for(var i=0;i<newNodeList.length;i++){
           var objNodeNew = new Object();
-          objNodeNew["name"] = newNodeList[i];objNodeNew["color"] = "hsl(20, 100%, 80%)";objNodeNew["id"] = "attr";//selectedDataId;
+          objNodeNew["name"] = newNodeList[i];objNodeNew["color"] = "hsl(20, 100%, 65%)";objNodeNew["id"] = "attr";//selectedDataId;
           obj_Node.push(objNodeNew);
         }
         tmpUpdate.nodes = obj_Node;
@@ -1227,7 +1225,7 @@
               var graphArea = svgObj.append("g");
               var active = d3.select(null); ///
               var w = 600; var h = 300;
-              var svg = d3.select("#selectedJGexpl").append("svg").attr("width", w).attr("height", h).data(graph.nodes); //#b3ccff
+              var svg = d3.select("#selectedJGexpl").append("svg").attr("width", w).attr("height", h).data(graph.nodes).style("background-color", "#ccddff"); //#b3ccff
                           //.on("mouseenter", mouseenter).on("mouseleave", mouseleave);
               ////@@@@
               var keys = ["relations", "predicates"];
@@ -1235,7 +1233,7 @@
               var size = 20;
               var color = d3.scaleOrdinal().domain(shapes).range(keys);
               $("#legend").empty();
-              var svg_legend = d3.select("#legend").append("svg").attr("width", 600).attr("height", 60);
+              var svg_legend = d3.select("#legend").append("svg").attr("width", 600).attr("height", 60).style("background-color", "#ccddff");
               // svg_legend.append("circle").attr("cx", 200).attr("cy", 130).attr("r", 10);
               // svg_legend.append("circle").attr("cx", 110).attr("cy", 50).attr("r", 10).style("fill", "#999");
               // svg_legend.append("text").attr("x", 130).attr("y", 54).text("relations").style("font-size", "15px").attr("alignment-baseline","middle");
@@ -1266,10 +1264,10 @@
               //     .style("fill", "#000000").text(function(d){ return color(d)}).attr("text-anchor", "left").style("alignment-baseline", "middle");
               /////////////////////
 
-              var simulation = d3.forceSimulation(graph.nodes).force("charge", d3.forceManyBody().strength(-1800))
-                      .force("center", d3.forceCenter(w/2, h/2))
-                      /////.force("collision", d3.forceCollide().radius(function(d){if(d.id=="attr"){return 100} else{return 50}}))
-                      .force("link", d3.forceLink(graph.links).id(d => d.name).distance(function(d){if(d.source.id=="attr" || d.target.id=="attr"){return 70}else{return 20}}));//;
+              // var simulation = d3.forceSimulation(graph.nodes).force("charge", d3.forceManyBody().strength(-1800))
+              //         .force("center", d3.forceCenter(w/2, h/2))
+              //         /////.force("collision", d3.forceCollide().radius(function(d){if(d.id=="attr"){return 100} else{return 50}}))
+              //         .force("link", d3.forceLink(graph.links).id(d => d.name).distance(function(d){if(d.source.id=="attr" || d.target.id=="attr"){return 70}else{return 20}}));//;
                       // .force("collision", rectCollide().size(function(d){return [d.width, d.height]}))
                       //.force("collide", d3.forceCollide().strength(.1).radius(50).iterations(1))//; ////@@@@
                       //.force("charge", function(d){ if(d.id=="attr"){return d3.forceManyBody().strength(-1500);} else{return d3.forceManyBody().strength(-2000);}});
@@ -1279,8 +1277,8 @@
               var nodes_with_text = svg.append("g").selectAll("g").data(graph.nodes).enter().append("g")
                                         .attr("class", function(d){if(d.id == "attr"){return "rt";} else{return "cl";}}).call(drag);
               ///d3.selectAll(".rt").append("rect").attr("width", 150).attr("height", 25).attr("x", -75).attr("y",-12.5).attr("fill", function(d){ return d.color});
-              d3.selectAll(".rt").append("rect").attr("width", function(d){ return d.name.length*10}).attr("height", 30)
-                .attr("x", function(d){return -5*d.name.length}).attr("y",-20).attr("fill", function(d){ return d.color});
+              d3.selectAll(".rt").append("rect").attr("width", function(d){ return d.name.length*9}).attr("height", 30)
+                .attr("x", function(d){return -4.5*d.name.length}).attr("y",-20).attr("fill", function(d){ return d.color});
               ///////////d3.selectAll(".rt").append("rect").attr("width", 50).attr("height", 50).attr("x", -25).attr("y",-25).attr("fill", function(d){ return d.color});
                 //.append("text").text(function(d){ return d.name}).style("text-anchor", "middle").style("font-size", "10px").attr("class", "node-label");
               d3.selectAll(".cl").append("rect").attr("width", function(d){ return d.name.length*9}).attr("height", 30)
@@ -1292,12 +1290,117 @@
               //#svg
               var tooltiptest = d3.select("#selectedJGexpl").append("div").style("position", "absolute").style("visibility", "hidden").style("background-color", "#a7a7a7")
                               .style("color", "white").style("border-width", "1px").style("border-radius", "5px").style("padding", "10px");
+              ///////////////////@@@@@@@@@@@@@
+              var collisionForce = rectCollide().size(function(d) { return [d.name.length*9, 30]});
+              var simulation = d3.forceSimulation(graph.nodes).force("charge", d3.forceManyBody().strength(-1800)).force("center", d3.forceCenter(w/2, h/2))
+                                  .force("link", d3.forceLink(graph.links).id(d => d.name).distance(50))
+                                  //.force("link", d3.forceLink(graph.links).id(d => d.name).distance(function(d){if(d.source.id=="attr" || d.target.id=="attr"){return 40}else{return 20}}))
+                                  .force('collision', collisionForce);//;
+              function rectCollide() {
+                var nodes, sizes, masses
+                var size = constant([0, 0])
+                var strength = 1
+                var iterations = 1
+
+                function force() {
+                    var node, size, mass, xi, yi
+                    var i = -1
+                    while (++i < iterations) { iterate() }
+
+                    function iterate() {
+                        var j = -1
+                        var tree = d3.quadtree(nodes, xCenter, yCenter).visitAfter(prepare)
+
+                        while (++j < nodes.length) {
+                            node = nodes[j]
+                            size = sizes[j]
+                            mass = masses[j]
+                            xi = xCenter(node)
+                            yi = yCenter(node)
+
+                            tree.visit(apply)
+                        }
+                    }
+
+                    function apply(quad, x0, y0, x1, y1) {
+                        var data = quad.data
+                        var xSize = (size[0] + quad.size[0]) / 2
+                        var ySize = (size[1] + quad.size[1]) / 2
+                        if (data) {
+                            if (data.index <= node.index) { return }
+
+                            var x = xi - xCenter(data)
+                            var y = yi - yCenter(data)
+                            var xd = Math.abs(x) - xSize
+                            var yd = Math.abs(y) - ySize
+
+                            if (xd < 0 && yd < 0) {
+                                var l = Math.sqrt(x * x + y * y)
+                                var m = masses[data.index] / (mass + masses[data.index])
+
+                                if (Math.abs(xd) < Math.abs(yd)) {
+                                    node.vx -= (x *= xd / l * strength) * m
+                                    data.vx += x * (1 - m)
+                                } else {
+                                    node.vy -= (y *= yd / l * strength) * m
+                                    data.vy += y * (1 - m)
+                                }
+                            }
+                        }
+
+                        return x0 > xi + xSize || y0 > yi + ySize ||
+                                x1 < xi - xSize || y1 < yi - ySize
+                    }
+
+                    function prepare(quad) {
+                        if (quad.data) {
+                            quad.size = sizes[quad.data.index]
+                        } else {
+                            quad.size = [0, 0]
+                            var i = -1
+                            while (++i < 4) {
+                                if (quad[i] && quad[i].size) {
+                                    quad.size[0] = Math.max(quad.size[0], quad[i].size[0])
+                                    quad.size[1] = Math.max(quad.size[1], quad[i].size[1])
+                                }
+                            }
+                        }
+                    }
+                }
+
+                function xCenter(d) { return d.x + d.vx + sizes[d.index][0] / 2 }
+                function yCenter(d) { return d.y + d.vy + sizes[d.index][1] / 2 }
+
+                force.initialize = function (_) {
+                    sizes = (nodes = _).map(size)
+                    masses = sizes.map(function (d) { return d[0] * d[1] })
+                }
+
+                force.size = function (_) {
+                    return (arguments.length
+                          ? (size = typeof _ === 'function' ? _ : constant(_), force)
+                          : size)
+                }
+
+                force.strength = function (_) {
+                    return (arguments.length ? (strength = +_, force) : strength)
+                }
+
+                force.iterations = function (_) {
+                    return (arguments.length ? (iterations = +_, force) : iterations)
+                }
+
+                return force
+              }            
+              function constant(_) { return function () { return _ } }
+
               simulation.on("tick", function() {
                   link.attr("x1", function(d) { return d.source.x; }).attr("y1", function(d) { return d.source.y; })
                       .attr("x2", function(d) { return d.target.x; }).attr("y2", function(d) { return d.target.y; });
                   //nodes_with_text.attr("transform", function(d) { return "translate("+d.x+","+d.y+")";});
                   //nodes_with_text.attr("transform", function(d) { if(d.id=="attr"){return "translate("+Math.max(150, Math.min(w-150, d.x))+","+Math.max(25, Math.min(h-25, d.y))+")";} else{return "translate("+Math.max(25, Math.min(w-25, d.x))+","+Math.max(25, Math.min(h-25, d.y))+")";}});
-                  nodes_with_text.attr("transform", function(d) { if(d.id=="attr"){return "translate("+Math.max(d.name.length*7/2, Math.min(w-d.name.length*7/2, d.x))+","+Math.max(20, Math.min(h-20, d.y))+")";} else{return "translate("+Math.max(25, Math.min(w-25, d.x))+","+Math.max(25, Math.min(h-25, d.y))+")";}});
+                  ///@@@@nodes_with_text.attr("transform", function(d) { if(d.id=="attr"){return "translate("+Math.max(d.name.length*9/2, Math.min(w-d.name.length*9/2, d.x))+","+Math.max(20, Math.min(h-20, d.y))+")";} else{return "translate("+Math.max(25, Math.min(w-25, d.x))+","+Math.max(25, Math.min(h-25, d.y))+")";}});
+                  nodes_with_text.attr("transform", function(d) { return "translate("+Math.max(d.name.length*9/2, Math.min(w-d.name.length*9/2, d.x))+","+Math.max(20, Math.min(h-20, d.y))+")";} );
 
                   ////////////////////nodes_with_text.attr("transform", function(d) { return "translate("+Math.max(50, Math.min(w-50, d.x))+","+Math.max(50, Math.min(h-50, d.y))+")";});
                   // nodes_with_text.attr("cx", function(d){return d.x = Math.max(25, Math.min(w-25, d.x));})
