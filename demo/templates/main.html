@@ -182,7 +182,7 @@
           <div id="legend" class="col-md-12" ></div>
         </div>
         <!-- <div id="explanation_graph" style="overflow-x: auto; height: 200px; white-space:nowrap; margin-bottom: 20px;"></div> -->
-        <div id="explanation_graph" style="overflow-y: auto; height: 300px;"></div>
+        <div id="explanation_graph" style="overflow-y: auto; height: 300px; width: 93.5%;"></div>
         <div class="row">
           <div id="explanation_graph" class="col-md-12"></div>
         </div>
@@ -1278,11 +1278,11 @@
                                         .attr("class", function(d){if(d.id == "attr"){return "rt";} else{return "cl";}}).call(drag);
               ///d3.selectAll(".rt").append("rect").attr("width", 150).attr("height", 25).attr("x", -75).attr("y",-12.5).attr("fill", function(d){ return d.color});
               d3.selectAll(".rt").append("rect").attr("width", function(d){ return d.name.length*9}).attr("height", 30)
-                .attr("x", function(d){return -4.5*d.name.length}).attr("y",-20).attr("fill", function(d){ return d.color});
+                .attr("x", function(d){return -4.5*d.name.length}).attr("y",-15).attr("fill", function(d){ return d.color});
               ///////////d3.selectAll(".rt").append("rect").attr("width", 50).attr("height", 50).attr("x", -25).attr("y",-25).attr("fill", function(d){ return d.color});
                 //.append("text").text(function(d){ return d.name}).style("text-anchor", "middle").style("font-size", "10px").attr("class", "node-label");
               d3.selectAll(".cl").append("rect").attr("width", function(d){ return d.name.length*9}).attr("height", 30)
-              .attr("x", function(d){return -4.5*d.name.length}).attr("y", -20).attr("fill", function(d){ return d.color});
+              .attr("x", function(d){return -4.5*d.name.length}).attr("y", -15).attr("fill", function(d){ return d.color});
                 //.append("text").text(function(d){ return d.name}).style("text-anchor", "middle").style("font-size", "10px").attr("class", "node-label");
               //var circles = nodes_with_text.append("circle").attr("r", 25).attr("fill", function(d){ return d.color});
               var texts = nodes_with_text.append("text").text(function(d){ return d.name}).style("text-anchor", "middle").style("font-weight", "bold")
@@ -1294,8 +1294,9 @@
               var collisionForce = rectCollide().size(function(d) { return [d.name.length*9, 30]});
               var simulation = d3.forceSimulation(graph.nodes).force("charge", d3.forceManyBody().strength(-1800)).force("center", d3.forceCenter(w/2, h/2))
                                   .force("link", d3.forceLink(graph.links).id(d => d.name).distance(50))
-                                  //.force("link", d3.forceLink(graph.links).id(d => d.name).distance(function(d){if(d.source.id=="attr" || d.target.id=="attr"){return 40}else{return 20}}))
                                   .force('collision', collisionForce);//;
+                                  //.force("link", d3.forceLink(graph.links).id(d => d.name).distance(function(d){if(d.source.id=="attr" || d.target.id=="attr"){return 40}else{return 20}}))
+                                  
               function rectCollide() {
                 var nodes, sizes, masses
                 var size = constant([0, 0])
@@ -1400,7 +1401,7 @@
                   //nodes_with_text.attr("transform", function(d) { return "translate("+d.x+","+d.y+")";});
                   //nodes_with_text.attr("transform", function(d) { if(d.id=="attr"){return "translate("+Math.max(150, Math.min(w-150, d.x))+","+Math.max(25, Math.min(h-25, d.y))+")";} else{return "translate("+Math.max(25, Math.min(w-25, d.x))+","+Math.max(25, Math.min(h-25, d.y))+")";}});
                   ///@@@@nodes_with_text.attr("transform", function(d) { if(d.id=="attr"){return "translate("+Math.max(d.name.length*9/2, Math.min(w-d.name.length*9/2, d.x))+","+Math.max(20, Math.min(h-20, d.y))+")";} else{return "translate("+Math.max(25, Math.min(w-25, d.x))+","+Math.max(25, Math.min(h-25, d.y))+")";}});
-                  nodes_with_text.attr("transform", function(d) { return "translate("+Math.max(d.name.length*9/2, Math.min(w-d.name.length*9/2, d.x))+","+Math.max(20, Math.min(h-20, d.y))+")";} );
+                  nodes_with_text.attr("transform", function(d) { return "translate("+Math.max(d.name.length*9/2, Math.min(w-d.name.length*9/2, d.x))+","+Math.max(15, Math.min(h-15, d.y))+")";} );
 
                   ////////////////////nodes_with_text.attr("transform", function(d) { return "translate("+Math.max(50, Math.min(w-50, d.x))+","+Math.max(50, Math.min(h-50, d.y))+")";});
                   // nodes_with_text.attr("cx", function(d){return d.x = Math.max(25, Math.min(w-25, d.x));})
