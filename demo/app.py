@@ -321,13 +321,13 @@ def ajax():
   data = request.get_json()
   
   global slt 
-  global agg 
+  # global agg 
   global frm 
   global where 
   global grp 
   
   slt = data["slt"]  
-  agg = data["agg"]  
+  # agg = data["agg"]  
   frm = data["frm"]  
   where = data["where"]  
   grp = data["grp"]
@@ -336,7 +336,7 @@ def ajax():
 
 
   query = f"""
-  SELECT {slt} {", {}".format(agg) if agg!="" else ""} FROM {frm} {"WHERE {}".format(where) if where !="" else ""} {"GROUP BY {}".format(grp) if grp !="" else ""} \
+  SELECT {slt} FROM {frm} {"WHERE {}".format(where) if where !="" else ""} {"GROUP BY {}".format(grp) if grp !="" else ""} \
   """
   logger.debug(query)
   cursor.execute(query)

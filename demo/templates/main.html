@@ -109,24 +109,24 @@
               <!--<div class="input-group"> -->
                 <div class="input-group1">
                   <div class="input-group-text" style="float: left;">SELECT</div>
-                  <input type="text" class="form-control" id="query-select" name="query-select" value = "count(*) as win, s.season_name" style="float: left; width: 30%;"><!--27%;--> 
-                  <div class="input-group-text" style="float: left;">,</div>
-                  <input type="text" class="form-control" id="query-aggregate" placeholder="COUNT(*)" name="query-aggregate" style="float: left; width: 21%;"><!--27%;-->  
+                  <input type="text" class="form-control" id="query-select" name="query-select" value = "count(*) as win, s.season_name" style="float: left; width: 80%;"><!--27%;--> 
+<!--                   <div class="input-group-text" style="float: left;">,</div>
+                  <input type="text" class="form-control" id="query-aggregate" placeholder="COUNT(*)" name="query-aggregate" style="float: left; width: 21%;"> -->
                 </div>
                 <div class="input-group2">
                   <div class="input-group-text" style="float: left;">FROM</div>
-                  <input type="text" class="form-control" id="query-from" name="query-from" value=" team t, game g, season s " style="float: left; width: 28%;">
+                  <input type="text" class="form-control" id="query-from" name="query-from" value=" team t, game g, season s " style="float: left; width: 83%;">
                 </div>
                 <div class="input-group3">
                   <div class="input-group-text" style="float: left;">WHERE</div>
-                  <input type="text" class="form-control" id="query-where" name="query-where" value=" t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' " style="float: left; width: 30%;">
+                  <input type="text" class="form-control" id="query-where" name="query-where" value=" t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' " style="float: left; width: 80%;">
                 </div>
                 <div class="input-group4">
                   <div class="input-group-text" style="float: left;">GROUP BY</div>
-                  <input type="text" class="form-control" id="query-group" name="query-group" value="s.season_name" style="float: left; width: 27%;">          
-                  <div class="input-group-run" style="float: right;"> 
-                    <button type="button" class="btn btn-outline-primary" id="execute" style="width: 100%;">Run</button>             
-                  </div>
+                  <input type="text" class="form-control" id="query-group" name="query-group" value="s.season_name" style="float: left; width: 60%;">          
+                  <!-- <div class="input-group-run" style="float: right;">  -->
+                  <button type="button" class="btn btn-outline-primary" id="execute" style="float: right; width: 18%;">Run</button>             
+                  <!-- </div> -->
                 </div>
             </div>
         	</form>
@@ -140,7 +140,7 @@
             <div style="display: inline;">
               <div style="float: left; width: 33%; padding: 10px;">
                 <p>Show
-                <select id="dataPerPage" class="form-select" style="width: 70px; display: inline;" onchange="changeRowsSelect()">
+                <select id="dataPerPage" class="form-select" style="width: 70px; display: inline;">
                   <option value="10">10</option>
                   <option value="15">15</option>
                   <option value="20">20</option>
@@ -154,7 +154,7 @@
             </div>
         </div>
 
-        <div id="display" style="overflow: auto;"></div><br>    
+        <div id="display" style="overflow-y: auto; height: 300px;"></div>  
 
         <div id="pageInfo" style="display: inline;">
           <div style="float: left;">
@@ -163,12 +163,14 @@
           <div style="float: right;">
             <ul id="pagingul" class="col-md-6"></ul>
           </div>
-        </div><br>
-        <div id="user_rating_update" style="width: 50%;"></div>
-        <div id="explanation_table" style="overflow: auto; height: 300px; margin-bottom: 20px;"></div><br><br><br>
-        <div id="reset_JGselection" style="float: left; width:50%;">
-          <button type="button" class="btn btn-outline-primary" onclick="resetClicked()">Reset</button>
         </div>
+        <div class="row">
+          <div id="user_rating_update" style="width: 50%;"></div>
+          <div id="reset_JGselection" style="float: left; width:50%;">
+            <button type="button" class="btn btn-outline-primary" onclick="resetClicked()">Reset</button>
+          </div>
+        </div>
+        <div id="explanation_table" style="overflow: auto; height: 300px; margin-bottom: 20px;"></div>
       </div>
 
       <div class="col-md-4"> <!--col-md-3--->
@@ -176,6 +178,7 @@
         <div class="row">
           <div id="schemagraph" class="col-md-12"></div>
         </div>
+        <br>
         <!-- <div id="selectedJGexpl" style="margin-top: 50px;"></div> -->
         <div class="row">
           <div id="selectedJGexpl" class="col-md-12"></div>
@@ -365,7 +368,7 @@
 		      dataPerPage = Number(dataPerPage);
 		      
 		      chartHtml = "<table class=\"table table-hover table-bordered\" sellspacing=\"0\" width=\"90%\" id=\"example\">";
-		      
+
           chartHtml += "<thead><tr>";
 		      for(var i=0;i<colNum;i++){
 		        chartHtml += "<th style=\"text-align: center;\">" + colData[i] + "</th>";
@@ -1076,7 +1079,7 @@
                   
                   var w_selected = 600; var h_selected = 300;
                   var svg = d3.select("#selectedJGexpl").append("svg").attr("width", w_selected).attr("height", h_selected)
-                              .data(graphData[selectedDataIndex]["nodes"]).style("background-color", "#ccddff"); //b3ccff
+                              .data(graphData[selectedDataIndex]["nodes"])
                   var simulation = d3.forceSimulation(graphData[selectedDataIndex]["nodes"])
                                     .force("charge", d3.forceManyBody().strength(-1500))
                                     .force("center", d3.forceCenter(w_selected/2, h_selected/2))
@@ -1096,7 +1099,7 @@
                   var texts = nodes_with_text.append("text").text(function(d){ return d.name})
                                               .style("text-anchor", "middle").attr("class", "node-label");
                   var tooltipp = d3.select("#selectedJGexpl").append("div").style("position", "absolute")
-                                    .style("visibility", "hidden").style("background-color", "#a7a7a7")
+                                    .style("visibility", "hidden")
                                     .style("color", "white").style("border-width", "1px")
                                     .style("border-radius", "5px").style("padding", "10px");
                   simulation.on("tick", function() {
@@ -1224,7 +1227,7 @@
               var graphArea = svgObj.append("g");
               var active = d3.select(null); ///
               var w = 600; var h = 300;
-              var svg = d3.select("#selectedJGexpl").append("svg").attr("width", w).attr("height", h).data(graph.nodes).style("background-color", "#ccddff"); //#b3ccff
+              var svg = d3.select("#selectedJGexpl").append("svg").attr("width", w).attr("height", h).data(graph.nodes); //#b3ccff
                           //.on("mouseenter", mouseenter).on("mouseleave", mouseleave);
               ////@@@@
               var keys = ["relations", "predicates"];
@@ -1232,7 +1235,7 @@
               var size = 20;
               var color = d3.scaleOrdinal().domain(shapes).range(keys);
               $("#legend").empty();
-              var svg_legend = d3.select("#legend").append("svg").attr("width", 600).attr("height", 60).style("background-color", "#ccddff");
+              var svg_legend = d3.select("#legend").append("svg").attr("width", 600).attr("height", 60);
               // svg_legend.append("circle").attr("cx", 200).attr("cy", 130).attr("r", 10);
               // svg_legend.append("circle").attr("cx", 110).attr("cy", 50).attr("r", 10).style("fill", "#999");
               // svg_legend.append("text").attr("x", 130).attr("y", 54).text("relations").style("font-size", "15px").attr("alignment-baseline","middle");

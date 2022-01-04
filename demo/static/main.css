@@ -19,8 +19,12 @@ body {
   border-radius: 0;
 }
 
+#vis {
+  border: 3px solid #999;
+}
+
 svg {
-    background-color: white;
+    background-color: #d0eff0;
     border: 3px solid #999;
 }
 .input-group1{
@@ -45,6 +49,7 @@ body::-webkit-scrollbar{
 body::-webkit-scrollbar-thumb{
   background-color: #444444;
 }
+
 #explanation_summary{
   text-align : left;
   font-size: 14px;
@@ -117,4 +122,13 @@ stroke: steelblue;
   font-size: 12px;
   font-style: oblique;
   margin: 0;
+}
+
+.input-group-text{
+  font-size: 14px;
+}
+
+#example{
+  font-size: 14px;
+  font-weight: bold;
 }

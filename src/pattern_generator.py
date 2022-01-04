@@ -914,6 +914,8 @@ class Pattern_Generator:
                         nominal_pattern_attr_list.append(attr)
                     else:
                         ordinal_pattern_attr_list.append(attr)
+                if(not nominal_pattern_attr_list):
+                    return
 
                 pattern_q_selection_clause = ",".join(pattern_cond_attr_list)
                 nominal_pattern_attr_clause = ",".join(nominal_pattern_attr_list)
