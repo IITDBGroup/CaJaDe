@@ -649,7 +649,7 @@
           //expHtml += "<tr><td>"+ exp_data_pdesc +"</td></tr>"; //exp_data[i] //style=\"text-align: center;\"
           // exp_data_pdesc = repText(exp_data_pdesc, ',', "<span>&#8743;</span>");
 
-          expHtml += "<tr><td style=\"width:80%;\">"+ exp_data_pdesc +"</td><td><input style=\"zoom:4.0;\" type=\"checkbox\" name=\"user_checkBox\" onclick=\"checkOne(this)\"></td>";
+          expHtml += "<tr><td style=\"width:80%;\">"+ exp_data_pdesc +"</td><td style=\"width:10%;\"><input type=\"checkbox\" name=\"user_checkBox\" onclick=\"checkOne(this)\"></td>";//style=\"zoom:4.0;\" 
           expHtml += "<td style=\"width:10%;\">";
           expHtml += "<button type=\"button\" class=\"btn hover1\" id=\"likeBTN\" name=\"user_like\" onclick=\"likeClicked(this)\"><i class=\"fa fa-thumbs-up\"></i></button>";
           expHtml += "<button type=\"button\" class=\"btn hover1\" id=\"dislikeBTN\" name=\"user_dislike\" onclick=\"dislikeClicked(this)\"><i class=\"fa fa-thumbs-down\"></i></button></td></tr>";
@@ -1045,7 +1045,7 @@
                 exp_data_pdesc = highlightText(exp_data_pdesc, element, repstr);
               });
               //newExpHtml += "<tr><td>"+ exp_data_pdesc +"</td></tr>";
-              newExpHtml += "<tr><td style=\"width:80%;\">"+ exp_data_pdesc +"</td><td><input style=\"zoom:4.0;\" type=\"checkbox\" name=\"user_checkBox\" onclick=\"checkOne(this)\"></td>";
+              newExpHtml += "<tr><td style=\"width:80%;\">"+ exp_data_pdesc +"</td><td style=\"width:10%;\"><input type=\"checkbox\" name=\"user_checkBox\" onclick=\"checkOne(this)\"></td>"; //style=\"zoom:4.0;\" 
               newExpHtml += "<td style=\"width:10%;\">";
               newExpHtml += "<button type=\"button\" class=\"btn hover1\" id=\"likeBTN\" name=\"user_like\" onclick=\"likeClicked(this)\"><i class=\"fa fa-thumbs-up\"></i></button>";
               newExpHtml += "<button type=\"button\" class=\"btn hover1\" id=\"dislikeBTN\" name=\"user_dislike\" onclick=\"dislikeClicked(this)\"><i class=\"fa fa-thumbs-down\"></i></button></td></tr>";
