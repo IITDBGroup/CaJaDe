@@ -109,24 +109,20 @@
               <!--<div class="input-group"> -->
                 <div class="input-group1">
                   <div class="input-group-text" style="float: left;">SELECT</div>
-                  <input type="text" class="form-control" id="query-select" name="query-select" value = "count(*) as win, s.season_name" style="float: left; width: 30%;"><!--27%;--> 
-                  <div class="input-group-text" style="float: left;">,</div>
-                  <input type="text" class="form-control" id="query-aggregate" placeholder="COUNT(*)" name="query-aggregate" style="float: left; width: 21%;"><!--27%;-->  
+                  <input type="text" class="form-control" id="query-select" name="query-select" value = "count(*) as win, s.season_name" style="float: left; width: 82%;"> 
                 </div>
                 <div class="input-group2">
                   <div class="input-group-text" style="float: left;">FROM</div>
-                  <input type="text" class="form-control" id="query-from" name="query-from" value=" team t, game g, season s " style="float: left; width: 28%;">
+                  <input type="text" class="form-control" id="query-from" name="query-from" value=" team t, game g, season s " style="float: left; width: 83%;">
                 </div>
                 <div class="input-group3">
                   <div class="input-group-text" style="float: left;">WHERE</div>
-                  <input type="text" class="form-control" id="query-where" name="query-where" value=" t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' " style="float: left; width: 30%;">
+                  <input type="text" class="form-control" id="query-where" name="query-where" value=" t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' " style="float: left; width: 83%;">
                 </div>
                 <div class="input-group4">
                   <div class="input-group-text" style="float: left;">GROUP BY</div>
-                  <input type="text" class="form-control" id="query-group" name="query-group" value="s.season_name" style="float: left; width: 27%;">          
-                  <div class="input-group-run" style="float: right;"> 
-                    <button type="button" class="btn btn-outline-primary" id="execute" style="width: 100%;">Run</button>             
-                  </div>
+                  <input type="text" class="form-control" id="query-group" name="query-group" value="s.season_name" style="float: left; width: 60%;">          
+                  <button type="button" class="btn btn-outline-primary" id="execute" style="width: 18%;">Run</button>             
                 </div>
             </div>
         	</form>
@@ -164,11 +160,13 @@
             <ul id="pagingul" class="col-md-6"></ul>
           </div>
         </div><br>
-        <div id="user_rating_update" style="width: 50%;"></div>
-        <div id="explanation_table" style="overflow: auto; height: 300px; margin-bottom: 20px;"></div><br><br><br>
-        <div id="reset_JGselection" style="float: left; width:50%;">
-          <button type="button" class="btn btn-outline-primary" onclick="resetClicked()">Reset</button>
+        <div class="row">
+          <div id="user_rating_update" style="width: 50%;"></div>
+          <div id="reset_JGselection" style="float: left; width:50%;">
+            <button type="button" class="btn btn-outline-primary" onclick="resetClicked()">Reset</button>
+          </div>
         </div>
+        <div id="explanation_table" style="overflow: auto; height: 300px; margin-bottom: 20px;"></div>
       </div>
 
       <div class="col-md-4"> <!--col-md-3--->
@@ -176,6 +174,7 @@
         <div class="row">
           <div id="schemagraph" class="col-md-12"></div>
         </div>
+        <br>
         <!-- <div id="selectedJGexpl" style="margin-top: 50px;"></div> -->
         <div class="row">
           <div id="selectedJGexpl" class="col-md-12"></div>
@@ -535,6 +534,8 @@
       }
 
       function updateSelectedData(jgName){
+        console.log('jgName:', jgName);
+        console.log('cur_graphData: ', cur_graphData);
         cur_graphData.forEach(function(d){
           if(d["nodes"][0]["id"] == jgName){
             selectedData = d;
@@ -590,8 +591,9 @@
               frac_name = data.result8; 
               frac_value = data.result9;//@@
 
-              //exp_table(exp_data,exp_len,graphData);
               exp_summary(cur_summaryData, cur_exp_data, cur_exp_len, cur_graphData); //exp_summary(summaryData, exp_data, exp_len, fscoreData); 	
+              likedList = []; dislikedList = [];
+
 		      }else{
             alert("no data");
           }
@@ -609,7 +611,10 @@
         $("#explanation_table").empty(); //remove filtered explanations
         $("#viz-options").empty();
         $("#vis").empty();
-
+        console.log(original_exp_data);
+        cur_exp_data = original_exp_data;
+        cur_graphData = original_graphData;
+        cur_highlightTextList = original_highlightTextList;
         // expTable(original_exp_len, original_exp_data, original_highlightTextList,color_matching); //show the entire explanation table
         exp_summary(original_summaryData, original_exp_data, original_exp_len, original_graphData); //exp_summary(summaryData, exp_data, exp_len, fscoreData);  
         dots.style("fill", "#ffab00").style("visibility", "visible"); //make fscore dot all yellow
@@ -710,9 +715,6 @@
               original_graphData = data.result3;
               original_summaryData = data.result5; ////
               original_highlightTextList = data.result6;
-              if(!running){
-                clearInterval(intervalid);
-              }
               cur_exp_len=original_exp_len;
               cur_exp_data=original_exp_data;
               cur_graphData=original_graphData;
@@ -720,6 +722,9 @@
               cur_highlightTextList=original_highlightTextList;
               frac_name = data.result8; 
               frac_value = data.result9;//@@
+              if(!running){
+                clearInterval(intervalid);
+              }
 
               //exp_table(exp_data,exp_len,graphData);
               exp_summary(cur_summaryData, cur_exp_data, cur_exp_len, cur_graphData); //exp_summary(summaryData, exp_data, exp_len, fscoreData); 
@@ -1077,7 +1082,7 @@
                   
                   var w_selected = 600; var h_selected = 300;
                   var svg = d3.select("#selectedJGexpl").append("svg").attr("width", w_selected).attr("height", h_selected)
-                              .data(graphData[selectedDataIndex]["nodes"]).style("background-color", "#ccddff"); //b3ccff
+                              .data(graphData[selectedDataIndex]["nodes"])
                   var simulation = d3.forceSimulation(graphData[selectedDataIndex]["nodes"])
                                     .force("charge", d3.forceManyBody().strength(-1700))
                                     .force("center", d3.forceCenter(w_selected/2, h_selected/2))
@@ -1225,7 +1230,7 @@
               var graphArea = svgObj.append("g");
               var active = d3.select(null); ///
               var w = 600; var h = 300;
-              var svg = d3.select("#selectedJGexpl").append("svg").attr("width", w).attr("height", h).data(graph.nodes).style("background-color", "#ccddff"); //#b3ccff
+              var svg = d3.select("#selectedJGexpl").append("svg").attr("width", w).attr("height", h).data(graph.nodes)
                           //.on("mouseenter", mouseenter).on("mouseleave", mouseleave);
               ////@@@@
               var keys = ["relations", "predicates"];
@@ -1233,7 +1238,7 @@
               var size = 20;
               var color = d3.scaleOrdinal().domain(shapes).range(keys);
               $("#legend").empty();
-              var svg_legend = d3.select("#legend").append("svg").attr("width", 600).attr("height", 60).style("background-color", "#ccddff");
+              var svg_legend = d3.select("#legend").append("svg").attr("width", 600).attr("height", 60);
               // svg_legend.append("circle").attr("cx", 200).attr("cy", 130).attr("r", 10);
               // svg_legend.append("circle").attr("cx", 110).attr("cy", 50).attr("r", 10).style("fill", "#999");
               // svg_legend.append("text").attr("x", 130).attr("y", 54).text("relations").style("font-size", "15px").attr("alignment-baseline","middle");
