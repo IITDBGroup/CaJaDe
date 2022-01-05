@@ -150,6 +150,9 @@
             </div>
         </div>
 
+        <div style="float: right;" class="col-sm-1">
+          <div class="tooltip_q" id="tooltip_q_exp"></div>
+        </div> 
         <div id="display" style="overflow-y: auto; height:300px;"></div><br>    
 
         <div id="pageInfo" style="display: inline;">
@@ -166,32 +169,50 @@
             <button type="button" class="btn btn-outline-primary" onclick="resetClicked()">Reset</button>
           </div>
         </div>
+        <div style="float: right;" class="col-sm-1">
+          <div class="tooltip_q" id="tooltip_q_exptable"></div>
+        </div> 
         <div id="explanation_table" style="overflow: auto; height: 300px; margin-bottom: 20px;"></div>
       </div>
 
       <div class="col-md-4"> <!--col-md-3--->
        <!--  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"> -->
-        <div class="row">
+        <div class="row" style="display: inline;">
+          <div style="float: right;" class="col-sm-1">
+            <div class="tooltip_q" id="tooltip_q">
+            </div>
+          </div>  
           <div id="schemagraph" class="col-md-12"></div>
-          <div id="questionmark">
-            <i class="fa fa-question-circle"></i>
-          </div>
+
+               
         </div>
         <br>
         <!-- <div id="selectedJGexpl" style="margin-top: 50px;"></div> -->
-        <div class="row">
+        <div class="row" style="display: inline;">
           <div id="selectedJGexpl" class="col-md-12"></div>
           <div id="legend" class="col-md-12" ></div>
         </div>
         <!-- <div id="explanation_graph" style="overflow-x: auto; height: 200px; white-space:nowrap; margin-bottom: 20px;"></div> -->
         <div id="explanation_graph" style="overflow-y: auto; height: 300px; width: 93.5%;"></div>
-        <div class="row">
+        <div class="row" style="display: inline;">
+          <div style="float: right;" class="col-sm-1">
+            <div class="tooltip_q" id="tooltip_q_jg">
+            </div>
+          </div>
           <div id="explanation_graph" class="col-md-12"></div>
+
+            
         </div>
       </div>   
       
       <div class= col-md-4>
+        <div style="float: right;" class="col-sm-1">
+          <div class="tooltip_q" id="tooltip_q_sum"></div>
+        </div> 
         <div id="explanation_summary" style="overflow-x: auto; height: 300px; white-space:nowrap; margin-bottom: 20px;"></div> <!--text-align:center;-->
+        <div style="float: right;" class="col-sm-1">
+          <div class="tooltip_q" id="tooltip_q_viz"></div>
+        </div> 
         <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom" id='vis'></div>
             <div >
               <select id='viz-options' onchange="config_and_draw()"></select>
@@ -278,6 +299,8 @@
             sltROWS = 0;
 
 		        displayData(totalNum);//(1, dataPerPage);
+            qmarkHtml = "<i class=\"fa fa-question-circle\" style=\"font-size:24px;\"></i><span class=\"tooltiptext\">exp</span>";
+            $("#tooltip_q_exp").append(qmarkHtml);
 		        //paging(totalNum, dataPerPage, pageCount, 1);
 
             //selectRows();
@@ -613,7 +636,10 @@
         $("#selectedJGexpl").empty(); //remove selecteJG located in the right hand side       
         $("#legend").empty(); //remove legend and fractions in the right hand side
         $("#explanation_table").empty(); //remove filtered explanations
+        $("#tooltip_q_exptable").empty();
         $("#viz-options").empty();
+        $("#tooltip_q_sum").empty();
+        $("#tooltip_q_viz").empty();
         $("#vis").empty();
         console.log(original_exp_data);
         cur_exp_data = original_exp_data;
@@ -672,6 +698,10 @@
         updateBtnHtml += "<button type=\"button\" class=\"btn btn-outline-primary\" onclick=\"ratingUpdate()\">Update</button>";  
         $("#user_rating_update").empty();             
         $("#user_rating_update").append(updateBtnHtml);
+
+        qmarkHtml = "<i class=\"fa fa-question-circle\" style=\"font-size:24px;\"></i><span class=\"tooltiptext\">exp table</span>";
+        $("#tooltip_q_exptable").empty();
+        $("#tooltip_q_exptable").append(qmarkHtml);
       }
 
 
@@ -732,6 +762,10 @@
 
               //exp_table(exp_data,exp_len,graphData);
               exp_summary(cur_summaryData, cur_exp_data, cur_exp_len, cur_graphData); //exp_summary(summaryData, exp_data, exp_len, fscoreData); 
+
+              qmarkHtml = "<i class=\"fa fa-question-circle\" style=\"font-size:24px;\"></i><span class=\"tooltiptext\">Join Graph</span>";
+              $("#tooltip_q_jg").empty();
+              $("#tooltip_q_jg").append(qmarkHtml);
             } 
             // else {
             //   alert("No data");
@@ -763,6 +797,15 @@
         $("#explanation_summary").empty();
         // $("#explanation_summary").append(sumHtml);
         $("#explanation_graph").empty();
+
+        qmarkHtml = "<i class=\"fa fa-question-circle\" style=\"font-size:24px;\"></i><span class=\"tooltiptext\">f score scatter plot</span>";
+        $("#tooltip_q_sum").empty();
+        $("#tooltip_q_sum").append(qmarkHtml);
+        qmarkHtml = "<i class=\"fa fa-question-circle\" style=\"font-size:24px;\"></i><span class=\"tooltiptext\">viz options</span>";
+        $("#tooltip_q_viz").empty();
+        $("#tooltip_q_viz").append(qmarkHtml);
+        
+
 
         //////////////////fscor-d3 scatter plot//////////////////
         var margin = {top: 30, right: 30, bottom: 30, left: 30}, fs_width = 550, fs_height = 240;
@@ -1067,6 +1110,10 @@
           // newExpHtml += "<button type=\"button\" class=\"btn btn-outline-primary\" id=\"checkBoxSelectBtn\" onclick=\"checkBoxSelectBtn()\">UPDATE</button>";
           $("#explanation_table").empty();
           $("#explanation_table").append(newExpHtml);
+
+          qmarkHtml = "<i class=\"fa fa-question-circle\" style=\"font-size:24px;\"></i><span class=\"tooltiptext\">Tooltip text</span>";
+          $("#tooltip_q_exptable").empty();
+          $("#tooltip_q_exptable").append(qmarkHtml);
 
           // let updateBtnHtml = "";
           // updateBtnHtml += "<button type=\"button\" class=\"btn btn-outline-primary\" onclick=\"ratingUpdate()\">Update</button>";            
@@ -1815,6 +1862,9 @@
             function mouseover(d) { tooltip_schema.style("visibility", "visible").text(d.type); }
             function mouseout() { tooltip_schema.style("visibility", "hidden"); }
             function mousemove(){ tooltip_schema.style("top", (d3.event.pageY - 10) + "px").style("left", (d3.event.pageX + 10) + "px"); }
+
+            qmarkHtml = "<i class=\"fa fa-question-circle\" style=\"font-size:24px;\"></i><span class=\"tooltiptext\">Tooltip text</span>";
+            $("#tooltip_q").append(qmarkHtml);
 
       </script>
       <!--</div> -->
