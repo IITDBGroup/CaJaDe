@@ -179,7 +179,7 @@
        <!--  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"> -->
         <div class="row" style="display: inline;">
           <div style="float: right;" class="col-sm-1">
-            <div class="tooltip_q" id="tooltip_q">
+            <div class="tooltip_q" id="tooltip_schema">
             </div>
           </div>  
           <div id="schemagraph" class="col-md-12"></div>
@@ -189,19 +189,21 @@
         <br>
         <!-- <div id="selectedJGexpl" style="margin-top: 50px;"></div> -->
         <div class="row" style="display: inline;">
+          <div style="float: right;" class="col-sm-1">
+            <div class="tooltip_q" id="selectedjg_q">
+            </div>
+          </div> 
           <div id="selectedJGexpl" class="col-md-12"></div>
           <div id="legend" class="col-md-12" ></div>
         </div>
         <!-- <div id="explanation_graph" style="overflow-x: auto; height: 200px; white-space:nowrap; margin-bottom: 20px;"></div> -->
-        <div id="explanation_graph" style="overflow-y: auto; height: 300px; width: 93.5%;"></div>
+        <!-- <div id="explanation_graph" style="overflow-y: auto; height: 300px; width: 93.5%;"></div> -->
         <div class="row" style="display: inline;">
           <div style="float: right;" class="col-sm-1">
             <div class="tooltip_q" id="tooltip_q_jg">
             </div>
           </div>
           <div id="explanation_graph" class="col-md-12"></div>
-
-            
         </div>
       </div>   
       
@@ -299,7 +301,7 @@
             sltROWS = 0;
 
 		        displayData(totalNum);//(1, dataPerPage);
-            qmarkHtml = "<i class=\"fa fa-question-circle\" style=\"font-size:24px;\"></i><span class=\"tooltiptext\">exp</span>";
+            qmarkHtml = "<i class=\"fa fa-question-circle\" style=\"font-size:24px;\"></i><span class=\"tooltiptext\">query results</span>";
             $("#tooltip_q_exp").append(qmarkHtml);
 		        //paging(totalNum, dataPerPage, pageCount, 1);
 
@@ -699,7 +701,7 @@
         $("#user_rating_update").empty();             
         $("#user_rating_update").append(updateBtnHtml);
 
-        qmarkHtml = "<i class=\"fa fa-question-circle\" style=\"font-size:24px;\"></i><span class=\"tooltiptext\">exp table</span>";
+        qmarkHtml = "<i class=\"fa fa-question-circle\" style=\"font-size:24px;\"></i><span class=\"tooltiptext\">pattern: text descriptions</span>";
         $("#tooltip_q_exptable").empty();
         $("#tooltip_q_exptable").append(qmarkHtml);
       }
@@ -1111,7 +1113,7 @@
           $("#explanation_table").empty();
           $("#explanation_table").append(newExpHtml);
 
-          qmarkHtml = "<i class=\"fa fa-question-circle\" style=\"font-size:24px;\"></i><span class=\"tooltiptext\">Tooltip text</span>";
+          qmarkHtml = "<i class=\"fa fa-question-circle\" style=\"font-size:24px;\"></i><span class=\"tooltiptext\">pattern: text descriptions</span>";
           $("#tooltip_q_exptable").empty();
           $("#tooltip_q_exptable").append(qmarkHtml);
 
@@ -1182,6 +1184,8 @@
         var green_frac_index;
         var tmpUpdate = new Object();
 
+        $('#selectedjg_q').empty();
+        $('#selectedjg_q').append('<i class=\"fa fa-question-circle\" style=\"font-size:24px;\"></i><span class=\"tooltiptext\">join graph with pattern predicates</span>');
         for(var i=0;i<cur_exp_data.length;i++){
           if(cur_exp_data[i][2] == pdes){ isUser = cur_exp_data[i][3]; break;}
         }
@@ -1863,8 +1867,8 @@
             function mouseout() { tooltip_schema.style("visibility", "hidden"); }
             function mousemove(){ tooltip_schema.style("top", (d3.event.pageY - 10) + "px").style("left", (d3.event.pageX + 10) + "px"); }
 
-            qmarkHtml = "<i class=\"fa fa-question-circle\" style=\"font-size:24px;\"></i><span class=\"tooltiptext\">Tooltip text</span>";
-            $("#tooltip_q").append(qmarkHtml);
+            qmarkHtml = "<i class=\"fa fa-question-circle\" style=\"font-size:24px;\"></i><span class=\"tooltiptext\">schema graph</span>";
+            $("#tooltip_schema").append(qmarkHtml);
 
       </script>
       <!--</div> -->

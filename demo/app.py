@@ -533,7 +533,7 @@ def retrieve_explanation():
         total_jgs_cnt = int(cursor.fetchone()[0])
 
         #query2 = "select p_desc from oct11.global_results"
-        query2 = "select id, jg_name, p_desc, is_user, recall, precision, fscore from "+resultSchemaName+".topk_patterns_from_top_jgs" #"select p_desc from "+resultSchemaName+".global_results"
+        query2 = "select id, jg_name, p_desc, is_user, recall, precision, fscore from "+resultSchemaName+".topk_patterns_from_top_jgs order by fscore::numeric desc" #"select p_desc from "+resultSchemaName+".global_results"
         globals()['cursor'].execute(query2)
         exp_list = globals()['cursor'].fetchall()
         print('exp_list:::', exp_list)
@@ -546,7 +546,7 @@ def retrieve_explanation():
         jg_detail_list = globals()['cursor'].fetchall()
         jg = getJoinGraph(jg_detail_list)
 
-        query5 = "select jg_details, fscore, p_desc, jg_name, id from "+resultSchemaName+".topk_patterns_from_top_jgs"
+        query5 = "select jg_details, fscore, p_desc, jg_name, id from "+resultSchemaName+".topk_patterns_from_top_jgs order by fscore::numeric desc"
         globals()['cursor'].execute(query5)
         test_list = globals()['cursor'].fetchall()
 
