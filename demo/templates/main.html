@@ -220,6 +220,7 @@
       var original_summaryData;
       var original_highlightTextList;
  
+      var color_index = -1; ///////////////////////
       var color_matching = [];
       var likedList = [];
       var dislikedList = [];
@@ -833,9 +834,12 @@
         /////<Generate Random Text Color>
         text_color_list = [];
         hue_list = [0,60,80,120,150,170,190,210,240,270,300,330,345]; //13colors
+        //text_color_list.push('hsl(0,0%,60%)');
         hue_list.forEach(function(d){
-          text_color_list.push('hsl('+d+',100%,80%)');
+          if(d == 0){ text_color_list.push('hsl('+d+',0%,60%)');}
+          text_color_list.push('hsl('+d+',100%,70%)');
         });
+        console.log("textcolorlist: ", text_color_list);
         // text_color_list = [];
         // function generateRandomTextColor(length) {
         //     while(text_color_list.length <length){
@@ -864,13 +868,14 @@
 
         // generateRandomColor(node_length);
 
-        var color_index = -1;
+        ////////////////////////var color_index = -1;
         //var color_matching = [];
 
         for(var i=0;i<graphData.length;i++){
           tmp = graphData[i]["nodes"];
           for(var j=0;j<tmp.length;j++){
               var obj = tmp[j];
+              console.log("color index: ", color_index);
 
               if(color_index <0){
                 color_index++;
