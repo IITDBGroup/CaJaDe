@@ -580,7 +580,7 @@ def retrieve_explanation():
             fracnames=[ur1, ur2]
             fracvalues=[frac1, frac2] 
         else:
-            progress_width = math.ceil(10+90*float(processed_jg_cnt/total_jgs_cnt))
+            progress_width = math.ceil(20+90*float(processed_jg_cnt/total_jgs_cnt))
 
     return jsonify(result = "success-explanation", result2 = exp_list, result3 = jg, result5 = test_list, result6 = highlight_list, 
         result8=fracnames, result9=fracvalues, isrunning=alive, status=status, bar_width=progress_width)

@@ -91,16 +91,19 @@ body::-webkit-scrollbar-thumb{
   padding: 5px 0;
   position: absolute;
   z-index: 1;
-  bottom: 125%;
+  top: 125%;
   left: 50%;
   margin-left: -60px;
   opacity: 0;
   transition: opacity 0.3s;
+  font-size: 20px;
 }
 
 .tooltip_q .tooltiptext::after {
   content: "";
-  position: absolute;
+  /*position: absolute;*/
+  top: -5px;
+  right: 105%;
   top: 100%;
   left: 50%;
   margin-left: -5px;
@@ -134,11 +137,11 @@ stroke: steelblue;
 
 #probar {
   width: 0%;
+  font-size: 13px;
   height: 30px;
-  background-color: #04AA6D;
-  text-align: center; /* To center it horizontally (if you want) */
+  /*background-color: #04AA6D;*/
   line-height: 30px; /* To center it vertically */
-  color: black;
+  /*color: black;*/
 }
 
 #progress {
