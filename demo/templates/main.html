@@ -166,7 +166,6 @@
         <div class="row">
           <div id="user_rating_update" style="width: 50%;"></div>
           <div id="reset_JGselection" style="float: left; width:50%;">
-            <button type="button" class="btn btn-outline-primary" onclick="resetClicked()">Reset</button>
           </div>
         </div>
         <div style="float: right;" class="col-sm-1">
@@ -215,10 +214,8 @@
         <div style="float: right;" class="col-sm-1">
           <div class="tooltip_q" id="tooltip_q_viz"></div>
         </div> 
-        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom" id='vis'></div>
-            <div >
-              <select id='viz-options' onchange="config_and_draw()"></select>
-            </div>
+        <div id='vis' class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"></div>
+        <div id='viz-dropdowns'></div>
       </div>
 
 		<script>
@@ -272,7 +269,8 @@
 		    var html;
 
         //let sltList = [];
-		    
+        $('#reset_JGselection').empty();
+        $('#reset_JGselection').append('<button type="button" class="btn btn-outline-primary" onclick="resetClicked()">Reset</button>');
 		    dataPerPage = $("#dataPerPage").val();
 		  
 		    var slt = $('#query-select').val();
@@ -1491,7 +1489,8 @@
           console.log("chosen_col: ", chosen_col);
           // console.log("type: ", type);
           // if(type=='numerical'){
-          $('#viz-options').empty();
+          $('#viz-dropdowns').empty();
+          $('#viz-dropdowns').append('<p class="font-weight-bold">Choose one predicate to show:</p><select id="viz-options" onchange="config_and_draw()"></select>');
           var dropdown = document.getElementById('viz-options');
           // dropdown='';
 
@@ -1589,7 +1588,7 @@
                 "subtitleFontSize": 15,
                 "font": "Montserrat",
                 "subtitleFont": "monospace",
-                "subtitleColor": "red"
+                "subtitleColor": "black"
                 },
               "data": {"name": "mydata", "values": plotdata},
               "facet": {"row": {"field": "user_question"}},
@@ -1633,7 +1632,7 @@
                 "subtitleFontSize": 15,
                 "font": "Montserrat",
                 "subtitleFont": "monospace",
-                "subtitleColor": "red"
+                "subtitleColor": "black"
                 },
               "data": { "name": "mydata", "values": plotdata},
               "facet": {"row": {"field": "user_question"}},

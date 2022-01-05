@@ -247,9 +247,14 @@ def draw():
         graph_title.append(''.join(where_cols[-1]))
         graph_title.append([''])
         if(plot_type=='numeric'):
-            graph_subtitle = [f"Red highlighted are {''.join([graph_config['col_to_draw'], graph_config['pattern_condition'], graph_config['pattern_value']])}"]
+            graph_subtitle = [f"Red:{''.join([graph_config['col_to_draw'], graph_config['pattern_condition'], graph_config['pattern_value']])}", ""]
+            oppo_sub = ">" if graph_config['pattern_condition']=='<' else "<"
+            graph_subtitle.append([f"Blue:{''.join([graph_config['col_to_draw'], oppo_sub, graph_config['pattern_value']])}", ""])
         else:
-            graph_subtitle = ["Red highlighted are " + f"{''.join([graph_config['col_to_draw'], '=', graph_config['pattern_value']])}"]
+            graph_subtitle = ["Red:highlighted are " + f"{''.join([graph_config['col_to_draw'], '=', graph_config['pattern_value']])}"]
+            oppo_sub = "!="
+            graph_subtitle.append([f"Blue:{''.join([graph_config['col_to_draw'], oppo_sub, graph_config['pattern_value']])}", ""])
+
 
     logger.debug(data_q)
     cursor.execute(data_q)
@@ -335,11 +340,17 @@ def ajax():
   global query
 
 
-  query = f"""
-  SELECT {slt} FROM {frm} {"WHERE {}".format(where) if where !="" else ""} {"GROUP BY {}".format(grp) if grp !="" else ""} \
+  shown_query = f"""
+  SELECT {slt} FROM {frm} {"WHERE {}".format(where) if where !="" else ""} {"GROUP BY {}".format(grp) if grp !="" else ""} 
+  ORDER BY s.season_name 
   """
-  logger.debug(query)
-  cursor.execute(query)
+
+  query = f"""
+  SELECT {slt} FROM {frm} {"WHERE {}".format(where) if where !="" else ""} {"GROUP BY {}".format(grp) if grp !="" else ""} 
+  """
+
+  logger.debug(shown_query)
+  cursor.execute(shown_query)
   data_list = cursor.fetchall()
   
   colnames = [desc[0] for desc in cursor.description]
@@ -400,8 +411,8 @@ def start_explanation():
     global ur1
     global ur2 
     
-    ur1="".join(tmp1)
-    ur2="".join(tmp2)
+    ur1=" ".join(tmp1)
+    ur2=" ".join(tmp2)
 
 
     for i in range(len(colData)):

@@ -19,10 +19,10 @@ body {
   border-radius: 0;
 }
 
-#vis {
+/*#vis {
   border: 3px solid #999;
 }
-
+*/
 svg {
     background-color: #d0eff0;
     border: 3px solid #999;
