@@ -24,6 +24,137 @@ app = Flask(__name__)
 two_cols = re.compile('\w+\.\w+\s{0,}!?(<|>|<=|>=|=|<>|!=)\s{0,}\w+\.\w+\s{0,}')
 pattern_triplets_re = re.compile(r'([\w\.\s-]+)([<|=|>])([\w\.\s]+)')
 
+def getSelection(tmp):
+    print("tmp: ", tmp)
+    print("tmp nodes: ", tmp['nodes'])
+    tmpNodeName = "" #[]
+    for nd in tmp['nodes']:
+        print("node: ", nd)
+        print("node name: ", nd['name'])
+        tmpNodeName = tmpNodeName+nd['name']+" "
+        print("tmpNodeName: ", tmpNodeName)
+        #tmpNodeName.append(nd['name'])
+    return tmpNodeName
+
+def newfunc(): #jg_detail_list, jg):
+    global jg_detail_list
+    global jg
+    print("///////////////////this is newfunc///////////////////")
+    print("*********jg_detail_list*********")
+    for item in jg_detail_list:
+        print(item)
+    print("*********jg*********")
+    for i in range(0, len(jg)):
+        print(i,") ", jg[i])
+    # for item in jg:
+    #     print(item)
+    print("<<Enter number>>: ")
+    a = int(input())
+    print("<<SELECTED JG>>: ", jg[a])
+
+    tmpNdName1 = getSelection(jg[a])  ####
+    print("tmpNdName1: ", tmpNdName1) ####
+    #start_explanation()
+    #global resultSchemaName 
+    resultSchemaName_second = datetime.today().strftime('%B%d%H%M').lower()+'_second'
+
+    # exp_conn = pg2.connect(database=db_name, 
+    #     user=db_user, 
+    #     password=db_pswd,
+    #     port=db_port,
+    #     host=db_host)
+    # exp_conn.autocommit = True
+
+    # globals()['cthread'] = threading.Thread(target=run_experiment, kwargs={'conn': exp_conn,
+    #     'result_schema': resultSchemaName_second, 
+    #     'user_query': (uQuery, 'test'), 
+    #     'user_questions' : [u1,u2],
+    #     'user_questions_map' : {'yes': ur1 , 'no': ur2},
+    #     'user_specified_attrs' : list(set(user_specified_attrs)),
+    #     'user_name' : db_user,
+    #     'password' : db_pswd,
+    #     'host' : db_host,
+    #     'port' : db_port,
+    #     'dbname' : db_name, 
+    #     'maximum_edges' : 2, #2,
+    #     'f1_sample_rate' : 0.3,
+    #     'f1_calculation_type' : 'o',
+    #     'user_assigned_max_num_pred' : 2,
+    #     'min_recall_threshold' : 0.5,
+    #     'gui': True,
+    #     'userSelection' : tmpNdName
+    #     }
+    # )
+    # logger.debug('starting thread')
+    # cthread.start()
+
+    # check_schema_q = f"SELECT schema_name FROM information_schema.schemata WHERE schema_name = '{resultSchemaName_second}';"
+    # cursor.execute(check_schema_q)
+    # cur_res = cursor.fetchone()
+    # logger.debug(check_schema_q)
+    # logger.debug(f"cursor result: {cur_res}")
+
+    # alive = cthread.is_alive()
+    # logger.debug(f"alive: {alive}")
+
+    run_experiment(conn=globals()['conn'],
+                result_schema=resultSchemaName_second,
+                user_query=(uQuery, 'test'),
+                user_questions = [u1,u2],
+                user_questions_map = {'yes': ur1 , 'no': ur2},
+                user_specified_attrs=list(set(user_specified_attrs)),
+                user_name=db_user,
+                password=db_pswd,
+                host=db_host,
+                port=db_port,
+                dbname=db_name, 
+                maximum_edges=2,
+                f1_sample_rate=0.3,
+                f1_calculation_type = 'o',
+                user_assigned_max_num_pred=2,
+                min_recall_threshold=0.5,
+                gui=True,
+                userSelection=tmpNdName1)
+    
+    ###################
+    query_second = "select distinct jg_name, jg_details from "+resultSchemaName_second+".topk_patterns_from_top_jgs"
+    globals()['cursor'].execute(query_second)
+    jg_detail_list_second = globals()['cursor'].fetchall()
+    jg_second = getJoinGraph(jg_detail_list_second)
+    print("*********jg_detail_list_second*********")
+    for item in jg_detail_list_second:
+        print(item)
+    print("*********jg_second*********")
+    for i in range(0, len(jg_second)):
+        print(i,") ", jg_second[i])
+    print("<<Enter number>>: ")
+    b = int(input())
+    print("<<SELECTED JG>>: ", jg_second[b])
+
+    tmpNdName2 = getSelection(jg_second[b])  ####
+    print("tmpNdName2: ", tmpNdName2)
+
+    # resultSchemaName_3 = datetime.today().strftime('%B%d%H%M').lower()+'_3'
+    # run_experiment(conn=globals()['conn'],
+    #             result_schema=resultSchemaName_3,
+    #             user_query=(uQuery, 'test'),
+    #             user_questions = [u1,u2],
+    #             user_questions_map = {'yes': ur1 , 'no': ur2},
+    #             user_specified_attrs=list(set(user_specified_attrs)),
+    #             user_name=db_user,
+    #             password=db_pswd,
+    #             host=db_host,
+    #             port=db_port,
+    #             dbname=db_name, 
+    #             maximum_edges=3,
+    #             f1_sample_rate=0.3,
+    #             f1_calculation_type = 'o',
+    #             user_assigned_max_num_pred=2,
+    #             min_recall_threshold=0.5,
+    #             gui=True,
+    #             userSelection=tmpNdName2)
+#################################################
+
 @app.route("/")
 def index():
     return render_template('main.html')
@@ -382,6 +513,7 @@ def start_explanation():
     frac_tmp.append(tmp1[0])#@@
     frac_tmp.append(tmp2[0])#@@
     
+    global uQuery ##########
     uQuery = "provenance of ("+query+");"
 
     # construct information needed for user question
@@ -434,6 +566,7 @@ def start_explanation():
     # 1) group by attributes
     # 2) where clause if certain attributes have equal to some constant
     # 3) TBD
+    global user_specified_attrs ##########
     user_specified_attrs = []
     table_mappings = {}
     tables = [x.strip() for x in frm.split(',')]
@@ -470,27 +603,55 @@ def start_explanation():
         host=db_host)
     exp_conn.autocommit = True
 
-    globals()['cthread'] = threading.Thread(target=run_experiment, kwargs={'conn': exp_conn,
-        'result_schema': resultSchemaName, 
-        'user_query': (uQuery, 'test'), 
-        'user_questions' : [u1,u2],
-        'user_questions_map' : {'yes': ur1 , 'no': ur2},
-        'user_specified_attrs' : list(set(user_specified_attrs)),
-        'user_name' : db_user,
-        'password' : db_pswd,
-        'host' : db_host,
-        'port' : db_port,
-        'dbname' : db_name, 
-        'maximum_edges' : 2,
-        'f1_sample_rate' : 0.3,
-        'f1_calculation_type' : 'o',
-        'user_assigned_max_num_pred' : 2,
-        'min_recall_threshold' : 0.5,
-        'gui': True
-        }
-    )
-    logger.debug('starting thread')
-    cthread.start()
+    userSelection = 'N/A'
+    run_experiment(conn=globals()['conn'],
+                    result_schema=resultSchemaName,
+                    user_query=(uQuery, 'test'),
+                    user_questions = [u1,u2],
+                    user_questions_map = {'yes': ur1 , 'no': ur2},
+                    user_specified_attrs=list(set(user_specified_attrs)),
+                    user_name=db_user,
+                    password=db_pswd,
+                    host=db_host,
+                    port=db_port,
+                    dbname=db_name, 
+                    maximum_edges=1,
+                    f1_sample_rate=0.3,
+                    f1_calculation_type = 'o',
+                    user_assigned_max_num_pred=2,
+                    min_recall_threshold=0.5,
+                    gui=True,
+                    userSelection=userSelection)
+    # globals()['cthread'] = threading.Thread(target=run_experiment, kwargs={'conn': exp_conn,
+    #     'result_schema': resultSchemaName, 
+    #     'user_query': (uQuery, 'test'), 
+    #     'user_questions' : [u1,u2],
+    #     'user_questions_map' : {'yes': ur1 , 'no': ur2},
+    #     'user_specified_attrs' : list(set(user_specified_attrs)),
+    #     'user_name' : db_user,
+    #     'password' : db_pswd,
+    #     'host' : db_host,
+    #     'port' : db_port,
+    #     'dbname' : db_name, 
+    #     'maximum_edges' : 1, #2,
+    #     'f1_sample_rate' : 0.3,
+    #     'f1_calculation_type' : 'o',
+    #     'user_assigned_max_num_pred' : 2,
+    #     'min_recall_threshold' : 0.5,
+    #     'gui': True,
+    #     'userSelection' : userSelection
+    #     }
+    # )
+    # logger.debug('starting thread')
+    # cthread.start()
+    query3 = "select distinct jg_name, jg_details from "+resultSchemaName+".topk_patterns_from_top_jgs" #"select distinct jg_details from "+resultSchemaName+".global_results"
+    globals()['cursor'].execute(query3)
+    global jg_detail_list
+    global jg
+    jg_detail_list = globals()['cursor'].fetchall()
+    jg = getJoinGraph(jg_detail_list)
+
+    newfunc()
 
     resp = jsonify(success=True)
     return resp
@@ -515,7 +676,7 @@ def start_explanation():
 
 @app.route('/retrieve_explanation',methods=['EXP'])
 def retrieve_explanation():
-
+    global jg
     fracnames= 'null'
     fracvalues= 'null'
     exp_list = 'null'
@@ -535,6 +696,7 @@ def retrieve_explanation():
     logger.debug(f"alive: {alive}")
     
     if(cur_res):
+        #global resultSchemaName
         unique_jg_q = "select count(distinct jg) from "+resultSchemaName+".topk_patterns_from_top_jgs"
         cursor.execute(unique_jg_q)
         processed_jg_cnt = int(cursor.fetchone()[0])
@@ -547,15 +709,18 @@ def retrieve_explanation():
         query2 = "select id, jg_name, p_desc, is_user, recall, precision, fscore from "+resultSchemaName+".topk_patterns_from_top_jgs order by fscore::numeric desc" #"select p_desc from "+resultSchemaName+".global_results"
         globals()['cursor'].execute(query2)
         exp_list = globals()['cursor'].fetchall()
-        print('exp_list:::', exp_list)
+        ###print('exp_list:::', exp_list)
         #exp_list = exp_replace_name(exp_list_tmp)
         highlight_list = getHighlightTexts(exp_list)
 
         #query3 = "select distinct jg_details from oct11.global_results"
         query3 = "select distinct jg_name, jg_details from "+resultSchemaName+".topk_patterns_from_top_jgs" #"select distinct jg_details from "+resultSchemaName+".global_results"
         globals()['cursor'].execute(query3)
+        global jg_detail_list
         jg_detail_list = globals()['cursor'].fetchall()
         jg = getJoinGraph(jg_detail_list)
+        #####newfunc()
+        #newfunc(jg_detail_list, jg) ##########################
 
         query5 = "select jg_details, fscore, p_desc, jg_name, id from "+resultSchemaName+".topk_patterns_from_top_jgs order by fscore::numeric desc"
         globals()['cursor'].execute(query5)
@@ -579,9 +744,15 @@ def retrieve_explanation():
 
             fracnames=[ur1, ur2]
             fracvalues=[frac1, frac2] 
+
+            #newfunc()
         else:
             progress_width = math.ceil(20+90*float(processed_jg_cnt/total_jgs_cnt))
-
+    if not cthread.is_alive():
+        newfunc()
+    # newfunc() #############
+    # return jsonify(result = "success-explanation", result2 = exp_list, result3 = jg, result5 = test_list, result6 = highlight_list, 
+    #     result8=fracnames, result9=fracvalues)
     return jsonify(result = "success-explanation", result2 = exp_list, result3 = jg, result5 = test_list, result6 = highlight_list, 
         result8=fracnames, result9=fracvalues, isrunning=alive, status=status, bar_width=progress_width)
 ##@@
@@ -696,8 +867,8 @@ def ratingUD():
 
 
 def getHighlightTexts(exp_list):
-    print("<<<<<<<exp_list[0]: ", exp_list[0])
-    print("<<<<<<<exp_list[0][2]: ", exp_list[0][2])
+    ###print("<<<<<<<exp_list[0]: ", exp_list[0])
+    ###print("<<<<<<<exp_list[0][2]: ", exp_list[0][2])
     highlightTxtList = []
     for i in range(0, len(exp_list)):
         tmp = exp_list[i][2]
@@ -707,7 +878,7 @@ def getHighlightTexts(exp_list):
             get_text = tmp_line.split('.')[0]
             if get_text not in highlightTxtList:
                 highlightTxtList.append(get_text)
-    print('highlight text list: ', highlightTxtList)
+    ###print('highlight text list: ', highlightTxtList)
     return highlightTxtList
     ##################################
     # highlightTxtList = []
@@ -739,8 +910,8 @@ def getJoinGraph(jg_detail_list):
         cur_data = jg_detail_list[i]
         cur_jg_name = cur_data[0]
         cur_jg_detail = cur_data[1]
-        print("cur_jg_detail::::::")
-        print(cur_jg_detail)
+        ###print("cur_jg_detail::::::")
+        ###print(cur_jg_detail)
 
         if 'cond' not in cur_jg_detail:
             nodeName = 'PT'

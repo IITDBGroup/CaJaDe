@@ -237,7 +237,9 @@ def run_experiment(conn=None,
                    f1_min_sample_size_threshold=100,
                    lca_eval_mode=False,
                    statstracker=ExperimentParams(),
-                   gui=False):
+                   gui=False,
+                   userSelection=''): ####
+                  
     # added a gui parameter, if true bypass pt creation step
     # f1_calculation_type: "o": evaluate on original materialized jg
     #                      "s": evaluate on a sampled materialized jg only sample size is decided
@@ -263,6 +265,7 @@ def run_experiment(conn=None,
     statstracker.params['f1_min_sample_size_threshold'] = "'{}'".format(f1_min_sample_size_threshold)
     statstracker.params['f1_sample_type'] = "'{}'".format(f1_sample_type)
     statstracker.params['gui'] = "'{}'".format(str(gui))
+    statstracker.params['userSelection'] = "'{}'".format(str(userSelection))
 
     exp_time = datetime.now().strftime("%Y_%m_%d__%H_%M_%S")
 
@@ -303,7 +306,8 @@ def run_experiment(conn=None,
     jgg = Join_Graph_Generator(schema_graph = sg, attr_dict = attr_dict, gwrapper=w)
 
     # logger.debug('generate new valid_jgs')
-    valid_result = jgg.Generate_JGs(pt_rels=pt_relations, num_edges=maximum_edges, customize=False)
+    print("userSelection:::: ", userSelection)
+    valid_result = jgg.Generate_JGs(pt_rels=pt_relations, num_edges=maximum_edges, customize=False, uSelection=userSelection)
     
     # logger.debug(f"Before filtering any, we have {len(valid_result)} valid jgs \n")
 

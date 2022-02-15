@@ -711,8 +711,8 @@
           expTEXT += tdArr[i];
           expTEXT += " ";
         }
-
-		    var postdata_exp = { 'tdArr': tdArr, 'colNum': colNum, 'colData': colData}
+        
+		    var postdata_exp = { 'tdArr': tdArr, 'colNum': colNum, 'colData': colData};
 
         // start explanation
         $.ajax({
@@ -720,63 +720,73 @@
           url: '{{url_for("start_explanation")}}',
           data: JSON.stringify(postdata_exp),
           dataType: 'JSON',
-          contentType: "application/json"
-        })
-
-
-        // periodically retrieve result
-        var intervalid = setInterval(ajaxCall, 10000); //5000 MS = 5s
-        var bar = document.getElementById("probar");
-
-        function ajaxCall() {
-        $.ajax({
-          type: 'EXP',
-          url: '{{url_for("retrieve_explanation")}}',
-          // data: JSON.stringify(postdata_exp),
-          dataType: 'JSON',
-          // contentType: "application/json"
+          contentType: "application/json",
+          ////////////////
           success: function(data){
-            running = data.isrunning;
-            status = data.status;
-            bar_width = data.bar_width;
-            // $('#status').text(status);
-            bar.style.width = bar_width + "%";
-            bar.innerHTML = status;
-            console.log(data.result2);
-            if (data.result2!='null'){
-              original_exp_len = data.result2.length;
-              original_exp_data = data.result2;
-              original_graphData = data.result3;
-              original_summaryData = data.result5; ////
-              original_highlightTextList = data.result6;
-              cur_exp_len=original_exp_len;
-              cur_exp_data=original_exp_data;
-              cur_graphData=original_graphData;
-              cur_summaryData=original_summaryData;
-              cur_highlightTextList=original_highlightTextList;
-              frac_name = data.result8; 
-              frac_value = data.result9;//@@
-              if(!running){
-                clearInterval(intervalid);
-              }
-
-              //exp_table(exp_data,exp_len,graphData);
-              exp_summary(cur_summaryData, cur_exp_data, cur_exp_len, cur_graphData); //exp_summary(summaryData, exp_data, exp_len, fscoreData); 
-
-              qmarkHtml = "<i class=\"fa fa-question-circle\" style=\"font-size:24px;\"></i><span class=\"tooltiptext\">Join graph</span>";
-              $("#tooltip_q_jg").empty();
-              $("#tooltip_q_jg").append(qmarkHtml);
-            } 
-            // else {
-            //   alert("No data");
-            // }
+            
+            
           },
           error: function(request, status, error){ 
             alert('ajax failed')
             alert(error);
           }
+          //////////////////
         })
-      }
+
+      //   // periodically retrieve result
+      //   var intervalid = setInterval(ajaxCall, 10000); //5000 MS = 5s
+      //   var bar = document.getElementById("probar");
+
+      //   function ajaxCall() {
+      //   $.ajax({
+      //     type: 'EXP',
+      //     url: '{{url_for("retrieve_explanation")}}',
+      //     //data: JSON.stringify(postdata_retrieve),
+      //     // data: JSON.stringify(postdata_exp),
+      //     dataType: 'JSON',
+      //     //contentType: "application/json",
+      //     success: function(data){
+      //       running = data.isrunning;
+      //       status = data.status;
+      //       bar_width = data.bar_width;
+      //       // $('#status').text(status);
+      //       bar.style.width = bar_width + "%";
+      //       bar.innerHTML = status;
+      //       console.log(data.result2);
+      //       if (data.result2!='null'){
+      //         original_exp_len = data.result2.length;
+      //         original_exp_data = data.result2;
+      //         original_graphData = data.result3;
+      //         original_summaryData = data.result5; ////
+      //         original_highlightTextList = data.result6;
+      //         cur_exp_len=original_exp_len;
+      //         cur_exp_data=original_exp_data;
+      //         cur_graphData=original_graphData;
+      //         cur_summaryData=original_summaryData;
+      //         cur_highlightTextList=original_highlightTextList;
+      //         frac_name = data.result8; 
+      //         frac_value = data.result9;//@@
+      //         if(!running){
+      //           clearInterval(intervalid);
+      //         }
+
+      //         //exp_table(exp_data,exp_len,graphData);
+      //         exp_summary(cur_summaryData, cur_exp_data, cur_exp_len, cur_graphData); //exp_summary(summaryData, exp_data, exp_len, fscoreData); 
+
+      //         qmarkHtml = "<i class=\"fa fa-question-circle\" style=\"font-size:24px;\"></i><span class=\"tooltiptext\">Join graph</span>";
+      //         $("#tooltip_q_jg").empty();
+      //         $("#tooltip_q_jg").append(qmarkHtml);
+      //       } 
+      //       // else {
+      //       //   alert("No data");
+      //       // }
+      //     },
+      //     error: function(request, status, error){ 
+      //       alert('ajax failed')
+      //       alert(error);
+      //     }
+      //   })
+      // }
         
         function getJGid(tmp_id){
           tmp = tmp_id.split(' ')
