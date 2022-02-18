@@ -97,7 +97,7 @@ def newfunc(): #jg_detail_list, jg):
     # alive = cthread.is_alive()
     # logger.debug(f"alive: {alive}")
 
-    run_experiment(conn=globals()['conn'],
+    returnval2 = run_experiment(conn=globals()['conn'],
                 result_schema=resultSchemaName_second,
                 user_query=(uQuery, 'test'),
                 user_questions = [u1,u2],
@@ -115,7 +115,7 @@ def newfunc(): #jg_detail_list, jg):
                 min_recall_threshold=0.5,
                 gui=True,
                 userSelection=tmpNdName1)
-    
+    print("return value2: ", returnval2)
     ###################
     query_second = "select distinct jg_name, jg_details from "+resultSchemaName_second+".topk_patterns_from_top_jgs"
     globals()['cursor'].execute(query_second)
@@ -604,7 +604,7 @@ def start_explanation():
     exp_conn.autocommit = True
 
     userSelection = 'N/A'
-    run_experiment(conn=globals()['conn'],
+    returnval1 = run_experiment(conn=globals()['conn'],
                     result_schema=resultSchemaName,
                     user_query=(uQuery, 'test'),
                     user_questions = [u1,u2],
@@ -615,13 +615,14 @@ def start_explanation():
                     host=db_host,
                     port=db_port,
                     dbname=db_name, 
-                    maximum_edges=1,
+                    maximum_edges=2,
                     f1_sample_rate=0.3,
                     f1_calculation_type = 'o',
                     user_assigned_max_num_pred=2,
                     min_recall_threshold=0.5,
                     gui=True,
                     userSelection=userSelection)
+    print("return value1: ", returnval1)
     # globals()['cthread'] = threading.Thread(target=run_experiment, kwargs={'conn': exp_conn,
     #     'result_schema': resultSchemaName, 
     #     'user_query': (uQuery, 'test'), 
@@ -644,14 +645,16 @@ def start_explanation():
     # )
     # logger.debug('starting thread')
     # cthread.start()
-    query3 = "select distinct jg_name, jg_details from "+resultSchemaName+".topk_patterns_from_top_jgs" #"select distinct jg_details from "+resultSchemaName+".global_results"
-    globals()['cursor'].execute(query3)
-    global jg_detail_list
-    global jg
-    jg_detail_list = globals()['cursor'].fetchall()
-    jg = getJoinGraph(jg_detail_list)
+    
+    ##########################
+    # query3 = "select distinct jg_name, jg_details from "+resultSchemaName+".topk_patterns_from_top_jgs" #"select distinct jg_details from "+resultSchemaName+".global_results"
+    # globals()['cursor'].execute(query3)
+    # global jg_detail_list
+    # global jg
+    # jg_detail_list = globals()['cursor'].fetchall()
+    # jg = getJoinGraph(jg_detail_list)
 
-    newfunc()
+    # newfunc()
 
     resp = jsonify(success=True)
     return resp

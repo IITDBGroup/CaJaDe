@@ -328,9 +328,15 @@ class Join_Graph_Generator:
             generated_jg_set = []
             prev_jg_set = []
             cur_jg_size = 0
-
-            self.stats.startTimer('jg_enumeration')
-            while(cur_jg_size <= num_edges):
+            #################################################################################       
+            valid_jgs = []
+            a=0
+            cur_edge=0
+            #for cur_edge in range(0, num_edges+1):
+            while (cur_edge<=3): #(cur_edge<=num_edges):
+                print("*******cur_edge:",cur_edge)
+                if cur_edge==0 and cur_edge>=2:
+                    self.stats.startTimer('jg_enumeration')
                 if(not prev_jg_set):
                     first_jg_core = MultiGraph(jg_id = '1', max_node_key = 1, sg = self.schema_graph, db_dict=self.attr_dict)
                     first_jg = Join_Graph(graph_core=first_jg_core, jg_number=jg_cur_number, num_edges=0)
@@ -342,51 +348,131 @@ class Join_Graph_Generator:
                     prev_jg_set.append(first_jg)
                     generated_jg_set.extend([first_jg])
                 else:
-                    new_jgs = []
-                    for t in prev_jg_set:
-                        logger.debug(t) ####
-                        ######
-                        print("check return: ", self.selection_checker(t, uSelection)) ################
+                    if cur_edge>1:
+                        print("*******cur_edge:",cur_edge,"***a:",a)
+                        new_jgs=[]
+                        logger.debug(repr(valid_jgs[a-1]))
                         checkValue = self.selection_checker(t, uSelection)
-                        if checkValue == 0:
-                            jg_cur_number, new_generated_jgs = self.gen_new_jg(t, pt_rels, jg_cur_number, 0)
-                            new_jgs.extend(new_generated_jgs)
-                        elif checkValue == 1:
+                        jg_cur_number, new_generated_jgs = self.gen_new_jg(valid_jgs[a-1], pt_rels, jg_cur_number, checkValue)
+                        new_jgs.extend(new_generated_jgs)
+                    else:
+                        new_jgs = []
+                        for t in prev_jg_set:
+                            logger.debug(t) ####
+                            ######
+                            print("check return: ", self.selection_checker(t, uSelection)) ################
+                            checkValue = self.selection_checker(t, uSelection)
+                            ######
                             jg_cur_number, new_generated_jgs = self.gen_new_jg(t, pt_rels, jg_cur_number, checkValue)
                             new_jgs.extend(new_generated_jgs)
-                        # elif checkValue == -1:
-                        #     break
-                        # else:
-                        #     jg_cur_number, new_generated_jgs = self.gen_new_jg(t, pt_rels, jg_cur_number, checkValue)
-                        #     new_jgs.extend(new_generated_jgs)
-                        #####
-                        # jg_cur_number, new_generated_jgs = self.gen_new_jg(t, pt_rels, jg_cur_number)
-                        # new_jgs.extend(new_generated_jgs)
                     prev_jg_set = new_jgs
+                    if cur_edge != 1:
+                        generated_jg_set.clear() ####
                     generated_jg_set.extend(new_jgs)
-                cur_jg_size+=1
-            self.stats.stopTimer('jg_enumeration')
-            
-            self.stats.params['number_of_jgs']+=len(generated_jg_set)
-            self.stats.startTimer('jg_hashing')
-            # logger.debug(generated_jg_set)
-            jg_hash_table = self.hash_jgs(generated_jg_set)
-            self.stats.stopTimer('jg_hashing')
-            valid_jgs = []
+                
+                if (cur_edge>=1):
+                    self.stats.stopTimer('jg_enumeration')            
+                    self.stats.params['number_of_jgs']+=len(generated_jg_set)
+                    self.stats.startTimer('jg_hashing')
 
-            self.stats.startTimer('jg_validtaion')
-            for n in jg_hash_table:
-                if(self.valid_check(n, pt_rels)==True):
-                    valid_jgs.append(n)
-            self.stats.stopTimer('jg_validtaion')
-            valid_jgs.sort(key=lambda j: j.jg_number)
-            # sort it to make sure jg materializer will see PT only first
-            # for v in valid_jgs:
-            #     logger.debug(v)
-            #     logger.debug(f"intermediate? {v.intermediate}")
+                    
+                    jg_hash_table = self.hash_jgs(generated_jg_set)
+                    self.stats.stopTimer('jg_hashing')
+                    #valid_jgs = []
+                    valid_jgs.clear()
+
+                    self.stats.startTimer('jg_validtaion')
+                    for n in jg_hash_table:
+                        if(self.valid_check(n, pt_rels)==True):
+                            valid_jgs.append(n)
+                    self.stats.stopTimer('jg_validtaion')
+
+                    valid_jgs.sort(key=lambda j: j.jg_number)
+                    ########################################
+                    print("<<Enter number>>: ")
+                    for i in range(0, len(valid_jgs)):
+                        print("[",i+1,"]",repr(valid_jgs[i]))
+                    a = int(input())
+                    print("<<SELECTED JG>>: ", repr(valid_jgs[a-1]))
+                    jg_hash_table.clear() #####
+                    #########################################
+                    # prev_jg_set.clear()
+                    # prev_jg_set.append(repr(valid_jgs[a-1]))
+                cur_edge+=1
             return valid_jgs
         else:
             pass
+
+            #################################################################################
+
+            # self.stats.startTimer('jg_enumeration')
+            # while(cur_jg_size <= num_edges):
+            #     if(not prev_jg_set):
+            #         first_jg_core = MultiGraph(jg_id = '1', max_node_key = 1, sg = self.schema_graph, db_dict=self.attr_dict)
+            #         first_jg = Join_Graph(graph_core=first_jg_core, jg_number=jg_cur_number, num_edges=0)
+            #         jg_cur_number+=1
+            #         first_node = Node(label='PT', cond_keys=None)
+            #         first_node.key = first_jg.graph_core.graph['max_node_key']
+            #         first_jg.graph_core.graph['max_node_key']+=1
+            #         first_jg.graph_core.add_node(first_node)
+            #         prev_jg_set.append(first_jg)
+            #         generated_jg_set.extend([first_jg])
+            #     else:
+            #         new_jgs = []
+            #         for t in prev_jg_set:
+            #             logger.debug(t) ####
+            #             logger.debug(repr(t)) ####
+            #             ######
+            #             print("check return: ", self.selection_checker(t, uSelection)) ################
+            #             checkValue = self.selection_checker(t, uSelection)
+            #             if checkValue == 0:
+            #                 jg_cur_number, new_generated_jgs = self.gen_new_jg(t, pt_rels, jg_cur_number, 0)
+            #                 new_jgs.extend(new_generated_jgs)
+            #             elif checkValue == 1:
+            #                 jg_cur_number, new_generated_jgs = self.gen_new_jg(t, pt_rels, jg_cur_number, checkValue)
+            #                 new_jgs.extend(new_generated_jgs)
+            #             # elif checkValue == -1:
+            #             #     break
+            #             # else:
+            #             #     jg_cur_number, new_generated_jgs = self.gen_new_jg(t, pt_rels, jg_cur_number, checkValue)
+            #             #     new_jgs.extend(new_generated_jgs)
+            #             #####
+            #             # jg_cur_number, new_generated_jgs = self.gen_new_jg(t, pt_rels, jg_cur_number)
+            #             # new_jgs.extend(new_generated_jgs)
+            #         prev_jg_set = new_jgs
+            #         logger.debug(prev_jg_set) ############
+            #         generated_jg_set.extend(new_jgs)
+            #     cur_jg_size+=1
+            # self.stats.stopTimer('jg_enumeration')
+            
+            # self.stats.params['number_of_jgs']+=len(generated_jg_set)
+            # self.stats.startTimer('jg_hashing')
+            # # logger.debug(generated_jg_set)
+            # jg_hash_table = self.hash_jgs(generated_jg_set)
+            # self.stats.stopTimer('jg_hashing')
+            # valid_jgs = []
+
+            # self.stats.startTimer('jg_validtaion')
+            # for n in jg_hash_table:
+            #     if(self.valid_check(n, pt_rels)==True):
+            #         valid_jgs.append(n)
+            # self.stats.stopTimer('jg_validtaion')
+
+            # valid_jgs.sort(key=lambda j: j.jg_number)
+            # ########################################
+            # print("<<Enter number>>: ")
+            # for i in range(0, len(valid_jgs)):
+            #     print("[",i+1,"]",repr(valid_jgs[i]))
+            # a = int(input())
+            # print("<<SELECTED JG>>: ", repr(valid_jgs[a-1]))
+            # #########################################
+            # # sort it to make sure jg materializer will see PT only first
+            # # for v in valid_jgs:
+            # #     logger.debug(v)
+            # #     logger.debug(f"intermediate? {v.intermediate}")
+        #     return valid_jgs
+        # else:
+        #     pass
 
 
     def hash_jgs(self, jg_set):

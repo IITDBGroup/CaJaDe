@@ -308,7 +308,11 @@ def run_experiment(conn=None,
     # logger.debug('generate new valid_jgs')
     print("userSelection:::: ", userSelection)
     valid_result = jgg.Generate_JGs(pt_rels=pt_relations, num_edges=maximum_edges, customize=False, uSelection=userSelection)
-    
+    logger.debug(valid_result) 
+    i=0
+    for item in valid_result:
+      i=i+1
+      print(i,")",item)
     # logger.debug(f"Before filtering any, we have {len(valid_result)} valid jgs \n")
 
     jgm = Join_Graph_Materializer(conn=conn, db_dict=attr_dict, gwrapper=w, user_query=user_query[0])
@@ -509,6 +513,13 @@ def run_experiment(conn=None,
 
     logger.debug(f'total number of patterns {len(patterns_all)}')
 
+    #logger.debug(topk_from_top_jgs) ################
+    i=0
+    for item in topk_from_top_jgs:
+      i=i+1
+      print(i,")",item)
+      
+
     # collect stats 
     stats_trackers = [jgg.stats, jgm.stats, pgen.stats, statstracker]
 
@@ -524,6 +535,7 @@ def run_experiment(conn=None,
       if(not gui):
         InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=topk_from_top_jgs, pattern_relation_name='topk_patterns_from_top_jgs', schema=result_schema, exp_time=exp_time, result_type=f1_calculation_type)
     # conn.close()
+    return 1
 
 
 def drop_jg_views(conn):
