@@ -192,7 +192,7 @@ class Join_Graph_Generator:
         return True
 
 
-    def add_one_edge(self, j_graph_target, node1_label, node2_label, condition, expandCheck):
+    def add_one_edge(self, j_graph_target, node1_label, node2_label, condition):
         """
         adding an edge to j_graph_target given node1 and node2 and condition with the edge
 
@@ -202,8 +202,8 @@ class Join_Graph_Generator:
         plans_edge_w_new_node = []
 
         for n in j_graph_target.graph_core:
-            logger.debug(n.label) ####
-            logger.debug(node1_label) ####
+            #logger.debug(n.label) ####
+            #logger.debug(node1_label) ####
             if(n.label == node1_label):
                 for nn in j_graph_target.graph_core:
                     FoundNode2 = False
@@ -222,20 +222,15 @@ class Join_Graph_Generator:
                             if(CondExists==False):
                                 plans_just_edge.append((j_graph_target,n.key, nn.key, condition))
                 if(not FoundNode2):
-                    # if expandCheck != 0:
-                    #     if node2_label == expandCheck:
-                    #         plans_edge_w_new_node.append((j_graph_target, n.key, node2_label, condition))
-                    # else:
-                    #     plans_edge_w_new_node.append((j_graph_target, n.key, node2_label, condition))
                     plans_edge_w_new_node.append((j_graph_target, n.key, node2_label, condition))
-        logger.debug(j_graph_target) ####
-        logger.debug(n.key) ####
-        logger.debug(node2_label) ####
-        logger.debug(condition) ####
-        logger.debug(plans_edge_w_new_node) ####
+        # logger.debug(j_graph_target) ####
+        # logger.debug(n.key) ####
+        # logger.debug(node2_label) ####
+        # logger.debug(condition) ####
+        # logger.debug(plans_edge_w_new_node) ####
         return plans_just_edge, plans_edge_w_new_node
  
-    def gen_new_jg(self, j_graph_target, pt_rels, jg_cur_number, expandCheck):
+    def gen_new_jg(self, j_graph_target, pt_rels, jg_cur_number):
         """
         j_graph_target: j_graph to add an edge to
 
@@ -251,7 +246,7 @@ class Join_Graph_Generator:
         j_graph_creation_plans = {'edges_only':[], 'edges_w_node':[]}
 
         for jn in j_graph_target.graph_core:
-            logger.debug(jn) ####
+            #logger.debug(jn) ####
             if(jn.label=='PT'):
                 for pt_n in pt_rels:
                     for n in self.schema_graph:
@@ -260,15 +255,15 @@ class Join_Graph_Generator:
                                 # replace pt_n.label with "PT"
                                 # cond_str = cond['condition'].replace(f'{pt_n}.', 'PT.')
                                 cond_str = re.sub(f'(?<!_){pt_n}\.', 'PT.', cond['condition'])
-                                logger.debug(j_graph_target) ####
-                                edge_only_plans, edges_w_node_plans = self.add_one_edge(j_graph_target, 'PT', n, [cond_str, cond['key_dict'], pt_n], expandCheck)
+                                #logger.debug(j_graph_target) ####
+                                edge_only_plans, edges_w_node_plans = self.add_one_edge(j_graph_target, 'PT', n, [cond_str, cond['key_dict'], pt_n])
                                 j_graph_creation_plans['edges_only'].extend(edge_only_plans)
                                 j_graph_creation_plans['edges_w_node'].extend(edges_w_node_plans)
             else:
                 for n in self.schema_graph:
                     if(self.schema_graph.has_edge(jn.label,n)):
                         for cond in [ x for x in self.schema_graph.get_edge_data(jn.label,n).values()]:
-                            edge_only_plans, edges_w_node_plans  = self.add_one_edge(j_graph_target, jn.label, n, [cond['condition'], cond['key_dict'], None], expandCheck)
+                            edge_only_plans, edges_w_node_plans  = self.add_one_edge(j_graph_target, jn.label, n, [cond['condition'], cond['key_dict'], None])
                             j_graph_creation_plans['edges_only'].extend(edge_only_plans)
                             j_graph_creation_plans['edges_w_node'].extend(edges_w_node_plans)
 
@@ -311,11 +306,11 @@ class Join_Graph_Generator:
                 new_jg.graph_core.add_edge(node1, node2, condition=cond_to_add)
                 new_jgs.append(new_jg)
 
-        logger.debug(new_jgs) ####
+        #logger.debug(new_jgs) ####
         return jg_cur_number, new_jgs
 
 
-    def Generate_JGs(self, pt_rels, num_edges, customize=False, uSelection=None): #=[]):
+    def Generate_JGs(self, pt_rels, num_edges, customize=False):
         """
         num_edges: this defines the size of a join graph
         pt_rels: relations coming from PT
@@ -333,7 +328,8 @@ class Join_Graph_Generator:
             a=0
             cur_edge=0
             #for cur_edge in range(0, num_edges+1):
-            while (cur_edge<=3): #(cur_edge<=num_edges):
+            #while (cur_edge<=num_edges): #(cur_edge<=3):
+            while True:
                 print("*******cur_edge:",cur_edge)
                 if cur_edge==0 and cur_edge>=2:
                     self.stats.startTimer('jg_enumeration')
@@ -352,18 +348,18 @@ class Join_Graph_Generator:
                         print("*******cur_edge:",cur_edge,"***a:",a)
                         new_jgs=[]
                         logger.debug(repr(valid_jgs[a-1]))
-                        checkValue = self.selection_checker(t, uSelection)
-                        jg_cur_number, new_generated_jgs = self.gen_new_jg(valid_jgs[a-1], pt_rels, jg_cur_number, checkValue)
+                        #checkValue = self.selection_checker(t, uSelection)
+                        jg_cur_number, new_generated_jgs = self.gen_new_jg(valid_jgs[a-1], pt_rels, jg_cur_number)
                         new_jgs.extend(new_generated_jgs)
                     else:
                         new_jgs = []
                         for t in prev_jg_set:
                             logger.debug(t) ####
                             ######
-                            print("check return: ", self.selection_checker(t, uSelection)) ################
-                            checkValue = self.selection_checker(t, uSelection)
+                            #print("check return: ", self.selection_checker(t, uSelection)) ################
+                            #checkValue = self.selection_checker(t, uSelection)
                             ######
-                            jg_cur_number, new_generated_jgs = self.gen_new_jg(t, pt_rels, jg_cur_number, checkValue)
+                            jg_cur_number, new_generated_jgs = self.gen_new_jg(t, pt_rels, jg_cur_number)
                             new_jgs.extend(new_generated_jgs)
                     prev_jg_set = new_jgs
                     if cur_edge != 1:
@@ -389,10 +385,12 @@ class Join_Graph_Generator:
 
                     valid_jgs.sort(key=lambda j: j.jg_number)
                     ########################################
-                    print("<<Enter number>>: ")
+                    print("<<Enter number (Stop:0)>>: ")
                     for i in range(0, len(valid_jgs)):
                         print("[",i+1,"]",repr(valid_jgs[i]))
                     a = int(input())
+                    if a==0:
+                        break
                     print("<<SELECTED JG>>: ", repr(valid_jgs[a-1]))
                     jg_hash_table.clear() #####
                     #########################################
@@ -487,41 +485,3 @@ class Join_Graph_Generator:
 
             # logger.debug(self.hash_jg_table)
             return self.hash_jg_table
-    
-    def get_selection_str(self, userSelection):
-        tmplist = []
-        tmplist = userSelection.strip().split(' ')
-        print("tmp split result: ", tmplist)
-        tmplist.remove('PT')
-        print("tmp split FINAL result: ", tmplist)
-        return tmplist
-        # if len(tmplist) == 1:
-        #     return tmplist.pop()
-        # elif len(tmplist) > 1:
-        #     return 
-
-    def selection_checker(self, tmp, uSelection):
-        print("uselection: ", uSelection)
-        if uSelection != "N/A":
-            uSelection = self.get_selection_str(uSelection)
-            if len(uSelection) == 1:
-                selection_val = uSelection.pop()
-            print("selection_val: ", selection_val)
-            #a = "team"
-            print("tmp: ", tmp)
-            print("tmp: ", str(tmp))
-            #if "team" in str(tmp):
-            tmplist = []
-            tmplist = str(tmp).strip().split(' ')
-            tmpCmp = tmplist[-1]
-            print("tmplist [-1]: ", tmpCmp)
-            #if a in str(tmp) or len(str(tmp)) == 0:
-            if selection_val == tmpCmp or len(str(tmp))==0:
-                #return selection_val
-                return 1
-            else:
-                return -1
-        else:
-            return 0
-
-

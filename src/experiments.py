@@ -237,8 +237,7 @@ def run_experiment(conn=None,
                    f1_min_sample_size_threshold=100,
                    lca_eval_mode=False,
                    statstracker=ExperimentParams(),
-                   gui=False,
-                   userSelection=''): ####
+                   gui=False):
                   
     # added a gui parameter, if true bypass pt creation step
     # f1_calculation_type: "o": evaluate on original materialized jg
@@ -265,7 +264,6 @@ def run_experiment(conn=None,
     statstracker.params['f1_min_sample_size_threshold'] = "'{}'".format(f1_min_sample_size_threshold)
     statstracker.params['f1_sample_type'] = "'{}'".format(f1_sample_type)
     statstracker.params['gui'] = "'{}'".format(str(gui))
-    statstracker.params['userSelection'] = "'{}'".format(str(userSelection))
 
     exp_time = datetime.now().strftime("%Y_%m_%d__%H_%M_%S")
 
@@ -306,8 +304,7 @@ def run_experiment(conn=None,
     jgg = Join_Graph_Generator(schema_graph = sg, attr_dict = attr_dict, gwrapper=w)
 
     # logger.debug('generate new valid_jgs')
-    print("userSelection:::: ", userSelection)
-    valid_result = jgg.Generate_JGs(pt_rels=pt_relations, num_edges=maximum_edges, customize=False, uSelection=userSelection)
+    valid_result = jgg.Generate_JGs(pt_rels=pt_relations, num_edges=maximum_edges, customize=False)
     logger.debug(valid_result) 
     i=0
     for item in valid_result:
@@ -535,7 +532,6 @@ def run_experiment(conn=None,
       if(not gui):
         InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=topk_from_top_jgs, pattern_relation_name='topk_patterns_from_top_jgs', schema=result_schema, exp_time=exp_time, result_type=f1_calculation_type)
     # conn.close()
-    return 1
 
 
 def drop_jg_views(conn):
