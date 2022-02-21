@@ -349,6 +349,7 @@ def run_experiment(conn=None,
 
       # logger.debug(f"before filtering redundant, we have {len(valid_result)} jgs")
       valid_result = [v for v in valid_result if not v.redundant]
+
       jgg.stats.params['valid_jgs']=len(valid_result)
       if(gui):
         Create_Stats_Table(conn=conn, stats_trackers=[jgg.stats], stats_relation_name='total_jgs', schema=f"{result_schema}_gui")
@@ -412,6 +413,7 @@ def run_experiment(conn=None,
       cost_estimate_dict = {i:[] for i in range(0,maximum_edges+1)}
       # logger.debug(cost_estimate_dict)
       for vr in valid_result:
+        logger.debug(f"This is a new vr {vr}")
         jgm.stats.startTimer('materialize_jg')
         cost_estimate, renaming_dict, apt_q = jgm.materialize_jg(vr,cost_estimate=True)
         if(apt_q is not None):
