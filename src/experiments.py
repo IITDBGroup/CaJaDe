@@ -21,6 +21,7 @@ from statistics import mean
 import argparse
 from datetime import datetime
 from time import strftime
+#from src.causality import check_causality
 
 
 #####
@@ -100,7 +101,7 @@ def Insert_jg_time_stats(conn, jg_time_dict, stats_relation_name, schema, exp_ti
     # logger.debug(f"INSERT INTO {schema}.{stats_relation_name}(exp_time, exp_desc, jg, timecost) VALUES ('{exp_time}', '{exp_desc}', '{str(k)}', {str(v)})")
     cur.execute(f"INSERT INTO {schema}.{stats_relation_name}(exp_time, exp_desc, jg, timecost) VALUES ('{exp_time}', '{exp_desc}', '{str(k)}', {str(v)})")
 
-def InsertPatterns(conn, exp_desc, patterns, pattern_relation_name, schema, exp_time, result_type='s'):
+def InsertPatterns(conn, exp_desc, patterns, pattern_relation_name, schema, exp_time, result_type='s', isCausality = False):
 
   # result_type: 
   #             s: sample type, use this for fastest results
@@ -115,6 +116,9 @@ def InsertPatterns(conn, exp_desc, patterns, pattern_relation_name, schema, exp_
 
   cols = ['exp_time', 'exp_desc', 'is_user', 'jg', 'jg_details', 'jg_name', 'num_edges', 'p_desc', 
   'recall', 'precision', 'fscore', 'sample_recall', 'sample_precision', 'sample_F1']
+
+  if (isCausality):
+      cols.append('causality_valid')
 
   cols_with_types = ''
 
@@ -413,7 +417,7 @@ def run_experiment(conn=None,
       cost_estimate_dict = {i:[] for i in range(0,maximum_edges+1)}
       # logger.debug(cost_estimate_dict)
       for vr in valid_result:
-        logger.debug(f"This is a new vr {vr}")
+        # logger.debug(f"This is a new vr {vr}")
         jgm.stats.startTimer('materialize_jg')
         cost_estimate, renaming_dict, apt_q = jgm.materialize_jg(vr,cost_estimate=True)
         if(apt_q is not None):
@@ -443,7 +447,7 @@ def run_experiment(conn=None,
 
       for n in valid_result:
         # logger.debug(f'we are on join graph number {jg_cnt}')
-        # logger.debug(n)
+        # logger.debug(n.renaming_dict)
         jg_cnt+=1
         # if(n.cost<=avg_cost_estimate_by_num_edges[n.num_edges]):
         jg_individual_times_dict[n] = 0
@@ -487,6 +491,8 @@ def run_experiment(conn=None,
         jg_individual_times_dict[vr] = pgen.stats.time['per_jg_timer']
         pgen.stats.resetTimer('per_jg_timer')
 
+
+
     if(lca_eval_mode):
       patterns_all = pgen.pattern_pool
     else:
@@ -506,6 +512,7 @@ def run_experiment(conn=None,
       patterns_all = pgen.rank_patterns(ranking_type = 'global')
 
     logger.debug(f'total number of patterns {len(patterns_all)}')
+    # logger.debug(global_rankings)
 
     # collect stats 
     stats_trackers = [jgg.stats, jgm.stats, pgen.stats, statstracker]
@@ -518,7 +525,7 @@ def run_experiment(conn=None,
       Create_jg_time_stats(conn=conn, stats_relation_name='jgs_time_dist', schema=result_schema)
       Insert_jg_time_stats(conn=conn, jg_time_dict=jg_individual_times_dict, stats_relation_name ='jgs_time_dist', schema=result_schema, exp_time=exp_time, exp_desc=exp_desc)
       InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=global_rankings, pattern_relation_name='global_results', schema=result_schema, exp_time=exp_time, result_type=f1_calculation_type)
-      InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=patterns_all, pattern_relation_name='patterns', schema=result_schema, exp_time=exp_time, result_type=f1_calculation_type)
+      InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=patterns_all, pattern_relation_name='patterns', schema=result_schema, exp_time=exp_time, result_type=f1_calculation_type, iscausality = True)
       if(not gui):
         InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=topk_from_top_jgs, pattern_relation_name='topk_patterns_from_top_jgs', schema=result_schema, exp_time=exp_time, result_type=f1_calculation_type)
     # conn.close()
@@ -560,7 +567,7 @@ def main():
   parser.add_argument('-i','--ignore_expensive', metavar="\b", type=str, default='true', 
     help='skip expensive jg or not, (default: %(default)s)')
 
-  parser.add_argument('-m','--min_recall_threshold', metavar="\b", type=float, default=0.3, 
+  parser.add_argument('-m','--min_recall_threshold', metavar="\b", type=float, default=0.3,
     help='recall threshold (default: %(default)s)')
 
   parser.add_argument('-r','--sample_rate_for_lca', metavar="\b", type=float, default=0.05, 
@@ -616,7 +623,11 @@ def main():
   u_question =["season_name='2015-16'","season_name='2012-13'"]
   user_specified_attrs = [('team','team'),('season','season_name')]
 
-
+  user_query = "provenance of (select avg(blood_pres) as blood_press, age from health_info group by age);"
+  # u_query = (user_query, 'gsw wins : 15 vs 12')
+  u_query = (user_query, 'demo')
+  u_question =["age=20.00","age=80.00"]
+  user_specified_attrs = [('health_info','age'),('health_info','blood_pres')]
 
   # user_query = "provenance of (select team from team);"
   # # u_query = (user_query, 'gsw wins : 15 vs 12') 
