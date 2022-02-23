@@ -306,10 +306,7 @@ def run_experiment(conn=None,
     # logger.debug('generate new valid_jgs')
     valid_result = jgg.Generate_JGs(pt_rels=pt_relations, num_edges=maximum_edges, customize=False)
     logger.debug(valid_result) 
-    i=0
-    for item in valid_result:
-      i=i+1
-      print(i,")",item)
+ 
     # logger.debug(f"Before filtering any, we have {len(valid_result)} valid jgs \n")
 
     jgm = Join_Graph_Materializer(conn=conn, db_dict=attr_dict, gwrapper=w, user_query=user_query[0])

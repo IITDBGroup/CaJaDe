@@ -308,8 +308,116 @@ class Join_Graph_Generator:
 
         #logger.debug(new_jgs) ####
         return jg_cur_number, new_jgs
+    
+    def genprev(self, pt_rels, generated_jg_set, cur_edge, prev_jg_set, jg_cur_number, valid_jgs,a):
+        return self.gen(pt_rels, generated_jg_set, cur_edge, prev_jg_set, jg_cur_number, valid_jgs,a)
+    
+    global count_edge
 
+    def gen(self, pt_rels, generated_jg_set, cur_edge, prev_jg_set, jg_cur_number, valid_jgs,a):
+        print("*******cur_edge:",cur_edge)
+        if cur_edge==0 and cur_edge>=2:
+            self.stats.startTimer('jg_enumeration')
+        if(not prev_jg_set):
+            first_jg_core = MultiGraph(jg_id = '1', max_node_key = 1, sg = self.schema_graph, db_dict=self.attr_dict)
+            first_jg = Join_Graph(graph_core=first_jg_core, jg_number=jg_cur_number, num_edges=0)
+            jg_cur_number+=1
+            first_node = Node(label='PT', cond_keys=None)
+            first_node.key = first_jg.graph_core.graph['max_node_key']
+            first_jg.graph_core.graph['max_node_key']+=1
+            first_jg.graph_core.add_node(first_node)
+            prev_jg_set.append(first_jg)
+            generated_jg_set.extend([first_jg])
+        else:
+            if cur_edge>=1:
+                print("*******cur_edge:",cur_edge,"***a:",a)
+                new_jgs=[]
+                print('#####valid jg:', valid_jgs)
+                #logger.debug(repr(valid_jgs[a-1]))
+                jg_cur_number, new_generated_jgs = self.gen_new_jg(valid_jgs[a-1], pt_rels, jg_cur_number)
+                new_jgs.extend(new_generated_jgs)
+            else:
+                new_jgs = []
+                for t in prev_jg_set:
+                    logger.debug(t) ####
+                    jg_cur_number, new_generated_jgs = self.gen_new_jg(t, pt_rels, jg_cur_number)
+                    new_jgs.extend(new_generated_jgs)
+            prev_jg_set = new_jgs
+            #if cur_edge != 1:
+            generated_jg_set.clear() ####
+            generated_jg_set.extend(new_jgs)
+        
+        #if (cur_edge>1):
+        self.stats.stopTimer('jg_enumeration')            
+        self.stats.params['number_of_jgs']+=len(generated_jg_set)
+        self.stats.startTimer('jg_hashing')
+        
+        jg_hash_table = self.hash_jgs(generated_jg_set)
+        self.stats.stopTimer('jg_hashing')
+        #valid_jgs = []
+        valid_jgs.clear()
 
+        self.stats.startTimer('jg_validtaion')
+        for n in jg_hash_table:
+            if(self.valid_check(n, pt_rels)==True):
+                valid_jgs.append(n)
+        self.stats.stopTimer('jg_validtaion')
+
+        valid_jgs.sort(key=lambda j: j.jg_number)
+        ###@@@
+        return_val=0
+            
+        print("<<Enter number (Stop:0|Previous step:-1)>>: ")
+        print('valid jg:', valid_jgs)
+        for i in range(0, len(valid_jgs)):
+            print("[",i+1,"]",repr(valid_jgs[i]))
+        a = int(input())
+        if a==0:
+            #break
+            return valid_jgs
+        elif a==-1 and cur_edge>1:
+            ##cur_edge-=1
+            #generated_jg_set.clear()
+            global count_edge
+            count_edge=cur_edge-2
+            print("^^^^-1*****count_edge: ", count_edge,"******cur_edge: ", cur_edge)
+            return -1
+        else:
+            print("<<SELECTED JG>>: ", repr(valid_jgs[a-1]))
+            print('******************valid jg******************:', valid_jgs)
+            cur_edge+=1
+            jg_hash_table.clear()
+
+            #while True:
+            return_val = self.gen(pt_rels, generated_jg_set, cur_edge, prev_jg_set, jg_cur_number, valid_jgs,a)
+            if return_val != -1:
+                valid_jgs=return_val
+                print('1@@@@@@@@@@@@@@@@@@@@valid jg:', valid_jgs)
+                #break
+            elif return_val == -1 and count_edge!=cur_edge:
+                print("****-1")
+                print("****-1*****count_edge: ", count_edge,"******cur_edge: ", cur_edge)
+                print('2@@@@@@@@@@@@@@@@@@@@valid jg:', valid_jgs)
+                return -1
+                # print("<<Enter number (Stop:0|Previous step:-1)>>: ")
+                # print('valid jg:', valid_jgs)
+                # for i in range(0, len(valid_jgs)):
+                #     print("[",i+1,"]",repr(valid_jgs[i]))
+                # a = int(input())
+            else:
+                generated_jg_set.clear() 
+                print("####-1*****count_edge: ", count_edge,"******cur_edge: ", cur_edge)
+                print('@@@@@@@@@@@@@@@@@@@@valid jg:', valid_jgs)
+
+                # else:
+                #     valid_jgs = return_val
+        return valid_jgs
+    global jgs_selection
+    jgs_selection = {}
+    def setJGselection(self, cur_edge_tmp, valid_jg_tmp):
+        jgs_selection[cur_edge_tmp] = valid_jg_tmp
+    def getJGselection(self, cur_edge_tmp):
+        return jgs_selection[cur_edge_tmp]
     def Generate_JGs(self, pt_rels, num_edges, customize=False):
         """
         num_edges: this defines the size of a join graph
@@ -325,14 +433,22 @@ class Join_Graph_Generator:
             cur_jg_size = 0
             #################################################################################       
             valid_jgs = []
-            a=0
+            # valid_jgs_prev=[]
+            # global jgs_selection
+            # jgs_selection = {}
+            uSelection=0
             cur_edge=0
             #for cur_edge in range(0, num_edges+1):
-            #while (cur_edge<=num_edges): #(cur_edge<=3):
+            # while (cur_edge<=num_edges): #(cur_edge<=3):
             while True:
-                print("*******cur_edge:",cur_edge)
-                if cur_edge==0 and cur_edge>=2:
-                    self.stats.startTimer('jg_enumeration')
+                #cur_edge, generated_jg_set, prev_jg_set, jg_cur_number = self.gen(pt_rels, generated_jg_set, cur_edge, prev_jg_set, jg_cur_number, valid_jgs,a)
+            ##valid_jgs = self.genprev(pt_rels, generated_jg_set, cur_edge, prev_jg_set, jg_cur_number, valid_jgs,a)
+
+                # print("[*******]cur_edge:",cur_edge)
+                # print('[@@@@@@@@@@]jgs selection dic: ', jgs_selection)
+                # print()
+                # if cur_edge==0 and cur_edge>=2:
+                #     self.stats.startTimer('jg_enumeration')
                 if(not prev_jg_set):
                     first_jg_core = MultiGraph(jg_id = '1', max_node_key = 1, sg = self.schema_graph, db_dict=self.attr_dict)
                     first_jg = Join_Graph(graph_core=first_jg_core, jg_number=jg_cur_number, num_edges=0)
@@ -345,20 +461,16 @@ class Join_Graph_Generator:
                     generated_jg_set.extend([first_jg])
                 else:
                     if cur_edge>1:
-                        print("*******cur_edge:",cur_edge,"***a:",a)
+                        # print("*******cur_edge:",cur_edge,"***a:",a)
                         new_jgs=[]
-                        logger.debug(repr(valid_jgs[a-1]))
-                        #checkValue = self.selection_checker(t, uSelection)
-                        jg_cur_number, new_generated_jgs = self.gen_new_jg(valid_jgs[a-1], pt_rels, jg_cur_number)
+                        #print('#####valid jg:', valid_jgs)
+                        #logger.debug(repr(valid_jgs[a-1]))
+                        jg_cur_number, new_generated_jgs = self.gen_new_jg(valid_jgs[uSelection-1], pt_rels, jg_cur_number)
                         new_jgs.extend(new_generated_jgs)
                     else:
                         new_jgs = []
                         for t in prev_jg_set:
                             logger.debug(t) ####
-                            ######
-                            #print("check return: ", self.selection_checker(t, uSelection)) ################
-                            #checkValue = self.selection_checker(t, uSelection)
-                            ######
                             jg_cur_number, new_generated_jgs = self.gen_new_jg(t, pt_rels, jg_cur_number)
                             new_jgs.extend(new_generated_jgs)
                     prev_jg_set = new_jgs
@@ -370,12 +482,11 @@ class Join_Graph_Generator:
                     self.stats.stopTimer('jg_enumeration')            
                     self.stats.params['number_of_jgs']+=len(generated_jg_set)
                     self.stats.startTimer('jg_hashing')
-
                     
                     jg_hash_table = self.hash_jgs(generated_jg_set)
                     self.stats.stopTimer('jg_hashing')
-                    #valid_jgs = []
-                    valid_jgs.clear()
+                    valid_jgs = []
+                    #valid_jgs.clear()
 
                     self.stats.startTimer('jg_validtaion')
                     for n in jg_hash_table:
@@ -384,19 +495,54 @@ class Join_Graph_Generator:
                     self.stats.stopTimer('jg_validtaion')
 
                     valid_jgs.sort(key=lambda j: j.jg_number)
-                    ########################################
-                    print("<<Enter number (Stop:0)>>: ")
+                    ######################################################################################
+                    print("<<Enter number (Stop:0|Previous step:-1)>>: ")
+                    # print('valid jg:', valid_jgs)
+                    #valid_jgs_prev=valid_jgs
+                    
+                    #print('valid jg prev:', valid_jgs_prev)
+                    
+                    uSelection_prev=uSelection
                     for i in range(0, len(valid_jgs)):
                         print("[",i+1,"]",repr(valid_jgs[i]))
-                    a = int(input())
-                    if a==0:
+                    uSelection = int(input())
+                    if uSelection==0:
                         break
-                    print("<<SELECTED JG>>: ", repr(valid_jgs[a-1]))
+                    elif uSelection==-1 and cur_edge>1:
+                        #valid_jgs.clear()
+                        
+                        ######################valid_jgs = jgs_selection[cur_edge-2]
+                        valid_jgs = self.getJGselection(cur_edge-2)
+                        cur_edge-=3
+                        uSelection=uSelection_prev
+                        
+                        #valid_jgs=valid_jgs_prev.copy()
+                        # print('\n@@@cur_edge -2:', cur_edge-2)
+                        # print('\n@@@valid jg:', valid_jgs)
+                        #print('@@@valid jg prev:', valid_jgs_prev)
+                        generated_jg_set.clear()
+                        print("<<Go back to Previous Step>>")
+                        #print("*******cur_edge:",cur_edge,"***a:",a)
+                    else:
+                        print("<<SELECTED JG>>: ", repr(valid_jgs[uSelection-1]))
+                        # print("<<cur edge>>: ", cur_edge)
+                       
+                        # print('@@@@@@@@@@jgs selection dic: ', jgs_selection)
+                        #############jgs_selection[cur_edge] = valid_jgs #valid_jgs[a-1]
+                        self.setJGselection(cur_edge, valid_jgs)
+                        # print('jgs selection dic: ', jgs_selection)
+                    
+                        # print('&&valid jg:', valid_jgs)
+                        #valid_jgs_prev.clear()
+                        #valid_jgs_prev.append(repr(valid_jgs[a-1]))
+                        #valid_jgs_prev=valid_jgs.copy()                        
+                        #print('&&valid jg prev:', valid_jgs_prev)
                     jg_hash_table.clear() #####
-                    #########################################
+                    ##########################################################################################
                     # prev_jg_set.clear()
                     # prev_jg_set.append(repr(valid_jgs[a-1]))
                 cur_edge+=1
+                #print('[######]jgs selection dic: ', jgs_selection)
             return valid_jgs
         else:
             pass

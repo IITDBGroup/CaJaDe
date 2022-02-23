@@ -561,8 +561,8 @@ def retrieve_explanation():
     logger.debug(check_schema_q)
     logger.debug(f"cursor result: {cur_res}")
 
-    alive = cthread.is_alive()
-    logger.debug(f"alive: {alive}")
+    ##alive = cthread.is_alive()
+    ##logger.debug(f"alive: {alive}")
     
     if(cur_res):
         #global resultSchemaName
@@ -597,24 +597,24 @@ def retrieve_explanation():
         globals()['cursor'].execute(query6)
         temp = globals()['cursor'].fetchall()
 
-        status = f'processing join graph ({processed_jg_cnt}/{total_jgs_cnt})'
+        # status = f'processing join graph ({processed_jg_cnt}/{total_jgs_cnt})'
 
-        if(not alive):
-            progress_width = 100
-            status='finished'
-            query_u1_frac = f" SELECT COUNT(*) FROM pt_full WHERE {u1};"
-            query_u2_frac = f" SELECT COUNT(*) FROM pt_full WHERE {u2};"
-            globals()['cursor'].execute(query_u1_frac)
-            frac1 = globals()['cursor'].fetchall()
-            globals()['cursor'].execute(query_u2_frac)
-            frac2 = globals()['cursor'].fetchall()
+        # if(not alive):
+        #     progress_width = 100
+        #     status='finished'
+        #     query_u1_frac = f" SELECT COUNT(*) FROM pt_full WHERE {u1};"
+        #     query_u2_frac = f" SELECT COUNT(*) FROM pt_full WHERE {u2};"
+        #     globals()['cursor'].execute(query_u1_frac)
+        #     frac1 = globals()['cursor'].fetchall()
+        #     globals()['cursor'].execute(query_u2_frac)
+        #     frac2 = globals()['cursor'].fetchall()
 
-            fracnames=[ur1, ur2]
-            fracvalues=[frac1, frac2] 
-        else:
-            progress_width = math.ceil(20+90*float(processed_jg_cnt/total_jgs_cnt))
+        #     fracnames=[ur1, ur2]
+        #     fracvalues=[frac1, frac2] 
+        # else:
+        #     progress_width = math.ceil(20+90*float(processed_jg_cnt/total_jgs_cnt))
     return jsonify(result = "success-explanation", result2 = exp_list, result3 = jg, result5 = test_list, result6 = highlight_list, 
-        result8=fracnames, result9=fracvalues, isrunning=alive, status=status, bar_width=progress_width)
+        result8=fracnames, result9=fracvalues)#, isrunning=alive, status=status, bar_width=progress_width)
 ##@@
 @app.route('/ratingUD',methods=['UD'])
 def ratingUD():
