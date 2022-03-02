@@ -86,7 +86,7 @@ class provenance_getter:
 		for k,v in pt_full_dict.items():
 			if(re_PROV.search(k)):
 				str_items = re.split('(?<!_)_(?!_)', k)
-				logger.debugg(str_items)
+				logger.debug(str_items)
 				if(len(str_items)==3):
 					origin_rel = str_items[1]
 					origin_rel = origin_rel.replace('__','_')

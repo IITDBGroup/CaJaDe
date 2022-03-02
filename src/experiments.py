@@ -21,7 +21,7 @@ from statistics import mean
 import argparse
 from datetime import datetime
 from time import strftime
-#from src.causality import check_causality
+from src.causality import Causality
 
 
 #####
@@ -491,7 +491,9 @@ def run_experiment(conn=None,
         jg_individual_times_dict[vr] = pgen.stats.time['per_jg_timer']
         pgen.stats.resetTimer('per_jg_timer')
 
-
+    causality = Causality()
+    #causality.check_causality(pgen.pattern_pool, 'blood_pres')
+    causality.is_treatment(pgen.pattern_pool, user_questions, conn)
 
     if(lca_eval_mode):
       patterns_all = pgen.pattern_pool
