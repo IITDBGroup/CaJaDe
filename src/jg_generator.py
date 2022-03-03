@@ -414,10 +414,20 @@ class Join_Graph_Generator:
         return valid_jgs
     global jgs_selection
     jgs_selection = {}
-    def setJGselection(self, cur_edge_tmp, valid_jg_tmp):
-        jgs_selection[cur_edge_tmp] = valid_jg_tmp
+    global jgNum
+    #jgNum = 0
+    def setJGselection(self, cur_edge_tmp, valid_jg_tmp, jgNum):
+        tmp = []
+        tmp.append(jgNum)
+        tmp.append(valid_jg_tmp)
+        jgs_selection[cur_edge_tmp] = tmp
+        #jgs_selection[cur_edge_tmp] = valid_jg_tmp
     def getJGselection(self, cur_edge_tmp):
         return jgs_selection[cur_edge_tmp]
+    def setJGnum(self, jgCurNum):
+        global jgNum
+        jgNum = jgCurNum
+
     def Generate_JGs(self, pt_rels, num_edges, customize=False):
         """
         num_edges: this defines the size of a join graph
@@ -449,6 +459,8 @@ class Join_Graph_Generator:
                 # print()
                 # if cur_edge==0 and cur_edge>=2:
                 #     self.stats.startTimer('jg_enumeration')
+                print("//////////jg cur num: ", jg_cur_number)
+                # self.setJGnum(jg_cur_number)
                 if(not prev_jg_set):
                     first_jg_core = MultiGraph(jg_id = '1', max_node_key = 1, sg = self.schema_graph, db_dict=self.attr_dict)
                     first_jg = Join_Graph(graph_core=first_jg_core, jg_number=jg_cur_number, num_edges=0)
@@ -460,7 +472,7 @@ class Join_Graph_Generator:
                     prev_jg_set.append(first_jg)
                     generated_jg_set.extend([first_jg])
                 else:
-                    if cur_edge>1:
+                    if cur_edge>=1:
                         # print("*******cur_edge:",cur_edge,"***a:",a)
                         new_jgs=[]
                         #print('#####valid jg:', valid_jgs)
@@ -474,74 +486,74 @@ class Join_Graph_Generator:
                             jg_cur_number, new_generated_jgs = self.gen_new_jg(t, pt_rels, jg_cur_number)
                             new_jgs.extend(new_generated_jgs)
                     prev_jg_set = new_jgs
-                    if cur_edge != 1:
-                        generated_jg_set.clear() ####
+                    ###if cur_edge != 1:
+                    generated_jg_set.clear() ####
                     generated_jg_set.extend(new_jgs)
                 
-                if (cur_edge>=1):
-                    self.stats.stopTimer('jg_enumeration')            
-                    self.stats.params['number_of_jgs']+=len(generated_jg_set)
-                    self.stats.startTimer('jg_hashing')
-                    
-                    jg_hash_table = self.hash_jgs(generated_jg_set)
-                    self.stats.stopTimer('jg_hashing')
-                    valid_jgs = []
-                    #valid_jgs.clear()
+                
+                #if (cur_edge>=1):
+                self.stats.stopTimer('jg_enumeration')            
+                self.stats.params['number_of_jgs']+=len(generated_jg_set)
+                self.stats.startTimer('jg_hashing')
+                
+                jg_hash_table = self.hash_jgs(generated_jg_set)
+                self.stats.stopTimer('jg_hashing')
+                valid_jgs = []
+                #valid_jgs.clear()
 
-                    self.stats.startTimer('jg_validtaion')
-                    for n in jg_hash_table:
-                        if(self.valid_check(n, pt_rels)==True):
-                            valid_jgs.append(n)
-                    self.stats.stopTimer('jg_validtaion')
+                self.stats.startTimer('jg_validtaion')
+                for n in jg_hash_table:
+                    if(self.valid_check(n, pt_rels)==True):
+                        valid_jgs.append(n)
+                self.stats.stopTimer('jg_validtaion')
 
-                    valid_jgs.sort(key=lambda j: j.jg_number)
-                    ######################################################################################
-                    print("<<Enter number (Stop:0|Previous step:-1)>>: ")
-                    # print('valid jg:', valid_jgs)
-                    #valid_jgs_prev=valid_jgs
-                    
-                    #print('valid jg prev:', valid_jgs_prev)
-                    
-                    uSelection_prev=uSelection
+                valid_jgs.sort(key=lambda j: j.jg_number)
+                ######################################################################################
+                self.setJGnum(jg_cur_number)
+                print("<<Enter number (Stop:0|Previous step:-1)>>: ")
+                # print('valid jg:', valid_jgs)
+                #valid_jgs_prev=valid_jgs
+                
+                #print('valid jg prev:', valid_jgs_prev)
+                
+                #uSelection_prev=uSelection
+
+                while True:
+                    print("///////////////////////")
                     for i in range(0, len(valid_jgs)):
                         print("[",i+1,"]",repr(valid_jgs[i]))
                     uSelection = int(input())
                     if uSelection==0:
                         break
-                    elif uSelection==-1 and cur_edge>1:
-                        #valid_jgs.clear()
-                        
+                    elif uSelection==-1 and cur_edge>=1:
                         ######################valid_jgs = jgs_selection[cur_edge-2]
-                        valid_jgs = self.getJGselection(cur_edge-2)
-                        cur_edge-=3
-                        uSelection=uSelection_prev
-                        
-                        #valid_jgs=valid_jgs_prev.copy()
-                        # print('\n@@@cur_edge -2:', cur_edge-2)
-                        # print('\n@@@valid jg:', valid_jgs)
-                        #print('@@@valid jg prev:', valid_jgs_prev)
+                        #valid_jgs = self.getJGselection(cur_edge-1) #self.getJGselection(cur_edge-2)
+                        dict_tmp = self.getJGselection(cur_edge-1)
+                        jg_cur_number = dict_tmp[0]
+                        valid_jgs = dict_tmp[1]
+                        self.setJGnum(jg_cur_number)
+
+                        cur_edge-=1 #-=2 #-=3
+                        #uSelection=uSelection_prev
+
                         generated_jg_set.clear()
                         print("<<Go back to Previous Step>>")
+                        #print('******jgs selection dic: ', jgs_selection)
                         #print("*******cur_edge:",cur_edge,"***a:",a)
+                    elif uSelection==-1 and cur_edge==0:
+                        print("<<Can't Go back to Previous Step>>")
                     else:
                         print("<<SELECTED JG>>: ", repr(valid_jgs[uSelection-1]))
-                        # print("<<cur edge>>: ", cur_edge)
-                       
-                        # print('@@@@@@@@@@jgs selection dic: ', jgs_selection)
+                        
+                        #print('@@@@@@@@@@jgs selection dic: ', jgs_selection)
                         #############jgs_selection[cur_edge] = valid_jgs #valid_jgs[a-1]
-                        self.setJGselection(cur_edge, valid_jgs)
-                        # print('jgs selection dic: ', jgs_selection)
-                    
-                        # print('&&valid jg:', valid_jgs)
-                        #valid_jgs_prev.clear()
-                        #valid_jgs_prev.append(repr(valid_jgs[a-1]))
-                        #valid_jgs_prev=valid_jgs.copy()                        
-                        #print('&&valid jg prev:', valid_jgs_prev)
-                    jg_hash_table.clear() #####
+                        self.setJGselection(cur_edge, valid_jgs, jgNum)
+                        cur_edge+=1
+                        #print('$$$$$$$$$$jgs selection dic: ', jgs_selection)
+                        break
+                jg_hash_table.clear() #####
                     ##########################################################################################
-                    # prev_jg_set.clear()
-                    # prev_jg_set.append(repr(valid_jgs[a-1]))
-                cur_edge+=1
+                #********************** cur_edge+=1
                 #print('[######]jgs selection dic: ', jgs_selection)
             return valid_jgs
         else:
