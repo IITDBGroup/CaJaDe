@@ -202,8 +202,13 @@ class Join_Graph_Generator:
         plans_edge_w_new_node = []
 
         for n in j_graph_target.graph_core:
-            #logger.debug(n.label) ####
-            #logger.debug(node1_label) ####
+            logger.debug(n.label) ####
+            logger.debug(node1_label) ####
+            logger.debug(node2_label) ####
+            ########################
+            if self.checkFiltering(node2_label) == -1:
+                break
+            ########################
             if(n.label == node1_label):
                 for nn in j_graph_target.graph_core:
                     FoundNode2 = False
@@ -227,9 +232,9 @@ class Join_Graph_Generator:
         # logger.debug(n.key) ####
         # logger.debug(node2_label) ####
         # logger.debug(condition) ####
-        # logger.debug(plans_edge_w_new_node) ####
+        logger.debug(plans_edge_w_new_node) ####
         return plans_just_edge, plans_edge_w_new_node
- 
+    
     def gen_new_jg(self, j_graph_target, pt_rels, jg_cur_number):
         """
         j_graph_target: j_graph to add an edge to
@@ -245,10 +250,18 @@ class Join_Graph_Generator:
         new_jgs = []
         j_graph_creation_plans = {'edges_only':[], 'edges_w_node':[]}
 
+        logger.debug(j_graph_target) ####
         for jn in j_graph_target.graph_core:
-            #logger.debug(jn) ####
+            logger.debug(jn) ####
             if(jn.label=='PT'):
                 for pt_n in pt_rels:
+                    # for n in self.schema_graph:
+                    #     logger.debug(n)
+                    #     print("n: ",n)
+                    # logger.debug(self.schema_graph) ###############
+                    #self.setFilteringList(self.schema_graph, pt_n)
+                    #print("////////////////////////////////////print filteringlist: ", filteringList)
+                    #########################################
                     for n in self.schema_graph:
                         if(self.schema_graph.has_edge(pt_n, n)):
                             for cond in [x for x in self.schema_graph.get_edge_data(pt_n, n).values()]:
@@ -256,6 +269,7 @@ class Join_Graph_Generator:
                                 # cond_str = cond['condition'].replace(f'{pt_n}.', 'PT.')
                                 cond_str = re.sub(f'(?<!_){pt_n}\.', 'PT.', cond['condition'])
                                 #logger.debug(j_graph_target) ####
+                                logger.debug(n) ####
                                 edge_only_plans, edges_w_node_plans = self.add_one_edge(j_graph_target, 'PT', n, [cond_str, cond['key_dict'], pt_n])
                                 j_graph_creation_plans['edges_only'].extend(edge_only_plans)
                                 j_graph_creation_plans['edges_w_node'].extend(edges_w_node_plans)
@@ -263,10 +277,12 @@ class Join_Graph_Generator:
                 for n in self.schema_graph:
                     if(self.schema_graph.has_edge(jn.label,n)):
                         for cond in [ x for x in self.schema_graph.get_edge_data(jn.label,n).values()]:
+                            logger.debug(jn.label) ####
+                            logger.debug(n) ####
                             edge_only_plans, edges_w_node_plans  = self.add_one_edge(j_graph_target, jn.label, n, [cond['condition'], cond['key_dict'], None])
                             j_graph_creation_plans['edges_only'].extend(edge_only_plans)
                             j_graph_creation_plans['edges_w_node'].extend(edges_w_node_plans)
-
+        logger.debug(j_graph_creation_plans) ################
         if(j_graph_creation_plans['edges_only']):
             for n in j_graph_creation_plans['edges_only']:
                 new_jg = deepcopy(n[0])
@@ -281,7 +297,7 @@ class Join_Graph_Generator:
                         node2 = m
                 new_jg.graph_core.add_edge(node1, node2, condition=cond_to_add)
                 new_jgs.append(new_jg)
-
+        logger.debug(j_graph_creation_plans) ################
         if(j_graph_creation_plans['edges_w_node']):
             for n in j_graph_creation_plans['edges_w_node']:
                 new_jg = deepcopy(n[0])
@@ -305,10 +321,12 @@ class Join_Graph_Generator:
                 new_jg.graph_core.graph['max_node_key']+=1
                 new_jg.graph_core.add_edge(node1, node2, condition=cond_to_add)
                 new_jgs.append(new_jg)
-
-        #logger.debug(new_jgs) ####
+        
+        logger.debug(new_jgs) ####
         return jg_cur_number, new_jgs
-    
+    ###########################################################################################################################
+    ###########################################################################################################################
+    ###########################################################################################################################
     global jgs_selection
     jgs_selection = {}
     global jgNum
@@ -324,6 +342,41 @@ class Join_Graph_Generator:
     def setJGnum(self, jgCurNum):
         global jgNum
         jgNum = jgCurNum
+
+    global filteringList
+    filteringList = [] #{} #[]
+    def setFilteringList(self): #, schema_graph, pt_n):
+        for n in self.schema_graph:
+            ###if(schema_graph.has_edge(pt_n, n)):
+            if n not in filteringList:
+                tmp = []
+                tmp.append(n)
+                tmp.append(0)
+                filteringList.append(tmp)
+                #filteringList[n] = 0
+                #filteringList.append(n)
+    def setFiltering(self):
+        print("<<Filter>> Enter number (Skip:-1): ")
+        # i=1
+        # for x in filteringList:
+        #     print('[',i,']',x, end=' ')
+        #     #print('|', i,'.', x, end=' ')
+        #     i=i+1
+        # print()
+        for i in range(0, len(filteringList)):
+            print('|',i,'.',filteringList[i][0], end='')
+        print()
+        filterSelection = int(input())
+        filteringList[filterSelection][1] = -1
+        print(filteringList)
+        for x in filteringList:
+            if x[1]==-1:
+                print("<<<<", x)
+    def checkFiltering(self, check):
+        for x in filteringList:
+            if x[0]==check and x[1]==-1:
+                return -1
+        return 0
 
     def Generate_JGs(self, pt_rels, num_edges, customize=False):
         """
@@ -342,8 +395,13 @@ class Join_Graph_Generator:
             valid_jgs = []
             uSelection=0
             cur_edge=0
+            uSelection_jg = ''
+
+            self.setFilteringList()
+            print("///////////////////////////////////////////filtering list: ", filteringList)
 
             while True:
+                self.setFiltering()
                 # print("[*******]cur_edge:",cur_edge)
                 # print('[@@@@@@@@@@]jgs selection dic: ', jgs_selection)
                 # print()
@@ -364,7 +422,7 @@ class Join_Graph_Generator:
                 else:
                     if cur_edge>=1:
                         new_jgs=[]
-                        jg_cur_number, new_generated_jgs = self.gen_new_jg(valid_jgs[uSelection-1], pt_rels, jg_cur_number)
+                        jg_cur_number, new_generated_jgs = self.gen_new_jg(uSelection_jg, pt_rels, jg_cur_number) #(valid_jgs[uSelection-1], pt_rels, jg_cur_number)
                         new_jgs.extend(new_generated_jgs)
                     else:
                         new_jgs = []
@@ -377,7 +435,7 @@ class Join_Graph_Generator:
                     generated_jg_set.clear() ####
                     generated_jg_set.extend(new_jgs)
                 
-                
+                logger.debug(generated_jg_set) ####
                 #if (cur_edge>=1):
                 self.stats.stopTimer('jg_enumeration')            
                 self.stats.params['number_of_jgs']+=len(generated_jg_set)
@@ -389,9 +447,12 @@ class Join_Graph_Generator:
 
                 self.stats.startTimer('jg_validtaion')
                 for n in jg_hash_table:
+                    logger.debug(n) ####
                     if(self.valid_check(n, pt_rels)==True):
                         valid_jgs.append(n)
                 self.stats.stopTimer('jg_validtaion')
+
+                logger.debug(valid_jgs) ####
 
                 valid_jgs.sort(key=lambda j: j.jg_number)
                 ######################################################################################
@@ -429,6 +490,7 @@ class Join_Graph_Generator:
                         #############jgs_selection[cur_edge] = valid_jgs #valid_jgs[a-1]
                         self.setJGselection(cur_edge, valid_jgs, jgNum)
                         cur_edge+=1
+                        uSelection_jg = valid_jgs[uSelection-1]
                         #print('$$$$$$$$$$jgs selection dic: ', jgs_selection)
                         break
                 jg_hash_table.clear() #####
