@@ -356,22 +356,26 @@ class Join_Graph_Generator:
                 #filteringList[n] = 0
                 #filteringList.append(n)
     def setFiltering(self):
-        print("<<Filter>> Enter number (Skip:-1): ")
-        # i=1
-        # for x in filteringList:
-        #     print('[',i,']',x, end=' ')
-        #     #print('|', i,'.', x, end=' ')
-        #     i=i+1
-        # print()
+        print("<<Filter/Unfilter>> Enter number (Skip:-1): ")
         for i in range(0, len(filteringList)):
-            print('|',i,'.',filteringList[i][0], end='')
+            print('[',i,']',filteringList[i][0], end=' ')
         print()
+
         filterSelection = int(input())
-        filteringList[filterSelection][1] = -1
+        if filterSelection!=-1:
+            if filteringList[filterSelection][1]==0:
+                filteringList[filterSelection][1] = -1
+            else:
+                filteringList[filterSelection][1] = 0
         print(filteringList)
+        self.displayFiltering()
+
+    def displayFiltering(self):
+        print("[Filtered] ", end="")
         for x in filteringList:
             if x[1]==-1:
-                print("<<<<", x)
+                print(x[0], end=" ")
+        print()
     def checkFiltering(self, check):
         for x in filteringList:
             if x[0]==check and x[1]==-1:
@@ -401,6 +405,7 @@ class Join_Graph_Generator:
             print("///////////////////////////////////////////filtering list: ", filteringList)
 
             while True:
+                self.displayFiltering()
                 self.setFiltering()
                 # print("[*******]cur_edge:",cur_edge)
                 # print('[@@@@@@@@@@]jgs selection dic: ', jgs_selection)
@@ -462,14 +467,8 @@ class Join_Graph_Generator:
 
                 while True:
                     print("///////////////////////")
-                    for i in range(0, len(valid_jgs)):
-                        print("[",i+1,"]",repr(valid_jgs[i]))
-                    uSelection = int(input())
-                    if uSelection==0:
-                        break
-                    elif uSelection==-1 and cur_edge>=1:
-                        ######################valid_jgs = jgs_selection[cur_edge-2]
-                        #valid_jgs = self.getJGselection(cur_edge-1) #self.getJGselection(cur_edge-2)
+                    if len(valid_jgs)==0 and cur_edge>=1:
+                        print("<<<<<empty valid_jgs>>>>>")
                         dict_tmp = self.getJGselection(cur_edge-1)
                         jg_cur_number = dict_tmp[0]
                         valid_jgs = dict_tmp[1]
@@ -479,20 +478,38 @@ class Join_Graph_Generator:
 
                         generated_jg_set.clear()
                         print("<<Go back to Previous Step>>")
-                        #print('******jgs selection dic: ', jgs_selection)
-                        #print("*******cur_edge:",cur_edge,"***a:",a)
-                    elif uSelection==-1 and cur_edge==0:
-                        print("<<Can't Go back to Previous Step>>")
                     else:
-                        print("<<SELECTED JG>>: ", repr(valid_jgs[uSelection-1]))
-                        
-                        #print('@@@@@@@@@@jgs selection dic: ', jgs_selection)
-                        #############jgs_selection[cur_edge] = valid_jgs #valid_jgs[a-1]
-                        self.setJGselection(cur_edge, valid_jgs, jgNum)
-                        cur_edge+=1
-                        uSelection_jg = valid_jgs[uSelection-1]
-                        #print('$$$$$$$$$$jgs selection dic: ', jgs_selection)
-                        break
+                        for i in range(0, len(valid_jgs)):
+                            print("[",i+1,"]",repr(valid_jgs[i]))
+                        uSelection = int(input())
+                        if uSelection==0:
+                            break
+                        elif uSelection==-1 and cur_edge>=1:
+                            ######################valid_jgs = jgs_selection[cur_edge-2]
+                            #valid_jgs = self.getJGselection(cur_edge-1) #self.getJGselection(cur_edge-2)
+                            dict_tmp = self.getJGselection(cur_edge-1)
+                            jg_cur_number = dict_tmp[0]
+                            valid_jgs = dict_tmp[1]
+                            self.setJGnum(jg_cur_number)
+
+                            cur_edge-=1
+
+                            generated_jg_set.clear()
+                            print("<<Go back to Previous Step>>")
+                            #print('******jgs selection dic: ', jgs_selection)
+                            #print("*******cur_edge:",cur_edge,"***a:",a)
+                        elif uSelection==-1 and cur_edge==0:
+                            print("<<Can't Go back to Previous Step>>")
+                        else:
+                            print("<<SELECTED JG>>: ", repr(valid_jgs[uSelection-1]))
+                            
+                            #print('@@@@@@@@@@jgs selection dic: ', jgs_selection)
+                            #############jgs_selection[cur_edge] = valid_jgs #valid_jgs[a-1]
+                            self.setJGselection(cur_edge, valid_jgs, jgNum)
+                            cur_edge+=1
+                            uSelection_jg = valid_jgs[uSelection-1]
+                            #print('$$$$$$$$$$jgs selection dic: ', jgs_selection)
+                            break
                 jg_hash_table.clear() #####
                     ##########################################################################################
                 #********************** cur_edge+=1
