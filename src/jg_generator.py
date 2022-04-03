@@ -381,6 +381,45 @@ class Join_Graph_Generator:
             if x[0]==check and x[1]==-1:
                 return -1
         return 0
+    def ratingDB(self,usel): ###################
+        print("******userselection: ", usel)
+        print("<<Rating>> Enter number (No:0 Yes:1): ")
+
+        rateOrNot = int(input())
+
+        if rateOrNot == 0:
+            print("<<Rating>> Skip Rating")
+        elif rateOrNot == 1:
+            #connect DB - myrating.rating(id, usel)
+            #myrating.table(uquery, uq1, uq2, usel, urating)
+            rconn = psycopg2.connect(database='rating', user='juseung', password='1234', port='5432', host='127.0.0.1')
+            cur = rconn.cursor()
+            getRatingQuery = """
+            SELECT * FROM myrating.rating;
+            """
+            #SELECT * FROM myrating.table;
+            cur.execute(getRatingQuery)
+            getRating = cur.fetchall()
+            print("*****rating ex:")
+            print(getRating)
+
+            insertRatingQ = F"""
+            INSERT INTO myrating.rating(id, usel)
+            VALUES(2, '{usel}');
+            """
+            cur.execute(insertRatingQ)
+
+            cur = rconn.cursor()
+            getRatingQuery = """
+            SELECT * FROM myrating.rating;
+            """
+            cur.execute(getRatingQuery)
+            getRating = cur.fetchall()
+            print("*****rating ex:")
+            print(getRating)
+            
+            cur.close()
+            rconn.close()
 
     def Generate_JGs(self, pt_rels, num_edges, customize=False):
         """
@@ -502,7 +541,9 @@ class Join_Graph_Generator:
                             print("<<Can't Go back to Previous Step>>")
                         else:
                             print("<<SELECTED JG>>: ", repr(valid_jgs[uSelection-1]))
-                            
+                            self.ratingDB(repr(valid_jgs[uSelection-1])) #########################################################################
+                            #################################################################################################################
+
                             #print('@@@@@@@@@@jgs selection dic: ', jgs_selection)
                             #############jgs_selection[cur_edge] = valid_jgs #valid_jgs[a-1]
                             self.setJGselection(cur_edge, valid_jgs, jgNum)
