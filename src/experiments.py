@@ -274,6 +274,10 @@ def run_experiment(conn=None,
 
     logger.debug(exp_desc)
     logger.debug(user_questions_map)
+    logger.debug(user_query[0])
+    logger.debug(user_questions)
+    logger.debug(statstracker.params['user_query'])
+    logger.debug(statstracker.params['user_questions'])
 
     for k,v in statstracker.params.items():
       logger.debug(f'{k} : {v}')
@@ -301,7 +305,7 @@ def run_experiment(conn=None,
 
     attr_dict['PT'] = pt_dict
 
-    jgg = Join_Graph_Generator(schema_graph = sg, attr_dict = attr_dict, gwrapper=w)
+    jgg = Join_Graph_Generator(schema_graph = sg, attr_dict = attr_dict, gwrapper=w, uquery=user_query[1], uq1 = user_questions[0], uq2 = user_questions[1])
 
     # logger.debug('generate new valid_jgs')
     valid_result = jgg.Generate_JGs(pt_rels=pt_relations, num_edges=maximum_edges, customize=False)

@@ -135,12 +135,15 @@ class Join_Graph:
 
 class Join_Graph_Generator:
 
-    def __init__(self, schema_graph, attr_dict, gwrapper):
+    def __init__(self, schema_graph, attr_dict, gwrapper, uquery, uq1, uq2):
         self.schema_graph = schema_graph
         self.hash_jg_table = {} # a hash dictionary that used to check duplicates
         self.attr_dict = attr_dict
         self.stats = JGGeneratorStats()
         self.gwrapper = gwrapper
+        self.uquery = uquery
+        self.uq1 = uq1
+        self.uq2 = uq2
 
     def valid_check(self, jg_candidate, pt_rels):
         """
@@ -381,42 +384,58 @@ class Join_Graph_Generator:
             if x[0]==check and x[1]==-1:
                 return -1
         return 0
+    
     def ratingDB(self,usel): ###################
         print("******userselection: ", usel)
-        print("<<Rating>> Enter number (No:0 Yes:1): ")
+        print("<<Rating>> Enter Rate(0 to 5) (Skip:-1): ")
 
-        rateOrNot = int(input())
+        getUserRating = int(input())
 
-        if rateOrNot == 0:
+        if getUserRating == -1:
             print("<<Rating>> Skip Rating")
-        elif rateOrNot == 1:
+        else:
             #connect DB - myrating.rating(id, usel)
-            #myrating.table(uquery, uq1, uq2, usel, urating)
-            rconn = psycopg2.connect(database='rating', user='juseung', password='1234', port='5432', host='127.0.0.1')
+            #connect DB - myrating.table(uquery, uq1, uq2, usel, urating)
+            rconn = psycopg2.connect(database='rating', 
+                                    user='juseung', 
+                                    password='1234', 
+                                    port='5432', 
+                                    host='127.0.0.1')
             cur = rconn.cursor()
+
             getRatingQuery = """
-            SELECT * FROM myrating.rating;
+            SELECT * FROM myrating.table;
             """
-            #SELECT * FROM myrating.table;
+            #SELECT * FROM myrating.rating;
             cur.execute(getRatingQuery)
             getRating = cur.fetchall()
             print("*****rating ex:")
             print(getRating)
 
             insertRatingQ = F"""
-            INSERT INTO myrating.rating(id, usel)
-            VALUES(2, '{usel}');
+            INSERT INTO myrating.table(uquery, uq1, uq2, usel, urating)
+            VALUES('{format(self.uquery.replace("'",''))}', '{format(self.uq1.replace("'",''))}', 
+            '{format(self.uq2.replace("'",''))}', '{usel}', '{getUserRating}');
             """
+            ###[x.replace("'", '') for x in self.uq1]
+            # insertRatingQ = F"""
+            # INSERT INTO myrating.rating(id, usel)
+            # VALUES('{getUserRating}', '{usel}');
+            # """
+            
             cur.execute(insertRatingQ)
 
-            cur = rconn.cursor()
+            #cur = rconn.cursor()
             getRatingQuery = """
-            SELECT * FROM myrating.rating;
+            SELECT * FROM myrating.table;
             """
+            #SELECT * FROM myrating.rating;
             cur.execute(getRatingQuery)
             getRating = cur.fetchall()
             print("*****rating ex:")
             print(getRating)
+
+            rconn.commit()
             
             cur.close()
             rconn.close()
