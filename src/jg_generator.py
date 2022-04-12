@@ -384,7 +384,69 @@ class Join_Graph_Generator:
             if x[0]==check and x[1]==-1:
                 return -1
         return 0
-    
+
+    global pt_cond_list
+    global node_cond_list
+    pt_cond_list = []
+    node_cond_list = []
+    def clean_text(self, inputStr):
+        #new_text = re.sub(':)(', '', inputStr)
+        new_text = inputStr.replace(':', '').replace('(', '').replace(')', '')
+        return new_text.replace(' ', '')
+    def findPT(self, tmp):
+        if 'PT' in tmp:
+            return 1
+        # if 'PT' in tmp:
+        #     return tmp.split('.')[1]
+        # else:
+        #     return tmp.split('.')[1]
+    def parsingCond(self, usel):
+        if 'cond' not in usel:
+            node_cond=""
+            pt_cond=""
+            node=""
+        else:
+            if '|' not in usel:
+                getCond = usel.split('cond')
+                cond = getCond[1].split('=')
+                cond1 = cond[0] # : (team.team_id)
+                cond2 = cond[1] # (PT.home_id)
+                tmp1 = self.clean_text(cond1) # team.team_id
+                tmp2 = self.clean_text(cond2) # PT.home_id
+                if self.findPT(tmp1):
+                    pt_cond = tmp1.split('.')[1]
+                    node_cond = tmp2.split('.')[1]
+                    node = tmp2.split('.')[0]
+                else:
+                    pt_cond = tmp2.split('.')[1] # pt_cond = home_id
+                    node_cond = tmp1.split('.')[1] # node_cond = team_id
+                    node = tmp1.split('.')[0] # node = team
+                pt_cond_list.append(pt_cond)
+                node_cond_list.append(node_cond)
+            else:
+                #17 : 1: PT, 2: team, cond: (team.team_id)=(PT.home_id)| 1: PT, 2: team, cond: (team.team_id)=(PT.winner_id)
+                splitPipe = usel.split('|')
+                for i in range(0, len(splitPipe)):
+                    getCond = splitPipe[i].split('cond')
+                    cond = getCond[1].split('=')
+                    cond1 = cond[0] # : (team.team_id)
+                    cond2 = cond[1] # (PT.home_id)
+                    tmp1 = self.clean_text(cond1) # team.team_id
+                    tmp2 = self.clean_text(cond2) # PT.home_id
+                    if self.findPT(tmp1):
+                        pt_cond = tmp1.split('.')[1]
+                        node_cond = tmp2.split('.')[1]
+                        node = tmp2.split('.')[0]
+                    else:
+                        pt_cond = tmp2.split('.')[1] # pt_cond = home_id
+                        node_cond = tmp1.split('.')[1] # node_cond = team_id
+                        node = tmp1.split('.')[0] # node = team
+                    if pt_cond not in pt_cond_list or node_cond not in node_cond_list:
+                        pt_cond_list.append(pt_cond)
+                        node_cond_list.append(node_cond)
+        return pt_cond, node_cond, node
+        
+
     def ratingDB(self,usel): ###################
         print("******userselection: ", usel)
         print("<<Rating>> Enter Rate(0 to 5) (Skip:-1): ")
@@ -404,20 +466,25 @@ class Join_Graph_Generator:
             cur = rconn.cursor()
 
             getRatingQuery = """
-            SELECT * FROM myrating.table;
+            SELECT * FROM myrating.mytable;
             """
+            #SELECT * FROM myrating.table;
             #SELECT * FROM myrating.rating;
             cur.execute(getRatingQuery)
             getRating = cur.fetchall()
             print("*****rating ex:")
             print(getRating)
 
+            pt_cond, node_cond, node = self.parsingCond(usel)
+
             insertRatingQ = F"""
-            INSERT INTO myrating.table(uquery, uq1, uq2, usel, urating)
-            VALUES('{format(self.uquery.replace("'",''))}', '{format(self.uq1.replace("'",''))}', 
-            '{format(self.uq2.replace("'",''))}', '{usel}', '{getUserRating}');
+            INSERT INTO myrating.mytable(node, node_cond, pt_cond, urating)
+            VALUES('{node}', '{node_cond}', '{pt_cond}', '{getUserRating}');
             """
             ###[x.replace("'", '') for x in self.uq1]
+            # INSERT INTO myrating.table(uquery, uq1, uq2, usel, urating)
+            # VALUES('{format(self.uquery.replace("'",''))}', '{format(self.uq1.replace("'",''))}', 
+            # '{format(self.uq2.replace("'",''))}', '{usel}', '{getUserRating}');
             # insertRatingQ = F"""
             # INSERT INTO myrating.rating(id, usel)
             # VALUES('{getUserRating}', '{usel}');
@@ -427,8 +494,9 @@ class Join_Graph_Generator:
 
             #cur = rconn.cursor()
             getRatingQuery = """
-            SELECT * FROM myrating.table;
+            SELECT * FROM myrating.mytable;
             """
+            #SELECT * FROM myrating.table;
             #SELECT * FROM myrating.rating;
             cur.execute(getRatingQuery)
             getRating = cur.fetchall()
