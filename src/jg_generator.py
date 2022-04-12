@@ -421,9 +421,9 @@ class Join_Graph_Generator:
                     pt_cond = tmp2.split('.')[1] # pt_cond = home_id
                     node_cond = tmp1.split('.')[1] # node_cond = team_id
                     node = tmp1.split('.')[0] # node = team
-                if r==1:
-                    pt_cond_list.append(pt_cond)
-                    node_cond_list.append(node_cond)
+                # if r==1:
+                #     pt_cond_list.append(pt_cond)
+                #     node_cond_list.append(node_cond)
             else:
                 #17 : 1: PT, 2: team, cond: (team.team_id)=(PT.home_id)| 1: PT, 2: team, cond: (team.team_id)=(PT.winner_id)
                 splitPipe = usel.split('|')
@@ -444,11 +444,10 @@ class Join_Graph_Generator:
                         node = tmp1.split('.')[0] # node = team
                     print("pt_cond: ", pt_cond, " node_cond: ", node_cond)
                     print("pt_cond_list: ", pt_cond_list, " node_cond_list: ", node_cond_list)
-                    if r==1:
-                        if pt_cond not in pt_cond_list or node_cond not in node_cond_list:
-                            pt_cond_list.append(pt_cond)
-                            node_cond_list.append(node_cond)
-                            #return pt_cond, node_cond, node
+                    if pt_cond not in pt_cond_list or node_cond not in node_cond_list:
+                        # pt_cond_list.append(pt_cond)
+                        # node_cond_list.append(node_cond)
+                        return pt_cond, node_cond, node
         return pt_cond, node_cond, node
     def ratingDBavg(self, pt_cond, node_cond, node):
         #print("check::::::", pt_cond, node_cond, node)
@@ -485,6 +484,11 @@ class Join_Graph_Generator:
         print("******userselection: ", usel)
         print("<<Rating>> Enter Rate(0 to 5) (Skip:-1): ")
 
+        pt_cond, node_cond, node = self.parsingCond(usel, 1)
+        pt_cond_list.append(pt_cond)
+        node_cond_list.append(node_cond)
+        print("pt_cond_list: ", pt_cond_list, " node_cond_list: ", node_cond_list)
+
         getUserRating = int(input())
 
         if getUserRating == -1:
@@ -509,7 +513,11 @@ class Join_Graph_Generator:
             print("*****rating ex:")
             print(getRating)
 
-            pt_cond, node_cond, node = self.parsingCond(usel, 1)
+            # # global pt_cond_list, node_cond_list
+            # pt_cond, node_cond, node = self.parsingCond(usel, 1)
+            # pt_cond_list.append(pt_cond)
+            # node_cond_list.append(node_cond)
+            # print("pt_cond_list: ", pt_cond_list, " node_cond_list: ", node_cond_list)
 
             insertRatingQ = F"""
             INSERT INTO myrating.mytable(node, node_cond, pt_cond, urating)
