@@ -400,7 +400,7 @@ class Join_Graph_Generator:
         #     return tmp.split('.')[1]
         # else:
         #     return tmp.split('.')[1]
-    def parsingCond(self, usel):
+    def parsingCond(self, usel, r):
         if 'cond' not in usel:
             node_cond=""
             pt_cond=""
@@ -421,8 +421,9 @@ class Join_Graph_Generator:
                     pt_cond = tmp2.split('.')[1] # pt_cond = home_id
                     node_cond = tmp1.split('.')[1] # node_cond = team_id
                     node = tmp1.split('.')[0] # node = team
-                pt_cond_list.append(pt_cond)
-                node_cond_list.append(node_cond)
+                if r==1:
+                    pt_cond_list.append(pt_cond)
+                    node_cond_list.append(node_cond)
             else:
                 #17 : 1: PT, 2: team, cond: (team.team_id)=(PT.home_id)| 1: PT, 2: team, cond: (team.team_id)=(PT.winner_id)
                 splitPipe = usel.split('|')
@@ -441,11 +442,44 @@ class Join_Graph_Generator:
                         pt_cond = tmp2.split('.')[1] # pt_cond = home_id
                         node_cond = tmp1.split('.')[1] # node_cond = team_id
                         node = tmp1.split('.')[0] # node = team
-                    if pt_cond not in pt_cond_list or node_cond not in node_cond_list:
-                        pt_cond_list.append(pt_cond)
-                        node_cond_list.append(node_cond)
+                    print("pt_cond: ", pt_cond, " node_cond: ", node_cond)
+                    print("pt_cond_list: ", pt_cond_list, " node_cond_list: ", node_cond_list)
+                    if r==1:
+                        if pt_cond not in pt_cond_list or node_cond not in node_cond_list:
+                            pt_cond_list.append(pt_cond)
+                            node_cond_list.append(node_cond)
+                            #return pt_cond, node_cond, node
         return pt_cond, node_cond, node
-        
+    def ratingDBavg(self, pt_cond, node_cond, node):
+        #print("check::::::", pt_cond, node_cond, node)
+        rconn = psycopg2.connect(database='rating', 
+                                    user='juseung', 
+                                    password='1234', 
+                                    port='5432', 
+                                    host='127.0.0.1')
+        cur = rconn.cursor()
+
+        getAVGquery = F"""
+        SELECT ROUND(AVG(urating)::numeric,2)::TEXT
+        FROM (SELECT * FROM myrating.mytable 
+        WHERE node='{node}' AND node_cond='{node_cond}' AND pt_cond='{pt_cond}')
+        AS new;
+        """
+
+        print('getAVGquery: ',getAVGquery)
+        # SELECT AVG(urating)
+        # FROM (SELECT * FROM myrating.mytable 
+        # WHERE node='{node}' and node_cond='{node_cond}' and pt_cond='{pt_cond}')
+        # AS new;
+        # """
+        # SELECT AVG(urating)
+        # FROM myrating.mytable
+        # WHERE node='{node}' and node_cond='{node_cond}' and pt_cond='{pt_cond}';
+        # """
+        cur.execute(getAVGquery)
+        getAVG = cur.fetchall()
+        #print("check2::::: ", getAVG[0][0])
+        return getAVG
 
     def ratingDB(self,usel): ###################
         print("******userselection: ", usel)
@@ -475,7 +509,7 @@ class Join_Graph_Generator:
             print("*****rating ex:")
             print(getRating)
 
-            pt_cond, node_cond, node = self.parsingCond(usel)
+            pt_cond, node_cond, node = self.parsingCond(usel, 1)
 
             insertRatingQ = F"""
             INSERT INTO myrating.mytable(node, node_cond, pt_cond, urating)
@@ -607,6 +641,11 @@ class Join_Graph_Generator:
                     else:
                         for i in range(0, len(valid_jgs)):
                             print("[",i+1,"]",repr(valid_jgs[i]))
+                            # parsing
+                            pt_cond, node_cond, node = self.parsingCond(repr(valid_jgs[i]), 0)
+                            # get avg and print avg
+                            print("rate avg: ", self.ratingDBavg(pt_cond, node_cond, node)[0][0])
+                            
                         uSelection = int(input())
                         if uSelection==0:
                             break
