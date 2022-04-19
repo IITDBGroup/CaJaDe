@@ -119,7 +119,7 @@ class Join_Graph_Materializer:
         reg_rc_line = re.compile(r'EC T_ProjectionOperator.*\nList size [0-9]+\n({.*})')
         rc_line = reg_rc_line.search(output).group(1)
         res = re.findall(r'(\{.*?\})', rc_line)
-        logger.debug(res)
+        # logger.debug(res)
 
         return [x.strip('{}').split(' ') for x in res]
 

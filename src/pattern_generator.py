@@ -1064,8 +1064,8 @@ class Pattern_Generator:
                 nominal_pattern_dict_list = nominal_pattern_dict_list[0:10]
                 # logger.debug(nominal_pattern_dict_list)
                 nominal_pattern_dict_list = [n for n in nominal_pattern_dict_list if n['np_recall']>=lca_recall_thresh]
-                logger.debug(nominal_pattern_dict_list)
-                logger.debug(len(nominal_pattern_dict_list))
+                # logger.debug(nominal_pattern_dict_list)
+                # logger.debug(len(nominal_pattern_dict_list))
                 
                 if(need_weighted_sampling==True): 
                     # if need weighted sampling, we start by sampling for 
@@ -1176,7 +1176,7 @@ class Pattern_Generator:
                             for k,v in cluster_dict.items():
                                 cluster_dict[k] = [[x,0,0] for x in v]
 
-                            logger.debug(cluster_dict)      
+                            # logger.debug(cluster_dict)
 
                             # entropy rank in each cluster to find the highest one 
                             # as the training input variable "representing" the cluster
@@ -1196,7 +1196,7 @@ class Pattern_Generator:
                                         col[2]=1
                                 cluster_dict[k] = sorted(v, key = lambda x: (x[2],x[1],x[0]), reverse=True)
                                 representative_var_for_clust = cluster_dict[k][0][0]
-                                logger.debug(representative_var_for_clust)
+                                # logger.debug(representative_var_for_clust)
                                 if(representative_var_for_clust in attrs_from_spec_node):
                                     rep_from_last_node.append(representative_var_for_clust)
                                 rf_input_vars.append(representative_var_for_clust)

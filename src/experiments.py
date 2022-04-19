@@ -21,7 +21,9 @@ from statistics import mean
 import argparse
 from datetime import datetime
 from time import strftime
+
 from src.causality import Causality
+
 
 
 #####
@@ -493,7 +495,8 @@ def run_experiment(conn=None,
 
     causality = Causality()
     #causality.check_causality(pgen.pattern_pool, 'blood_pres')
-    causality.is_treatment(pgen.pattern_pool, user_questions, conn)
+    # causality.is_treatment(pgen.pattern_pool, user_questions, conn)
+    causality.matching_patterns(pgen.pattern_pool, user_specified_attrs, conn)
 
     if(lca_eval_mode):
       patterns_all = pgen.pattern_pool
@@ -625,11 +628,11 @@ def main():
   u_question =["season_name='2015-16'","season_name='2012-13'"]
   user_specified_attrs = [('team','team'),('season','season_name')]
 
-  user_query = "provenance of (select avg(blood_pres) as blood_press, age from health_info group by age);"
+  # user_query = "provenance of (select avg(blood_pres) as blood_press, age from health_info group by age);"
   # u_query = (user_query, 'gsw wins : 15 vs 12')
-  u_query = (user_query, 'demo')
-  u_question =["age=20.00","age=80.00"]
-  user_specified_attrs = [('health_info','age'),('health_info','blood_pres')]
+  # u_query = (user_query, 'demo')
+  # u_question =["age=20.00","age=80.00"]
+  # user_specified_attrs = [('health_info','age'),('health_info','blood_pres')]
 
   # user_query = "provenance of (select team from team);"
   # # u_query = (user_query, 'gsw wins : 15 vs 12') 
