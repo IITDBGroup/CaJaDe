@@ -1,4 +1,7 @@
 from src.sg_generator import Schema_Graph_Generator
+from src.pattern_generator import Pattern_Generator
+from src.jg_materializer import Join_Graph_Materializer
+
 from src.provenance_getter import provenance_getter
 from src.gprom_wrapper import  GProMWrapper
 from src.hashes import fnv1a_init, fnv1a_update_str
@@ -7,6 +10,7 @@ from networkx import MultiGraph
 import networkx as nx
 import psycopg2
 import logging 
+from statistics import mean 
 from copy import deepcopy
 import re
 import time
@@ -135,7 +139,10 @@ class Join_Graph:
 
 class Join_Graph_Generator:
 
-    def __init__(self, schema_graph, attr_dict, gwrapper, uquery, uq1, uq2):
+    def __init__(self, schema_graph, attr_dict, gwrapper, uquery, uq1, uq2, conn, uquery0, exclude_high_cost_jg_0, 
+                sample_rate_for_s_tmp, lca_s_max_size, lca_s_min_size, lca_eval_mode, min_recall_threshold,
+                numercial_attr_filter_method, user_pt_size, user_questions_map, f1_sample_type, f1_min_sample_size_threshold,
+                user_assigned_max_num_pred):
         self.schema_graph = schema_graph
         self.hash_jg_table = {} # a hash dictionary that used to check duplicates
         self.attr_dict = attr_dict
@@ -144,6 +151,20 @@ class Join_Graph_Generator:
         self.uquery = uquery
         self.uq1 = uq1
         self.uq2 = uq2
+        self.conn = conn
+        self.uquery0 = uquery0
+        self.exclude_high_cost_jg_0 = exclude_high_cost_jg_0
+        self.sample_rate_for_s_tmp = sample_rate_for_s_tmp
+        self.lca_s_max_size = lca_s_max_size
+        self.lca_s_min_size = lca_s_min_size
+        self.lca_eval_mode = lca_eval_mode
+        self.min_recall_threshold = min_recall_threshold
+        self.numercial_attr_filter_method = numercial_attr_filter_method
+        self.user_pt_size = user_pt_size
+        self.user_questions_map = user_questions_map
+        self.f1_sample_type = f1_sample_type
+        self.f1_min_sample_size_threshold = f1_min_sample_size_threshold
+        self.user_assigned_max_num_pred = user_assigned_max_num_pred
 
     def valid_check(self, jg_candidate, pt_rels):
         """
@@ -549,8 +570,170 @@ class Join_Graph_Generator:
             
             cur.close()
             rconn.close()
+    def getRecomm(self, valid_result, cur_edge): #, connInfo, statstrackerInfo): 
+        recomm_result = []
+        #####Recommendation
+        ###pattern generate
+        #result = sample_pgen(vjs)
+        #connInfo, statstrackerInfo, 
+        #sample_rate_for_s = sample_pgen()
 
-    def Generate_JGs(self, pt_rels, num_edges, customize=False):
+        # pgen_tmp = Pattern_Generator(connInfo)
+        # for vr in vjs:
+        #     pgen_tmp.gen_patterns(jg = vr,
+        #                             jg_name = f"jg_{vr.jg_number}", 
+        #                             renaming_dict=, 
+        #                             skip_cols=,
+        #                             s_rate_for_s = sample_rate_for_s,
+        #                             lca_s_max_size=lca_s_max_size,
+        #                             lca_s_min_size=lca_s_min_size,
+        #                             just_lca=,
+        #                             lca_recall_thresh=,
+        #                             numercial_attr_filter_method=,
+        #                             user_pt_size=,
+        #                             original_pt_size=,
+        #                             user_questions_map=,
+        #                             f1_calculation_type = 'o',
+        #                             f1_sample_type=,
+        #                             f1_calculation_sample_rate = 0.1,
+        #                             f1_calculation_min_size=,
+        #                             user_assigned_num_pred_cap=
+        #                         )
+
+        jgm = Join_Graph_Materializer(conn=self.conn, db_dict=self.attr_dict, gwrapper=self.gwrapper, user_query=self.uquery0)
+        jgm.init_cost_estimator()
+
+        pgen_tmp = Pattern_Generator(self.conn)
+
+
+        # pattern_ranked_within_jg = {}
+        # jg_individual_times_dict = {}
+
+        # cost_friendly_jgs = []
+        # not_cost_friendly_jgs = []
+
+        if(self.exclude_high_cost_jg_0==False):
+            for n in valid_result:
+            # for i in range(0, len(valid_result)):
+            #     n = repr(valid_result[i])
+
+                cost_estimate, renaming_dict, apt_q = jgm.materialize_jg(n)
+                # logger.debug(n.ignored_attrs)
+                if(apt_q is not None):
+                    n.cost = cost_estimate
+                    n.apt_create_q = apt_q
+                    n.renaming_dict = renaming_dict
+                else:
+                    n.redundant = True
+                    continue
+            jg_cnt=1
+            for vr in valid_result:
+            # for i in range(0, len(valid_result)):
+            #     vr = repr(valid_result[i])
+
+                jg_cnt+=1
+                drop_if_exist_jg_view = "DROP MATERIALIZED VIEW IF EXISTS {} CASCADE;".format('jg_{}'.format(vr.jg_number))
+                jg_query_view = "CREATE MATERIALIZED VIEW {} AS {}".format('jg_{}'.format(vr.jg_number), vr.apt_create_q)
+                jgm.cur.execute(drop_if_exist_jg_view)
+                jgm.cur.execute(jg_query_view)
+                apt_size_query = f"SELECT count(*) FROM jg_{vr.jg_number}"
+                jgm.cur.execute(apt_size_query)
+                apt_size = int(jgm.cur.fetchone()[0])
+                pgen_tmp.gen_patterns(jg = vr,
+                                    jg_name = f"jg_{vr.jg_number}", 
+                                    renaming_dict = vr.renaming_dict, 
+                                    skip_cols = vr.ignored_attrs,
+                                    s_rate_for_s = self.sample_rate_for_s_tmp,
+                                    lca_s_max_size = self.lca_s_max_size,
+                                    lca_s_min_size = self.lca_s_min_size,
+                                    just_lca = self.lca_eval_mode,
+                                    lca_recall_thresh = self.min_recall_threshold,
+                                    numercial_attr_filter_method = self.numercial_attr_filter_method,
+                                    user_pt_size = self.user_pt_size,
+                                    original_pt_size = apt_size,
+                                    user_questions_map = self.user_questions_map,
+                                    f1_calculation_type = 'o',
+                                    f1_sample_type = self.f1_sample_type,
+                                    f1_calculation_sample_rate = 0.1,
+                                    f1_calculation_min_size = self.f1_min_sample_size_threshold,
+                                    user_assigned_num_pred_cap = self.user_assigned_max_num_pred
+                                    )
+                patterns_to_insert_tmp = pgen_tmp.top_pattern_from_one_jg(vr)
+                ###############
+                print("##############Pattern 1 ##############", patterns_to_insert_tmp)
+                if patterns_to_insert_tmp != None: #len(patterns_to_insert_tmp) != 0:
+                    tmp = 0
+                    for i in range(0, len(patterns_to_insert_tmp)):
+                        tmp += patterns_to_insert_tmp[i]['F1']
+                    tmp_avg = tmp/len(patterns_to_insert_tmp)
+                    recomm_result.append(round(tmp_avg, 3))
+                else:
+                    recomm_result.append(0)
+
+        else:
+            valid_result = [v for v in valid_result if not v.intermediate]
+            cost_estimate_dict = {i:[] for i in range(0,cur_edge+1)}
+            #for vr in valid_result:
+            for i in range(0, len(valid_result)):
+                vr = repr(valid_result[i])
+
+                cost_estimate, renaming_dict, apt_q = jgm.materialize_jg(vr,cost_estimate=True)
+                if(apt_q is not None):
+                    vr.cost = cost_estimate
+                    vr.apt_create_q = apt_q
+                    vr.renaming_dict = renaming_dict
+                else:
+                    vr.redundant=True
+                    continue
+            valid_result = [v for v in valid_result if not v.redundant]
+            avg_cost_estimate_by_num_edges = {k:mean(v) for k,v in cost_estimate_dict.items() if v}
+            jg_cnt=1
+            valid_result = [n for n in valid_result if n.cost<=avg_cost_estimate_by_num_edges[n.num_edges]]
+            #for n in valid_result:
+            for i in range(0, len(valid_result)):
+                n = repr(valid_result[i])
+
+                jg_cnt+=1
+                drop_if_exist_jg_view = "DROP MATERIALIZED VIEW IF EXISTS {} CASCADE;".format('jg_{}'.format(n.jg_number))
+                jg_query_view = "CREATE MATERIALIZED VIEW {} AS {}".format('jg_{}'.format(n.jg_number), n.apt_create_q)
+                jgm.cur.execute(drop_if_exist_jg_view)
+                jgm.cur.execute(jg_query_view)
+                apt_size_query = f"SELECT count(*) FROM jg_{n.jg_number}"
+                jgm.cur.execute(apt_size_query)
+                apt_size = int(jgm.cur.fetchone()[0])
+                pgen_tmp.gen_patterns(jg = n,
+                                    jg_name = f"jg_{n.jg_number}", 
+                                    renaming_dict = n.renaming_dict,  
+                                    skip_cols = n.ignored_attrs,
+                                    s_rate_for_s = self.sample_rate_for_s_tmp,
+                                    lca_s_max_size = self.lca_s_max_size,
+                                    lca_s_min_size = self.lca_s_min_size,
+                                    just_lca = self.lca_eval_mode,
+                                    lca_recall_thresh = self.min_recall_threshold,
+                                    numercial_attr_filter_method = self.numercial_attr_filter_method,
+                                    user_pt_size = self.user_pt_size,
+                                    original_pt_size = apt_size,
+                                    user_questions_map = self.user_questions_map,
+                                    f1_calculation_type = 'o',
+                                    f1_sample_type = self.f1_sample_type,
+                                    f1_calculation_sample_rate = 0.1,
+                                    f1_calculation_min_size = self.f1_min_sample_size_threshold,
+                                    user_assigned_num_pred_cap = self.user_assigned_max_num_pred
+                                    )
+                patterns_to_insert_tmp = pgen_tmp.top_pattern_from_one_jg(n)
+                ###############
+                print("##############Pattern 2##############", patterns_to_insert_tmp)
+                if patterns_to_insert_tmp != None: #len(patterns_to_insert_tmp) != 0:
+                    tmp = 0
+                    for i in range(0, len(patterns_to_insert_tmp)):
+                        tmp+= patterns_to_insert_tmp[i]['F1']
+                    tmp_avg = tmp/len(patterns_to_insert_tmp)
+                    recomm_result.append(round(tmp_avg, 3))
+                else:
+                    recomm_result.append(0)
+        return recomm_result
+
+    def Generate_JGs(self, pt_rels, num_edges, customize=False): #, connInfo, statstracker):
         """
         num_edges: this defines the size of a join graph
         pt_rels: relations coming from PT
@@ -647,13 +830,18 @@ class Join_Graph_Generator:
                         generated_jg_set.clear()
                         print("<<Go back to Previous Step>>")
                     else:
+                        #####Recommendation
+                        # recomm = self.getRecomm(valid_jgs) #, connInfo, statstrackerInfo)
+                        #####
                         for i in range(0, len(valid_jgs)):
                             print("[",i+1,"]",repr(valid_jgs[i]))
                             # parsing
                             pt_cond, node_cond, node = self.parsingCond(repr(valid_jgs[i]), 0)
                             # get avg and print avg
                             print("rate avg: ", self.ratingDBavg(pt_cond, node_cond, node)[0][0])
-                            
+                        recomm = self.getRecomm(valid_jgs, cur_edge)
+                        print("recommendation>>>>> ", recomm)
+
                         uSelection = int(input())
                         if uSelection==0:
                             break
