@@ -449,7 +449,7 @@ def run_experiment(conn=None,
 
       for n in valid_result:
         # logger.debug(f'we are on join graph number {jg_cnt}')
-        # logger.debug(n.renaming_dict)
+        # logger.debug(n)
         jg_cnt+=1
         # if(n.cost<=avg_cost_estimate_by_num_edges[n.num_edges]):
         jg_individual_times_dict[n] = 0
@@ -496,7 +496,7 @@ def run_experiment(conn=None,
     causality = Causality()
     #causality.check_causality(pgen.pattern_pool, 'blood_pres')
     # causality.is_treatment(pgen.pattern_pool, user_questions, conn)
-    causality.matching_patterns(pgen.pattern_pool, user_specified_attrs, conn)
+    causality.matching_patterns(pgen.pattern_pool, pgen.dummy_pattern_pool, user_specified_attrs, conn)
 
     if(lca_eval_mode):
       patterns_all = pgen.pattern_pool

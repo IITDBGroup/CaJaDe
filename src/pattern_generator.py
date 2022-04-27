@@ -56,6 +56,7 @@ class Pattern_Generator:
         self.conn = conn
         self.cur = self.conn.cursor()
         self.stats = PatternGeneratorStats()
+        self.dummy_pattern_pool = []
         self.pattern_pool = []
         self.pattern_by_jg = {}
         self.weighted_sample_views = {} # key as the pattern structure, value as the name of the view
@@ -1707,6 +1708,7 @@ class Pattern_Generator:
                     # logger.debug(f"number of valid patterns {len(valid_patterns)}")
                     for vp in valid_patterns:
                         self.stats.startTimer('pattern_recover')
+                        self.dummy_pattern_pool.append(vp)
                         vp_recovered = self.pattern_recover(renaming_dict, vp, user_questions_map)
                         self.stats.params['n_p_pass_node_rule_and_recall_thresh']+=1
                         self.stats.stopTimer('pattern_recover')

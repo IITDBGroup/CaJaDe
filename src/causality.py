@@ -10,32 +10,90 @@ class Causality:
     def __init__(self):
         pass
 
-    def matching_patterns(self, patterns, user_specified_attrs, conn):
+    '''
+    This function is used to get the average treatment effect of each pattern to see if it should be dropped or not
+    '''
+
+    def matching_patterns(self, patterns, dummy_patterns, user_specified_attrs, conn):
         cur = conn.cursor()
+        jg_names_list = []
 
-        for pattern in patterns:
-            # jg = pattern['join_graph']
+        for idx, pattern in enumerate(dummy_patterns):
+            clauses = []
+            jg = pattern['join_graph']
             jg_name = pattern['jg_name']
-            # renaming_dict = jg.renaming_dict
-            ren_attr = pattern['pattern_attr_mappings']
+            renaming_dict = jg.renaming_dict
 
-            logger.debug(jg_name)
-            logger.debug(ren_attr)
+            # logger.debug(pattern)
 
-            pattern_desc = pattern['desc']
-            diff_var = pattern_desc.split('∧')
-            clauses, dummy_clause = [], []
+            clauses = self.get_dummy_clause(pattern, clauses)
+            c_query = ' and '.join(clauses)
 
-            for var in diff_var:
-                clauses = self.get_clause(var, clauses)
+            # logger.debug(c_query)
 
-            logger.debug(clauses)
+            if (self.is_pattern_treated(cur, jg_name, c_query)):
+                logger.debug(pattern)
+                logger.debug(c_query)
+                logger.debug("It's goood!!!")
 
-            for c in clauses:
-                variable = c.split("=")[0]
+                query = f"""
+                    update apt_table_{jg_name}
+                    set treated_pt_{idx} = 1
+                    where {c_query};
+                    """
+                # logger.debug(clauses)
 
+                if (jg_name not in jg_names_list):
+                    jg_names_list.append(jg_name)
+                    new_apt_table = f"""
+                        create table if not exists apt_table_{jg_name}
+                        as select * from {jg_name};
+                        """
+                    # cur.execute(new_apt_table)
 
+                new_column = f"""
+                    alter table apt_table_{jg_name}
+                    add column if not exists treated_pt_{idx} integer default(0);
+                    """
 
+                # do this because is a test
+                set_0 = f"""
+                    update apt_table_{jg_name}
+                    set treated_pt_{idx} = 0;
+                    """
+
+                # cur.execute(new_column)
+                # cur.execute(set_0)
+                # logger.debug(query)
+                # cur.execute(query)
+        logger.debug(jg_names_list)
+
+    '''
+    This function checks whether the pattern should be treated or discarded before calculating its ATE.
+    This checking is done by calculating the average values that match the pattern in the APT.
+    '''
+
+    def is_pattern_treated(self, cur, jg_name, c_query):
+        treated_query = f"""
+        select avg(treated) between 0.2 and 0.8 as good_coverage 
+        from (select 
+        case when 
+        (count(distinct(case when {c_query} then pnumber else 0 end))::float / 
+        count(distinct pnumber)::float) 
+        > 0.8 
+        then 1 else 0 end treated 
+        from {jg_name}
+        group by a_2, season_name) as unit_treated;
+        """
+
+        cur.execute(treated_query)
+        treated = cur.fetchone()[0]
+
+        return treated
+
+    '''
+    This function checks whether the pattern is causally independent from the outcome variable or not
+    '''
 
     def check_causality(self, patterns, outcome_var):
         '''
@@ -61,6 +119,11 @@ class Causality:
 
             logger.debug(pattern_desc)
             logger.debug(is_pattern_causal)
+
+    '''
+    This function checks the support of each pattern to see if the pattern is good enough or if it should be 
+    dropped
+    '''
 
     def is_treatment(self, patterns, user_questions, conn):
         cur = conn.cursor()
@@ -131,6 +194,10 @@ class Causality:
         for pt in good_patterns:
             logger.debug(pt)
 
+    ''' 
+    This function retrieves the table and the clause that has to be used for a pattern
+    '''
+
     def get_table_and_clause(self, var, table, clause):
 
         if ('prov' in var):
@@ -163,6 +230,10 @@ class Causality:
 
         return (table, clause)
 
+    ''' 
+    This function retrieves the table that has to be used for a pattern
+    '''
+
     def get_table(self, var, table):
         if ('prov' in var):
             matches = re.compile('prov_([A-z]*__)*([A-z]*?)_(.*)').search(var)  # prov_([A-z]*__[A-z]*?)_(.*)
@@ -178,6 +249,10 @@ class Causality:
             table.append(new_table)
 
         return table
+
+    ''' 
+    This function retrieves the clause that has to be used for a pattern
+    '''
 
     def get_clause(self, var, clause):
         if ('prov' in var):
@@ -200,3 +275,17 @@ class Causality:
             clause.append(new_clause)
 
         return clause
+
+    def get_dummy_clause(self, pattern, clauses):
+        for nt in pattern['nominal_values']:
+            new_clause = nt[0] + "='" + nt[1] + "'"
+            if (not new_clause in clauses):
+                clauses.append(new_clause)
+
+        if ('ordinal_values' in pattern):
+            for ot in pattern['ordinal_values']:
+                new_clause = ot[0] + ot[1] + str(ot[2])
+                if (not new_clause in clauses):
+                    clauses.append(new_clause)
+
+        return clauses
