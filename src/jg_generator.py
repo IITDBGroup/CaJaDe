@@ -14,7 +14,7 @@ from statistics import mean
 from copy import deepcopy
 import re
 import time
-
+import numpy as np
 
 class JGGeneratorStats(ExecStats):
     """
@@ -570,7 +570,7 @@ class Join_Graph_Generator:
             
             cur.close()
             rconn.close()
-    def getRecomm(self, valid_result, cur_edge): #, connInfo, statstrackerInfo): 
+    def getRecomm(self, valid_result, cur_edge, f1_sample_rate): #, connInfo, statstrackerInfo): 
         recomm_result = []
         #####Recommendation
         ###pattern generate
@@ -611,6 +611,12 @@ class Join_Graph_Generator:
 
         # cost_friendly_jgs = []
         # not_cost_friendly_jgs = []
+        fconn = psycopg2.connect(database='f1rate', 
+                                    user='juseung', 
+                                    password='1234', 
+                                    port='5432', 
+                                    host='127.0.0.1')
+        cur = fconn.cursor()
 
         if(self.exclude_high_cost_jg_0==False):
             for n in valid_result:
@@ -654,7 +660,7 @@ class Join_Graph_Generator:
                                     user_questions_map = self.user_questions_map,
                                     f1_calculation_type = 'o',
                                     f1_sample_type = self.f1_sample_type,
-                                    f1_calculation_sample_rate = 0.1,
+                                    f1_calculation_sample_rate = f1_sample_rate, #0.1,
                                     f1_calculation_min_size = self.f1_min_sample_size_threshold,
                                     user_assigned_num_pred_cap = self.user_assigned_max_num_pred
                                     )
@@ -666,10 +672,18 @@ class Join_Graph_Generator:
                     for i in range(0, len(patterns_to_insert_tmp)):
                         tmp += patterns_to_insert_tmp[i]['F1']
                     tmp_avg = tmp/len(patterns_to_insert_tmp)
-                    recomm_result.append(round(tmp_avg, 3))
+                    recomm_val = round(tmp_avg, 3)
+                    recomm_result.append(recomm_val) #round(tmp_avg, 3))
                 else:
-                    recomm_result.append(0)
-
+                    recomm_val = 0
+                    recomm_result.append(recomm_val) #0)
+                
+                insertF1rateQ = F"""
+                    INSERT INTO f1sample(f1calrate, f1avg, jg)
+                    VALUES('{f1_sample_rate}', '{recomm_val}', '{vr}');
+                """
+                cur.execute(insertF1rateQ)
+                fconn.commit()
         else:
             valid_result = [v for v in valid_result if not v.intermediate]
             cost_estimate_dict = {i:[] for i in range(0,cur_edge+1)}
@@ -716,7 +730,7 @@ class Join_Graph_Generator:
                                     user_questions_map = self.user_questions_map,
                                     f1_calculation_type = 'o',
                                     f1_sample_type = self.f1_sample_type,
-                                    f1_calculation_sample_rate = 0.1,
+                                    f1_calculation_sample_rate = f1_sample_rate, #0.1,
                                     f1_calculation_min_size = self.f1_min_sample_size_threshold,
                                     user_assigned_num_pred_cap = self.user_assigned_max_num_pred
                                     )
@@ -728,9 +742,22 @@ class Join_Graph_Generator:
                     for i in range(0, len(patterns_to_insert_tmp)):
                         tmp+= patterns_to_insert_tmp[i]['F1']
                     tmp_avg = tmp/len(patterns_to_insert_tmp)
-                    recomm_result.append(round(tmp_avg, 3))
+                    recomm_val = round(tmp_avg, 3)
+                    recomm_result.append(recomm_val) #round(tmp_avg, 3))
                 else:
-                    recomm_result.append(0)
+                    recomm_val = 0
+                    recomm_result.append(recomm_val) #0)
+                
+                insertF1rateQ = F"""
+                    INSERT INTO f1sample(f1calrate, f1avg, jg)
+                    VALUES('{f1_sample_rate}', '{recomm_val}', '{n}');
+                """
+                cur.execute(insertF1rateQ)
+                fconn.commit()
+        
+        cur.close()
+        fconn.close()
+
         return recomm_result
 
     def Generate_JGs(self, pt_rels, num_edges, customize=False): #, connInfo, statstracker):
@@ -839,8 +866,11 @@ class Join_Graph_Generator:
                             pt_cond, node_cond, node = self.parsingCond(repr(valid_jgs[i]), 0)
                             # get avg and print avg
                             print("rate avg: ", self.ratingDBavg(pt_cond, node_cond, node)[0][0])
-                        recomm = self.getRecomm(valid_jgs, cur_edge)
-                        print("recommendation>>>>> ", recomm)
+                        iteration = np.arange(0.1, 0.35, 0.05)
+                        for j in iteration:
+                            f1_sample_rate = round(j,5)
+                            recomm = self.getRecomm(valid_jgs, cur_edge,f1_sample_rate)
+                            print("recommendation>>>>> ", recomm)
 
                         uSelection = int(input())
                         if uSelection==0:
