@@ -6,8 +6,6 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj" crossorigin="anonymous"></script>
 
 	<script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>	
-  <!-- <script src="https://d3js.org/d3.v7.min.js"></script> -->
-  <!-- <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script> -->
   <script src="https://d3js.org/d3.v4.min.js" type="text/javascript"></script>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.11.0/d3.min.js"></script>
@@ -19,8 +17,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 	<link rel="stylesheet" href='../static/main.css'>
-
-  <!-- <link rel="stylesheet" type="text/css" href="static/main.css"> -->
 	
 	<title>Main</title>
 </head>
@@ -41,7 +37,6 @@
                 </button>
                 <div class="dropdown-menu">
                    <form id="db-credentials" action="{{ url_for('db_connect')}}" method="post">
-                   <!--<form id="db-credentials" action="#" onsubmit="return dbConnect()" method="post">-->
                        <label for="dbname">DB Name:</label>
                        <input type="text" id="dbname" name="dbname">
                        
@@ -57,37 +52,26 @@
                        <label for="dbhost">DB Host:</label>
                        <input type="text" id="host" name="host" placeholder="127.0.0.1", value="127.0.0.1">
 
-                       <!-- <button type="submit" class="btn btn-primary", onclick="establish_conn()">Connect</button> -->
                        <button type="submit" class="btn btn-primary">Connect</button>
                        <button type="button" class="btn btn-secondary">Disconnect</button> 
                    </form>
                 </div> 
             </li>
-<!--             <li class="nav-item">
-              <a class="nav-link active" href="#">Home</a>
-            </li> -->
-<!--             <li class="nav-item">
-              <a class="nav-link active" href="#">Params</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link active" href="#">Schema Graph</a>
-            </li> -->
           </ul>
         </div>
     </div>
 </nav>
-
 <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
-<!--  href="#" onclick="tableList();return false;">  -->
+
 <div class="container-fluid">
     <div class="row">
+      <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Left Navbar %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
       <nav class="col-md-1 d-none d-md-block bg-light accordion accordion-flush">
              {% for i in db_tables %}
              <div class="accordion-item">
                <h2 class="accordion-header" id="heading{{ i }}">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{i}}" aria-expanded="true" aria-controls="collapse{{ i }}"> {{i}}
-                </button>
-              </h2>
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{i}}" aria-expanded="true" aria-controls="collapse{{ i }}">{{i}}</button>
+               </h2>
                 <div id="collapse{{ i }}" class="accordion-collapse collapse" aria-labelledby="heading{{ i }}" data-bs-parent="#accordionExample">
                   <div class="accordion-body">
                     <ul class="list-group">
@@ -99,8 +83,9 @@
                 </div>
             </div>
              {% endfor %}
-         </ul>
       </nav>
+      <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+
       <div class="col-md-3">
         
         <div class="row">
