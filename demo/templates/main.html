@@ -86,78 +86,71 @@
       </nav>
       <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
 
+      <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Left Column %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
       <div class="col-md-3">
         
-        <div class="row">
+        <!-- ********************************************** Query Form ********************************************** -->
+        <div class="row" style="padding-bottom: 5%;">
           <form id="query-form" method="POST" action="/run">
-            <div class="col-md-12" style="display: flex; flex-direction: column; justify-content: center;  ">
-              <!--<div class="input-group"> -->
+            <div class="col-md-12" style="display: flex; flex-direction: column; justify-content: center;">
                 <div class="input-group1">
-                  <div class="input-group-text" style="float: left;">SELECT</div>
-                  <input type="text" class="form-control" id="query-select" name="query-select" value = "count(*) as win, s.season_name" style="float: left; width: 82%;"> 
+                  <div class="input-group-text" style="float: left;width:15%;">SELECT</div>
+                  <input type="text" class="form-control" id="query-select" name="query-select" value = "count(*) as win, s.season_name" style="float: left; width: 84%;"> 
                 </div>
                 <div class="input-group2">
-                  <div class="input-group-text" style="float: left;">FROM</div>
-                  <input type="text" class="form-control" id="query-from" name="query-from" value=" team t, game g, season s " style="float: left; width: 83%;">
+                  <div class="input-group-text" style="float: left;width:15%;">FROM</div>
+                  <input type="text" class="form-control" id="query-from" name="query-from" value=" team t, game g, season s " style="float: left; width: 84%;">
                 </div>
                 <div class="input-group3">
-                  <div class="input-group-text" style="float: left;">WHERE</div>
-                  <input type="text" class="form-control" id="query-where" name="query-where" value=" t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' " style="float: left; width: 83%;">
+                  <div class="input-group-text" style="float: left;width:15%;">WHERE</div>
+                  <input type="text" class="form-control" id="query-where" name="query-where" value=" t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' " style="float: left; width: 84%;">
                 </div>
                 <div class="input-group4">
-                  <div class="input-group-text" style="float: left;">GROUP BY</div>
-                  <input type="text" class="form-control" id="query-group" name="query-group" value="s.season_name" style="float: left; width: 60%;">          
-                  <button type="button" class="btn btn-outline-primary" id="execute" style="width: 18%;">Run</button>             
+                  <div class="input-group-text" style="float: left;width:20%;">GROUP BY</div>
+                  <input type="text" class="form-control" id="query-group" name="query-group" value="s.season_name" style="float: left; width: 64%;">          
+                  <button type="button" class="btn btn-outline-primary" id="execute" style="width: 15%;">Run</button>             
                 </div>
             </div>
         	</form>
-        <div id="progress">
-          <div class="progress-bar progress-bar-striped" id="probar">0%</div>
+
+          <!-- 
+          <div id="progress">
+            <div class="progress-bar progress-bar-striped" id="probar">0%</div>
+          </div> 
+          -->
         </div>
+        <!-- ******************************************************************************************************** -->
+
+        <!-- ********************************************* Query Results ******************************************** -->
+        <div clss="row" style="padding-bottom: 5%;">
+          <div style="float: right; text-align: center;" class="col-sm-1">
+            <div class="tooltip_q" id="tooltip_q_exp"></div>
+          </div> 
+          <div id="display" style="overflow-y: auto; height:300px;"></div>
         </div>
 
         <div class="row">
-            <br>
-            <div style="display: inline;">
-              <div style="float: left; width: 33%; padding: 10px;">
-                <!-- <p>Show
-                <select id="dataPerPage" class="form-select" style="width: 70px; display: inline;" onchange="changeRowsSelect()">
-                  <option value="10">10</option>
-                  <option value="15">15</option>
-                  <option value="20">20</option>
-                </select>
-                Rows</p> -->
-              </div>
-              <div style="float: left; padding: 10px; width: 41%; text-align: right;">
-                <!-- <p id="sltROWScount"></p> -->
-              </div>
-              <div style="float: right; width: 22%; text-align: right;" id="container"></div>
-            </div>
+          <div style="width: 50%;"></div>
+          <div id="container" style="float: left; width:50%;"></div>
         </div>
+        <!-- ******************************************************************************************************** -->
 
-        <div style="float: right;" class="col-sm-1">
-          <div class="tooltip_q" id="tooltip_q_exp"></div>
-        </div> 
-        <div id="display" style="overflow-y: auto; height:300px;"></div><br>    
-
-        <div id="pageInfo" style="display: inline;">
-          <div style="float: left;">
-            <p id="displayCount"></p>
-          </div>
-          <div style="float: right;">
-            <ul id="pagingul" class="col-md-6"></ul>
-          </div>
-        </div><br>
-        <div class="row">
+        <!-- ***************************************** Explanation Results ****************************************** -->
+        <div clss="row" style="padding-bottom: 5%;">
+          <div style="float: right; text-align: center;" class="col-sm-1">
+            <div class="tooltip_q" id="tooltip_q_exptable"></div>
+          </div> 
+          <div id="explanation_table" style="overflow: auto; height: 300px;"></div>
+        </div>
+      
+        <div class="row" style="margin-bottom: 10%;">
           <div id="user_rating_update" style="width: 50%;"></div>
-          <div id="reset_JGselection" style="float: left; width:50%;">
-          </div>
+          <div id="reset_JGselection" style="float: left; width:50%;"></div>
         </div>
-        <div style="float: right;" class="col-sm-1">
-          <div class="tooltip_q" id="tooltip_q_exptable"></div>
-        </div> 
-        <div id="explanation_table" style="overflow: auto; height: 300px; margin-bottom: 20px;"></div>
+        <!-- ******************************************************************************************************** -->        
       </div>
+      <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+
 
       <div class="col-md-4"> <!--col-md-3--->
        <!--  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"> -->
@@ -433,8 +426,8 @@
           $("#sltROWScount").append(sltROWS);
           $('#container').empty();
           $('#container').append(
-            "<button onclick=\"exp()\" type=\"button\" class=\"btn btn-outline-primary\" id=\"explanation\" style=\"width:100%;\">Explain</button>"
-          ); 
+            "<button onclick=\"exp()\" type=\"button\" class=\"btn btn-outline-primary\" id=\"explanation\" >Explain</button>"
+          ); //style=\"width:100%;\"
 
           td.each(function(i){
             var index = tdArr.indexOf(td.eq(i).text());
@@ -463,8 +456,8 @@
 
             $('#container').empty();
             $('#container').append(
-              "<button onclick=\"exp()\" type=\"button\" class=\"btn btn-outline-primary\" id=\"explanation\" style=\"width:100%;\">Explain</button>"
-            );    
+              "<button onclick=\"exp()\" type=\"button\" class=\"btn btn-outline-primary\" id=\"explanation\">Explain</button>"
+            );    //style=\"width:100%;\"
 
             td.each(function(i){
               tdArr.push(td.eq(i).text());
