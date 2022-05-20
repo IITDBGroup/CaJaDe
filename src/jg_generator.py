@@ -866,11 +866,14 @@ class Join_Graph_Generator:
                             pt_cond, node_cond, node = self.parsingCond(repr(valid_jgs[i]), 0)
                             # get avg and print avg
                             print("rate avg: ", self.ratingDBavg(pt_cond, node_cond, node)[0][0])
-                        iteration = np.arange(0.1, 0.35, 0.05)
-                        for j in iteration:
-                            f1_sample_rate = round(j,5)
-                            recomm = self.getRecomm(valid_jgs, cur_edge,f1_sample_rate)
-                            print("recommendation>>>>> ", recomm)
+                        # iteration = np.arange(0.1, 0.35, 0.05)
+                        # for j in iteration:
+                        #     f1_sample_rate = round(j,5)
+                        #     recomm = self.getRecomm(valid_jgs, cur_edge,f1_sample_rate)
+                        #     print("recommendation>>>>> ", recomm)
+                        
+                        recomm = self.getRecomm(valid_jgs, cur_edge,0.1)
+                        print("recommendation>>>>> ", recomm)
 
                         uSelection = int(input())
                         if uSelection==0:
@@ -904,10 +907,13 @@ class Join_Graph_Generator:
                             #print('$$$$$$$$$$jgs selection dic: ', jgs_selection)
                             break
                 jg_hash_table.clear() #####
-                    ##########################################################################################
+                ##########################################################################################
                 #********************** cur_edge+=1
                 #print('[######]jgs selection dic: ', jgs_selection)
-            return valid_jgs
+                if uSelection==0:
+                    return valid_jgs
+            
+            #return valid_jgs
         else:
             pass
 
