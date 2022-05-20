@@ -227,7 +227,7 @@
       var dislikedList = [];
       var exp_data_jgname;
       var dots;
-      var selectedData; // = [];
+      var selectedData;
       var selectedData_nodes;
       var selectedData_links;
       var selectedDataIndex;
@@ -237,19 +237,12 @@
       var width = 200, height = 200;
       var selected_pattern_desc=null;
 
+      // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Run Button - Query Execution %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		  $('#execute').click(function(){
 		    let totalNum;
 		    let tblData;
-		    let dataPerPage;
-		    let pageCount = 5;
-		    let globalCurrentPage = 1;
 		    var cnt;
 		    var html;
-
-        //let sltList = [];
-        $('#reset_JGselection').empty();
-        $('#reset_JGselection').append('<button type="button" class="btn btn-outline-primary" onclick="resetClicked()">Reset</button>');
-		    dataPerPage = $("#dataPerPage").val();
 		  
 		    var slt = $('#query-select').val();
 		    var agg = $('#query-aggregate').val();
@@ -257,7 +250,8 @@
         var where = $('#query-where').val();
 		    var grp = $('#query-group').val();
 		    
-		    var postdata = {'slt':slt, 'agg':agg, 'frm':frm, 'where':where, 'grp':grp}
+		    var postdata = {'slt':slt, 'agg':agg, 'frm':frm, 'where':where, 'grp':grp};
+
 		    $.ajax({
 		      type: 'POST',
 		      url: '{{url_for("ajax")}}',
@@ -276,114 +270,28 @@
             tdArr = [];
             sltROWS = 0;
 
-		        displayData(totalNum);//(1, dataPerPage);
+		        displayData(totalNum);
             qmarkHtml = "<i class=\"fa fa-question-circle\" style=\"font-size:24px;\"></i><span class=\"tooltiptext\">query results</span>";
             $("#tooltip_q_exp").append(qmarkHtml);
-		        //paging(totalNum, dataPerPage, pageCount, 1);
-
-            //selectRows();
-            /***
-		        $("#dataPerPage").change(function () {
-		          dataPerPage = $("#dataPerPage").val();
-		          paging(totalNum, dataPerPage, pageCount, globalCurrentPage);
-		          displayData(globalCurrentPage, dataPerPge);
-		        });
-            ***/
-
 		      },
 		      error: function(request, status, error){ 
 		        alert('ajax failed')
 		        alert(error);
 		      }
 		    })
-		    
-        // $("#dataPerPage").change(function () {
-		    //   dataPerPage = $("#dataPerPage").val();
-        //   displayData(1, dataPerPage);
-		    //   paging(totalNum, dataPerPage, pageCount, 1);
 
-		    //   //paging(totalNum, dataPerPage, pageCount, globalCurrentPage);
-		    //   //displayData(globalCurrentPage, dataPerPge);
-		    // });
-
-		    // function paging(totalNum, dataPerPage, pageCount, currentPage){
-		    //   let totalPageNum = Math.ceil(totalNum/dataPerPage);
-		    //   if(totalPageNum < pageCount){
-		    //     pageCount = totalPageNum;
-		    //   }
-		    //   let pageGroup = Math.ceil(currentPage/pageCount);
-		    //   let last = pageGroup*pageCount;
-		      
-		    //   if(last>totalPageNum){
-		    //     last = totalPageNum;
-		    //   }
-		    //   let first = last - (pageCount -1);
-		    //   let next = last + 1;
-		    //   let prev = first - 1;
-		    //   let pageHtml = "";
-		      
-		    //   pageHtml += "<nav aria-label=\"Page navigation example\"><ul class=\"pagination\">";
-
-		    //   if(prev > 0){
-        //     pageHtml += "<li><a class=\"page-link\" href='#' id='prev' aria-label=\"Previous\"><span aria-hidden=\"true\">&laquo;</span><span class=\"sr-only\">Previous</span></a></li>";		       
-		    //   }
-		    //   for(var i = first; i<=last; i++){ 
-		    //     if(currentPage == i){
-        //       pageHtml += "<li class='on'><a class=\"page-link\" href='#' id='"+i+"'>" + i + "</a></li>";
-
-		    //     } else{
-        //       pageHtml += "<li><a class=\"page-link\" href='#' id='"+i+"'>" + i + "</a></li>";
-
-		    //     }
-		    //   }
-		    //   if(last<totalPageNum){
-        //     pageHtml += "<li><a class=\"page-link\" href='#' id='next' aria-label=\"Next\"><span aria-hidden=\"true\">&raquo;</span><span class=\"sr-only\">Next</span></a></li>";
-		    //   }
-		    //   pageHtml += "</ul></nav>";
-		    //   $("#pagingul").html(pageHtml);
-		      
-		    //   let displayCount = "";
-		    //   let currentShowingPageFrom = (currentPage*dataPerPage)-dataPerPage+1;
-		    //   let currentShowingPageTo = currentPage*dataPerPage;
-        //   if(currentShowingPageTo > totalNum) currentShowingPageTo = totalNum;
-
-		    //   displayCount = "Showing "+currentShowingPageFrom+" to "+currentShowingPageTo+" of "+totalNum+" entries";
-		    //   //$("#displayCount").text(displayCount);
-		      
-		    //   $("#pagingul li a").click(function (){
-		    //     let $id = $(this).attr("id");
-		    //     selectedPage = $(this).text();
-		        
-		    //     if($id == "next") selectedPage = next;
-		    //     if($id == "prev") selectedPage = prev;
-		        
-		    //     globalCurrentPage = selectedPage;
-		        
-		    //     paging(totalNum, dataPerPage, pageCount, selectedPage);
-		    //     displayData(selectedPage, dataPerPage);
-		    //   });
-		    // }       
-
-		    function displayData(totalNum){//(currentPage, dataPerPage){
-		      let chartHtml = "";
-		      // currentPage = Number(currentPage);
-		      // dataPerPage = Number(dataPerPage);
-		      
-		      chartHtml = "<table class=\"table table-hover table-bordered\" sellspacing=\"0\" width=\"90%\" id=\"example\">";
-		      
+		    function displayData(totalNum){
+		      let chartHtml = "";		      
+		      chartHtml = "<table class=\"table table-hover table-bordered\" sellspacing=\"0\" width=\"90%\" id=\"example\">";		      
           chartHtml += "<thead><tr>";
+
 		      for(var i=0;i<colNum;i++){
 		        chartHtml += "<th style=\"text-align: center;\">" + colData[i] + "</th>";
 		      }
 		      
 		      chartHtml += "</tr></thead>";
-
-          // let tableFrom = (currentPage-1)*dataPerPage;
-          // let tableTo = (currentPage-1)*dataPerPage+dataPerPage;
-          // if(tableTo > totalNum) tableTo = totalNum;
-
 		      chartHtml += "<tbody>";
-          for(var i=0;i<totalNum;i++){//(var i = tableFrom; i<tableTo;i++){
+          for(var i=0;i<totalNum;i++){
             let txtTMP = "";
 
             for(var j=0;j<colNum;j++){txtTMP += tblData[i][j];}
@@ -399,6 +307,7 @@
 		      $("#display").append(chartHtml);          
 		    }
 		  })
+      // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
       function selectRows(elem){        
         var text = $(elem).text();
@@ -409,8 +318,7 @@
         var cnt = selectedArr.indexOf(text);
         var len = selectedArr.length;
 
-        if(selectedArr.includes(text))
-        {
+        if(selectedArr.includes(text)){
           if(text==green_text){
             green_text=null;
           }
@@ -671,6 +579,9 @@
 
         $("#explanation_table").empty();
         $("#explanation_table").append(expHtml);
+
+        $('#reset_JGselection').empty();
+        $('#reset_JGselection').append('<button type="button" class="btn btn-outline-primary" onclick="resetClicked()">Reset</button>');
 
         let updateBtnHtml = "";
         updateBtnHtml += "<button type=\"button\" class=\"btn btn-outline-primary\" onclick=\"ratingUpdate()\">Update</button>";  
