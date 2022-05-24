@@ -199,9 +199,7 @@
 		<script>
       var colNum;
       var colData;
-      let sltROWS = 0;
       var selectedArr = new Array();
-      let sltROWScnt = "Total Selected Rows: ";
       var tdArr = new Array();
       var green_color="#2fdf28";
       var purple_color="#bb0ef1";
@@ -264,11 +262,9 @@
 		        colData = data.result3;
 		        tblData = data.result2;
 
-            $("#sltROWScount").empty();
             $('#container').empty();
             selectedArr = [];
             tdArr = [];
-            sltROWS = 0;
 
 		        displayData(totalNum);
             qmarkHtml = "<i class=\"fa fa-question-circle\" style=\"font-size:24px;\"></i><span class=\"tooltiptext\">query results</span>";
@@ -309,33 +305,28 @@
 		  })
       // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-      function selectRows(elem){        
-        var text = $(elem).text();
-        console.log(text);          
+      // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% [selectRows] select rows in query results %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      function selectRows(elem){               
         var tr = $(elem);
         var td = tr.children();
+        var text = $(elem).text();
+        console.log(text);  
 
         var cnt = selectedArr.indexOf(text);
         var len = selectedArr.length;
 
+        // ********** re-selection of the row **********
         if(selectedArr.includes(text)){
           if(text==green_text){
             green_text=null;
-          }
-          else{
+          } else{
             purple_text=null;
           }
-          $(elem).css("background-color", "#FFFFFF");    
-          sltROWS -= 1;
+          $(elem).css("background-color", "#FFFFFF");
           selectedArr.splice(cnt,1);
 
-          $("#sltROWScount").empty();
-          $("#sltROWScount").append(sltROWScnt);
-          $("#sltROWScount").append(sltROWS);
           $('#container').empty();
-          $('#container').append(
-            "<button onclick=\"exp()\" type=\"button\" class=\"btn btn-outline-primary\" id=\"explanation\" >Explain</button>"
-          ); //style=\"width:100%;\"
+          $('#container').append("<button onclick=\"exp()\" type=\"button\" class=\"btn btn-outline-primary\" id=\"explanation\" >Explain</button>");
 
           td.each(function(i){
             var index = tdArr.indexOf(td.eq(i).text());
@@ -344,28 +335,21 @@
             }
           })
         }
+        // ********** selection of the row **********
         else {
           if(cnt==-1 && len<2){
             if(green_text==null){
               $(elem).css("background-color", green_color);
               green_text=text;      
-            }
-            else{
+            } else{
               $(elem).css("background-color", purple_color);
               purple_text=text;      
             }
 
-            sltROWS += 1;
             selectedArr.push(text);
 
-            $("#sltROWScount").empty();
-            $("#sltROWScount").append(sltROWScnt);
-            $("#sltROWScount").append(sltROWS);
-
             $('#container').empty();
-            $('#container').append(
-              "<button onclick=\"exp()\" type=\"button\" class=\"btn btn-outline-primary\" id=\"explanation\">Explain</button>"
-            );    //style=\"width:100%;\"
+            $('#container').append("<button onclick=\"exp()\" type=\"button\" class=\"btn btn-outline-primary\" id=\"explanation\">Explain</button>");
 
             td.each(function(i){
               tdArr.push(td.eq(i).text());
@@ -373,6 +357,7 @@
           } 
         }
       }
+      // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
       function checkOne(element){
