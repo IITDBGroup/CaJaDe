@@ -359,9 +359,10 @@
       }
       // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
+      // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% [checkOne] check one explanation in the explanation table %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
       function checkOne(element){
         console.log("checkOne>>>>>");
+
         const checkboxes = document.getElementsByName("user_checkBox");
         checkboxes.forEach((cb) => { cb.checked = false;})
         element.checked = true;
@@ -372,11 +373,13 @@
           var td = tr.children();
           var pdes = td.eq(0).text();
           selected_pattern_desc = pdes;
-          console.log("^^^^^^^checkbox pdes:^^^^^^", pdes); ///////////////@@@@@@@@@@@@@@
+          console.log("^^^^^^^checkbox pdes:^^^^^^", pdes);
           expParser(pdes);
         });
       }
+      // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+      // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% [expParser] parse the selected explanation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
       function expParser(pdes){
         var tmp = pdes.split(' ∧ ');
         var newNodeList = [];
@@ -386,11 +389,8 @@
           var splitByPeriod = d.split('.');
           var targetNode = splitByPeriod[0];
           var node = d.replace(targetNode+".","");
-          var targetNode = targetNode.slice(0,-2); //split("_")[0];
+          var targetNode = targetNode.slice(0,-2);
           
-          // var splitByEq = d.split('=');
-          // var node = splitByEq[1];
-          // var targetNode = splitByEq[0].split('_')[0];
           console.log("***********node | targetNode: ", node, " | ", targetNode);
           newNodeList.push(node);
           newTargetNodeList.push(targetNode);
@@ -399,17 +399,25 @@
         var jgName;
         var fscoreValue;
         var idx;
+
         cur_exp_data.forEach(function(d){
-          if(d[2] == pdes){ jgName = d[1];fscoreValue = d[6];idx = d[0];
+          if(d[2] == pdes){ 
+            jgName = d[1];
+            fscoreValue = d[6];
+            idx = d[0];
             console.log("***********d2 |", d[2],"|jgName: ", jgName,"|fscore: ", fscoreValue,"|idx:",idx);
           }
           console.log("***********jgName: ", jgName);
         });
+
         updateSelectedData(jgName);
         updateSelectedJG(newNodeList, newTargetNodeList, pdes);
-        dots.style("fill", function(d){if(d.idx == idx){return "#6699ff";}else{ return "#ffab00";}}).style("visibility", "visible");
+        dots.style("fill", function(d){
+          if(d.idx == idx){return "#6699ff";}
+          else{ return "#ffab00";}}
+          ).style("visibility", "visible");
 
-        // show default pattern graph
+        // ********** show default pattern graph **********
         var pattern_numeric_to_draw = $('#viz-numerical-options').val();
         var pattern_nominal_to_draw = [];
         $('#viz-nominal-options input:checked').each(function() {
@@ -426,10 +434,10 @@
           success: function(data){
             plot_example(data.data, data.pattern_config, data.plot_type);
             config_plot_options(data.cols, data.chosen_col);
-            // config_plot_options(data.num_cols, type='numerical');
-        }
-      })
+          }
+        })
       }
+      // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
       function updateSelectedData(jgName){
         console.log('jgName:', jgName);
