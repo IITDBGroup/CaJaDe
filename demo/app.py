@@ -329,16 +329,14 @@ def ajax():
   # global agg 
   global frm 
   global where 
-  global grp 
+  global grp
+  global query
   
   slt = data["slt"]  
   # agg = data["agg"]  
   frm = data["frm"]  
   where = data["where"]  
   grp = data["grp"]
-
-  global query
-
 
   shown_query = f"""
   SELECT {slt} FROM {frm} {"WHERE {}".format(where) if where !="" else ""} {"GROUP BY {}".format(grp) if grp !="" else ""} 
@@ -356,10 +354,10 @@ def ajax():
   colnames = [desc[0] for desc in cursor.description]
   return jsonify(result = "success", result2 = data_list, result3=colnames)
 
-######
+
 @app.route('/start_explanation',methods=['EXP'])
 def start_explanation():
-    # query data 
+    ## ********** query data **********
     data = request.get_json()
 
     tdArr = data["tdArr"]
@@ -370,23 +368,21 @@ def start_explanation():
 
     tmp1 = []
     tmp2 = []
-    frac_tmp = [] #@@
-    # logger.debug(query)
-
+    frac_tmp = []
 
     for i in range(0, rangelen):
       if i<colNum:
           tmp1.append(tdArr[i])
       else:
           tmp2.append(tdArr[i])
-    frac_tmp.append(tmp1[0])#@@
-    frac_tmp.append(tmp2[0])#@@
+    frac_tmp.append(tmp1[0])
+    frac_tmp.append(tmp2[0])
     
-    global uQuery ##########
+    global uQuery
     uQuery = "provenance of ("+query+");"
 
-    # construct information needed for user question
-    gen_pt_full(uQuery) # create pt_full
+    ## ********** construct information needed for user question **********
+    gen_pt_full(uQuery) ## ********** create pt_full **********
     dtype_q = """
     SELECT ic.column_name, ic.data_type  
     FROM information_schema.tables it, information_schema.columns ic 
@@ -394,6 +390,7 @@ def start_explanation():
     """
     cursor.execute(dtype_q)
 
+    ## ********** query result datatypes, we only need to know whether attribute is numeric or not **********
     pg_numeric_list = ['smallint','integer','bigint','decimal','numeric',
     'real','double precision','smallserial','serial','bigserial']
 
@@ -406,15 +403,12 @@ def start_explanation():
             d[1] = 'string'
 
     ddict={x[0]:x[1] for x in raw_dtypes} 
-    # query result datatypes, we only need to know whether attribute is numeric or not
-
-
+    
     global ur1
     global ur2 
     
     ur1=" ".join(tmp1)
     ur2=" ".join(tmp2)
-
 
     for i in range(len(colData)):
         if(ddict[colData[i]]=='string'):
@@ -430,12 +424,13 @@ def start_explanation():
     logger.debug(f"u1: {u1}")
     logger.debug(f"u2: {u2}")
 
-    # adding user specified attrs
+    ## ********** adding user specified attrs **********
     # rules: 
     # 1) group by attributes
     # 2) where clause if certain attributes have equal to some constant
     # 3) TBD
-    global user_specified_attrs ##########
+    ## **************************************************
+    global user_specified_attrs
     user_specified_attrs = []
     table_mappings = {}
     tables = [x.strip() for x in frm.split(',')]
@@ -447,8 +442,7 @@ def start_explanation():
         else:
             table_mappings[t_and_a[1]] = t_and_a[0]
 
-    # handle where
-
+    ##  ********** handle where **********
     ands = re.split("and", where, flags=re.IGNORECASE)
 
     for a in ands:
@@ -462,14 +456,11 @@ def start_explanation():
         user_specified_attrs.append((table_mappings[table], attr))
 
     logger.debug(f"user_specified_attrs : {user_specified_attrs}")
+
     global resultSchemaName 
     resultSchemaName = datetime.today().strftime('%B%d%H%M').lower()
 
-    exp_conn = pg2.connect(database=db_name, 
-        user=db_user, 
-        password=db_pswd,
-        port=db_port,
-        host=db_host)
+    exp_conn = pg2.connect(database=db_name, user=db_user, password=db_pswd, port=db_port, host=db_host)
     exp_conn.autocommit = True
 
     run_experiment(conn=globals()['conn'],
@@ -490,62 +481,14 @@ def start_explanation():
                     min_recall_threshold=0.5,
                     gui=True)
 
-    # globals()['cthread'] = threading.Thread(target=run_experiment, kwargs={'conn': exp_conn,
-    #     'result_schema': resultSchemaName, 
-    #     'user_query': (uQuery, 'test'), 
-    #     'user_questions' : [u1,u2],
-    #     'user_questions_map' : {'yes': ur1 , 'no': ur2},
-    #     'user_specified_attrs' : list(set(user_specified_attrs)),
-    #     'user_name' : db_user,
-    #     'password' : db_pswd,
-    #     'host' : db_host,
-    #     'port' : db_port,
-    #     'dbname' : db_name, 
-    #     'maximum_edges' : 1, #2,
-    #     'f1_sample_rate' : 0.3,
-    #     'f1_calculation_type' : 'o',
-    #     'user_assigned_max_num_pred' : 2,
-    #     'min_recall_threshold' : 0.5,
-    #     'gui': True
-    #     }
-    # )
-    # logger.debug('starting thread')
-    # cthread.start()
-    
-    ##########################
-    # query3 = "select distinct jg_name, jg_details from "+resultSchemaName+".topk_patterns_from_top_jgs" #"select distinct jg_details from "+resultSchemaName+".global_results"
-    # globals()['cursor'].execute(query3)
-    # global jg_detail_list
-    # global jg
-    # jg_detail_list = globals()['cursor'].fetchall()
-    # jg = getJoinGraph(jg_detail_list)
-
-    # newfunc()
-
     resp = jsonify(success=True)
     return resp
 
-    # run_experiment(conn=globals()['conn'],
-    #                 result_schema=resultSchemaName, #'oct11',
-    #                 user_query=(uQuery, 'test'),
-    #                 user_questions = [u1,u2],
-    #                 user_questions_map = {'yes': ur1 , 'no': ur2},
-    #                 user_specified_attrs=list(set(user_specified_attrs)),
-    #                 user_name=db_user,
-    #                 password=db_pswd,
-    #                 host=db_host,
-    #                 port=db_port,
-    #                 dbname=db_name, 
-    #                 maximum_edges=2,
-    #                 f1_sample_rate=0.3,
-    #                 f1_calculation_type = 'o',
-    #                 user_assigned_max_num_pred=2,
-    #                 min_recall_threshold=0.5,
-    #                 gui=True)
 
 @app.route('/retrieve_explanation',methods=['EXP'])
 def retrieve_explanation():
     global jg
+
     fracnames= 'null'
     fracvalues= 'null'
     exp_list = 'null'
@@ -558,14 +501,11 @@ def retrieve_explanation():
     check_schema_q = f"SELECT schema_name FROM information_schema.schemata WHERE schema_name = '{resultSchemaName}';"
     cursor.execute(check_schema_q)
     cur_res = cursor.fetchone()
+
     logger.debug(check_schema_q)
     logger.debug(f"cursor result: {cur_res}")
-
-    ##alive = cthread.is_alive()
-    ##logger.debug(f"alive: {alive}")
     
     if(cur_res):
-        #global resultSchemaName
         unique_jg_q = "select count(distinct jg) from "+resultSchemaName+".topk_patterns_from_top_jgs"
         cursor.execute(unique_jg_q)
         processed_jg_cnt = int(cursor.fetchone()[0])
@@ -574,17 +514,15 @@ def retrieve_explanation():
         cursor.execute(total_jgs_q)
         total_jgs_cnt = int(cursor.fetchone()[0])
 
-        #query2 = "select p_desc from oct11.global_results"
         query2 = "select id, jg_name, p_desc, is_user, recall, precision, fscore from "+resultSchemaName+".topk_patterns_from_top_jgs order by fscore::numeric desc" #"select p_desc from "+resultSchemaName+".global_results"
         globals()['cursor'].execute(query2)
         exp_list = globals()['cursor'].fetchall()
-        ###print('exp_list:::', exp_list)
-        #exp_list = exp_replace_name(exp_list_tmp)
+
         highlight_list = getHighlightTexts(exp_list)
 
-        #query3 = "select distinct jg_details from oct11.global_results"
         query3 = "select distinct jg_name, jg_details from "+resultSchemaName+".topk_patterns_from_top_jgs" #"select distinct jg_details from "+resultSchemaName+".global_results"
         globals()['cursor'].execute(query3)
+
         global jg_detail_list
         jg_detail_list = globals()['cursor'].fetchall()
         jg = getJoinGraph(jg_detail_list)
@@ -597,24 +535,9 @@ def retrieve_explanation():
         globals()['cursor'].execute(query6)
         temp = globals()['cursor'].fetchall()
 
-        # status = f'processing join graph ({processed_jg_cnt}/{total_jgs_cnt})'
+    return jsonify(result = "success-explanation", result2 = exp_list, result3 = jg, result5 = test_list, 
+                    result6 = highlight_list, result8=fracnames, result9=fracvalues)
 
-        # if(not alive):
-        #     progress_width = 100
-        #     status='finished'
-        #     query_u1_frac = f" SELECT COUNT(*) FROM pt_full WHERE {u1};"
-        #     query_u2_frac = f" SELECT COUNT(*) FROM pt_full WHERE {u2};"
-        #     globals()['cursor'].execute(query_u1_frac)
-        #     frac1 = globals()['cursor'].fetchall()
-        #     globals()['cursor'].execute(query_u2_frac)
-        #     frac2 = globals()['cursor'].fetchall()
-
-        #     fracnames=[ur1, ur2]
-        #     fracvalues=[frac1, frac2] 
-        # else:
-        #     progress_width = math.ceil(20+90*float(processed_jg_cnt/total_jgs_cnt))
-    return jsonify(result = "success-explanation", result2 = exp_list, result3 = jg, result5 = test_list, result6 = highlight_list, 
-        result8=fracnames, result9=fracvalues)#, isrunning=alive, status=status, bar_width=progress_width)
 ##@@
 @app.route('/ratingUD',methods=['UD'])
 def ratingUD():
@@ -727,8 +650,6 @@ def ratingUD():
 
 
 def getHighlightTexts(exp_list):
-    ###print("<<<<<<<exp_list[0]: ", exp_list[0])
-    ###print("<<<<<<<exp_list[0][2]: ", exp_list[0][2])
     highlightTxtList = []
     for i in range(0, len(exp_list)):
         tmp = exp_list[i][2]
@@ -738,26 +659,7 @@ def getHighlightTexts(exp_list):
             get_text = tmp_line.split('.')[0]
             if get_text not in highlightTxtList:
                 highlightTxtList.append(get_text)
-    ###print('highlight text list: ', highlightTxtList)
     return highlightTxtList
-    ##################################
-    # highlightTxtList = []
-    # for i in range(0, len(exp_list)):
-    #     tmp = str(exp_list[i])
-    #     ##print('tmp: ', tmp) ###
-    #     tmp = tmp.replace('(', '')
-    #     tmp = tmp.replace(')', '')
-    #     tmp = tmp.replace('\'', '')
-    #     ##print('tmp: ', tmp) ###
-    #     split_comma = tmp.split(',')
-    #     for j in range(0, len(split_comma)-1):
-    #         tmp_line = split_comma[j]
-    #         get_text = tmp_line.split('.')[0]
-    #         #get_text = get_text.split('_')[0]
-    #         if get_text not in highlightTxtList:
-    #             highlightTxtList.append(get_text)
-    # print('highlight text list: ', highlightTxtList)
-    # return highlightTxtList
 
 def getJoinGraph(jg_detail_list):
     gd_list = []
