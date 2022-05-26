@@ -136,8 +136,15 @@
         <!-- ******************************************************************************************************** -->
 
         <!-- ****************************************** Filtering Section ******************************************* -->
-        <div clss="row" style="padding-bottom: 5%;">
-          <div id="filtering_table" style="overflow: auto; height: 200px;"></div>
+        <div clss="row" style="padding-bottom: 5%; padding-top: 5%;">
+          <div id="filtering_table" style="overflow: auto; height: 200px; visibility: hidden;">
+            {% for i in db_tables %}
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="checkbox" id="inlineCheckbox1" value="option1" />
+              <label class="form-check-label" for="inlineCheckbox1">{{i}}</label>
+            </div>
+            {% endfor %}           
+          </div>
         </div>
         <!-- ******************************************************************************************************** -->
 
@@ -592,8 +599,13 @@
         $("#tooltip_q_exptable").append(qmarkHtml);
       }
 
+            
 
-      function exp(){        
+      // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% [exp] when the explanation button clicked %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      function exp(){
+        document.getElementById('filtering_table').style.visibility='visible';
+
         var expTEXT = "";
         for(var i=0;i<tdArr.length;i++){
           expTEXT += tdArr[i];
@@ -602,24 +614,23 @@
         
 		    var postdata_exp = { 'tdArr': tdArr, 'colNum': colNum, 'colData': colData};
 
-        // start explanation
+        // ********** start explanation **********
         $.ajax({
           type: 'EXP',
           url: '{{url_for("start_explanation")}}',
           data: JSON.stringify(postdata_exp),
           dataType: 'JSON',
           contentType: "application/json",
-          ////////////////
           success: function(data){
             console.log("<start_explanation> success");
             ajaxCallRetrieve();
           },
           error: function(request, status, error){ 
-            alert('ajax failed')
+            alert('ajax failed');
             alert(error);
           }
-          //////////////////
         })
+        
         function ajaxCallRetrieve(){
           $.ajax({
             type: 'EXP',
