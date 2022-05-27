@@ -130,21 +130,38 @@
         </div>
 
         <div class="row">
-          <div style="width: 50%;"></div>
-          <div id="container" style="float: left; width:50%;"></div>
-        </div>
-        <!-- ******************************************************************************************************** -->
+          <div id="filtering_table" style="width: 70%; overflow: auto; visibility: hidden;">
 
-        <!-- ****************************************** Filtering Section ******************************************* -->
-        <div clss="row" style="padding-bottom: 5%; padding-top: 5%;">
-          <div id="filtering_table" style="overflow: auto; height: 200px; visibility: hidden;">
-            {% for i in db_tables %}
-            <div class="form-check form-check-inline">
-              <input class="form-check-input" type="checkbox" id="inlineCheckbox1" value="option1" />
-              <label class="form-check-label" for="inlineCheckbox1">{{i}}</label>
+            <div class="accordion-item">
+
+              <h2 class="accordion-header" id="headingOne">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                  Filtering Items
+                </button>
+              </h2>
+
+              <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                <div class="accordion-body">
+                  {% for i in db_tables %}
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" name="cbox" id="inlineCheckbox1" value="{{ i }}" onclick="setFilteringList(event)"/>
+                    <label class="form-check-label" for="inlineCheckbox1">{{i}}</label>
+                  </div>
+                  {% endfor %} 
+                </div>
+
+                <!-- <div class="row" style="padding-bottom: 5%;">
+                  <div style="width: 50%;"></div>
+                  <div id="container_filtering" style="float: left; width:50%; text-align: center;">
+                    <button type="button" onclick="setFiltering()" class="btn btn-outline-primary" id="set_filtering" >SET</button>
+                  </div>
+                </div> -->
+              </div>
+
             </div>
-            {% endfor %}           
+
           </div>
+          <div id="container" style="float: left; width:30%; text-align: right;"></div>
         </div>
         <!-- ******************************************************************************************************** -->
 
@@ -218,6 +235,7 @@
       var purple_color="#bb0ef1";
       var purple_text=null;
       var green_text=null;
+      var filteringList = new Set(); //new Array();
 
       // current set of variables that will be used when update based on use feedback
       var cur_exp_len;
@@ -280,8 +298,7 @@
             tdArr = [];
 
 		        displayData(totalNum);
-            qmarkHtml = "<i class=\"fa fa-question-circle\" style=\"font-size:24px;\"></i><span class=\"tooltiptext\">query results</span>";
-            $("#tooltip_q_exp").append(qmarkHtml);
+            document.getElementById('filtering_table').style.visibility='visible';
 		      },
 		      error: function(request, status, error){ 
 		        alert('ajax failed')
@@ -313,7 +330,10 @@
 		      chartHtml += "</tbody></table>";
 		      
 		      $("#display").empty();
-		      $("#display").append(chartHtml);          
+		      $("#display").append(chartHtml);
+          
+          qmarkHtml = "<i class=\"fa fa-question-circle\" style=\"font-size:24px;\"></i><span class=\"tooltiptext\">query results</span>";
+          $("#tooltip_q_exp").append(qmarkHtml);
 		    }
 		  })
       // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -599,20 +619,36 @@
         $("#tooltip_q_exptable").append(qmarkHtml);
       }
 
-            
+      
+      // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% [setFilteringList] set Filtering List %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      function setFilteringList(event){
+        let selectedValue = '';
+
+        if(event.target.checked){
+          selectedValue = event.target.value;
+          filteringList.add(selectedValue);
+        } else{
+          selectedValue = event.target.value;
+          filteringList.delete(selectedValue);
+
+        }
+
+        console.log(selectedValue);
+        console.log(filteringList);
+      }
+      // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
       // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% [exp] when the explanation button clicked %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-      // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
       function exp(){
-        document.getElementById('filtering_table').style.visibility='visible';
-
         var expTEXT = "";
         for(var i=0;i<tdArr.length;i++){
           expTEXT += tdArr[i];
           expTEXT += " ";
         }
-        
-		    var postdata_exp = { 'tdArr': tdArr, 'colNum': colNum, 'colData': colData};
+        const filteringtmp = Array.from(filteringList);
+        console.log(filteringtmp);
+
+		    var postdata_exp = {'tdArr': tdArr, 'colNum': colNum, 'colData': colData, 'filteringList': filteringtmp};
 
         // ********** start explanation **********
         $.ajax({
@@ -630,7 +666,7 @@
             alert(error);
           }
         })
-        
+
         function ajaxCallRetrieve(){
           $.ajax({
             type: 'EXP',

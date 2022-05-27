@@ -363,8 +363,10 @@ def start_explanation():
     tdArr = data["tdArr"]
     colNum = data["colNum"]
     colData = data["colData"]
+    filteringList = data["filteringList"]
     rangelen = len(tdArr)
     logger.debug(tdArr)
+    logger.debug(filteringList)
 
     tmp1 = []
     tmp2 = []
@@ -479,7 +481,8 @@ def start_explanation():
                     f1_calculation_type = 'o',
                     user_assigned_max_num_pred=2,
                     min_recall_threshold=0.5,
-                    gui=True)
+                    gui=True,
+                    filtering=filteringList)
 
     resp = jsonify(success=True)
     return resp

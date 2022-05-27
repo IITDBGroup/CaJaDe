@@ -589,7 +589,8 @@ def run_experiment(conn=None,
                    f1_min_sample_size_threshold=100,
                    lca_eval_mode=False,
                    statstracker=ExperimentParams(),
-                   gui=False):
+                   gui=False,
+                   filtering=None):
                   
     # added a gui parameter, if true bypass pt creation step
     # f1_calculation_type: "o": evaluate on original materialized jg
@@ -616,6 +617,7 @@ def run_experiment(conn=None,
     statstracker.params['f1_min_sample_size_threshold'] = "'{}'".format(f1_min_sample_size_threshold)
     statstracker.params['f1_sample_type'] = "'{}'".format(f1_sample_type)
     statstracker.params['gui'] = "'{}'".format(str(gui))
+    # statstracker.params['filtering'] = "'{}'".format(for x in filtering)
 
     exp_time = datetime.now().strftime("%Y_%m_%d__%H_%M_%S")
 
@@ -630,6 +632,10 @@ def run_experiment(conn=None,
     logger.debug(user_questions)
     logger.debug(statstracker.params['user_query'])
     logger.debug(statstracker.params['user_questions'])
+
+    logger.debug(filtering)
+    for i in filtering:
+      logger.debug(i)
 
     sample_rate_for_s_tmp = statstracker.params['sample_rate_for_s']
 
