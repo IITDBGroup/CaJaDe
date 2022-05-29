@@ -552,7 +552,9 @@ def retrieve_explanation():
         highlight_list = getHighlightTexts(exp_list)
 
         #query3 = "select distinct jg_details from oct11.global_results"
-        query3 = "select distinct jg_name, jg_details from "+resultSchemaName+".topk_patterns_from_top_jgs" #"select distinct jg_details from "+resultSchemaName+".global_results"
+        # query3 = "select jg_name, jg_details, string_agg(fscore, ',') from " +resultSchemaName+".topk_patterns_from_top_jgs group by jg_name, jg_details"
+        query3 = "select jg_name, jg_details, string_agg(fscore, ',') from " +resultSchemaName+".topk_patterns_from_top_jgs group by jg_name, jg_details order by length(jg_details) desc"
+        #"select distinct jg_details from "+resultSchemaName+".global_results"
         globals()['cursor'].execute(query3)
         jg_detail_list = globals()['cursor'].fetchall()
         jg = getJoinGraph(jg_detail_list)
@@ -648,7 +650,9 @@ def ratingUD():
     highlight_list = getHighlightTexts(exp_list)
 
     #query3 = "select distinct jg_details from oct11.global_results"
-    query3 = "select distinct jg_name, jg_details from user_updated_exp" #"select distinct jg_details from "+resultSchemaName+".global_results"
+    # query3 = "select distinct jg_name, jg_details from user_updated_exp" #"select distinct jg_details from "+resultSchemaName+".global_results"
+    query3 = "select jg_name, jg_details, string_agg(fscore, ',') from user_updated_exp group by jg_name, jg_details order by length(jg_details) desc"
+
     globals()['cursor'].execute(query3)
     jg_detail_list = globals()['cursor'].fetchall()
     jg = getJoinGraph(jg_detail_list)
@@ -730,15 +734,18 @@ def getHighlightTexts(exp_list):
 
 def getJoinGraph(jg_detail_list):
     gd_list = []
-    graphData = {"nodes":[], "links":[]}
+    graphData = {"nodes":[], "links":[], 'scores':[]}
 
     for i in range (0, len(jg_detail_list)):
-        graphData = {"nodes":[], "links":[]} ##
+
         node_list = []
 
         cur_data = jg_detail_list[i]
         cur_jg_name = cur_data[0]
         cur_jg_detail = cur_data[1]
+
+        graphData = {"nodes":[], "links":[], "scores": [float(t) for t in cur_data[2].split(',')]}##
+        
         print("cur_jg_detail::::::")
         print(cur_jg_detail)
 

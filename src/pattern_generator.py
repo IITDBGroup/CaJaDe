@@ -171,7 +171,7 @@ class Pattern_Generator:
 
     def pattern_diversification(self, 
                             pattern_pool,
-                            k=5, 
+                            k=10, 
                             same_attr_weight=-0.3, # punish patterns sharing same attribute
                             same_val_weight=-2, # punish same attr and same value,
                             ):

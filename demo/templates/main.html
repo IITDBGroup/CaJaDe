@@ -109,19 +109,23 @@
               <!--<div class="input-group"> -->
                 <div class="input-group1">
                   <div class="input-group-text" style="float: left;">SELECT</div>
-                  <input type="text" class="form-control" id="query-select" name="query-select" value = "count(*) as win, s.season_name" style="float: left; width: 82%;"> 
+                  <input type="text" class="form-control" id="query-select" name="query-select" style="float: left; width: 82%;"> 
+<!--                   <input type="text" class="form-control" id="query-select" name="query-select" value = "count(*) as win, s.season_name" style="float: left; width: 82%;">  -->
                 </div>
                 <div class="input-group2">
                   <div class="input-group-text" style="float: left;">FROM</div>
-                  <input type="text" class="form-control" id="query-from" name="query-from" value=" team t, game g, season s " style="float: left; width: 83%;">
+                  <input type="text" class="form-control" id="query-from" name="query-from" style="float: left; width: 85%;">
+<!--                   <input type="text" class="form-control" id="query-from" name="query-from" value=" team t, game g, season s " style="float: left; width: 83%;"> -->
                 </div>
                 <div class="input-group3">
                   <div class="input-group-text" style="float: left;">WHERE</div>
-                  <input type="text" class="form-control" id="query-where" name="query-where" value=" t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' " style="float: left; width: 83%;">
+                  <input type="text" class="form-control" id="query-where" name="query-where" style="float: left; width: 85%;">
+  <!--                 <input type="text" class="form-control" id="query-where" name="query-where" value=" t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' " style="float: left; width: 83%;"> -->
                 </div>
                 <div class="input-group4">
                   <div class="input-group-text" style="float: left;">GROUP BY</div>
-                  <input type="text" class="form-control" id="query-group" name="query-group" value="s.season_name" style="float: left; width: 60%;">          
+                  <input type="text" class="form-control" id="query-group" name="query-group" style="float: left; width: 60%;">          
+<!--                   <input type="text" class="form-control" id="query-group" name="query-group" value="s.season_name" style="float: left; width: 60%;">   -->   
                   <button type="button" class="btn btn-outline-primary" id="execute" style="width: 18%;">Run</button>             
                 </div>
             </div>
@@ -256,7 +260,7 @@
       var selectedDataId;
       var green; 
       var purple;
-      var width = 200, height = 200;
+      var width = 230, height = 230;
       var selected_pattern_desc=null;
 
 		  $('#execute').click(function(){
@@ -868,7 +872,7 @@
           .append("circle")
           .attr("cx", function(d, i) { return xScale(i) })
           .attr("cy", function(d) { return yScale(d.y) })
-          .attr("r", 5)
+          .attr("r", 3)
           .style("fill", "#ffab00")
           .style("opacity", 0.5)
           .style("stroke", "black")
@@ -958,22 +962,102 @@
           $.fn.generateMultiForce = function(svgObj) {
               return this.each(function() {
                   var graph = this;
-                  var graphArea = svgObj.append("g");
+                  // var graphArea = svgObj.append("g");
 
-                  var svg = d3.select("#explanation_graph")       
+                  var svg = d3.select("#explanation_graph")
+                      // .append('div')       
                       .append("svg")
-                      .attr("width", width)
-                      .attr("height", height)
+                      .attr("width", 300)
+                      .attr("height", 300)
                       .data(graph.nodes) //
                       .style("background-color", "white")
+                      .attr("align","center")
+                      // .style("width","42%")
+                      // .style("display", "inline-block")
                       .on("mouseenter", mouseenter)
                       .on("mouseleave", mouseleave)
                       .on('click', click);
 
+                  var hist_data = graph.scores;
+
+                  console.log(hist_data);
+
+                  min = d3.min(hist_data);
+                  max = d3.max(hist_data);
+                  domain = [min,max+0.001];
+                  var margin = { top: 30, right: 10, bottom: 10, left: 30},
+                    h_width = 120,
+                    h_height = 100;
+
+                  // The number of bins
+                  Nbin = 10;
+
+                  var x = d3
+                    .scaleLinear()
+                    .domain(domain)
+                    .range([0, h_width]);
+
+                  var histogram = d3
+                    .histogram()
+                    .domain(x.domain()) // then the domain of the graphic
+                    .thresholds(x.ticks(Nbin)); // then the numbers of bins
+
+                  // And apply this function to data to get the bins
+                  var bins = histogram(hist_data);
+
+
+
+                  svg
+                    .append("svg")
+                    .attr("width", h_width + margin.left + margin.right)
+                    .attr("height", h_height + margin.top + margin.bottom)
+                    .append("g")
+                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                  svg
+                    .append("g")
+                    .attr("transform", "translate(" +margin.left+ "," + (h_height+10) + ")")
+                    .call(d3.axisBottom(x).ticks(5));
+
+
+                  var y = d3
+                    .scaleLinear()
+                    .range([h_height, 0])
+                    .domain([
+                      0,
+                      d3.max(bins, function(d) {
+                        return d.length;
+                      })
+                    ]);
+
+                  svg.append("g")
+                  .attr("transform", "translate(" + margin.left+ ",10)")
+                  .call(d3.axisLeft(y).ticks(5));
+
+                  svg
+                  .append("g")
+                  .attr("transform", "translate(" + margin.left + ",10)")
+                    .selectAll("rect")
+                    .data(bins)
+                    .enter()
+                    .append("rect")
+                    .attr("x", 1)
+                    .attr("transform", function(d) {
+                      return "translate(" +x(d.x0) + "," + y(d.length) + ")";
+                    })
+                    .attr("width", function(d) {
+                      return x(d.x1) - x(d.x0) - 1;
+                    })
+                    .attr("height", function(d) {
+                      return h_height - y(d.length);
+                    })
+                    .style("fill", "#69b3a2");
+                     
+
                   var simulation = d3
                       .forceSimulation(graph.nodes)
                       .force("charge", d3.forceManyBody().strength(-1500))
-                      .force("center", d3.forceCenter(width / 2, height / 2))
+                      .force("center", d3.forceCenter(300 *4 /7, 300 *4/ 7))
                       .force("link", d3.forceLink(graph.links).id(d => d.name));
 
                   var link =  svg
@@ -1187,6 +1271,7 @@
         for(var i=0;i<cur_exp_data.length;i++){
           if(cur_exp_data[i][2] == pdes){ isUser = cur_exp_data[i][3]; break;}
         }
+        var internal_isUser = isUser.replace(/\s/g, '');
         //var isUser = exp_data[i][3];
         // var isUserTmp = isUser.split('AND')[0].split('=')[1];
         // console.log("isUserTmp>>>>>>>>>>>>>>>>>>>>>>>", isUserTmp);
@@ -1201,7 +1286,7 @@
         console.log("purple_text : ", purple_text);
 
 
-        if(isUser == green_text){
+        if(internal_isUser == green_text){
           console.log("isUser == green_text!")
           green_frac_index=frac_name.indexOf(isUser);
           frac_green = frac_value[green_frac_index];
@@ -1283,7 +1368,7 @@
           $.fn.generateMultiForce1 = function(svgObj) {
             return this.each(function() {
               var graph = this;
-              var graphArea = svgObj.append("g");
+              // var graphArea = svgObj.append("g");
               var active = d3.select(null); ///
               var w = 600; var h = 300;
               var svg = d3.select("#selectedJGexpl").append("svg").attr("width", w).attr("height", h).data(graph.nodes)
@@ -1352,7 +1437,7 @@
               var tooltiptest = d3.select("#selectedJGexpl").append("div").style("position", "absolute").style("visibility", "hidden").style("background-color", "#a7a7a7")
                               .style("color", "white").style("border-width", "1px").style("border-radius", "5px").style("padding", "10px");
               ///////////////////@@@@@@@@@@@@@
-              var collisionForce = rectCollide().size(function(d) { return [d.name.length*9, 30]});
+              var collisionForce = rectCollide().size(function(d) { return [d.name.length*2, 30]});
               var simulation = d3.forceSimulation(graph.nodes).force("charge", d3.forceManyBody().strength(-1800)).force("center", d3.forceCenter(w/2, h/2))
                                   .force("link", d3.forceLink(graph.links).id(d => d.name).distance(50))
                                   .force('collision', collisionForce);//;
