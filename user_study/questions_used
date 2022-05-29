@@ -1,3 +1,0 @@
-                                        jg                                          |                                             p_desc                                              |      precision      | recall  | fscore  | is_user 
-
-join_graph_details : 1: PT, 2: team, cond: (A_2.team_id)=(A_1."prov_game_away__id") | PT_1.prov_game_away__points>104.0,PT_1.prov_season_season__type=regular season,team_2.team=GSW  | 0.7368421052631579  | 0.38356 | 0.5045  | 2015-16
