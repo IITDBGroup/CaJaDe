@@ -1,7 +1,7 @@
 from src.sg_generator import Schema_Graph_Generator
 from src.pattern_generator import Pattern_Generator
 from src.jg_materializer import Join_Graph_Materializer
-
+from demo.app import getUserSelection as appUselection
 from src.provenance_getter import provenance_getter
 from src.gprom_wrapper import  GProMWrapper
 from src.hashes import fnv1a_init, fnv1a_update_str
@@ -226,9 +226,9 @@ class Join_Graph_Generator:
         plans_edge_w_new_node = []
 
         for n in j_graph_target.graph_core:
-            logger.debug(n.label) ####
-            logger.debug(node1_label) ####
-            logger.debug(node2_label) ####
+            logger.debug(n.label)
+            logger.debug(node1_label)
+            logger.debug(node2_label)
             ########################
             if self.checkFiltering(node2_label) == -1:
                 break
@@ -369,41 +369,47 @@ class Join_Graph_Generator:
 
     global filteringList
     filteringList = [] #{} #[]
-    def setFilteringList(self): #, schema_graph, pt_n):
-        for n in self.schema_graph:
-            ###if(schema_graph.has_edge(pt_n, n)):
+    # def setFilteringList(self): #, schema_graph, pt_n):
+    #     for n in self.schema_graph:
+    #         ###if(schema_graph.has_edge(pt_n, n)):
+    #         if n not in filteringList:
+    #             tmp = []
+    #             tmp.append(n)
+    #             tmp.append(0)
+    #             filteringList.append(tmp)
+    #             #filteringList[n] = 0
+    #             #filteringList.append(n)
+    def setFiltering(self, filtering_tmp):
+        for n in filtering_tmp:
             if n not in filteringList:
-                tmp = []
-                tmp.append(n)
-                tmp.append(0)
-                filteringList.append(tmp)
-                #filteringList[n] = 0
-                #filteringList.append(n)
-    def setFiltering(self):
-        print("<<Filter/Unfilter>> Enter number (Skip:-1): ")
-        for i in range(0, len(filteringList)):
-            print('[',i,']',filteringList[i][0], end=' ')
-        print()
-
-        filterSelection = int(input())
-        if filterSelection!=-1:
-            if filteringList[filterSelection][1]==0:
-                filteringList[filterSelection][1] = -1
-            else:
-                filteringList[filterSelection][1] = 0
+                filteringList.append(n)
         print(filteringList)
-        self.displayFiltering()
+        # print("<<Filter/Unfilter>> Enter number (Skip:-1): ")
+        # for i in range(0, len(filteringList)):
+        #     print('[',i,']',filteringList[i][0], end=' ')
+        # print()
 
-    def displayFiltering(self):
-        print("[Filtered] ", end="")
-        for x in filteringList:
-            if x[1]==-1:
-                print(x[0], end=" ")
-        print()
+        # filterSelection = int(input())
+        # if filterSelection!=-1:
+        #     if filteringList[filterSelection][1]==0:
+        #         filteringList[filterSelection][1] = -1
+        #     else:
+        #         filteringList[filterSelection][1] = 0
+        # self.displayFiltering()
+
+    # def displayFiltering(self):
+    #     print("[Filtered] ", end="")
+    #     for x in filteringList:
+    #         if x[1]==-1:
+    #             print(x[0], end=" ")
+    #     print()
     def checkFiltering(self, check):
         for x in filteringList:
-            if x[0]==check and x[1]==-1:
+            if check in filteringList:
                 return -1
+        # for x in filteringList:
+        #     if x[0]==check and x[1]==-1:
+        #         return -1
         return 0
 
     global pt_cond_list
@@ -760,7 +766,7 @@ class Join_Graph_Generator:
 
         return recomm_result
 
-    def Generate_JGs(self, pt_rels, num_edges, customize=False): #, connInfo, statstracker):
+    def Generate_JGs(self, pt_rels, num_edges, customize=False, filtering_tmp=[]): #, connInfo, statstracker):
         """
         num_edges: this defines the size of a join graph
         pt_rels: relations coming from PT
@@ -779,12 +785,15 @@ class Join_Graph_Generator:
             cur_edge=0
             uSelection_jg = ''
 
-            self.setFilteringList()
-            print("///////////////////////////////////////////filtering list: ", filteringList)
+            #self.setFilteringList()
+            print("///////////////////////////////////////////filtering list: ", filtering_tmp)
+            
 
             while True:
-                self.displayFiltering()
-                self.setFiltering()
+                # self.displayFiltering()
+                self.setFiltering(filtering_tmp)
+
+
                 # print("[*******]cur_edge:",cur_edge)
                 # print('[@@@@@@@@@@]jgs selection dic: ', jgs_selection)
                 # print()
@@ -860,6 +869,9 @@ class Join_Graph_Generator:
                         #####Recommendation
                         # recomm = self.getRecomm(valid_jgs) #, connInfo, statstrackerInfo)
                         #####
+                        
+                        uSelection = appUselection(valid_jgs) ###########
+
                         for i in range(0, len(valid_jgs)):
                             print("[",i+1,"]",repr(valid_jgs[i]))
                             # parsing
@@ -875,7 +887,7 @@ class Join_Graph_Generator:
                         recomm = self.getRecomm(valid_jgs, cur_edge,0.1)
                         print("recommendation>>>>> ", recomm)
 
-                        uSelection = int(input())
+                        ################uSelection = int(input())
                         if uSelection==0:
                             break
                         elif uSelection==-1 and cur_edge>=1:

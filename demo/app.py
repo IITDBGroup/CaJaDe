@@ -2,9 +2,10 @@ from flask import Flask
 from flask import render_template, request, jsonify, redirect, url_for, flash
 import psycopg2 as pg2
 from networkx import MultiGraph
+
 from src.sg_generator import Schema_Graph_Generator
 from src.gprom_wrapper import run_command, GProMWrapper
-from src.experiments import run_experiment
+from src.experiments import * #run_experiment
 from flask.logging import default_handler
 import logging
 import re
@@ -23,6 +24,13 @@ app = Flask(__name__)
 
 two_cols = re.compile('\w+\.\w+\s{0,}!?(<|>|<=|>=|=|<>|!=)\s{0,}\w+\.\w+\s{0,}')
 pattern_triplets_re = re.compile(r'([\w\.\s-]+)([<|=|>])([\w\.\s]+)')
+
+
+global validJGlist
+validJGlist = []
+vgList=[]
+vCheck = False
+
 
 @app.route("/")
 def index():
@@ -465,29 +473,202 @@ def start_explanation():
     exp_conn = pg2.connect(database=db_name, user=db_user, password=db_pswd, port=db_port, host=db_host)
     exp_conn.autocommit = True
 
-    run_experiment(conn=globals()['conn'],
-                    result_schema=resultSchemaName,
-                    user_query=(uQuery, 'test'),
-                    user_questions = [u1,u2],
-                    user_questions_map = {'yes': ur1 , 'no': ur2},
-                    user_specified_attrs=list(set(user_specified_attrs)),
-                    user_name=db_user,
-                    password=db_pswd,
-                    host=db_host,
-                    port=db_port,
-                    dbname=db_name, 
-                    maximum_edges=5,
-                    f1_sample_rate=0.3,
-                    f1_calculation_type = 'o',
-                    user_assigned_max_num_pred=2,
-                    min_recall_threshold=0.5,
-                    gui=True,
-                    filtering=filteringList)
+    globals()['cthread'] = threading.Thread(target=run_experiment, 
+                            kwargs={'conn': exp_conn,
+                                    'result_schema': resultSchemaName,
+                                    'user_query': (uQuery, 'test'),
+                                    'user_questions': [u1,u2],
+                                    'user_questions_map': {'yes': ur1 , 'no': ur2},
+                                    'user_specified_attrs': list(set(user_specified_attrs)),
+                                    'user_name': db_user,
+                                    'password': db_pswd,
+                                    'host': db_host,
+                                    'port': db_port,
+                                    'dbname': db_name, 
+                                    'maximum_edges': 5,
+                                    'f1_sample_rate': 0.3,
+                                    'f1_calculation_type': 'o',
+                                    'user_assigned_max_num_pred': 2,
+                                    'min_recall_threshold': 0.5,
+                                    'gui': True,
+                                    'filtering': filteringList
+                                    })
+    logger.debug('starting thread')
+    cthread.start()
+
+    # run_experiment(conn=globals()['conn'],
+    #                 result_schema=resultSchemaName,
+    #                 user_query=(uQuery, 'test'),
+    #                 user_questions = [u1,u2],
+    #                 user_questions_map = {'yes': ur1 , 'no': ur2},
+    #                 user_specified_attrs=list(set(user_specified_attrs)),
+    #                 user_name=db_user,
+    #                 password=db_pswd,
+    #                 host=db_host,
+    #                 port=db_port,
+    #                 dbname=db_name, 
+    #                 maximum_edges=5,
+    #                 f1_sample_rate=0.3,
+    #                 f1_calculation_type = 'o',
+    #                 user_assigned_max_num_pred=2,
+    #                 min_recall_threshold=0.5,
+    #                 gui=True,
+    #                 filtering=filteringList)
 
     resp = jsonify(success=True)
     return resp
+###########################################
+# global validJGlist
+# validJGlist = []
+# vgList=[]
+# vCheck = False
+def getUserSelection(valid_jgs):
+    global validJGlist
+    global vgList
+
+    uconn = pg2.connect(database='uselection', 
+                        user='juseung', 
+                        password='1234', 
+                        port='5432', 
+                        host='127.0.0.1')
+    cur = uconn.cursor()
+
+    ###check if the table exists
+    # uselectionTBname = datetime.today().strftime('%B%d%H%M').lower()
+    # create_uselectionTB = "CREATE TABLE uselection"+uselectionTBname+" (jg varchar(200), slt int);"
+    # # checkTB = "SELECT EXISTS( SELECT COUNT(*) FROM uselection"+uselectionTBname+");"
+    # cur.execute(create_uselectionTB)
+
+    
+    ########print options########
+    print("*********demo.getUserSelection******")
+    for i in valid_jgs:
+        print(repr(i))
+        #getNodesEdges(repr(i))
+
+        insertJG = F"""
+        INSERT INTO uselection(jg, slt)
+        VALUES('{repr(i)}',-1);
+        """
+        cur.execute(insertJG)
+        uconn.commit()
+
+        vgList.append(repr(i))
+        #validJGlist.append(getNodesEdges(repr(i)))
+        # validJGlist.append(repr(i))
+    cur.close()
+    uconn.close()
+
+    print('validJGlist: ', validJGlist)
+
+    global vCheck
+    vCheck = True
+    print('vCheck: ', vCheck)
+    print('validJGlist: ', validJGlist)
+    #########pass options to javascript###########
 
 
+    #########get selection#######
+    u_selection = int(input()) ###########
+    return u_selection
+def getJGlist():
+    global validJGlist
+    print('validJGlist4: ', validJGlist)
+    print('vgList: ', vgList)
+    return validJGlist
+#############################################
+@app.route('/user_selection',methods=['SELECTION'])
+def user_selection():
+    global validJGlist
+    print('validJGlist2: ', validJGlist)
+    global vCheck
+    vCheck = True
+    alive = cthread.is_alive()
+    if vCheck == True:
+        print('vCheck: ', vCheck)
+        vCheck = False
+        print('validJGlist3: ', validJGlist)
+        print('getJGlist: ', getJGlist())
+        print('vgList: ', vgList)
+
+        uconn = pg2.connect(database='uselection', 
+                            user='juseung', 
+                            password='1234', 
+                            port='5432', 
+                            host='127.0.0.1')
+        cur = uconn.cursor()
+        retrieve_JG = "SELECT jg from uselection where slt=-1"
+
+        cur.execute(retrieve_JG)
+        ulist = cur.fetchall()
+        print("ulist: ",ulist)
+        for i in ulist:
+            getNodesEdges(i)
+
+        uconn.commit()
+        cur.close()
+        uconn.close()
+        print('validJGlist>>>>>>: ', validJGlist)
+        return jsonify(result="sucess-userSelection", isrunning=alive, result2=validJGlist)
+    else:
+        return jsonify(result="sucess-userSelection", isrunning=alive, result2='null')
+#############################################
+
+#############################################
+def getNodesEdges(tmp):
+    global validJGlist
+    validJGdata = {"nodes":[], "edges":[]}
+    node_list = []
+
+    if 'cond' not in tmp:
+        nodeName = 'PT'
+        node_list.append(nodeName)
+        validJGdata['nodes'].append({"name": nodeName})
+        validJGdata['edges'].clear()
+    else:
+        if '|' not in tmp:
+            getNodes = tmp.split('cond')
+            nodes = getNodes[0].split(',')
+            two_nodes = []
+            for i in range(0, len(nodes)-1):
+                x = nodes[i].split(' ')
+                nodeName = x[len(x)-1]
+
+                if nodeName not in node_list:
+                    node_list.append(nodeName)
+                    validJGdata['nodes'].append({"name": nodeName})
+                two_nodes.append(nodeName)
+            validJGdata['edges'].append({"cond": getCondition(getNodes[1],node_list)})
+        else:
+            getNodes = tmp.split('|')
+            for i in range(0, len(getNodes)):
+                nodes = getNodes[i].split(',')
+                two_nodes = []
+                for j in range(0, len(nodes)):
+                    if 'cond' not in nodes[j]:
+                        x = nodes[j].split(' ')
+                        nodeName = x[len(x)-1]
+                        if nodeName not in node_list:
+                            node_list.append(nodeName)
+                            validJGdata['nodes'].append({"name": nodeName})
+                        two_nodes.append(nodeName)
+                    else:
+                        jg_condition = nodes[j]
+                validJGdata['edges'].append({"cond": getCondition(jg_condition, node_list) })
+    validJGlist.append(validJGdata)
+
+def getCondition(tmp_cond, node_list):
+    tmp = tmp_cond.split(' ')
+    jgCondition = tmp[len(tmp)-1]
+    index = 1
+    for node_name in node_list:
+        replace_name = 'A_'+ str(index)
+        jgCondition = jgCondition.replace(replace_name, node_name)
+        index += 1
+    clean_jgCondition = re.sub("[()]","",jgCondition)
+    return clean_jgCondition
+
+#############################################
 @app.route('/retrieve_explanation',methods=['EXP'])
 def retrieve_explanation():
     global jg

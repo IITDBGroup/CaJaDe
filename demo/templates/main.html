@@ -165,6 +165,12 @@
         </div>
         <!-- ******************************************************************************************************** -->
 
+        <!-- **************************************** User Selection Results **************************************** -->
+        <div clss="row" style="padding-bottom: 5%;">
+          <div id="uSelection_table" style="overflow: auto; height: 300px;"></div>
+        </div>
+        <!-- ******************************************************************************************************** -->
+
         <!-- ***************************************** Explanation Results ****************************************** -->
         <div clss="row" style="padding-bottom: 5%;">
           <div style="float: right; text-align: center;" class="col-sm-1">
@@ -650,6 +656,7 @@
 
 		    var postdata_exp = {'tdArr': tdArr, 'colNum': colNum, 'colData': colData, 'filteringList': filteringtmp};
 
+
         // ********** start explanation **********
         $.ajax({
           type: 'EXP',
@@ -657,15 +664,45 @@
           data: JSON.stringify(postdata_exp),
           dataType: 'JSON',
           contentType: "application/json",
-          success: function(data){
-            console.log("<start_explanation> success");
-            ajaxCallRetrieve();
-          },
-          error: function(request, status, error){ 
-            alert('ajax failed');
-            alert(error);
-          }
+          // success: function(data){
+          //   console.log("<start_explanation> success");
+          //   ajaxCallRetrieve();
+          // },
+          // error: function(request, status, error){ 
+          //   alert('ajax failed');
+          //   alert(error);
+          // }
         })
+
+        // ********** start user selection **********
+        var intervalid = setInterval(ajaxSelection, 500);
+        function ajaxSelection() {
+          $.ajax({
+            type: 'SELECTION',
+            url: '{{url_for("user_selection")}}',
+            dataType: 'JSON',
+            success: function(data){
+              running = data.isrunning;
+              console.log(data.result2);
+              if(data.result2!='null'){
+                console.log("success");
+                clearInterval(intervalid);
+                uSelectionList = data.result2;
+                console.log("uSelectionList: ", uSelectionList);
+              }
+              if(!running){
+                clearInterval(intervalid);
+              }
+            },
+            error: function(request, status, error){
+              alert('ajax failed')
+              alert(error);
+            }
+          })
+        }
+        // ******************************************
+ 
+
 
         function ajaxCallRetrieve(){
           $.ajax({

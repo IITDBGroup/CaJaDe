@@ -617,7 +617,7 @@ def run_experiment(conn=None,
     statstracker.params['f1_min_sample_size_threshold'] = "'{}'".format(f1_min_sample_size_threshold)
     statstracker.params['f1_sample_type'] = "'{}'".format(f1_sample_type)
     statstracker.params['gui'] = "'{}'".format(str(gui))
-    # statstracker.params['filtering'] = "'{}'".format(for x in filtering)
+    statstracker.params['filtering'] = "'{}'".format(filtering)
 
     exp_time = datetime.now().strftime("%Y_%m_%d__%H_%M_%S")
 
@@ -688,7 +688,7 @@ def run_experiment(conn=None,
                                 )
 
     # logger.debug('generate new valid_jgs')
-    valid_result = jgg.Generate_JGs(pt_rels=pt_relations, num_edges=maximum_edges, customize=False) #, conn, statstracker)
+    valid_result = jgg.Generate_JGs(pt_rels=pt_relations, num_edges=maximum_edges, customize=False, filtering_tmp=filtering) #, conn, statstracker)
     logger.debug(valid_result) 
  
     # logger.debug(f"Before filtering any, we have {len(valid_result)} valid jgs \n")
