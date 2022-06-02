@@ -638,7 +638,7 @@ def getNodesEdges(tmp):
                     node_list.append(nodeName)
                     validJGdata['nodes'].append({"name": nodeName})
                 two_nodes.append(nodeName)
-            validJGdata['edges'].append({"cond": getCondition(getNodes[1],node_list)})
+            validJGdata['edges'].append({"source": two_nodes[0], "target": two_nodes[1], "cond": getCondition(getNodes[1],node_list)})
         else:
             getNodes = tmp.split('|')
             for i in range(0, len(getNodes)):
@@ -654,7 +654,7 @@ def getNodesEdges(tmp):
                         two_nodes.append(nodeName)
                     else:
                         jg_condition = nodes[j]
-                validJGdata['edges'].append({"cond": getCondition(jg_condition, node_list) })
+                validJGdata['edges'].append({"source": two_nodes[0], "target": two_nodes[1], "cond": getCondition(jg_condition, node_list) })
     validJGlist.append(validJGdata)
 
 def getCondition(tmp_cond, node_list):
