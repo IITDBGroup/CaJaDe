@@ -809,6 +809,7 @@
         }
 
       } 
+      var graphviz;
       function show_uSelection(usList){
         $("#uSelection_table").empty();
 
@@ -817,7 +818,8 @@
           node [style="filled"]`;
 
         for(var i=1; i<=usList.length;i++){
-          dotSrc+= `Node`+i+` [id="NodeId`+i+`" label="`+usList[i-1]["nodes"]["name"]+`" fillcolor="#d62728"]`;
+          dotSrc+= `Node`+i+` [id="NodeId`+i+`" label="`+usList[i-1]["nodes"][0]["name"]+`" fillcolor="#d62728"]`;
+          console.log(">>>>>>:", usList[i-1]["nodes"][0]["name"])
           console.log(">>>>>>:", usList[i-1]["nodes"]["name"])
           console.log(">>>>>>:", usList[i-1]["nodes"])
           console.log(">>>>>>:", usList[i-1])
@@ -832,9 +834,28 @@
         
 
         var dotScrLines;
-        graphviz = d3.select("#uSelection_table").graphviz().renderDot(dotSrc);
+        // graphviz = d3.select("#uSelection_table").graphviz().renderDot(dotSrc);
+
+
+        graphviz = d3.select("#uSelection_table").graphviz();
+        render(dotSrc);
       }
-      
+      function render(dotSrc){
+        console.log('DOT source =',dotSrc);
+        graphviz.renderDot(dotSrc).on("end", interactive);
+      }
+      function interactive(){
+        nodes = d3.selectAll('.node, .edge');
+        nodes.on("click", function(){
+          var title = d3.select(this).selectAll('title').text().trim();
+          var text = d3.select(this).selectAll('text').text();
+          var id = d3.select(this).attr('id');
+          var class1 = d3.select(this).attr('class');
+          console.log('Element id="%s" class="%s" title="%s" text="%s"', id, class1, title, text);
+
+        });
+      }
+
 
       function exp_summary(summaryData, exp_data, exp_len, graphData){ //(exp_len, recallData, precisionData)
         // join graph + scatter plot
