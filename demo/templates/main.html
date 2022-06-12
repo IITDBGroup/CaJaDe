@@ -172,6 +172,7 @@
         <!-- **************************************** User Selection Results **************************************** -->
         <div clss="row" style="padding-bottom: 5%;">
           <div id="uSelection_table" style="overflow: auto; height: 300px;"></div>
+          <div id="container2" style="float: left; width:30%; text-align: right;"></div>
         </div>
         <!-- ******************************************************************************************************** -->
 
@@ -709,6 +710,10 @@
           })
         }
         // ******************************************
+
+        // // *********** pass user selection ***********
+        // var intervalid2 = setInterval(passSelection, 500);
+        // // ******************************************
  
 
 
@@ -815,10 +820,11 @@
 
         var dotSrc = `digraph {
           graph [label="user selection" labelloc="t"]
-          node [style="filled"]`;
+          node [style="filled"]\n`;
 
         for(var i=1; i<=usList.length;i++){
-          dotSrc+= `Node`+i+` [id="NodeId`+i+`" label="`+usList[i-1]["nodes"][0]["name"]+`" fillcolor="#d62728"]`;
+          // dotSrc+= `Node`+i+` [id="NodeId`+i+`" label="`+usList[i-1]["nodes"][0]["name"]+`" fillcolor="#d62728"]`;
+          dotSrc+= `Node`+i+` [id="`+i+`" label="`+usList[i-1]["nodes"][0]["name"]+`" fillcolor="#d62728"]\n`;
           console.log(">>>>>>:", usList[i-1]["nodes"][0]["name"])
           console.log(">>>>>>:", usList[i-1]["nodes"]["name"])
           console.log(">>>>>>:", usList[i-1]["nodes"])
@@ -839,23 +845,52 @@
 
         graphviz = d3.select("#uSelection_table").graphviz();
         render(dotSrc);
+
+        $('#container2').empty();
+        $('#container2').append("<button id=\"uselection_btn\" class=\"btn btn-outline-primary\" onclick=\"uselectionClicked()\" type=\"button\">Select</button>");
       }
       function render(dotSrc){
         console.log('DOT source =',dotSrc);
         graphviz.renderDot(dotSrc).on("end", interactive);
       }
+      var id = -1;
       function interactive(){
         nodes = d3.selectAll('.node, .edge');
         nodes.on("click", function(){
           var title = d3.select(this).selectAll('title').text().trim();
           var text = d3.select(this).selectAll('text').text();
-          var id = d3.select(this).attr('id');
+          id = d3.select(this).attr('id');
           var class1 = d3.select(this).attr('class');
           console.log('Element id="%s" class="%s" title="%s" text="%s"', id, class1, title, text);
 
         });
       }
+      function uselectionClicked(){
+        console.log("<<ID>>: ", id);
+        
+        // *********** pass user selection ***********
+        // var intervalid2 = setInterval(passSelection, 500);
+        // function passSelection(){
 
+        var postdata_id = {'selectionID': id};
+
+        $.ajax({
+          type: 'SELECTIONMADE',
+          url: '{{url_for("selection_made")}}',
+          data: JSON.stringify(postdata_id),
+          dataType: 'JSON',
+          contentType: "application/json",
+          success: function(data){
+            
+          },
+          error: function(request, status, error){
+            alert('ajax failed')
+            alert(error);
+          }
+        })
+        // }
+        // ******************************************
+      }
 
       function exp_summary(summaryData, exp_data, exp_len, graphData){ //(exp_len, recallData, precisionData)
         // join graph + scatter plot

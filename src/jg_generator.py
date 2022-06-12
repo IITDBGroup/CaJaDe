@@ -870,7 +870,8 @@ class Join_Graph_Generator:
                         # recomm = self.getRecomm(valid_jgs) #, connInfo, statstrackerInfo)
                         #####
                         
-                        uSelection = appUselection(valid_jgs) ###########
+                        uSelection = appUselection(valid_jgs,cur_edge) ###########
+                        print("uselection:******: ", uSelection)
 
                         for i in range(0, len(valid_jgs)):
                             print("[",i+1,"]",repr(valid_jgs[i]))

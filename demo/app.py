@@ -522,10 +522,12 @@ def start_explanation():
 # validJGlist = []
 # vgList=[]
 # vCheck = False
-def getUserSelection(valid_jgs):
+global selection
+
+def getUserSelection(valid_jgs, cur_edge):
     global validJGlist
     global vgList
-
+    global selection
     uconn = pg2.connect(database='uselection', 
                         user='juseung', 
                         password='1234', 
@@ -542,13 +544,17 @@ def getUserSelection(valid_jgs):
     
     ########print options########
     print("*********demo.getUserSelection******")
+    idx = 0
     for i in valid_jgs:
         print(repr(i))
+        idx = idx+1
+        print("index: ",idx)
+
         #getNodesEdges(repr(i))
 
         insertJG = F"""
-        INSERT INTO uselection(jg, slt)
-        VALUES('{repr(i)}',-1);
+        INSERT INTO uselection(jg, step, slt)
+        VALUES('{repr(i)}', '{cur_edge}', '{idx}');
         """
         cur.execute(insertJG)
         uconn.commit()
@@ -569,18 +575,62 @@ def getUserSelection(valid_jgs):
 
 
     #########get selection#######
-    u_selection = int(input()) ###########
-    return u_selection
-def getJGlist():
-    global validJGlist
-    print('validJGlist4: ', validJGlist)
-    print('vgList: ', vgList)
-    return validJGlist
+    ##### interval??
+    ##### get user selection and pass it to jg_generator.py
+    checkconn = pg2.connect(database='uselection', 
+                        user='juseung', 
+                        password='1234', 
+                        port='5432', 
+                        host='127.0.0.1')
+    ccur = checkconn.cursor()
+    checkJG = "SELECT slt from uselection WHERE slt<0"
+
+    while True:
+        # check if there is positive value in slt(which indicates user selction is stored)
+        # then if exists, get the value and pass it to jg_generator.py
+        # and update it to zero value
+        #########################################
+    
+        ccur.execute(checkJG)
+
+        u_selection = ccur.fetchone()
+
+        if (u_selection):
+            print("u_selection:>>>>>>>>>>", u_selection)
+            checkconn.commit()        
+            ccur.close()
+
+            ccur2 = checkconn.cursor()
+            update_jg = "UPDATE uselection SET slt=0 WHERE slt<0"
+            ccur2.execute(update_jg)
+
+            # checkconn.commit()        
+            # ccur.close()
+            checkconn.commit()  
+            ccur2.close()
+            checkconn.close()
+            break
+
+        
+
+        # if vCheck==False:
+        #     print('selection: ', selection)
+        #     break
+        # else:
+        #     print('vCheck TRUE: ', selection)
+        #     break
+            
+
+    #u_selection = int(input()) ###########
+    print("u_selection:******: ", u_selection)
+    return -(u_selection[0])
+
 #############################################
 @app.route('/user_selection',methods=['SELECTION'])
 def user_selection():
     global validJGlist
     print('validJGlist2: ', validJGlist)
+    # print('>>>>global cur_step: ', cur_step)
     global vCheck
     vCheck = True
     alive = cthread.is_alive()
@@ -588,7 +638,7 @@ def user_selection():
         print('vCheck: ', vCheck)
         vCheck = False
         print('validJGlist3: ', validJGlist)
-        print('getJGlist: ', getJGlist())
+
         print('vgList: ', vgList)
 
         uconn = pg2.connect(database='uselection', 
@@ -597,7 +647,7 @@ def user_selection():
                             port='5432', 
                             host='127.0.0.1')
         cur = uconn.cursor()
-        retrieve_JG = "SELECT jg from uselection where slt=-1"
+        retrieve_JG = "SELECT jg from uselection where slt>0"
 
         cur.execute(retrieve_JG)
         ulist = cur.fetchall()
@@ -609,9 +659,9 @@ def user_selection():
         cur.close()
         uconn.close()
         print('validJGlist>>>>>>: ', validJGlist)
-        return jsonify(result="sucess-userSelection", isrunning=alive, result2=validJGlist)
+        return jsonify(result="success-userSelection", isrunning=alive, result2=validJGlist)
     else:
-        return jsonify(result="sucess-userSelection", isrunning=alive, result2='null')
+        return jsonify(result="success-userSelection", isrunning=alive, result2='null')
 #############################################
 
 #############################################
@@ -669,6 +719,39 @@ def getCondition(tmp_cond, node_list):
     return clean_jgCondition
 
 #############################################
+@app.route('/selection_made',methods=['SELECTIONMADE'])
+def selection_made():
+    global selection
+    data = request.get_json()
+
+    id = data["selectionID"]
+
+    print("id:", id)
+
+    sconn = pg2.connect(database='uselection', 
+                        user='juseung', 
+                        password='1234', 
+                        port='5432', 
+                        host='127.0.0.1')
+    cur = sconn.cursor()
+    updateJG = F"""
+        UPDATE uselection SET slt=
+        CASE WHEN slt!='{id}' THEN 0
+        ELSE '-{id}'
+        END;
+        """
+    
+    cur.execute(updateJG)
+    sconn.commit()
+
+       
+    cur.close()
+    sconn.close()
+    
+    return jsonify(result="success-selection_made")
+#############################################
+
+
 @app.route('/retrieve_explanation',methods=['EXP'])
 def retrieve_explanation():
     global jg
