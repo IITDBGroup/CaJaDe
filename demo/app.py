@@ -571,6 +571,7 @@ def getUserSelection(valid_jgs, cur_edge):
     vCheck = True
     print('vCheck: ', vCheck)
     print('validJGlist: ', validJGlist)
+    print('$$$$$$$$$$$3')
     #########pass options to javascript###########
 
 
@@ -628,7 +629,9 @@ def getUserSelection(valid_jgs, cur_edge):
 #############################################
 @app.route('/user_selection',methods=['SELECTION'])
 def user_selection():
+    print("@@@@@2")
     global validJGlist
+    validJGlist.clear()
     print('validJGlist2: ', validJGlist)
     # print('>>>>global cur_step: ', cur_step)
     global vCheck
@@ -666,9 +669,12 @@ def user_selection():
 
 #############################################
 def getNodesEdges(tmp):
+    print('>>>>>tmp: ', tmp)
+    print('>>>>>tmp[0]: ', tmp[0])
     global validJGlist
     validJGdata = {"nodes":[], "edges":[]}
     node_list = []
+    tmp = tmp[0]
 
     if 'cond' not in tmp:
         nodeName = 'PT'
@@ -705,6 +711,7 @@ def getNodesEdges(tmp):
                     else:
                         jg_condition = nodes[j]
                 validJGdata['edges'].append({"source": two_nodes[0], "target": two_nodes[1], "cond": getCondition(jg_condition, node_list) })
+    print('>>>>>validJGdata: ', validJGdata)
     validJGlist.append(validJGdata)
 
 def getCondition(tmp_cond, node_list):

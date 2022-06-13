@@ -650,6 +650,7 @@
       // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
       // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% [exp] when the explanation button clicked %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      let intervalid;
       function exp(){
         var expTEXT = "";
         for(var i=0;i<tdArr.length;i++){
@@ -680,35 +681,38 @@
         })
 
         // ********** start user selection **********
-        var intervalid = setInterval(ajaxSelection, 500);
-        function ajaxSelection() {
-          $.ajax({
-            type: 'SELECTION',
-            url: '{{url_for("user_selection")}}',
-            dataType: 'JSON',
-            success: function(data){
-              running = data.isrunning;
-              console.log(data.result2);
-              if(data.result2!='null'){
-                console.log("success");
-                clearInterval(intervalid);
-                uSelectionList = data.result2;
-                console.log("uSelectionList: ", uSelectionList);
-                show_uSelection(uSelectionList);
-                // d3.select("#uSelection_table").graphviz().renderDot('digraph  {a -> b}');
-
-                // uSelection_table
-              }
-              if(!running){
-                clearInterval(intervalid);
-              }
-            },
-            error: function(request, status, error){
-              alert('ajax failed')
-              alert(error);
-            }
-          })
+        if(!intervalid){
+          intervalid = setInterval(ajaxSelection, 500);
         }
+        
+        // function ajaxSelection() {
+        //   $.ajax({
+        //     type: 'SELECTION',
+        //     url: '{{url_for("user_selection")}}',
+        //     dataType: 'JSON',
+        //     success: function(data){
+        //       running = data.isrunning;
+        //       console.log(data.result2);
+        //       if(data.result2!='null'){
+        //         console.log("success");
+        //         clearInterval(intervalid);
+        //         uSelectionList = data.result2;
+        //         console.log("uSelectionList: ", uSelectionList);
+        //         show_uSelection(uSelectionList);
+        //         // d3.select("#uSelection_table").graphviz().renderDot('digraph  {a -> b}');
+
+        //         // uSelection_table
+        //       }
+        //       if(!running){
+        //         clearInterval(intervalid);
+        //       }
+        //     },
+        //     error: function(request, status, error){
+        //       alert('ajax failed')
+        //       alert(error);
+        //     }
+        //   })
+        // }
         // ******************************************
 
         // // *********** pass user selection ***********
@@ -813,24 +817,88 @@
           return jgID
         }
 
-      } 
-      var graphviz;
+      }
+      function ajaxSelection() {
+        console.log("@@@@@@@@@@@@@@@@@@@@@");
+        $.ajax({
+          type: 'SELECTION',
+          url: '{{url_for("user_selection")}}',
+          dataType: 'JSON',
+          success: function(data){
+            running = data.isrunning;
+            console.log(data.result2);
+            if(data.result2.length!=0){ // data.result2!='null'
+              console.log("success");
+              clearInterval(intervalid);
+              intervalid = null;
+
+              uSelectionList = data.result2;
+              console.log("uSelectionList: ", uSelectionList);
+              show_uSelection(uSelectionList);
+              // d3.select("#uSelection_table").graphviz().renderDot('digraph  {a -> b}');
+
+              // uSelection_table
+            }
+            if(!running){
+              clearInterval(intervalid);
+            }
+          },
+          error: function(request, status, error){
+            alert('ajax failed')
+            alert(error);
+          }
+        })
+      }
+
+
+      // var graphviz;
       function show_uSelection(usList){
         $("#uSelection_table").empty();
-
-        var dotSrc = `digraph {
-          graph [label="user selection" labelloc="t"]
-          node [style="filled"]\n`;
+        
+        
+        var nodeIdx = 1;
+        var dotSrc = `
+          digraph {`;
+          // graph [label="user selection" labelloc="t"]\n
+          // node [style="filled"]\n`;
 
         for(var i=1; i<=usList.length;i++){
-          // dotSrc+= `Node`+i+` [id="NodeId`+i+`" label="`+usList[i-1]["nodes"][0]["name"]+`" fillcolor="#d62728"]`;
-          dotSrc+= `Node`+i+` [id="`+i+`" label="`+usList[i-1]["nodes"][0]["name"]+`" fillcolor="#d62728"]\n`;
-          console.log(">>>>>>:", usList[i-1]["nodes"][0]["name"])
-          console.log(">>>>>>:", usList[i-1]["nodes"]["name"])
-          console.log(">>>>>>:", usList[i-1]["nodes"])
-          console.log(">>>>>>:", usList[i-1])
+          var nodeDict = {}
+          dotSrc += `\nsubgraph `+i+` {\n`;
+          // digraph G`+i+` {\n
+          // graph [label="user selection" labelloc="t"]\n
+          // node [style="filled"]\n`;
+
+          nLength = usList[i-1]["nodes"].length;
+          eLength = usList[i-1]["edges"].length;
+
+          for(var j=0;j<nLength;j++){
+            // dotSrc+= `Node`+i+` [id="NodeId`+i+`" label="`+usList[i-1]["nodes"][0]["name"]+`" fillcolor="#d62728"]`;
+            // dotSrc+= `Node`+i+` [id="`+i+`" label="`+usList[i-1]["nodes"][0]["name"]+`" fillcolor="#1f77b4"]\n`;
+            // dotSrc+= `Node`+i+` [id="`+i+`" label="`+usList[i-1]["nodes"][j]["name"]+`" fillcolor="#1f77b4"]\n`;
+            nodeName = 'Node'+nodeIdx;
+            nodeLabel = usList[i-1]["nodes"][j]["name"];
+            dotSrc+= nodeName+` [id="`+i+`" label="`+nodeLabel+`" fillcolor="#1f77b4"]\n`;
+            // console.log(">>>>>>:", usList[i-1]["nodes"][0]["name"])
+            // console.log(">>>>>>:", usList[i-1]["nodes"]["name"])
+            // console.log(">>>>>>:", usList[i-1]["nodes"])
+            // console.log(">>>>>>:", usList[i-1])
+            nodeDict[nodeLabel] = nodeName;
+            nodeIdx++;
+          }
+          for(var k=0;k<eLength;k++){
+            nodeSource = usList[i-1]["edges"][k]["source"];
+            nodeTarget = usList[i-1]["edges"][k]["target"];
+            nodeLabel = usList[i-1]["edges"][k]["cond"].replace(/\"/gi,"");
+
+            dotSrc+= nodeDict[nodeSource]+` -> `+nodeDict[nodeTarget]+` [id="`+i+`" label="`+nodeLabel+`" arrowhead=none]\n`;
+          }
+          dotSrc+= `}`;
+          // render(dotSrc);
         }
-        dotSrc+= `}`;
+        dotSrc+= `\n}`;
+
+
         // for(var i=1; i<=len(usList);i++){
         //   if(usList[i-1]['edges']){
         //     dotSrc+= `Node`+i+` [id="NodeId`+i+`" label="`+usList[i-1]["name"]+`" fillcolor="#d62728"]`;
@@ -838,8 +906,6 @@
         //   dotSrc+= `Node`+i+` [id="NodeId`+i+`" label="`+usList[i-1]["name"]+`" fillcolor="#d62728"]`;
         // }
         
-
-        var dotScrLines;
         // graphviz = d3.select("#uSelection_table").graphviz().renderDot(dotSrc);
 
 
@@ -851,6 +917,8 @@
       }
       function render(dotSrc){
         console.log('DOT source =',dotSrc);
+        //graphviz = d3.select("#uSelection_table").graphviz().renderDot(dotSrc).on("end", interactive);
+
         graphviz.renderDot(dotSrc).on("end", interactive);
       }
       var id = -1;
@@ -881,7 +949,8 @@
           dataType: 'JSON',
           contentType: "application/json",
           success: function(data){
-            
+            console.log("setinterval>>>>>>>>>");
+            intervalid = setInterval(ajaxSelection, 500);
           },
           error: function(request, status, error){
             alert('ajax failed')

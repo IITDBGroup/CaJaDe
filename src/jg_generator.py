@@ -909,7 +909,8 @@ class Join_Graph_Generator:
                             print("<<Can't Go back to Previous Step>>")
                         else:
                             print("<<SELECTED JG>>: ", repr(valid_jgs[uSelection-1]))
-                            self.ratingDB(repr(valid_jgs[uSelection-1])) #########################################################################
+                            ####Rating>>>>>
+                            ##self.ratingDB(repr(valid_jgs[uSelection-1])) #########################################################################
                             #################################################################################################################
 
                             #print('@@@@@@@@@@jgs selection dic: ', jgs_selection)
