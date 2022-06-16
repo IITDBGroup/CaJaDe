@@ -524,7 +524,7 @@ def start_explanation():
 # vCheck = False
 global selection
 
-def getUserSelection(valid_jgs, cur_edge):
+def getUserSelection(valid_jgs, cur_edge, rc):
     global validJGlist
     global vgList
     global selection
@@ -553,8 +553,8 @@ def getUserSelection(valid_jgs, cur_edge):
         #getNodesEdges(repr(i))
 
         insertJG = F"""
-        INSERT INTO uselection(jg, step, slt)
-        VALUES('{repr(i)}', '{cur_edge}', '{idx}');
+        INSERT INTO uselection(jg, step, slt, recomm)
+        VALUES('{repr(i)}', '{cur_edge}', '{idx}', '{rc[idx-1]}');
         """
         cur.execute(insertJG)
         uconn.commit()
@@ -650,19 +650,31 @@ def user_selection():
                             port='5432', 
                             host='127.0.0.1')
         cur = uconn.cursor()
-        retrieve_JG = "SELECT jg from uselection where slt>0"
-
+        retrieve_JG = "SELECT jg, recomm from uselection where slt>0"
         cur.execute(retrieve_JG)
+
         ulist = cur.fetchall()
         print("ulist: ",ulist)
-        for i in ulist:
-            getNodesEdges(i)
+
+        rc_list = []
+        for i in range(0, len(ulist)):
+            print(ulist[i][0])
+            getNodesEdges(ulist[i][0])
+            rc_list.append(ulist[i][1])
+        
+        # for i in ulist:
+        #     getNodesEdges(i)
+
+        # cur_2 = uconn.cursor()
+        # ex_JG = "SELECT jg, recomm from uselection where slt>0"
+        # cur_2.execute(ex_JG)
+        # exlist = cur_2.fetchall()
 
         uconn.commit()
         cur.close()
         uconn.close()
         print('validJGlist>>>>>>: ', validJGlist)
-        return jsonify(result="success-userSelection", isrunning=alive, result2=validJGlist)
+        return jsonify(result="success-userSelection", isrunning=alive, result2=validJGlist, result3=rc_list)
     else:
         return jsonify(result="success-userSelection", isrunning=alive, result2='null')
 #############################################
@@ -674,7 +686,7 @@ def getNodesEdges(tmp):
     global validJGlist
     validJGdata = {"nodes":[], "edges":[]}
     node_list = []
-    tmp = tmp[0]
+    #tmp = tmp[0]
 
     if 'cond' not in tmp:
         nodeName = 'PT'

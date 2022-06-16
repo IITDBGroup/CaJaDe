@@ -829,12 +829,15 @@
             console.log(data.result2);
             if(data.result2.length!=0){ // data.result2!='null'
               console.log("success");
+              console.log(data.result3);
               clearInterval(intervalid);
               intervalid = null;
 
               uSelectionList = data.result2;
+              recommList = data.result3;
+
               console.log("uSelectionList: ", uSelectionList);
-              show_uSelection(uSelectionList);
+              show_uSelection(uSelectionList,recommList);
               // d3.select("#uSelection_table").graphviz().renderDot('digraph  {a -> b}');
 
               // uSelection_table
@@ -852,22 +855,26 @@
 
 
       // var graphviz;
-      function show_uSelection(usList){
+      function show_uSelection(usList,recommList){
         $("#uSelection_table").empty();
         
         
         var nodeIdx = 1;
         var dotSrc = `
-          digraph {`;
+          digraph {\n`;
           // graph [label="user selection" labelloc="t"]\n
           // node [style="filled"]\n`;
 
         for(var i=1; i<=usList.length;i++){
           var nodeDict = {}
-          dotSrc += `\nsubgraph `+i+` {\n`;
+          dotSrc += `\nsubgraph cluster_`+i+` {\n
+            label = `;
+          dotSrc += `"Recommendation: `+recommList[i-1]+`";\n
+          node [style=filled];\n`;
+            
           // digraph G`+i+` {\n
           // graph [label="user selection" labelloc="t"]\n
-          // node [style="filled"]\n`;
+            // node [style="filled"]\n`;
 
           nLength = usList[i-1]["nodes"].length;
           eLength = usList[i-1]["edges"].length;
@@ -891,7 +898,7 @@
             nodeTarget = usList[i-1]["edges"][k]["target"];
             nodeLabel = usList[i-1]["edges"][k]["cond"].replace(/\"/gi,"");
 
-            dotSrc+= nodeDict[nodeSource]+` -> `+nodeDict[nodeTarget]+` [id="`+i+`" label="`+nodeLabel+`" arrowhead=none]\n`;
+            dotSrc+= nodeDict[nodeSource]+` -> `+nodeDict[nodeTarget]+` [id="`+i+`" label="" labeltooltip="`+nodeLabel+`" arrowhead=none]\n`;
           }
           dotSrc+= `}`;
           // render(dotSrc);
