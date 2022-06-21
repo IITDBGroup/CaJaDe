@@ -553,8 +553,8 @@ def getUserSelection(valid_jgs, cur_edge, rc):
         #getNodesEdges(repr(i))
 
         insertJG = F"""
-        INSERT INTO uselection(jg, step, slt, recomm)
-        VALUES('{repr(i)}', '{cur_edge}', '{idx}', '{rc[idx-1]}');
+        INSERT INTO uselection(jg, step, slt, recomm, urating)
+        VALUES('{repr(i)}', '{cur_edge}', '{idx}', '{rc[idx-1]}', 0);
         """
         cur.execute(insertJG)
         uconn.commit()
@@ -584,7 +584,7 @@ def getUserSelection(valid_jgs, cur_edge, rc):
                         port='5432', 
                         host='127.0.0.1')
     ccur = checkconn.cursor()
-    checkJG = "SELECT slt from uselection WHERE slt<0"
+    checkJG = "SELECT slt, urating from uselection WHERE slt<0" #"SELECT slt from uselection WHERE slt<0"
 
     while True:
         # check if there is positive value in slt(which indicates user selction is stored)
@@ -594,10 +594,19 @@ def getUserSelection(valid_jgs, cur_edge, rc):
     
         ccur.execute(checkJG)
 
-        u_selection = ccur.fetchone()
+        #u_selection = ccur.fetchone()
+        u_selection_tmp = ccur.fetchall()
+        #print('u_selection_tmp>>>>>>>>>: ', u_selection_tmp)
 
-        if (u_selection):
-            print("u_selection:>>>>>>>>>>", u_selection)
+
+        if (u_selection_tmp):
+            print("u_selection:>>>>>>>>>>", u_selection_tmp)
+
+            u_selection = u_selection_tmp[0]
+            print('u_selection>>>>>>>>>: ', u_selection)
+            u_rating = u_selection_tmp[0][1]
+            print('u_rating>>>>>>>>>: ', u_rating)
+
             checkconn.commit()        
             ccur.close()
 
@@ -624,7 +633,7 @@ def getUserSelection(valid_jgs, cur_edge, rc):
 
     #u_selection = int(input()) ###########
     print("u_selection:******: ", u_selection)
-    return -(u_selection[0])
+    return -(u_selection[0]), u_rating
 
 #############################################
 @app.route('/user_selection',methods=['SELECTION'])
@@ -744,6 +753,11 @@ def selection_made():
     data = request.get_json()
 
     id = data["selectionID"]
+    uRate = data["userRating"]
+
+    print("rating: ", uRate)
+    ####if rating is not -1(if user rating exists)
+    ####pass rating data and save it to DB
 
     print("id:", id)
 
@@ -754,10 +768,8 @@ def selection_made():
                         host='127.0.0.1')
     cur = sconn.cursor()
     updateJG = F"""
-        UPDATE uselection SET slt=
-        CASE WHEN slt!='{id}' THEN 0
-        ELSE '-{id}'
-        END;
+        UPDATE uselection SET slt= CASE WHEN slt!='{id}' THEN 0 ELSE '-{id}' END
+                            , urating= '{uRate}' WHERE slt='{id}';
         """
     
     cur.execute(updateJG)

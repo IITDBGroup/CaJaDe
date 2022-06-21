@@ -507,75 +507,75 @@ class Join_Graph_Generator:
         #print("check2::::: ", getAVG[0][0])
         return getAVG
 
-    def ratingDB(self,usel): ###################
+    def ratingDB(self,usel, getUserRating): ###################
         print("******userselection: ", usel)
-        print("<<Rating>> Enter Rate(0 to 5) (Skip:-1): ")
+        #print("<<Rating>> Enter Rate(0 to 5) (Skip:-1): ")
 
         pt_cond, node_cond, node = self.parsingCond(usel, 1)
         pt_cond_list.append(pt_cond)
         node_cond_list.append(node_cond)
         print("pt_cond_list: ", pt_cond_list, " node_cond_list: ", node_cond_list)
 
-        getUserRating = int(input())
+        #getUserRating = int(input())
 
-        if getUserRating == -1:
-            print("<<Rating>> Skip Rating")
-        else:
+        # if getUserRating == -1:
+        #     print("<<Rating>> Skip Rating")
+        # else:
             #connect DB - myrating.rating(id, usel)
             #connect DB - myrating.table(uquery, uq1, uq2, usel, urating)
-            rconn = psycopg2.connect(database='rating', 
-                                    user='juseung', 
-                                    password='1234', 
-                                    port='5432', 
-                                    host='127.0.0.1')
-            cur = rconn.cursor()
+        rconn = psycopg2.connect(database='rating', 
+                                user='juseung', 
+                                password='1234', 
+                                port='5432', 
+                                host='127.0.0.1')
+        cur = rconn.cursor()
 
-            getRatingQuery = """
-            SELECT * FROM myrating.mytable;
-            """
-            #SELECT * FROM myrating.table;
-            #SELECT * FROM myrating.rating;
-            cur.execute(getRatingQuery)
-            getRating = cur.fetchall()
-            print("*****rating ex:")
-            print(getRating)
+        #SELECT * FROM myrating.table;
+        #SELECT * FROM myrating.rating;
+        getRatingQuery = "SELECT * FROM myrating.mytable;"
+        cur.execute(getRatingQuery)
+        getRating = cur.fetchall()
 
-            # # global pt_cond_list, node_cond_list
-            # pt_cond, node_cond, node = self.parsingCond(usel, 1)
-            # pt_cond_list.append(pt_cond)
-            # node_cond_list.append(node_cond)
-            # print("pt_cond_list: ", pt_cond_list, " node_cond_list: ", node_cond_list)
+        print("*****rating ex:")
+        print(getRating)
 
-            insertRatingQ = F"""
-            INSERT INTO myrating.mytable(node, node_cond, pt_cond, urating)
-            VALUES('{node}', '{node_cond}', '{pt_cond}', '{getUserRating}');
-            """
-            ###[x.replace("'", '') for x in self.uq1]
-            # INSERT INTO myrating.table(uquery, uq1, uq2, usel, urating)
-            # VALUES('{format(self.uquery.replace("'",''))}', '{format(self.uq1.replace("'",''))}', 
-            # '{format(self.uq2.replace("'",''))}', '{usel}', '{getUserRating}');
-            # insertRatingQ = F"""
-            # INSERT INTO myrating.rating(id, usel)
-            # VALUES('{getUserRating}', '{usel}');
-            # """
-            
-            cur.execute(insertRatingQ)
+        # # global pt_cond_list, node_cond_list
+        # pt_cond, node_cond, node = self.parsingCond(usel, 1)
+        # pt_cond_list.append(pt_cond)
+        # node_cond_list.append(node_cond)
+        # print("pt_cond_list: ", pt_cond_list, " node_cond_list: ", node_cond_list)
 
-            #cur = rconn.cursor()
-            getRatingQuery = """
-            SELECT * FROM myrating.mytable;
-            """
-            #SELECT * FROM myrating.table;
-            #SELECT * FROM myrating.rating;
-            cur.execute(getRatingQuery)
-            getRating = cur.fetchall()
-            print("*****rating ex:")
-            print(getRating)
+        insertRatingQ = F"""
+        INSERT INTO myrating.mytable(node, node_cond, pt_cond, urating)
+        VALUES('{node}', '{node_cond}', '{pt_cond}', '{getUserRating}');
+        """
+        ###[x.replace("'", '') for x in self.uq1]
+        # INSERT INTO myrating.table(uquery, uq1, uq2, usel, urating)
+        # VALUES('{format(self.uquery.replace("'",''))}', '{format(self.uq1.replace("'",''))}', 
+        # '{format(self.uq2.replace("'",''))}', '{usel}', '{getUserRating}');
+        # insertRatingQ = F"""
+        # INSERT INTO myrating.rating(id, usel)
+        # VALUES('{getUserRating}', '{usel}');
+        # """
+        
+        cur.execute(insertRatingQ)
 
-            rconn.commit()
-            
-            cur.close()
-            rconn.close()
+        #cur = rconn.cursor()
+
+        #SELECT * FROM myrating.table;
+        #SELECT * FROM myrating.rating;
+        getRatingQuery = "SELECT * FROM myrating.mytable;"
+
+        cur.execute(getRatingQuery)
+        getRating = cur.fetchall()
+        print("*****rating ex:")
+        print(getRating)
+
+        rconn.commit()
+        
+        cur.close()
+        rconn.close()
+
     def getRecomm(self, valid_result, cur_edge, f1_sample_rate): #, connInfo, statstrackerInfo): 
         recomm_result = []
         #####Recommendation
@@ -873,8 +873,10 @@ class Join_Graph_Generator:
                         recomm = self.getRecomm(valid_jgs, cur_edge,0.1)
                         print("recommendation>>>>> ", recomm)
                         
-                        uSelection = appUselection(valid_jgs,cur_edge, recomm) ###########
-                        print("uselection:******: ", uSelection)
+                        ########## get user selection and rating ##########
+                        ####need to pass rate average
+                        uSelection, uRating = appUselection(valid_jgs,cur_edge, recomm)
+                        print("uselection, uRating:******: ", uSelection,"*****",uRating)
 
                         for i in range(0, len(valid_jgs)):
                             print("[",i+1,"]",repr(valid_jgs[i]))
@@ -913,6 +915,9 @@ class Join_Graph_Generator:
                         else:
                             print("<<SELECTED JG>>: ", repr(valid_jgs[uSelection-1]))
                             ####Rating>>>>>
+                            ###if uRating exists, if uRating value is not -1, execute ratingDB
+                            if uRating!=-1:
+                                self.ratingDB(repr(valid_jgs[uSelection-1]), uRating)
                             ##self.ratingDB(repr(valid_jgs[uSelection-1])) #########################################################################
                             #################################################################################################################
 

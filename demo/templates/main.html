@@ -15,6 +15,9 @@
   <script src="https://cdn.jsdelivr.net/npm/vega@5.21.0"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.2.0"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.20.2"></script>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">    
+
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 	<link rel="stylesheet" href='../static/main.css'>
@@ -172,7 +175,38 @@
         <!-- **************************************** User Selection Results **************************************** -->
         <div clss="row" style="padding-bottom: 5%;">
           <div id="uSelection_table" style="overflow: auto; height: 300px;"></div>
-          <div id="container2" style="float: left; width:30%; text-align: right;"></div>
+          <div id="container2" style="float: left; width:30%; text-align: right;">
+          
+          </div>
+
+          <div id="rating_drawer" style="width: 70%; overflow: auto; visibility: hidden;">
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="headingTwo">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="true" aria-controls="collapseOne">
+                  Rating
+                </button>
+              </h2>
+
+              <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample" style="text-align: center;">
+                <div class="accordion-body">
+                  <div class="btn-group">
+                      {% for i in range(1,6) %}
+                      <button type="button" class="btn btn-link" id="star{{ i }}" onclick="myRating(this)" style="color: lightslategray;"><span class="bi bi-star-fill"></span></button>
+                      {% endfor %}
+                  </div>  
+
+                  <div>
+                    <button id="ratingClear" class="btn btn-outline-primary" onclick="clearClicked()" type="button" style="width: 40%;">Clear</button>
+                    <button id="ratingSubmit" class="btn btn-outline-primary" onclick="ratingClicked()" type="button" style="width: 40%;">Submit</button>
+                  </div>
+
+                </div>
+              </div>
+  
+              
+
+            </div>
+          </div> 
         </div>
         <!-- ******************************************************************************************************** -->
 
@@ -921,6 +955,8 @@
 
         $('#container2').empty();
         $('#container2').append("<button id=\"uselection_btn\" class=\"btn btn-outline-primary\" onclick=\"uselectionClicked()\" type=\"button\">Select</button>");
+
+        document.getElementById('rating_drawer').style.visibility='visible';
       }
       function render(dotSrc){
         console.log('DOT source =',dotSrc);
@@ -941,13 +977,18 @@
         });
       }
       function uselectionClicked(){
+
         console.log("<<ID>>: ", id);
+        console.log("<<curRate>>: ", curRate);
+
+        // *******if user hasn't made selection, post an alert
+          
         
         // *********** pass user selection ***********
         // var intervalid2 = setInterval(passSelection, 500);
         // function passSelection(){
 
-        var postdata_id = {'selectionID': id};
+        var postdata_id = {'selectionID': id, 'userRating': curRate};
 
         $.ajax({
           type: 'SELECTIONMADE',
@@ -967,6 +1008,36 @@
         // }
         // ******************************************
       }
+      var curID=-1;
+      var curRate=-1;
+      function myRating(elem){
+        console.log("elem id:", elem.id);
+        curID = elem.id.slice(-1);
+
+        for(var i=1;i<=5;i++){
+          starID = 'star'+i;
+          if(i<=curID){
+            document.getElementById(starID).style.color= "orange";
+          }
+          else{
+            document.getElementById(starID).style.color= "lightslategray";
+          }
+        }
+      }
+
+      function clearClicked(){
+        curID=-1;
+        for(var i=1;i<=5;i++){
+          starID = 'star'+i;
+          document.getElementById(starID).style.color= "lightslategray";
+        }
+      }
+      function ratingClicked(){
+        console.log("curID:", curID);
+        curRate=curID;
+        console.log("curRate:", curRate);
+      }
+      
 
       function exp_summary(summaryData, exp_data, exp_len, graphData){ //(exp_len, recallData, precisionData)
         // join graph + scatter plot
