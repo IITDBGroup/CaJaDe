@@ -476,23 +476,33 @@ class Join_Graph_Generator:
                         # node_cond_list.append(node_cond)
                         return pt_cond, node_cond, node
         return pt_cond, node_cond, node
-    def ratingDBavg(self, pt_cond, node_cond, node):
-        #print("check::::::", pt_cond, node_cond, node)
-        rconn = psycopg2.connect(database='rating', 
-                                    user='juseung', 
-                                    password='1234', 
-                                    port='5432', 
-                                    host='127.0.0.1')
-        cur = rconn.cursor()
+    def ratingDBavg(self, v_jgs): #pt_cond, node_cond, node):
+        return_avg = []
 
-        getAVGquery = F"""
-        SELECT ROUND(AVG(urating)::numeric,2)::TEXT
-        FROM (SELECT * FROM myrating.mytable 
-        WHERE node='{node}' AND node_cond='{node_cond}' AND pt_cond='{pt_cond}')
-        AS new;
-        """
+        for i in range(0, len(v_jgs)):
+            pt_cond, node_cond, node = self.parsingCond(repr(v_jgs[i]), 0)
+            print("check::::::", pt_cond, node_cond, node)
+        
+            rconn = psycopg2.connect(database='rating', 
+                                        user='juseung', 
+                                        password='1234', 
+                                        port='5432', 
+                                        host='127.0.0.1')
+            cur = rconn.cursor()
 
-        print('getAVGquery: ',getAVGquery)
+            getAVGquery = F"""
+                        SELECT ROUND(AVG(urating)::numeric,2)::TEXT
+                        FROM (SELECT * FROM myrating.mytable 
+                        WHERE node='{node}' AND node_cond='{node_cond}' AND pt_cond='{pt_cond}')
+                        AS new;
+                        """
+
+            print('getAVGquery: ',getAVGquery)
+
+            cur.execute(getAVGquery)
+            getAVG = cur.fetchall()
+            print("check2::::: ", getAVG[0][0])
+            return_avg.append(getAVG[0][0])
         # SELECT AVG(urating)
         # FROM (SELECT * FROM myrating.mytable 
         # WHERE node='{node}' and node_cond='{node_cond}' and pt_cond='{pt_cond}')
@@ -502,10 +512,12 @@ class Join_Graph_Generator:
         # FROM myrating.mytable
         # WHERE node='{node}' and node_cond='{node_cond}' and pt_cond='{pt_cond}';
         # """
-        cur.execute(getAVGquery)
-        getAVG = cur.fetchall()
+
+        # cur.execute(getAVGquery)
+        # getAVG = cur.fetchall()
         #print("check2::::: ", getAVG[0][0])
-        return getAVG
+        print("return_avg::::: ", return_avg)
+        return return_avg
 
     def ratingDB(self,usel, getUserRating): ###################
         print("******userselection: ", usel)
@@ -866,24 +878,22 @@ class Join_Graph_Generator:
                         generated_jg_set.clear()
                         print("<<Go back to Previous Step>>")
                     else:
-                        #####Recommendation
-                        # recomm = self.getRecomm(valid_jgs) #, connInfo, statstrackerInfo)
-                        #####
-
+                        ##### Recommendation #####
                         recomm = self.getRecomm(valid_jgs, cur_edge,0.1)
                         print("recommendation>>>>> ", recomm)
+
+                        ##### Get rate avg #####
+                        getRavg = self.ratingDBavg(valid_jgs)
                         
                         ########## get user selection and rating ##########
-                        ####need to pass rate average
-                        uSelection, uRating = appUselection(valid_jgs,cur_edge, recomm)
+                        uSelection, uRating = appUselection(valid_jgs,cur_edge, recomm, getRavg)
                         print("uselection, uRating:******: ", uSelection,"*****",uRating)
 
                         for i in range(0, len(valid_jgs)):
-                            print("[",i+1,"]",repr(valid_jgs[i]))
-                            # parsing
-                            pt_cond, node_cond, node = self.parsingCond(repr(valid_jgs[i]), 0)
-                            # get avg and print avg
-                            print("rate avg: ", self.ratingDBavg(pt_cond, node_cond, node)[0][0])
+                            print("[",i+1,"]",repr(valid_jgs[i]))                            
+                            # pt_cond, node_cond, node = self.parsingCond(repr(valid_jgs[i]), 0) # parsing                            
+                            # print("rate avg: ", self.ratingDBavg(pt_cond, node_cond, node)[0][0])# get avg and print avg
+
                         # iteration = np.arange(0.1, 0.35, 0.05)
                         # for j in iteration:
                         #     f1_sample_rate = round(j,5)

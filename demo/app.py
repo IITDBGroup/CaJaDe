@@ -524,7 +524,7 @@ def start_explanation():
 # vCheck = False
 global selection
 
-def getUserSelection(valid_jgs, cur_edge, rc):
+def getUserSelection(valid_jgs, cur_edge, rc, rAvg):
     global validJGlist
     global vgList
     global selection
@@ -553,8 +553,8 @@ def getUserSelection(valid_jgs, cur_edge, rc):
         #getNodesEdges(repr(i))
 
         insertJG = F"""
-        INSERT INTO uselection(jg, step, slt, recomm, urating)
-        VALUES('{repr(i)}', '{cur_edge}', '{idx}', '{rc[idx-1]}', 0);
+        INSERT INTO uselection(jg, step, slt, recomm, urating, ravg)
+        VALUES('{repr(i)}', '{cur_edge}', '{idx}', '{rc[idx-1]}', 0, '{rAvg[idx-1]}');
         """
         cur.execute(insertJG)
         uconn.commit()
@@ -659,17 +659,20 @@ def user_selection():
                             port='5432', 
                             host='127.0.0.1')
         cur = uconn.cursor()
-        retrieve_JG = "SELECT jg, recomm from uselection where slt>0"
+        retrieve_JG = "SELECT jg, recomm, ravg from uselection where slt>0"
         cur.execute(retrieve_JG)
 
         ulist = cur.fetchall()
         print("ulist: ",ulist)
 
         rc_list = []
+        ravg_list = []
+
         for i in range(0, len(ulist)):
             print(ulist[i][0])
             getNodesEdges(ulist[i][0])
             rc_list.append(ulist[i][1])
+            ravg_list.append(ulist[i][2])
         
         # for i in ulist:
         #     getNodesEdges(i)
@@ -683,7 +686,7 @@ def user_selection():
         cur.close()
         uconn.close()
         print('validJGlist>>>>>>: ', validJGlist)
-        return jsonify(result="success-userSelection", isrunning=alive, result2=validJGlist, result3=rc_list)
+        return jsonify(result="success-userSelection", isrunning=alive, result2=validJGlist, result3=rc_list, result4=ravg_list)
     else:
         return jsonify(result="success-userSelection", isrunning=alive, result2='null')
 #############################################

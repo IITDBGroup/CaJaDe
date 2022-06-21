@@ -869,9 +869,11 @@
 
               uSelectionList = data.result2;
               recommList = data.result3;
+              rateAvgList = data.result4;
 
               console.log("uSelectionList: ", uSelectionList);
-              show_uSelection(uSelectionList,recommList);
+              console.log("rateAvgList: ", rateAvgList);
+              show_uSelection(uSelectionList,recommList,rateAvgList);
               // d3.select("#uSelection_table").graphviz().renderDot('digraph  {a -> b}');
 
               // uSelection_table
@@ -889,7 +891,7 @@
 
 
       // var graphviz;
-      function show_uSelection(usList,recommList){
+      function show_uSelection(usList,recommList,rateAvgList){
         $("#uSelection_table").empty();
         
         
@@ -903,8 +905,8 @@
           var nodeDict = {}
           dotSrc += `\nsubgraph cluster_`+i+` {\n
             label = `;
-          dotSrc += `"Recommendation: `+recommList[i-1]+`";\n
-          node [style=filled];\n`;
+          dotSrc += `"Recommendation: `+recommList[i-1]+`\nUser Rating Avg: `+rateAvgList[i-1]+`";\n
+                    node [style=filled];\n`;
             
           // digraph G`+i+` {\n
           // graph [label="user selection" labelloc="t"]\n
