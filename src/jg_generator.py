@@ -480,6 +480,7 @@ class Join_Graph_Generator:
         return_avg = []
 
         for i in range(0, len(v_jgs)):
+            print(">>>>>>>>>",repr(v_jgs[i]))
             pt_cond, node_cond, node = self.parsingCond(repr(v_jgs[i]), 0)
             print("check::::::", pt_cond, node_cond, node)
         
@@ -502,7 +503,11 @@ class Join_Graph_Generator:
             cur.execute(getAVGquery)
             getAVG = cur.fetchall()
             print("check2::::: ", getAVG[0][0])
-            return_avg.append(getAVG[0][0])
+            if getAVG[0][0]:
+                return_avg.append(getAVG[0][0])
+            else:
+                return_avg.append(-1)
+                
         # SELECT AVG(urating)
         # FROM (SELECT * FROM myrating.mytable 
         # WHERE node='{node}' and node_cond='{node_cond}' and pt_cond='{pt_cond}')
@@ -634,7 +639,7 @@ class Join_Graph_Generator:
                                     password='1234', 
                                     port='5432', 
                                     host='127.0.0.1')
-        cur = fconn.cursor()
+        fcur = fconn.cursor()
 
         if(self.exclude_high_cost_jg_0==False):
             for n in valid_result:
@@ -700,7 +705,7 @@ class Join_Graph_Generator:
                     INSERT INTO f1sample(f1calrate, f1avg, jg)
                     VALUES('{f1_sample_rate}', '{recomm_val}', '{vr}');
                 """
-                cur.execute(insertF1rateQ)
+                fcur.execute(insertF1rateQ)
                 fconn.commit()
         else:
             valid_result = [v for v in valid_result if not v.intermediate]
@@ -770,10 +775,10 @@ class Join_Graph_Generator:
                     INSERT INTO f1sample(f1calrate, f1avg, jg)
                     VALUES('{f1_sample_rate}', '{recomm_val}', '{n}');
                 """
-                cur.execute(insertF1rateQ)
+                fcur.execute(insertF1rateQ)
                 fconn.commit()
         
-        cur.close()
+        fcur.close()
         fconn.close()
 
         return recomm_result
@@ -878,12 +883,16 @@ class Join_Graph_Generator:
                         generated_jg_set.clear()
                         print("<<Go back to Previous Step>>")
                     else:
+                        print("*************************************************")
+                        print(valid_jgs)
+                        ##### Get rate avg #####
+                        getRavg = self.ratingDBavg(valid_jgs)
+                        
                         ##### Recommendation #####
                         recomm = self.getRecomm(valid_jgs, cur_edge,0.1)
                         print("recommendation>>>>> ", recomm)
 
-                        ##### Get rate avg #####
-                        getRavg = self.ratingDBavg(valid_jgs)
+                        
                         
                         ########## get user selection and rating ##########
                         uSelection, uRating = appUselection(valid_jgs,cur_edge, recomm, getRavg)

@@ -905,7 +905,13 @@
           var nodeDict = {}
           dotSrc += `\nsubgraph cluster_`+i+` {\n
             label = `;
-          dotSrc += `"Recommendation: `+recommList[i-1]+`\nUser Rating Avg: `+rateAvgList[i-1]+`";\n
+          if(rateAvgList[i-1]==-1){
+            var ravg = 'N/A';
+          }
+          else{
+            var ravg = rateAvgList[i-1];
+          }
+          dotSrc += `"Recommendation: `+recommList[i-1]+`\nUser Rating Avg: `+ravg+`";\n
                     node [style=filled];\n`;
             
           // digraph G`+i+` {\n
@@ -984,32 +990,40 @@
         console.log("<<curRate>>: ", curRate);
 
         // *******if user hasn't made selection, post an alert
-          
-        
-        // *********** pass user selection ***********
-        // var intervalid2 = setInterval(passSelection, 500);
-        // function passSelection(){
+        if(id==-1){
+          alert('Not selected');
+        }
+        else{
+          //reset the rating_drawer and make it unvisible
+          document.getElementById('rating_drawer').style.visibility='hidden';
+          clearClicked();
 
-        var postdata_id = {'selectionID': id, 'userRating': curRate};
+          // *********** pass user selection ***********
+          // var intervalid2 = setInterval(passSelection, 500);
+          // function passSelection(){
 
-        $.ajax({
-          type: 'SELECTIONMADE',
-          url: '{{url_for("selection_made")}}',
-          data: JSON.stringify(postdata_id),
-          dataType: 'JSON',
-          contentType: "application/json",
-          success: function(data){
-            console.log("setinterval>>>>>>>>>");
-            intervalid = setInterval(ajaxSelection, 500);
-          },
-          error: function(request, status, error){
-            alert('ajax failed')
-            alert(error);
-          }
-        })
-        // }
-        // ******************************************
+          var postdata_id = {'selectionID': id, 'userRating': curRate};
+
+          $.ajax({
+            type: 'SELECTIONMADE',
+            url: '{{url_for("selection_made")}}',
+            data: JSON.stringify(postdata_id),
+            dataType: 'JSON',
+            contentType: "application/json",
+            success: function(data){
+              console.log("setinterval>>>>>>>>>");
+              intervalid = setInterval(ajaxSelection, 500);
+            },
+            error: function(request, status, error){
+              alert('ajax failed')
+              alert(error);
+            }
+          })
+          // }
+          // ******************************************
+        }
       }
+
       var curID=-1;
       var curRate=-1;
       function myRating(elem){
