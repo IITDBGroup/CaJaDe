@@ -168,18 +168,17 @@
             </div>
 
           </div>
-          <div id="container" style="float: left; width:30%; text-align: right;"></div>
+          <div id="container" style="float: right; width:30%; text-align: right;"></div>
         </div>
         <!-- ******************************************************************************************************** -->
 
         <!-- **************************************** User Selection Results **************************************** -->
         <div clss="row" style="padding-bottom: 5%;">
           <div id="uSelection_table" style="overflow: auto; height: 300px;"></div>
-          <div id="container2" style="float: left; width:30%; text-align: right;">
-          
-          </div>
+        
 
-          <div id="rating_drawer" style="width: 70%; overflow: auto; visibility: hidden;">
+          
+          <div id="rating_drawer" style="width: 40%; overflow: auto; visibility: hidden; float: left;">
             <div class="accordion-item">
               <h2 class="accordion-header" id="headingTwo">
                 <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="true" aria-controls="collapseOne">
@@ -199,14 +198,15 @@
                     <button id="ratingClear" class="btn btn-outline-primary" onclick="clearClicked()" type="button" style="width: 40%;">Clear</button>
                     <button id="ratingSubmit" class="btn btn-outline-primary" onclick="ratingClicked()" type="button" style="width: 40%;">Submit</button>
                   </div>
-
                 </div>
-              </div>
-  
-              
-
+              </div> 
             </div>
-          </div> 
+          </div>
+          
+          <div id="container2" style="float: right; width:20%; text-align: right;"></div>
+          <div id="container3" style="float: right; width:20%; text-align: right;"></div>
+          <div id="container4" style="float: right; width:20%; text-align: right;"></div>        
+
         </div>
         <!-- ******************************************************************************************************** -->
 
@@ -852,6 +852,8 @@
         }
 
       }
+      var curStep = -1;
+
       function ajaxSelection() {
         console.log("@@@@@@@@@@@@@@@@@@@@@");
         $.ajax({
@@ -861,7 +863,7 @@
           success: function(data){
             running = data.isrunning;
             console.log(data.result2);
-            if(data.result2.length!=0){ // data.result2!='null'
+            if(data.result2!='null'){ //  data.result2.length!=0
               console.log("success");
               console.log(data.result3);
               clearInterval(intervalid);
@@ -870,6 +872,7 @@
               uSelectionList = data.result2;
               recommList = data.result3;
               rateAvgList = data.result4;
+              curStep = data.result5;
 
               console.log("uSelectionList: ", uSelectionList);
               console.log("rateAvgList: ", rateAvgList);
@@ -963,6 +966,10 @@
 
         $('#container2').empty();
         $('#container2').append("<button id=\"uselection_btn\" class=\"btn btn-outline-primary\" onclick=\"uselectionClicked()\" type=\"button\">Select</button>");
+        $('#container3').empty();
+        $('#container3').append("<button id=\"back_btn\" class=\"btn btn-outline-primary\" onclick=\"backbtnClicked()\" type=\"button\">Back</button>");
+        $('#container4').empty();
+        $('#container4').append("<button id=\"stop_btn\" class=\"btn btn-outline-primary\" onclick=\"stopbtnClicked()\" type=\"button\">Stop</button>");
 
         document.getElementById('rating_drawer').style.visibility='visible';
       }
@@ -985,7 +992,6 @@
         });
       }
       function uselectionClicked(){
-
         console.log("<<ID>>: ", id);
         console.log("<<curRate>>: ", curRate);
 
@@ -1053,6 +1059,67 @@
         curRate=curID;
         console.log("curRate:", curRate);
       }
+      function backbtnClicked(){
+        console.log("back btn clicked>>>>>>>");
+        console.log("<<ID>>: ", id);
+        console.log("<<curRate>>: ", curRate);
+        
+        if(curStep==0){
+          // if current step(edge) is 0, display alert
+          alert('Can\'t Go back to Previous Step');
+        }
+        else {
+          document.getElementById('rating_drawer').style.visibility='hidden';
+          clearClicked();
+          var postdata_id = {'selectionID': id, 'userRating': curRate};
+
+          $.ajax({
+            type: 'SELECTIONMADE',
+            url: '{{url_for("selection_made")}}',
+            data: JSON.stringify(postdata_id),
+            dataType: 'JSON',
+            contentType: "application/json",
+            success: function(data){
+              alert('Go back to Previous Step');
+              console.log("setinterval>>>>>>>>>");
+              intervalid = setInterval(ajaxSelection, 500);
+            },
+            error: function(request, status, error){
+              alert('ajax failed')
+              alert(error);
+            }
+          })
+        }        
+      }
+      function stopbtnClicked(){
+        console.log("stop btn clicked>>>>>>>");
+        console.log("<<ID>>: ", id);
+        console.log("<<curRate>>: ", curRate);
+
+        document.getElementById('rating_drawer').style.visibility='hidden';
+        clearClicked();
+        id=0;
+        var postdata_id = {'selectionID': id, 'userRating': curRate};
+
+        $.ajax({
+          type: 'SELECTIONMADE',
+          url: '{{url_for("selection_made")}}',
+          data: JSON.stringify(postdata_id),
+          dataType: 'JSON',
+          contentType: "application/json",
+          success: function(data){
+            alert('Stop User seleciton');
+            // console.log("setinterval>>>>>>>>>");
+            // intervalid = setInterval(ajaxSelection, 500);
+          },
+          error: function(request, status, error){
+            alert('ajax failed')
+            alert(error);
+          }
+        })
+
+      }
+      //////////////////////////////////////////////////////////////////////////////////////////
       
 
       function exp_summary(summaryData, exp_data, exp_len, graphData){ //(exp_len, recallData, precisionData)

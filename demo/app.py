@@ -553,8 +553,8 @@ def getUserSelection(valid_jgs, cur_edge, rc, rAvg):
         #getNodesEdges(repr(i))
 
         insertJG = F"""
-        INSERT INTO uselection(jg, step, slt, recomm, urating, ravg)
-        VALUES('{repr(i)}', '{cur_edge}', '{idx}', '{rc[idx-1]}', 0, '{rAvg[idx-1]}');
+        INSERT INTO uselection(jg, step, slt, recomm, urating, ravg, back)
+        VALUES('{repr(i)}', '{cur_edge}', '{idx}', '{rc[idx-1]}', 0, '{rAvg[idx-1]}', 0);
         """
         cur.execute(insertJG)
         uconn.commit()
@@ -586,6 +586,9 @@ def getUserSelection(valid_jgs, cur_edge, rc, rAvg):
     ccur = checkconn.cursor()
     checkJG = "SELECT slt, urating from uselection WHERE slt<0" #"SELECT slt from uselection WHERE slt<0"
 
+    ccur1 = checkconn.cursor()
+    backCheck = "SELECT back from uselection WHERE slt=0"
+
     while True:
         # check if there is positive value in slt(which indicates user selction is stored)
         # then if exists, get the value and pass it to jg_generator.py
@@ -597,6 +600,23 @@ def getUserSelection(valid_jgs, cur_edge, rc, rAvg):
         #u_selection = ccur.fetchone()
         u_selection_tmp = ccur.fetchall()
         #print('u_selection_tmp>>>>>>>>>: ', u_selection_tmp)
+
+        ccur1.execute(backCheck)
+        back_check = ccur1.fetchone()
+
+        if (back_check):
+            checkconn.commit()        
+            ccur.close()
+
+            # delete current step results
+            ccur3 = checkconn.cursor()
+            delete_jg = "DELETE from uselection WHERE slt>=0"
+            ccur3.execute(delete_jg)
+            checkconn.commit()  
+            ccur3.close()
+            checkconn.close()
+
+            return back_check[0], -1 #-1, -1
 
 
         if (u_selection_tmp):
@@ -646,25 +666,22 @@ def user_selection():
     global vCheck
     vCheck = True
     alive = cthread.is_alive()
-    if vCheck == True:
-        print('vCheck: ', vCheck)
-        vCheck = False
-        print('validJGlist3: ', validJGlist)
 
-        print('vgList: ', vgList)
-
-        uconn = pg2.connect(database='uselection', 
+    ###########################
+    uconn = pg2.connect(database='uselection', 
                             user='juseung', 
                             password='1234', 
                             port='5432', 
                             host='127.0.0.1')
-        cur = uconn.cursor()
-        retrieve_JG = "SELECT jg, recomm, ravg from uselection where slt>0"
-        cur.execute(retrieve_JG)
+    cur = uconn.cursor()
+    retrieve_JG = "SELECT jg, recomm, ravg, step from uselection where slt>0"
+    #while True:
+    cur.execute(retrieve_JG)
+    ulist = cur.fetchall()
+    print(">>>>>>ulist: ",ulist)
 
-        ulist = cur.fetchall()
-        print("ulist: ",ulist)
-
+    if (ulist):
+        print(">>>>>>ulist_2: ",ulist)
         rc_list = []
         ravg_list = []
 
@@ -673,22 +690,71 @@ def user_selection():
             getNodesEdges(ulist[i][0])
             rc_list.append(ulist[i][1])
             ravg_list.append(ulist[i][2])
-        
-        # for i in ulist:
-        #     getNodesEdges(i)
-
-        # cur_2 = uconn.cursor()
-        # ex_JG = "SELECT jg, recomm from uselection where slt>0"
-        # cur_2.execute(ex_JG)
-        # exlist = cur_2.fetchall()
+        print("cur_step>>>>>>>>>>>>>>>>>>", ulist[0])
+        print("cur_step>>>>>>>>>>>>>>>>>>", ulist[0][3])
+        cur_step = ulist[0][3]
+        print("cur_step>>>>>>>>>>>>>>>>>>", cur_step)
 
         uconn.commit()
         cur.close()
         uconn.close()
         print('validJGlist>>>>>>: ', validJGlist)
-        return jsonify(result="success-userSelection", isrunning=alive, result2=validJGlist, result3=rc_list, result4=ravg_list)
+        return jsonify(result="success-userSelection", isrunning=alive, result2=validJGlist, result3=rc_list, result4=ravg_list, result5=cur_step)
     else:
         return jsonify(result="success-userSelection", isrunning=alive, result2='null')
+
+
+
+
+
+
+    ############################
+    # if vCheck == True:
+    #     print('vCheck: ', vCheck)
+    #     vCheck = False
+    #     print('validJGlist3: ', validJGlist)
+
+    #     print('vgList: ', vgList)
+
+    #     uconn = pg2.connect(database='uselection', 
+    #                         user='juseung', 
+    #                         password='1234', 
+    #                         port='5432', 
+    #                         host='127.0.0.1')
+    #     cur = uconn.cursor()
+    #     retrieve_JG = "SELECT jg, recomm, ravg, step from uselection where slt>0"
+    #     cur.execute(retrieve_JG)
+
+    #     ulist = cur.fetchall()
+    #     print("ulist: ",ulist)
+
+    #     rc_list = []
+    #     ravg_list = []
+
+    #     for i in range(0, len(ulist)):
+    #         print(ulist[i][0])
+    #         getNodesEdges(ulist[i][0])
+    #         rc_list.append(ulist[i][1])
+    #         ravg_list.append(ulist[i][2])
+    #     print("cur_step>>>>>>>>>>>>>>>>>>", ulist[0])
+    #     print("cur_step>>>>>>>>>>>>>>>>>>", ulist[0][3])
+    #     cur_step = ulist[0][3]
+    #     print("cur_step>>>>>>>>>>>>>>>>>>", cur_step)
+    #     # for i in ulist:
+    #     #     getNodesEdges(i)
+
+    #     # cur_2 = uconn.cursor()
+    #     # ex_JG = "SELECT jg, recomm from uselection where slt>0"
+    #     # cur_2.execute(ex_JG)
+    #     # exlist = cur_2.fetchall()
+
+    #     uconn.commit()
+    #     cur.close()
+    #     uconn.close()
+    #     print('validJGlist>>>>>>: ', validJGlist)
+    #     return jsonify(result="success-userSelection", isrunning=alive, result2=validJGlist, result3=rc_list, result4=ravg_list, result5=cur_step)
+    # else:
+    #     return jsonify(result="success-userSelection", isrunning=alive, result2='null')
 #############################################
 
 #############################################
@@ -759,10 +825,8 @@ def selection_made():
     uRate = data["userRating"]
 
     print("rating: ", uRate)
-    ####if rating is not -1(if user rating exists)
-    ####pass rating data and save it to DB
 
-    print("id:", id)
+    print("id:", id)   
 
     sconn = pg2.connect(database='uselection', 
                         user='juseung', 
@@ -770,10 +834,21 @@ def selection_made():
                         port='5432', 
                         host='127.0.0.1')
     cur = sconn.cursor()
-    updateJG = F"""
-        UPDATE uselection SET slt= CASE WHEN slt!='{id}' THEN 0 ELSE '-{id}' END
-                            , urating= '{uRate}' WHERE slt='{id}';
-        """
+
+    # if back button clicked
+    if id==-1:
+        updateJG = F"""
+            UPDATE uselection SET back='{id}', slt=0 WHERE slt>=0;
+            """
+    elif id==0:
+        updateJG = F"""
+            UPDATE uselection SET back='{id}', slt=0 WHERE slt>=0;
+            """
+    else:
+        updateJG = F"""
+            UPDATE uselection SET slt= CASE WHEN slt!='{id}' THEN 0 ELSE '-{id}' END
+                                , urating= '{uRate}' WHERE slt='{id}';
+            """
     
     cur.execute(updateJG)
     sconn.commit()
