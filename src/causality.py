@@ -17,6 +17,7 @@ class Causality:
 
     def matching_patterns(self, patterns, dummy_patterns, user_specified_attrs, conn):
         cur = conn.cursor()
+        
         jg_name_list = []
         rel_attr_dict = {}
 
