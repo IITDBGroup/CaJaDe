@@ -494,8 +494,6 @@ def run_experiment(conn=None,
         pgen.stats.resetTimer('per_jg_timer')
 
     causality = Causality()
-    #causality.check_causality(pgen.pattern_pool, 'blood_pres')
-    # causality.is_treatment(pgen.pattern_pool, user_questions, conn)
     causality.matching_patterns(pgen.pattern_pool, pgen.dummy_pattern_pool, user_specified_attrs, conn)
 
     if(lca_eval_mode):
