@@ -554,7 +554,7 @@ def getUserSelection(valid_jgs, cur_edge, rc, rAvg):
 
         insertJG = F"""
         INSERT INTO uselection(jg, step, slt, recomm, urating, ravg, back)
-        VALUES('{repr(i)}', '{cur_edge}', '{idx}', '{rc[idx-1]}', 0, '{rAvg[idx-1]}', 0);
+        VALUES('{repr(i)}', '{cur_edge}', '{idx}', '{rc[idx-1]}', 0, '{rAvg[idx-1]}', 1);
         """
         cur.execute(insertJG)
         uconn.commit()
@@ -587,7 +587,11 @@ def getUserSelection(valid_jgs, cur_edge, rc, rAvg):
     checkJG = "SELECT slt, urating from uselection WHERE slt<0" #"SELECT slt from uselection WHERE slt<0"
 
     ccur1 = checkconn.cursor()
-    backCheck = "SELECT back from uselection WHERE slt=0"
+    ccur_s = checkconn.cursor()
+    #backCheck = "SELECT back from uselection WHERE slt=0"
+    #backCheck = "SELECT COUNT(back) from uselection WHERE slt=0"
+    backCheck = "SELECT COUNT(back) from uselection WHERE back=-1"
+    stopCheck = "SELECT COUNT(back) from uselection WHERE back=0"
 
     while True:
         # check if there is positive value in slt(which indicates user selction is stored)
@@ -603,9 +607,15 @@ def getUserSelection(valid_jgs, cur_edge, rc, rAvg):
 
         ccur1.execute(backCheck)
         back_check = ccur1.fetchone()
-
-        if (back_check):
-            checkconn.commit()        
+        #back_check = ccur1.fetchall()
+        #print(">>>>>>>>>back_check: ", back_check)
+        #print(">>>>>>>>>back_check2: ", back_check[0])
+        if (back_check[0]!=0):
+            print(">>>>>>>>>back_check3: ", back_check[0])
+            print(ccur1.fetchall())
+            checkconn.commit()
+            ccur1.close()
+            ccur_s.close()       
             ccur.close()
 
             # delete current step results
@@ -615,8 +625,25 @@ def getUserSelection(valid_jgs, cur_edge, rc, rAvg):
             checkconn.commit()  
             ccur3.close()
             checkconn.close()
+            print(">>>>>>>>>BACK")
+            #return back_check[0], -1 #-1, -1
+            u_selection_rt = -1 #back_check[0]
+            u_rating = -1
+            break
 
-            return back_check[0], -1 #-1, -1
+        ccur_s.execute(stopCheck)
+        stop_check = ccur_s.fetchone()
+        if (stop_check[0]!=0):
+            print(">>>>>>>>>back_check3: ", back_check[0])
+            print(ccur1.fetchall())
+            checkconn.commit()
+            ccur1.close()
+            ccur_s.close()         
+            ccur.close()
+
+            u_selection_rt = 0 #back_check[0]
+            u_rating = -1
+            break
 
 
         if (u_selection_tmp):
@@ -624,6 +651,7 @@ def getUserSelection(valid_jgs, cur_edge, rc, rAvg):
 
             u_selection = u_selection_tmp[0]
             print('u_selection>>>>>>>>>: ', u_selection)
+            u_selection_rt = -(u_selection[0])
             u_rating = u_selection_tmp[0][1]
             print('u_rating>>>>>>>>>: ', u_rating)
 
@@ -636,8 +664,11 @@ def getUserSelection(valid_jgs, cur_edge, rc, rAvg):
 
             # checkconn.commit()        
             # ccur.close()
-            checkconn.commit()  
+            checkconn.commit()
+            ccur1.close()   
             ccur2.close()
+            ccur.close()
+            ccur_s.close()  
             checkconn.close()
             break
 
@@ -652,8 +683,8 @@ def getUserSelection(valid_jgs, cur_edge, rc, rAvg):
             
 
     #u_selection = int(input()) ###########
-    print("u_selection:******: ", u_selection)
-    return -(u_selection[0]), u_rating
+    print("u_selection_rt:******: ", u_selection_rt)
+    return u_selection_rt, u_rating
 
 #############################################
 @app.route('/user_selection',methods=['SELECTION'])
@@ -886,7 +917,7 @@ def retrieve_explanation():
         cursor.execute(unique_jg_q)
         processed_jg_cnt = int(cursor.fetchone()[0])
 
-        total_jgs_q = "select valid_jgs from " + resultSchemaName + "_gui.total_jgs";
+        total_jgs_q = "select valid_jgs from " + resultSchemaName + "_gui.total_jgs"
         cursor.execute(total_jgs_q)
         total_jgs_cnt = int(cursor.fetchone()[0])
 

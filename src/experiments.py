@@ -689,6 +689,8 @@ def run_experiment(conn=None,
 
     # logger.debug('generate new valid_jgs')
     valid_result = jgg.Generate_JGs(pt_rels=pt_relations, num_edges=maximum_edges, customize=False, filtering_tmp=filtering) #, conn, statstracker)
+    logger.debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    logger.debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
     logger.debug(valid_result) 
  
     # logger.debug(f"Before filtering any, we have {len(valid_result)} valid jgs \n")
@@ -904,6 +906,8 @@ def run_experiment(conn=None,
       i=i+1
       print(i,")",item)
       
+    logger.debug("!!!!!!")
+    logger.debug(result_schema)
 
     # # collect stats 
     stats_trackers = [jgg.stats, jgm.stats, pgen.stats, statstracker]
