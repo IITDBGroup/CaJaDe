@@ -173,12 +173,15 @@
         <!-- ******************************************************************************************************** -->
 
         <!-- **************************************** User Selection Results **************************************** -->
-        <div clss="row" style="padding-bottom: 5%;">
-          <div id="uSelection_table" style="overflow: auto; height: 300px;"></div>
-        
+        <div clss="row" style="padding-bottom: 5%; padding-top: 5%;">
+          <div id="uSelection_table" style="overflow: auto;"></div>
+        </div>
 
-          
-          <div id="rating_drawer" style="width: 40%; overflow: auto; visibility: hidden; float: left;">
+        <div clss="row" style="padding-bottom: 5%;">
+          <!-- <div id="uSelection_table" style="overflow: auto;"></div>   -->
+          <!-- height: 300px; -->
+                  
+          <div id="rating_drawer" style="width: 49%; overflow: auto; visibility: hidden; float: left;">
             <div class="accordion-item">
               <h2 class="accordion-header" id="headingTwo">
                 <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="true" aria-controls="collapseOne">
@@ -187,7 +190,7 @@
               </h2>
 
               <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample" style="text-align: center;">
-                <div class="accordion-body">
+                <div class="accordion-body" style="text-align: center;">
                   <div class="btn-group">
                       {% for i in range(1,6) %}
                       <button type="button" class="btn btn-link" id="star{{ i }}" onclick="myRating(this)" style="color: lightslategray;"><span class="bi bi-star-fill"></span></button>
@@ -203,9 +206,9 @@
             </div>
           </div>
           
-          <div id="container2" style="float: right; width:20%; text-align: right;"></div>
-          <div id="container3" style="float: right; width:20%; text-align: right;"></div>
-          <div id="container4" style="float: right; width:20%; text-align: right;"></div>
+          <div id="container2" style="float: right; width:17%; text-align: right;"></div>
+          <div id="container3" style="float: right; width:17%; text-align: right;"></div>
+          <div id="container4" style="float: right; width:17%; text-align: right;"></div>
           
           <!-- <div class="row_2" style="margin-bottom: 10%; margin-top: 5%; display: inline;">
             <div id="user_rating_update" style="float: left; width: 45%; text-align: right;"></div>
@@ -920,16 +923,17 @@
       // var graphviz;
       function show_uSelection(usList,recommList,rateAvgList){
         $("#uSelection_table").empty();
+        clickedgraph="";
         
         
         var nodeIdx = 1;
-        var dotSrc = `
-          digraph {\n`;
+        var dotSrc = `digraph {\n
+          bgcolor="transparent"`;
           // graph [label="user selection" labelloc="t"]\n
           // node [style="filled"]\n`;
 
         for(var i=1; i<=usList.length;i++){
-          var nodeDict = {}
+          var nodeDict = {};
           dotSrc += `\nsubgraph cluster_`+i+` {\n
             label = `;
           if(rateAvgList[i-1]==-1){
@@ -938,8 +942,8 @@
           else{
             var ravg = rateAvgList[i-1];
           }
-          dotSrc += `"Recommendation: `+recommList[i-1]+`\nUser Rating Avg: `+ravg+`";\n
-                    node [style=filled];\n`;
+          dotSrc += `"Score: `+recommList[i-1]+`\nUser Rating Avg: `+ravg+`";\n
+                    node [style=filled shape=rectangle];\n`;
             
           // digraph G`+i+` {\n
           // graph [label="user selection" labelloc="t"]\n
@@ -954,7 +958,7 @@
             // dotSrc+= `Node`+i+` [id="`+i+`" label="`+usList[i-1]["nodes"][j]["name"]+`" fillcolor="#1f77b4"]\n`;
             nodeName = 'Node'+nodeIdx;
             nodeLabel = usList[i-1]["nodes"][j]["name"];
-            dotSrc+= nodeName+` [id="`+i+`" label="`+nodeLabel+`" fillcolor="#1f77b4"]\n`;
+            dotSrc+= nodeName+` [id="`+i+`" label="`+nodeLabel+`" tooltip="`+nodeLabel+`" fillcolor="#1f77b4"]\n`;
             // console.log(">>>>>>:", usList[i-1]["nodes"][0]["name"])
             // console.log(">>>>>>:", usList[i-1]["nodes"]["name"])
             // console.log(">>>>>>:", usList[i-1]["nodes"])
@@ -967,7 +971,7 @@
             nodeTarget = usList[i-1]["edges"][k]["target"];
             nodeLabel = usList[i-1]["edges"][k]["cond"].replace(/\"/gi,"");
 
-            dotSrc+= nodeDict[nodeSource]+` -> `+nodeDict[nodeTarget]+` [id="`+i+`" label="" labeltooltip="`+nodeLabel+`" arrowhead=none]\n`;
+            dotSrc+= nodeDict[nodeSource]+` -> `+nodeDict[nodeTarget]+` [id="`+i+`" tooltip="`+nodeLabel+`" arrowhead=none]\n`;
           }
           dotSrc+= `}`;
           // render(dotSrc);
@@ -1004,6 +1008,8 @@
         graphviz.renderDot(dotSrc).on("end", interactive);
       }
       var id = -1;
+      var clickedgraph = "";
+
       function interactive(){
         nodes = d3.selectAll('.node, .edge');
         nodes.on("click", function(){
@@ -1011,10 +1017,63 @@
           var text = d3.select(this).selectAll('text').text();
           id = d3.select(this).attr('id');
           var class1 = d3.select(this).attr('class');
-          console.log('Element id="%s" class="%s" title="%s" text="%s"', id, class1, title, text);
+          
+          if(clickedgraph == ('clust'+id)){
+              clickedgraph = "";
+          }
+          else{
+            d3.selectAll('.cluster polygon').attr("fill", "transparent");
+            d3.select('#clust'+id+' polygon').attr("fill", "#ffd889");
+            clickedgraph = 'clust'+id;
+          }
+
+          console.log('Element id="%s" class="%s" title="%s" text="%s" clickedgraph="%s"', id, class1, title, text, clickedgraph);
 
         });
+        subg = d3.selectAll('.cluster');
+        subg.on("click", function(){
+          console.log("cluster clicked");
+          var cid = d3.select(this).attr('id');
+          console.log('Element id="%s"', cid);
+
+          
+          if(clickedgraph == cid){
+              clickedgraph = "";
+          }
+          else{
+            d3.selectAll('.cluster polygon').attr("fill", "transparent");
+            d3.select('#'+cid+' polygon').attr("fill", "#ffd889");
+            clickedgraph = cid;
+            id = cid.slice(-1);
+            console.log('//// id="%s", clickedgraph:"%s"', id, clickedgraph);
+          }
+
+          // if(clickedgraph == cid){
+          //     d3.select('#'+cid+' polygon').attr("fill", "#transparent");
+          //     clickedgraph = "";
+          // }
+          // else{
+          //   d3.selectAll('.cluster polygon').attr("fill", "transparent");
+          //   d3.select('#'+cid+' polygon').attr("fill", "#ffd889");
+          //   clickedgraph = cid;
+          //   id = cid.slice(-1);
+          //   console.log('//// id="%s", clickedgraph:"%s"', id, clickedgraph);
+          // }
+        }).on("mouseenter", function(){
+          var cid = d3.select(this).attr('id');
+          //console.log('Element id="%s"', id);
+          if(!clickedgraph){
+            d3.select('#'+cid+' polygon').attr("fill", "#ffd889");
+          }          
+        }).on("mouseleave", function(){
+          var cid = d3.select(this).attr('id');
+          //console.log('Element id="%s"', id);
+          if(!clickedgraph){
+            d3.select('#'+cid+' polygon').attr("fill", "transparent");
+          }          
+        });
       }
+
       function uselectionClicked(){
         console.log("<<ID>>: ", id);
         console.log("<<curRate>>: ", curRate);
