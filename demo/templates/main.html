@@ -921,6 +921,28 @@
 
 
       // var graphviz;
+      var text_color_list2 = ['#BEBEBE','#ac92eb', '#4fc1e8', '#a0d568', '#ffce54', '#ed5564', '#FFB6C1', '#CD853F'];
+      var garphviz_dict = {};
+
+      function color_matching_check(name){
+        dict_len = Object.keys(garphviz_dict).length;
+        //if dict is empty -> match with the first color
+        if(dict_len == 0){
+          garphviz_dict[name]=text_color_list2[0];
+        }
+        else{ //not eampty
+          // find if it is already matched in dict
+          if(name in garphviz_dict){
+            return garphviz_dict[name]; 
+          }
+          else{ // -> not matched ->
+            garphviz_dict[name]=text_color_list2[dict_len];
+          }          
+        }
+        console.log(">>>>",garphviz_dict);
+        return garphviz_dict[name];        
+      }
+
       function show_uSelection(usList,recommList,rateAvgList){
         $("#uSelection_table").empty();
         clickedgraph="";
@@ -958,7 +980,10 @@
             // dotSrc+= `Node`+i+` [id="`+i+`" label="`+usList[i-1]["nodes"][j]["name"]+`" fillcolor="#1f77b4"]\n`;
             nodeName = 'Node'+nodeIdx;
             nodeLabel = usList[i-1]["nodes"][j]["name"];
-            dotSrc+= nodeName+` [id="`+i+`" label="`+nodeLabel+`" tooltip="`+nodeLabel+`" fillcolor="#1f77b4"]\n`;
+            nodeColor = color_matching_check(nodeLabel);
+
+            dotSrc+= nodeName+` [id="`+i+`" label="`+nodeLabel+`" tooltip="`+nodeLabel+`" fillcolor="`+nodeColor+`"]\n`;
+            //dotSrc+= nodeName+` [id="`+i+`" label="`+nodeLabel+`" tooltip="`+nodeLabel+`" fillcolor="#1f77b4"]\n`;
             // console.log(">>>>>>:", usList[i-1]["nodes"][0]["name"])
             // console.log(">>>>>>:", usList[i-1]["nodes"]["name"])
             // console.log(">>>>>>:", usList[i-1]["nodes"])
