@@ -982,7 +982,7 @@
             nodeLabel = usList[i-1]["nodes"][j]["name"];
             nodeColor = color_matching_check(nodeLabel);
 
-            dotSrc+= nodeName+` [id="`+i+`" label="`+nodeLabel+`" tooltip="`+nodeLabel+`" fillcolor="`+nodeColor+`"]\n`;
+            dotSrc+= nodeName+` [id="`+i+`" label="`+nodeLabel+`" tooltip="`+nodeLabel+`" fillcolor="`+nodeColor+`" penwidth=3]\n`;
             //dotSrc+= nodeName+` [id="`+i+`" label="`+nodeLabel+`" tooltip="`+nodeLabel+`" fillcolor="#1f77b4"]\n`;
             // console.log(">>>>>>:", usList[i-1]["nodes"][0]["name"])
             // console.log(">>>>>>:", usList[i-1]["nodes"]["name"])
@@ -996,7 +996,7 @@
             nodeTarget = usList[i-1]["edges"][k]["target"];
             nodeLabel = usList[i-1]["edges"][k]["cond"].replace(/\"/gi,"");
 
-            dotSrc+= nodeDict[nodeSource]+` -> `+nodeDict[nodeTarget]+` [id="`+i+`" tooltip="`+nodeLabel+`" arrowhead=none]\n`;
+            dotSrc+= nodeDict[nodeSource]+` -> `+nodeDict[nodeTarget]+` [id="`+i+`" tooltip="`+nodeLabel+`" arrowhead=none penwidth=5]\n`;
           }
           dotSrc+= `}`;
           // render(dotSrc);

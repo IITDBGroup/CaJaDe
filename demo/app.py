@@ -908,11 +908,17 @@ def retrieve_explanation():
     check_schema_q = f"SELECT schema_name FROM information_schema.schemata WHERE schema_name = '{resultSchemaName}';"
     cursor.execute(check_schema_q)
     cur_res = cursor.fetchone()
+    #cur_res = cursor.fetchall()
 
     logger.debug(check_schema_q)
     logger.debug(f"cursor result: {cur_res}")
+
+    get_flag = check_insertion()
+
+    logger.debug(f"insertion complete>>>>{get_flag}")
     
-    if(cur_res):
+    #if(cur_res):
+    if(get_flag):
         unique_jg_q = "select count(distinct jg) from "+resultSchemaName+".topk_patterns_from_top_jgs"
         cursor.execute(unique_jg_q)
         processed_jg_cnt = int(cursor.fetchone()[0])

@@ -563,6 +563,7 @@ def InsertStats(conn, stats_trackers, stats_relation_name, schema, exp_time, exp
   # return stats_trackers
 global conn
 global sample_rate_for_s_tmp
+global insertion_complete
 
 def run_experiment(conn=None,
                    result_schema='demotest',
@@ -599,7 +600,9 @@ def run_experiment(conn=None,
     #                      "e": f1 sample rate evaluation mode: this is to investigate the sample
     #                           rate effect on the accuracy in terms of fscore, dont use this mode
     #                           to measure runtime.
-    
+    global insertion_complete
+    insertion_complete = False
+
     statstracker.params['result_schema'] = "'{}'".format(result_schema)
     statstracker.params['user_query'] = "'{}'".format(user_query[1])
     statstracker.params['user_questions']="'{}'".format(" VS ".join([x.replace("'", '') for x in user_questions]))
@@ -908,6 +911,8 @@ def run_experiment(conn=None,
       
     logger.debug("!!!!!!")
     logger.debug(result_schema)
+    insertion_complete = True
+    logger.debug(f"insertion complete>>>>{insertion_complete}")
 
     # # collect stats 
     stats_trackers = [jgg.stats, jgm.stats, pgen.stats, statstracker]
@@ -925,7 +930,9 @@ def run_experiment(conn=None,
         InsertPatterns(conn=conn, exp_desc=exp_desc, patterns=topk_from_top_jgs, pattern_relation_name='topk_patterns_from_top_jgs', schema=result_schema, exp_time=exp_time, result_type=f1_calculation_type)
     # conn.close()
 
-
+def check_insertion():
+  return insertion_complete
+  
 def drop_jg_views(conn):
     cur = conn.cursor()
     q_get_num_tree_views = """
