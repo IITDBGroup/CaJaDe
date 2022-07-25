@@ -25,7 +25,6 @@ from time import strftime
 from src.causality import Causality
 
 
-
 #####
 ##import app.py
 ###from app import colNum
@@ -339,7 +338,6 @@ def run_experiment(conn=None,
 
       # logger.debug(f"after filtering out intermediate we have {len(valid_result)} valid jgs \n")
 
-
       jgm.stats.startTimer('materialize_jg')
       for n in valid_result:
         cost_estimate, renaming_dict, apt_q = jgm.materialize_jg(n)
@@ -449,6 +447,7 @@ def run_experiment(conn=None,
 
       for n in valid_result:
         # logger.debug(f'we are on join graph number {jg_cnt}')
+        logger.debug(f'This is the renaming dict {n.renaming_dict}')
         # logger.debug(n)
         jg_cnt+=1
         # if(n.cost<=avg_cost_estimate_by_num_edges[n.num_edges]):
@@ -548,6 +547,30 @@ def drop_jg_views(conn):
         cur.execute(q)
         conn.commit()
 
+def ask_for_information():
+    outcome = input('What is the outcome for the provenance?\n')
+    group_by = input('What columns do you want to aggregate?\n')
+    tables = input('What tables do you want to query?\n')
+    where = input('What condition do you want to add?\n')
+
+    user_query = f"""
+    provenance of (select {outcome}, {group_by}
+    from {tables}
+    where {where}
+    group by {group_by}); 
+    """
+
+    return user_query
+
+def create_new_APT(n):
+    # first create the new table from the jg_number
+
+    # after that use the renaming dict, and the mapping_table to summarize the columns.
+        # to do that use the get_rel_attr_dict function from causality to retrieve the mapping from dummy to real values.
+        # once we have the mapping creating a function that creates the mapping from real names to summarization function
+        # after we having the mapping, create the query that will be used to modify the table so the summarization is applied.
+
+
 def main():
 
   parser = argparse.ArgumentParser(description='Running experiments of CaJaDe')
@@ -614,20 +637,28 @@ def main():
   requiredNamed.add_argument('-d','--db_name', metavar="\b", type=str, required=True,
     help='database name (required)')
 
-
+  # user_query = ask_for_information()
+  # logger.debug(user_query)
 
   # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     #####
     ##print("colNum: "+colNum)
     #####
-  user_query = "provenance of (select count(*) as win, s.season_name from team t, game g, season s where t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' group by s.season_name);"
-  # u_query = (user_query, 'gsw wins : 15 vs 12') 
+  user_query = "provenance of (select count(*) as win, s.season_name from team t, game g, season s where t.team_id = g.winner_id and g.season_id = s.season_id and t.team = 'GSW' group by s.season_name);"
+  user_query = "provenance of (select sum(CASE WHEN t.team_id = g.winner_id THEN 1 ELSE 0 END) as win, " \
+               "DATE_PART('month', g.game_date) as month, s.season_name from team t, game g, season s " \
+               "where (t.team_id = g.home_id OR t.team_id = g.away_id) and g.season_id = s.season_id " \
+               "and t.team = 'GSW' group by s.season_name, DATE_PART('month', g.game_date));"
+
+  # u_query = (user_query, 'gsw wins : 15 vs 12')
   u_query = (user_query, 'demo')
-  u_question =["season_name='2015-16'","season_name='2012-13'"]
+  u_question = ["season_name='2015-16'","season_name='2012-13'"]
   user_specified_attrs = [('team','team'),('season','season_name')]
 
+
+
   # user_query = "provenance of (select avg(blood_pres) as blood_press, age from health_info group by age);"
-  # u_query = (user_query, 'gsw wins : 15 vs 12')
+  # # u_query = (user_query, 'gsw wins : 15 vs 12')
   # u_query = (user_query, 'demo')
   # u_question =["age=20.00","age=80.00"]
   # user_specified_attrs = [('health_info','age'),('health_info','blood_pres')]

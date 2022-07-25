@@ -46,7 +46,7 @@ class provenance_getter:
 		code, output = self.gprom_wrapper.runQuery(query)
 		drop_pt_full = "DROP TABLE IF EXISTS pt_full CASCADE;"
 		gen_pt_full_query = output.decode("utf-8")
-		# logger.debug(f'gen_original_pt_query:\n {gen_original_pt_query}')
+		# logger.debug(f'gen_original_pt_query:\n {gen_pt_full_query}')
 		pt_full_table = f"CREATE TABLE pt_full AS {gen_pt_full_query};"
 		self.cur.execute(drop_pt_full)
 		self.cur.execute(pt_full_table)
@@ -127,6 +127,12 @@ class provenance_getter:
 
 		user_prov_part = "ROW_NUMBER() OVER () AS pnumber, 'yes' as is_user"
 		non_user_prov_part = "ROW_NUMBER() OVER () AS pnumber, 'no' as is_user"
+
+		add_col = "ROW_NUMBER() OVER (PARTITION BY season_name, month) AS pnumber, DENSE_RANK() OVER (ORDER BY season_name, month) as is_user"
+
+		logger.debug(f'ATTRIBUTES:{pt_attrs}')
+
+		user_questions = []    # added so we can test 0-point question
 		
 		if(len(user_questions)==1):
 			APT_view = f"""
@@ -143,7 +149,7 @@ class provenance_getter:
 				)
 			)
 			"""
-		else:
+		elif (len(user_questions) == 2):
 			APT_view = f"""
 			CREATE TABLE pt AS 
 			(
@@ -156,6 +162,13 @@ class provenance_getter:
 				SELECT {','.join(pt_attrs)}, {non_user_prov_part} FROM pt_full
 				WHERE {user_questions[1]}
 				)
+			)
+			"""
+		else:
+			APT_view = f"""
+			CREATE TABLE pt AS 
+			(
+				SELECT {','.join(pt_attrs)}, {add_col} FROM pt_full
 			)
 			"""
 

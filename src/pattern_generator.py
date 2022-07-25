@@ -124,7 +124,7 @@ class Pattern_Generator:
         pending_pattern['is_user'] = user_questions_map[pending_pattern['is_user']]
         pending_pattern['user_question_map'] = json.dumps(user_questions_map)
         pending_pattern['pattern_attr_mappings'] = json.dumps(pattern_attr_data_mappings)
-        # logger.debug(pending_pattern)
+
         return pending_pattern
 
     def top_pattern_from_one_jg(self, jg):
@@ -674,7 +674,7 @@ class Pattern_Generator:
                 return pattern, True
 
 
-    def gen_patterns(self, 
+    def gen_patterns(self,
                       jg, 
                       jg_name, 
                       renaming_dict, 
@@ -770,21 +770,21 @@ class Pattern_Generator:
                         """
                         self.cur.execute(create_f1_jg_size)
                     
-                        q_tp_yes = f"""
-                        SELECT COUNT(DISTINCT pnumber)
-                        FROM {jg_name}_fs
-                        WHERE is_user='yes'
-                        """
-                        self.cur.execute(q_tp_yes)
-                        sample_recall_dict['yes'] = int(self.cur.fetchone()[0])
-
-                        q_tp_no = f"""
-                        SELECT COUNT(DISTINCT pnumber)
-                        FROM {jg_name}_fs
-                        WHERE is_user='no'
-                        """
-                        self.cur.execute(q_tp_no)
-                        sample_recall_dict['no'] = int(self.cur.fetchone()[0])
+                        # q_tp_yes = f"""
+                        # SELECT COUNT(DISTINCT pnumber)
+                        # FROM {jg_name}_fs
+                        # WHERE is_user='yes'
+                        # """
+                        # self.cur.execute(q_tp_yes)
+                        # sample_recall_dict['yes'] = int(self.cur.fetchone()[0])
+                        #
+                        # q_tp_no = f"""
+                        # SELECT COUNT(DISTINCT pnumber)
+                        # FROM {jg_name}_fs
+                        # WHERE is_user='no'
+                        # """
+                        # self.cur.execute(q_tp_no)
+                        # sample_recall_dict['no'] = int(self.cur.fetchone()[0])
 
                         self.stats.stopTimer('f1_sample')
 
@@ -815,21 +815,21 @@ class Pattern_Generator:
                     """
                     self.cur.execute(create_f1_jg_size)
                 
-                    q_tp_yes = f"""
-                    SELECT COUNT(DISTINCT pnumber)
-                    FROM {jg_name}_fs
-                    WHERE is_user='yes'
-                    """
-                    self.cur.execute(q_tp_yes)
-                    sample_recall_dict['yes'] = int(self.cur.fetchone()[0])
-
-                    q_tp_no = f"""
-                    SELECT COUNT(DISTINCT pnumber)
-                    FROM {jg_name}_fs
-                    WHERE is_user='no'
-                    """
-                    self.cur.execute(q_tp_no)
-                    sample_recall_dict['no'] = int(self.cur.fetchone()[0])
+                    # q_tp_yes = f"""
+                    # SELECT COUNT(DISTINCT pnumber)
+                    # FROM {jg_name}_fs
+                    # WHERE is_user='yes'
+                    # """
+                    # self.cur.execute(q_tp_yes)
+                    # sample_recall_dict['yes'] = int(self.cur.fetchone()[0])
+                    #
+                    # q_tp_no = f"""
+                    # SELECT COUNT(DISTINCT pnumber)
+                    # FROM {jg_name}_fs
+                    # WHERE is_user='no'
+                    # """
+                    # self.cur.execute(q_tp_no)
+                    # sample_recall_dict['no'] = int(self.cur.fetchone()[0])
 
                     self.stats.stopTimer('f1_sample')
 
@@ -838,21 +838,21 @@ class Pattern_Generator:
 
             original_recall_dict={}
 
-            q_tp_yes = f"""
-            SELECT COUNT(DISTINCT pnumber)
-            FROM {jg_name}
-            WHERE is_user='yes'
-            """
-            self.cur.execute(q_tp_yes)
-            original_recall_dict['yes'] = int(self.cur.fetchone()[0])
-
-            q_tp_no = f"""
-            SELECT COUNT(DISTINCT pnumber)
-            FROM {jg_name}
-            WHERE is_user='no'
-            """
-            self.cur.execute(q_tp_no)
-            original_recall_dict['no'] = int(self.cur.fetchone()[0])
+            # q_tp_yes = f"""
+            # SELECT COUNT(DISTINCT pnumber)
+            # FROM {jg_name}
+            # WHERE is_user='yes'
+            # """
+            # self.cur.execute(q_tp_yes)
+            # original_recall_dict['yes'] = int(self.cur.fetchone()[0])
+            #
+            # q_tp_no = f"""
+            # SELECT COUNT(DISTINCT pnumber)
+            # FROM {jg_name}
+            # WHERE is_user='no'
+            # """
+            # self.cur.execute(q_tp_no)
+            # original_recall_dict['no'] = int(self.cur.fetchone()[0])
 
             recall_dicts['original'] = original_recall_dict
 
@@ -1025,7 +1025,7 @@ class Pattern_Generator:
                 # logger.debug(nominal_pattern_df)
 
                 nominal_pattern_dicts = nominal_pattern_df.to_dict('records')
-                # logger.debug(nominal_pattern_dict_listcts)
+                logger.debug(f'THIS IS THE PATTERN: {nominal_pattern_dicts}')
 
                 nominal_pattern_dict_list = []
 
@@ -1111,21 +1111,21 @@ class Pattern_Generator:
 
                     nom_sample_dict = {}
 
-                    q_tp_yes = f"""
-                    SELECT COUNT(DISTINCT pnumber)
-                    FROM {jg_name}_ws_nom
-                    WHERE is_user='yes'
-                    """
-                    self.cur.execute(q_tp_yes)
-                    nom_sample_dict['yes'] = int(self.cur.fetchone()[0])
-
-                    q_tp_no = f"""
-                    SELECT COUNT(DISTINCT pnumber)
-                    FROM {jg_name}_ws_nom
-                    WHERE is_user='no'
-                    """
-                    self.cur.execute(q_tp_no)
-                    nom_sample_dict['no'] = int(self.cur.fetchone()[0])
+                    # q_tp_yes = f"""
+                    # SELECT COUNT(DISTINCT pnumber)
+                    # FROM {jg_name}_ws_nom
+                    # WHERE is_user='yes'
+                    # """
+                    # self.cur.execute(q_tp_yes)
+                    # nom_sample_dict['yes'] = int(self.cur.fetchone()[0])
+                    #
+                    # q_tp_no = f"""
+                    # SELECT COUNT(DISTINCT pnumber)
+                    # FROM {jg_name}_ws_nom
+                    # WHERE is_user='no'
+                    # """
+                    # self.cur.execute(q_tp_no)
+                    # nom_sample_dict['no'] = int(self.cur.fetchone()[0])
 
 
                     self.weighted_sample_views[jg_name] = {'jg_samples': [], 'ws_index':1, 'nominal_only_recall': nom_sample_dict}
