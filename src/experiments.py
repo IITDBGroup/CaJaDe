@@ -23,6 +23,7 @@ from datetime import datetime
 from time import strftime
 
 from src.causality import Causality
+import pandas
 
 
 #####
@@ -459,9 +460,13 @@ def run_experiment(conn=None,
         jgm.cur.execute(drop_if_exist_jg_view)
         jgm.cur.execute(jg_query_view)
         jgm.stats.stopTimer('materialize_jg')
+
+        create_new_APT(n, conn)  # this function creates the new APT with the summarization functions
+
         apt_size_query = f"SELECT count(*) FROM jg_{n.jg_number}"
         jgm.cur.execute(apt_size_query)
         apt_size = int(jgm.cur.fetchone()[0])
+
         pgen.stats.startTimer('per_jg_timer')
         pgen.gen_patterns(jg=n,
                           jg_name=f"jg_{n.jg_number}", 
@@ -562,13 +567,41 @@ def ask_for_information():
 
     return user_query
 
-def create_new_APT(n):
+def create_new_APT(jg, conn):
+    cur = conn.cursor()
+    rel_dummy_to_attr = {}
+
     # first create the new table from the jg_number
+    drop_new_apt = f"DROP TABLE IF EXISTS summ_jg_{jg.jg_number};"
+    new_apt_query = f"""
+    CREATE TABLE summ_jg_{jg.jg_number} AS
+    SELECT *
+    FROM jg_{jg.jg_number}
+    """
+
+    # cur.execute(drop_new_apt)
+    # cur.execute(new_apt_query)
 
     # after that use the renaming dict, and the mapping_table to summarize the columns.
         # to do that use the get_rel_attr_dict function from causality to retrieve the mapping from dummy to real values.
         # once we have the mapping creating a function that creates the mapping from real names to summarization function
         # after we having the mapping, create the query that will be used to modify the table so the summarization is applied.
+
+    # we get the mapping table values
+    summ_val_q = "select * from mapping_summ"
+    summ_map_val = pandas.read_sql_query(summ_val_q, conn)
+
+    # logger.debug(summ_map_val.loc[summ_map_val['attributes'] == 'salary', 'summ_function'].iloc[0])
+
+    for key, value in jg.renaming_dict.items():
+        if (key == 'max_rel_index' or key == 'max_attr_index' or key == 'dtypes'):
+            continue
+        else:
+            for dummy, attr in renaming_dict[key]['columns'].items():
+                # here we need to check from the summ_map_val dataframe whether the attr value is drop or ntile
+                # if it is drop we drop the column from the table, otherwise we apply the summarization value
+                # To do that create a query for each possibility and keep updating it until the end. Then run the query
+
 
 
 def main():
