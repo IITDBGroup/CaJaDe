@@ -674,6 +674,7 @@ def run_experiment(conn=None,
                                 uquery=user_query[1], 
                                 uq1 = user_questions[0], 
                                 uq2 = user_questions[1],
+                                db = dbname, #####
                                 conn = conn,
                                 uquery0 = user_query[0],
                                 exclude_high_cost_jg_0 = exclude_high_cost_jg[0],

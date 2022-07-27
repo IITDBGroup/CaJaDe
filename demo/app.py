@@ -493,6 +493,8 @@ def start_explanation():
                                     'gui': True,
                                     'filtering': filteringList
                                     })
+    globals()['cthread2'] = threading.Thread(target=run_experiment, 
+                            kwargs={'valid_jgs': 'N/A', 'cur_edge': 0, 'rc': 0, 'rAvg': 0})
     logger.debug('starting thread')
     cthread.start()
 
@@ -522,48 +524,89 @@ def start_explanation():
 # validJGlist = []
 # vgList=[]
 # vCheck = False
+def u_insertion(valid_jgs, cur_edge, rc, rAvg):
+    if(valid_jgs!='N/A'):
+        uconn = pg2.connect(database='uselection', 
+                        user='juseung', 
+                        password='1234', 
+                        port='5432', 
+                        host='127.0.0.1')
+        cur = uconn.cursor()
+
+        ########print options########
+        print("*********demo.getUserSelection******")
+        idx = 0
+        for i in valid_jgs:
+            print(repr(i))
+            idx = idx+1
+            print("index: ",idx)
+
+            #getNodesEdges(repr(i))
+
+            insertJG = F"""
+            INSERT INTO uselection(jg, step, slt, recomm, urating, ravg, back)
+            VALUES('{repr(i)}', '{cur_edge}', '{idx}', '{rc[idx-1]}', 0, '{rAvg[idx-1]}', 1);
+            """
+            cur.execute(insertJG)
+            uconn.commit()
+
+            vgList.append(repr(i))
+            #validJGlist.append(getNodesEdges(repr(i)))
+            # validJGlist.append(repr(i))
+        cur.close()
+        uconn.close()
+    
+
+
 global selection
 
 def getUserSelection(valid_jgs, cur_edge, rc, rAvg):
     global validJGlist
     global vgList
     global selection
-    uconn = pg2.connect(database='uselection', 
-                        user='juseung', 
-                        password='1234', 
-                        port='5432', 
-                        host='127.0.0.1')
-    cur = uconn.cursor()
 
-    ###check if the table exists
-    # uselectionTBname = datetime.today().strftime('%B%d%H%M').lower()
-    # create_uselectionTB = "CREATE TABLE uselection"+uselectionTBname+" (jg varchar(200), slt int);"
-    # # checkTB = "SELECT EXISTS( SELECT COUNT(*) FROM uselection"+uselectionTBname+");"
-    # cur.execute(create_uselectionTB)
+    globals()['cthread2'] = threading.Thread(target=u_insertion, 
+                        kwargs={'valid_jgs': valid_jgs, 'cur_edge': cur_edge, 'rc': rc, 'rAvg': rAvg})
+    cthread2.start()
+    #u_insertion(valid_jgs, cur_edge, rc, rAvg)
+
+
+    # uconn = pg2.connect(database='uselection', 
+    #                     user='juseung', 
+    #                     password='1234', 
+    #                     port='5432', 
+    #                     host='127.0.0.1')
+    # cur = uconn.cursor()
+
+    # ###check if the table exists
+    # # uselectionTBname = datetime.today().strftime('%B%d%H%M').lower()
+    # # create_uselectionTB = "CREATE TABLE uselection"+uselectionTBname+" (jg varchar(200), slt int);"
+    # # # checkTB = "SELECT EXISTS( SELECT COUNT(*) FROM uselection"+uselectionTBname+");"
+    # # cur.execute(create_uselectionTB)
 
     
-    ########print options########
-    print("*********demo.getUserSelection******")
-    idx = 0
-    for i in valid_jgs:
-        print(repr(i))
-        idx = idx+1
-        print("index: ",idx)
+    # ########print options########
+    # print("*********demo.getUserSelection******")
+    # idx = 0
+    # for i in valid_jgs:
+    #     print(repr(i))
+    #     idx = idx+1
+    #     print("index: ",idx)
 
-        #getNodesEdges(repr(i))
+    #     #getNodesEdges(repr(i))
 
-        insertJG = F"""
-        INSERT INTO uselection(jg, step, slt, recomm, urating, ravg, back)
-        VALUES('{repr(i)}', '{cur_edge}', '{idx}', '{rc[idx-1]}', 0, '{rAvg[idx-1]}', 1);
-        """
-        cur.execute(insertJG)
-        uconn.commit()
+    #     insertJG = F"""
+    #     INSERT INTO uselection(jg, step, slt, recomm, urating, ravg, back)
+    #     VALUES('{repr(i)}', '{cur_edge}', '{idx}', '{rc[idx-1]}', 0, '{rAvg[idx-1]}', 1);
+    #     """
+    #     cur.execute(insertJG)
+    #     uconn.commit()
 
-        vgList.append(repr(i))
-        #validJGlist.append(getNodesEdges(repr(i)))
-        # validJGlist.append(repr(i))
-    cur.close()
-    uconn.close()
+    #     vgList.append(repr(i))
+    #     #validJGlist.append(getNodesEdges(repr(i)))
+    #     # validJGlist.append(repr(i))
+    # cur.close()
+    # uconn.close()
 
     print('validJGlist: ', validJGlist)
 
@@ -659,7 +702,11 @@ def getUserSelection(valid_jgs, cur_edge, rc, rAvg):
             ccur.close()
 
             ccur2 = checkconn.cursor()
-            update_jg = "UPDATE uselection SET slt=0 WHERE slt<0"
+            update_jg = "UPDATE uselection SET slt=0" #"UPDATE uselection SET slt=0 WHERE slt<0"
+
+                        # UPDATE uselection SET slt= CASE WHEN slt!='{id}' THEN 0 ELSE '-{id}' END
+                        #         , urating= '{uRate}' WHERE slt='{id}';
+           
             ccur2.execute(update_jg)
 
             # checkconn.commit()        
@@ -696,8 +743,12 @@ def user_selection():
     # print('>>>>global cur_step: ', cur_step)
     global vCheck
     vCheck = True
-    alive = cthread.is_alive()
 
+    alive = cthread.is_alive()
+    logger.debug(f"alive: {alive}")
+
+    # alive2 = cthread2.is_alive()    
+    # logger.debug(f"alive: {alive2}")
     ###########################
     uconn = pg2.connect(database='uselection', 
                             user='juseung', 
@@ -730,9 +781,14 @@ def user_selection():
         cur.close()
         uconn.close()
         print('validJGlist>>>>>>: ', validJGlist)
-        return jsonify(result="success-userSelection", isrunning=alive, result2=validJGlist, result3=rc_list, result4=ravg_list, result5=cur_step)
+
+        alive2 = cthread2.is_alive()    
+        logger.debug(f"alive: {alive2}")
+        return jsonify(result="success-userSelection", isrunning=alive, isrunning2=alive2, result2=validJGlist, result3=rc_list, result4=ravg_list, result5=cur_step)
     else:
-        return jsonify(result="success-userSelection", isrunning=alive, result2='null')
+        alive2 = cthread2.is_alive()    
+        logger.debug(f"alive: {alive2}")
+        return jsonify(result="success-userSelection", isrunning=alive, isrunning2=alive2, result2='null')
 
 
 
@@ -832,6 +888,7 @@ def getNodesEdges(tmp):
                     else:
                         jg_condition = nodes[j]
                 validJGdata['edges'].append({"source": two_nodes[0], "target": two_nodes[1], "cond": getCondition(jg_condition, node_list) })
+    print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>node_list: ', node_list)
     print('>>>>>validJGdata: ', validJGdata)
     validJGlist.append(validJGdata)
 

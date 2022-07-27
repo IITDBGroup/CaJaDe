@@ -139,7 +139,7 @@ class Join_Graph:
 
 class Join_Graph_Generator:
 
-    def __init__(self, schema_graph, attr_dict, gwrapper, uquery, uq1, uq2, conn, uquery0, exclude_high_cost_jg_0, 
+    def __init__(self, schema_graph, attr_dict, gwrapper, uquery, uq1, uq2, db, conn, uquery0, exclude_high_cost_jg_0, 
                 sample_rate_for_s_tmp, lca_s_max_size, lca_s_min_size, lca_eval_mode, min_recall_threshold,
                 numercial_attr_filter_method, user_pt_size, user_questions_map, f1_sample_type, f1_min_sample_size_threshold,
                 user_assigned_max_num_pred):
@@ -151,6 +151,7 @@ class Join_Graph_Generator:
         self.uquery = uquery
         self.uq1 = uq1
         self.uq2 = uq2
+        self.db = db
         self.conn = conn
         self.uquery0 = uquery0
         self.exclude_high_cost_jg_0 = exclude_high_cost_jg_0
@@ -593,7 +594,7 @@ class Join_Graph_Generator:
         cur.close()
         rconn.close()
 
-    def getRecomm(self, valid_result, cur_edge, f1_sample_rate): #, connInfo, statstrackerInfo): 
+    def getRecomm(self, valid_result, cur_edge, f1_sample_rate, f1c_type): #, connInfo, statstrackerInfo): 
         recomm_result = []
         #####Recommendation
         ###pattern generate
@@ -681,7 +682,7 @@ class Join_Graph_Generator:
                                     user_pt_size = self.user_pt_size,
                                     original_pt_size = apt_size,
                                     user_questions_map = self.user_questions_map,
-                                    f1_calculation_type = 'o',
+                                    f1_calculation_type = f1c_type, #'o',#'s',#'o',
                                     f1_sample_type = self.f1_sample_type,
                                     f1_calculation_sample_rate = f1_sample_rate, #0.1,
                                     f1_calculation_min_size = self.f1_min_sample_size_threshold,
@@ -705,6 +706,7 @@ class Join_Graph_Generator:
                     INSERT INTO f1sample(f1calrate, f1avg, jg)
                     VALUES('{f1_sample_rate}', '{recomm_val}', '{vr}');
                 """
+
                 fcur.execute(insertF1rateQ)
                 fconn.commit()
         else:
@@ -751,7 +753,7 @@ class Join_Graph_Generator:
                                     user_pt_size = self.user_pt_size,
                                     original_pt_size = apt_size,
                                     user_questions_map = self.user_questions_map,
-                                    f1_calculation_type = 'o',
+                                    f1_calculation_type = f1c_type, #'o',#'s',#'o',
                                     f1_sample_type = self.f1_sample_type,
                                     f1_calculation_sample_rate = f1_sample_rate, #0.1,
                                     f1_calculation_min_size = self.f1_min_sample_size_threshold,
@@ -760,7 +762,7 @@ class Join_Graph_Generator:
                 patterns_to_insert_tmp = pgen_tmp.top_pattern_from_one_jg(n)
                 ###############
                 print("##############Pattern 2##############", patterns_to_insert_tmp)
-                if patterns_to_insert_tmp != None: #len(patterns_to_insert_tmp) != 0:
+                if patterns_to_insert_tmp != None or len(patterns_to_insert_tmp) != 0:
                     tmp = 0
                     for i in range(0, len(patterns_to_insert_tmp)):
                         tmp+= patterns_to_insert_tmp[i]['F1']
@@ -782,6 +784,49 @@ class Join_Graph_Generator:
         fconn.close()
 
         return recomm_result
+
+    global test_insertion_complete
+    test_insertion_complete = False
+
+    def f1rate_test(self, valid_jgs, cur_edge):
+        rc01 = self.getRecomm(valid_jgs, cur_edge, 0.1, 's')
+        rc015 = self.getRecomm(valid_jgs, cur_edge, 0.15, 's')
+        rc02 = self.getRecomm(valid_jgs, cur_edge, 0.2, 's')
+        rc025 = self.getRecomm(valid_jgs, cur_edge, 0.25, 's')
+        rc03 = self.getRecomm(valid_jgs, cur_edge, 0.3, 's')
+        rc03_o = self.getRecomm(valid_jgs, cur_edge, 0.3, 'o')
+
+        print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>recommendation1>>>>> ", rc01)
+        print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>recommendation2>>>>> ", rc015)
+        print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>recommendation3>>>>> ", rc02)
+        print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>recommendation4>>>>> ", rc025)
+        print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>recommendation5>>>>> ", rc03)
+        print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>recommendation5-'o'>>>>> ", rc03_o)
+
+        for i in range(0, len(rc01)):
+            ftconn = psycopg2.connect(database='f1rate_test',
+                                user='juseung', 
+                                password='1234', 
+                                port='5432', 
+                                host='127.0.0.1')
+            ftcur = ftconn.cursor()
+
+        #for i in range(0, len(recomm1)):
+            # insertF1testQ = F"""
+            #     INSERT INTO f1test(dataset, rate01, rate015, rate02, rate025, rate03)
+            #     VALUES('{self.db}', '{recomm1[i]}', '{recomm2[i]}', '{recomm3[i]}', '{recomm4[i]}', '{recomm5[i]}');
+            # """
+            insertF1testQ = F"""
+                INSERT INTO testing(db, jg, edge, s_01, s_015, s_02, s_025, s_03, o_03)
+                VALUES('{self.db}', '{valid_jgs[i]}', '{cur_edge}', '{rc01[i]}', '{rc015[i]}', '{rc02[i]}', '{rc025[i]}', '{rc03[i]}', '{rc03_o[i]}');
+            """
+            ftcur.execute(insertF1testQ)
+            ftconn.commit()
+
+            ftcur.close()
+            ftconn.close()
+        global test_insertion_complete
+        test_insertion_complete = True
 
     def Generate_JGs(self, pt_rels, num_edges, customize=False, filtering_tmp=[]): #, connInfo, statstracker):
         """
@@ -885,16 +930,32 @@ class Join_Graph_Generator:
                     else:
                         print("*************************************************")
                         print(valid_jgs)
+
+                        global test_insertion_complete
+                        test_insertion_complete = False
                         ##### Get rate avg #####
                         getRavg = self.ratingDBavg(valid_jgs)
                         
-                        ##### Recommendation #####
-                        recomm = self.getRecomm(valid_jgs, cur_edge,0.1)
-                        print("recommendation>>>>> ", recomm)
 
-                        
+                        ############################################################
+                        ##### f1_rate_testing #####
+                        self.f1rate_test(valid_jgs, cur_edge)
+                        while(True):
+                            if test_insertion_complete:
+                                print("COMPLETED>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+                                break
+                        ############################################################
+
+                        ##### Recommendation #####
+                        recomm = self.getRecomm(valid_jgs, cur_edge, 0.3, 'o')
+                        print("recommendation>>>>> ", recomm)
                         
                         ########## get user selection and rating ##########
+                        print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+                        for i in range(0, len(valid_jgs)):
+                            print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>[",i+1,"]",repr(valid_jgs[i]))
+                        print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+                            
                         uSelection, uRating = appUselection(valid_jgs,cur_edge, recomm, getRavg)
                         print("uselection, uRating:******: ", uSelection,"*****",uRating)
 
@@ -909,8 +970,8 @@ class Join_Graph_Generator:
                         #     recomm = self.getRecomm(valid_jgs, cur_edge,f1_sample_rate)
                         #     print("recommendation>>>>> ", recomm)
                         
-                        recomm = self.getRecomm(valid_jgs, cur_edge,0.1)
-                        print("recommendation>>>>> ", recomm)
+                        # recomm = self.getRecomm(valid_jgs, cur_edge,0.1)
+                        # print("recommendation>>>>> ", recomm)
 
                         ################uSelection = int(input())
                         if uSelection==0:

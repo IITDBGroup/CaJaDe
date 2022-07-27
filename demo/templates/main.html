@@ -741,8 +741,10 @@
         })
 
         // ********** start user selection **********
+        console.log("intervalid: ", intervalid);
         if(!intervalid){
           intervalid = setInterval(ajaxSelection, 500);
+          console.log("set intervalid");
         }
         
         // function ajaxSelection() {
@@ -889,12 +891,13 @@
           dataType: 'JSON',
           success: function(data){
             running = data.isrunning;
+            running2 = data.isrunning2;
             console.log(data.result2);
             if(data.result2!='null'){ //  data.result2.length!=0
               console.log("success");
               console.log(data.result3);
-              clearInterval(intervalid);
-              intervalid = null;
+              //clearInterval(intervalid);
+              //intervalid = null;
 
               uSelectionList = data.result2;
               recommList = data.result3;
@@ -910,6 +913,11 @@
             }
             if(!running){
               clearInterval(intervalid);
+              intervalid = null;
+            }
+            if(data.result2!='null' && !running2){
+              clearInterval(intervalid);
+              intervalid = null;
             }
           },
           error: function(request, status, error){
