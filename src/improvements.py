@@ -6,15 +6,56 @@ import pandas
 logger = logging.getLogger(__name__)
 
 
-class Causality:
+class Improvements:
 
     def __init__(self):
         pass
 
     '''
-    This function is used to get the average treatment effect of each pattern to see if it should be dropped or not
+    This function creates a new table from the JG (materialized view) applying to each column the corresponding summarization
+    function.
+    The renaming dict, and the mapping_table is used to summarize the columns and to do the mapping from the columns to
+    its appropriate summarization function. After the mapping is done, a query to create the table is constructed and executed.
     '''
+    def create_new_APT(self, jg, conn):
+        cur = conn.cursor()
+        select_query = ""
 
+        # we get the mapping table values
+        summ_val_q = "select * from mapping_summ"
+        summ_map_val = pandas.read_sql_query(summ_val_q, conn)
+
+        for key, value in jg.renaming_dict.items():
+            if (key == 'max_rel_index' or key == 'max_attr_index' or key == 'dtypes'):
+                continue
+            else:
+                for dummy, attr in jg.renaming_dict[key]['columns'].items():
+                    # Check the summarization function for each attribute and construct the query accordingly
+                    attr = self.get_variable(attr)
+                    summ_func = summ_map_val.loc[summ_map_val['attributes'] == attr, 'summ_function'].iloc[0]
+
+                    if  summ_func == 'drop':
+                        continue
+                    else:
+                        if not select_query:
+                            select_query += f'{summ_func} OVER (ORDER BY {dummy}) as {dummy}'
+                        else:
+                            select_query += f', {summ_func} OVER (ORDER BY {dummy}) as {dummy}'
+
+        # use the query made to create the table from the jg_number
+        drop_new_apt = f"DROP TABLE IF EXISTS summ_jg_{jg.jg_number};"
+        new_apt_query = f"""
+        CREATE TABLE summ_jg_{jg.jg_number} AS
+        SELECT {select_query}
+        FROM jg_{jg.jg_number}
+        """
+
+        logger.debug(new_apt_query)
+        # cur.execute(drop_new_apt)
+        # cur.execute(new_apt_query)
+
+
+    # This function is used to get the average treatment effect of each pattern to see if it should be dropped or not
     def matching_patterns(self, patterns, dummy_patterns, user_specified_attrs, conn):
         cur = conn.cursor()
 
@@ -132,7 +173,6 @@ class Causality:
     This function checks the support of each pattern to see if the pattern is good enough or if it should be 
     dropped
     '''
-
 
     def is_treatment(self, patterns, user_questions, conn):
         cur = conn.cursor()
@@ -267,7 +307,6 @@ class Causality:
     This function retrieves the clause that has to be used for a pattern
     '''
 
-
     def get_clause(self, var, clause):
         if ('prov' in var):
             matches = re.compile('prov_([A-z]*__)*([A-z]*?)_(.*)').search(var)  # prov_([A-z]*__[A-z]*?)_(.*)
@@ -289,6 +328,15 @@ class Causality:
             clause.append(new_clause)
 
         return clause
+
+    def get_variable(self, var):
+        if ('prov' in var):
+            matches = re.compile('prov_([A-z]*__)*([A-z]*?)_(.*)').search(var)  # prov_([A-z]*__[A-z]*?)_(.*)
+            variable = matches.group(3).replace('__', '_').strip()
+        else:
+            variable = var # re.compile('\.(.*)').search(var).group(1).strip()
+
+        return variable
 
 
     def get_dummy_clause(self, pattern, clauses):
