@@ -850,12 +850,18 @@ def getNodesEdges(tmp):
     print('>>>>>tmp[0]: ', tmp[0])
     global validJGlist
     validJGdata = {"nodes":[], "edges":[]}
+
+    # Make node_dict instead of node_list
+    # e.g. key: 'A_1' value: 'PT'
+    node_dict = {}
     node_list = []
     #tmp = tmp[0]
 
     if 'cond' not in tmp:
         nodeName = 'PT'
-        node_list.append(nodeName)
+        #node_list.append(nodeName)        
+        node_dict[getDkey(len(node_dict))] = nodeName
+
         validJGdata['nodes'].append({"name": nodeName})
         validJGdata['edges'].clear()
     else:
@@ -867,11 +873,14 @@ def getNodesEdges(tmp):
                 x = nodes[i].split(' ')
                 nodeName = x[len(x)-1]
 
-                if nodeName not in node_list:
-                    node_list.append(nodeName)
-                    validJGdata['nodes'].append({"name": nodeName})
+                node_dict[getDkey(len(node_dict))] = nodeName
+                validJGdata['nodes'].append({"name": nodeName})
+
+                # if nodeName not in node_list:
+                #     node_list.append(nodeName)
+                #     validJGdata['nodes'].append({"name": nodeName})
                 two_nodes.append(nodeName)
-            validJGdata['edges'].append({"source": two_nodes[0], "target": two_nodes[1], "cond": getCondition(getNodes[1],node_list)})
+            validJGdata['edges'].append({"source": two_nodes[0], "target": two_nodes[1], "cond": getCondition(getNodes[1],node_dict)}) #node_list)})
         else:
             getNodes = tmp.split('|')
             for i in range(0, len(getNodes)):
@@ -881,25 +890,42 @@ def getNodesEdges(tmp):
                     if 'cond' not in nodes[j]:
                         x = nodes[j].split(' ')
                         nodeName = x[len(x)-1]
-                        if nodeName not in node_list:
-                            node_list.append(nodeName)
-                            validJGdata['nodes'].append({"name": nodeName})
+                        keyNum = re.sub(":","",x[len(x)-2])
+
+                        if len(node_dict)<int(keyNum):
+                            if nodeName not in list(node_dict.values()):
+                                validJGdata['nodes'].append({"name": nodeName})
+                            node_dict[getDkey(len(node_dict))] = nodeName
+
+                        # if nodeName not in node_list:
+                        #     node_list.append(nodeName)
+                        #     validJGdata['nodes'].append({"name": nodeName})
                         two_nodes.append(nodeName)
                     else:
                         jg_condition = nodes[j]
-                validJGdata['edges'].append({"source": two_nodes[0], "target": two_nodes[1], "cond": getCondition(jg_condition, node_list) })
+                validJGdata['edges'].append({"source": two_nodes[0], "target": two_nodes[1], "cond": getCondition(jg_condition,node_dict)}) #node_list)})
+    
     print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>node_list: ', node_list)
+    print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>node_dict: ', node_dict)
     print('>>>>>validJGdata: ', validJGdata)
     validJGlist.append(validJGdata)
 
-def getCondition(tmp_cond, node_list):
+def getDkey(dLen):
+    return 'A_'+str(dLen+1)
+
+def getCondition(tmp_cond, node_dict): #node_list):
     tmp = tmp_cond.split(' ')
     jgCondition = tmp[len(tmp)-1]
-    index = 1
-    for node_name in node_list:
-        replace_name = 'A_'+ str(index)
-        jgCondition = jgCondition.replace(replace_name, node_name)
-        index += 1
+
+    keyList = list(node_dict.keys())
+    for key in keyList:
+        jgCondition = jgCondition.replace(key, node_dict[key])
+
+    # index = 1
+    # for node_name in node_list:
+    #     replace_name = 'A_'+ str(index)
+    #     jgCondition = jgCondition.replace(replace_name, node_name)
+    #     index += 1
     clean_jgCondition = re.sub("[()]","",jgCondition)
     return clean_jgCondition
 
