@@ -116,7 +116,10 @@ class provenance_getter:
 			else:
 				pt_dict['attributes'][':'.join([k,'nominal'])] = ('PT', k)
 
-			pt_attrs.append(f'"{k}"')
+			if (k == 'win_ratio'):
+				k = "round(win_ratio::numeric, 5) as win_ratio"
+
+			pt_attrs.append(f'{k}')
 
 		# logger.debug(f'pt_dict:{pt_dict}')
 		pt_dict['attributes']['pnumber:nominal'] = ('PT','pnumber')

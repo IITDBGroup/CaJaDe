@@ -277,8 +277,8 @@ def run_experiment(conn=None,
                 exclude_high_cost_jg[1], str(f1_calculation_type), str(f1_sample_rate), str(f1_min_sample_size_threshold)])
 
 
-    logger.debug(exp_desc)
-    logger.debug(user_questions_map)
+    # logger.debug(exp_desc)
+    # logger.debug(user_questions_map)
 
     for k,v in statstracker.params.items():
       logger.debug(f'{k} : {v}')
@@ -310,10 +310,7 @@ def run_experiment(conn=None,
 
     jgg = Join_Graph_Generator(schema_graph = sg, attr_dict = attr_dict, gwrapper=w)
 
-    # logger.debug('generate new valid_jgs')
     valid_result = jgg.Generate_JGs(pt_rels=pt_relations, num_edges=maximum_edges, customize=False)
-    
-    # logger.debug(f"Before filtering any, we have {len(valid_result)} valid jgs \n")
 
     jgm = Join_Graph_Materializer(conn=conn, db_dict=attr_dict, gwrapper=w, user_query=user_query[0])
     jgm.init_cost_estimator()
@@ -331,7 +328,6 @@ def run_experiment(conn=None,
 
     if(exclude_high_cost_jg[0]==False):
       # logger.debug("DO include high cost jg!!!!!!!!!!!!!")
-      # logger.debug(f"before filtering intermediate, we have {len(valid_result)} jgs")
 
       intermediate_jgs = [v for v in valid_result if v.intermediate]
       valid_result = [v for v in valid_result if not v.intermediate]
@@ -344,7 +340,6 @@ def run_experiment(conn=None,
       jgm.stats.startTimer('materialize_jg')
       for n in valid_result:
         cost_estimate, renaming_dict, apt_q = jgm.materialize_jg(n)
-        # logger.debug(n.ignored_attrs)
         if(apt_q is not None):
           n.cost = cost_estimate
           n.apt_create_q = apt_q
@@ -354,7 +349,6 @@ def run_experiment(conn=None,
           continue
       jgm.stats.stopTimer('materialize_jg')
 
-      # logger.debug(f"before filtering redundant, we have {len(valid_result)} jgs")
       valid_result = [v for v in valid_result if not v.redundant]
 
       jgg.stats.params['valid_jgs']=len(valid_result)
@@ -362,14 +356,9 @@ def run_experiment(conn=None,
         Create_Stats_Table(conn=conn, stats_trackers=[jgg.stats], stats_relation_name='total_jgs', schema=f"{result_schema}_gui")
         InsertStats(conn=conn, stats_trackers=[jgg.stats], stats_relation_name='total_jgs', schema=f"{result_schema}_gui", exp_time=exp_time, exp_desc=exp_desc)
 
-      # logger.debug(f"after filtering out redund[]ant we have {len(valid_result)} valid jgs \n")
-
-      # logger.debug(f'we found {len(valid_result)} valid join graphs, now materializing and generating patterns')
-      
       jg_cnt=1
 
       for vr in valid_result:
-        # if(str(vr)=='1: PT, 2: icustays| 2: icustays, 3: patients'):
         jg_individual_times_dict[vr] = 0
         jgm.stats.startTimer('materialize_jg')
         # logger.debug(f'we are on join graph number {jg_cnt}')
@@ -414,11 +403,9 @@ def run_experiment(conn=None,
         pgen.stats.resetTimer('per_jg_timer')
       # logger.debug(jg_individual_times_dict)
     else:
-      # cost_estimate_dict 
       valid_result = [v for v in valid_result if not v.intermediate]
 
       cost_estimate_dict = {i:[] for i in range(0,maximum_edges+1)}
-      # logger.debug(cost_estimate_dict)
       for vr in valid_result:
         # logger.debug(f"This is a new vr {vr}")
         jgm.stats.startTimer('materialize_jg')
@@ -435,11 +422,7 @@ def run_experiment(conn=None,
 
       valid_result = [v for v in valid_result if not v.redundant]
 
-      # logger.debug(cost_estimate_dict)
-
       avg_cost_estimate_by_num_edges = {k:mean(v) for k,v in cost_estimate_dict.items() if v}
-      # logger.debug(avg_cost_estimate_by_num_edges)
-      # logger.debug(f'we found {len(valid_result)} valid join graphs, now materializing and generating patterns')
       jg_cnt=1
 
       valid_result = [n for n in valid_result if n.cost<=avg_cost_estimate_by_num_edges[n.num_edges]]
@@ -451,9 +434,8 @@ def run_experiment(conn=None,
       for n in valid_result:
         # logger.debug(f'we are on join graph number {jg_cnt}')
         logger.debug(f'This is the renaming dict {n.renaming_dict}')
-        # logger.debug(n)
         jg_cnt+=1
-        # if(n.cost<=avg_cost_estimate_by_num_edges[n.num_edges]):
+
         jg_individual_times_dict[n] = 0
         cost_friendly_jgs.append(n) 
         jgm.stats.startTimer('materialize_jg')
@@ -470,25 +452,30 @@ def run_experiment(conn=None,
         apt_size = int(jgm.cur.fetchone()[0])
 
         pgen.stats.startTimer('per_jg_timer')
-        pgen.gen_patterns(jg=n,
-                          jg_name=f"jg_{n.jg_number}", 
-                          renaming_dict=n.renaming_dict, 
-                          skip_cols=n.ignored_attrs, 
-                          s_rate_for_s=sample_rate_for_s,
-                          lca_s_max_size = lca_s_max_size,
-                          lca_s_min_size = lca_s_min_size,
-                          just_lca = lca_eval_mode,
-                          lca_recall_thresh=min_recall_threshold,
-                          numercial_attr_filter_method = numercial_attr_filter_method,
-                          user_pt_size=user_pt_size,
-                          original_pt_size = apt_size,
-                          user_questions_map = user_questions_map,
-                          f1_calculation_type = f1_calculation_type,
-                          f1_calculation_sample_rate=f1_sample_rate,
-                          f1_sample_type = f1_sample_type,
-                          f1_calculation_min_size=f1_min_sample_size_threshold,
-                          user_assigned_num_pred_cap=user_assigned_max_num_pred
-                        )
+
+        improv.gen_patterns_v2(n, f'summ_jg_{n.jg_number}', conn, skip_cols=n.ignored_attrs,
+                               original_pt_size=apt_size, lca_s_max_size=lca_s_max_size, lca_s_min_size=lca_s_min_size,
+                               s_rate_for_s=sample_rate_for_s)
+
+        # pgen.gen_patterns(jg=n,
+        #                   jg_name=f"jg_{n.jg_number}",
+        #                   renaming_dict=n.renaming_dict,
+        #                   skip_cols=n.ignored_attrs,
+        #                   s_rate_for_s=sample_rate_for_s,
+        #                   lca_s_max_size = lca_s_max_size,
+        #                   lca_s_min_size = lca_s_min_size,
+        #                   just_lca = lca_eval_mode,
+        #                   lca_recall_thresh=min_recall_threshold,
+        #                   numercial_attr_filter_method = numercial_attr_filter_method,
+        #                   user_pt_size=user_pt_size,
+        #                   original_pt_size = apt_size,
+        #                   user_questions_map = user_questions_map,
+        #                   f1_calculation_type = f1_calculation_type,
+        #                   f1_calculation_sample_rate=f1_sample_rate,
+        #                   f1_sample_type = f1_sample_type,
+        #                   f1_calculation_min_size=f1_min_sample_size_threshold,
+        #                   user_assigned_num_pred_cap=user_assigned_max_num_pred
+        #                 )
         if(gui):
           logger.debug("gui mode! insert by jg!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
           patterns_to_insert = pgen.top_pattern_from_one_jg(n)
@@ -499,7 +486,18 @@ def run_experiment(conn=None,
         jg_individual_times_dict[vr] = pgen.stats.time['per_jg_timer']
         pgen.stats.resetTimer('per_jg_timer')
 
-    improv.matching_patterns(pgen.pattern_pool, pgen.dummy_pattern_pool, user_specified_attrs, conn)
+    # for pattern in improv.dummy_pattern_pool:
+    #     test_list = []
+    #     for true_p in pattern['values']:
+    #         test = true_p[0] + '=' + str(true_p[1])
+    #         test_list.append(test)
+    #
+    #     full_patern = ' and '.join(test_list)
+    #     logger.debug(f"This is the pattern {full_patern} from jg: {pattern['jg_name']}")
+
+    improv.matching_patterns(improv.dummy_pattern_pool, conn)
+    return
+
 
     if(lca_eval_mode):
       patterns_all = pgen.pattern_pool
@@ -643,7 +641,12 @@ def main():
     ##print("colNum: "+colNum)
     #####
   user_query = "provenance of (select count(*) as win, s.season_name from team t, game g, season s where t.team_id = g.winner_id and g.season_id = s.season_id and t.team = 'GSW' group by s.season_name);"
-  user_query = "provenance of (select sum(CASE WHEN t.team_id = g.winner_id THEN 1 ELSE 0 END) as win, " \
+  # user_query = "provenance of (select sum(CASE WHEN t.team_id = g.winner_id THEN 1 ELSE 0 END)/count(*) as win, " \
+  #              "DATE_PART('month', g.game_date) as month, s.season_name from team t, game g, season s " \
+  #              "where (t.team_id = g.home_id OR t.team_id = g.away_id) and g.season_id = s.season_id " \
+  #              "and t.team = 'GSW' group by s.season_name, DATE_PART('month', g.game_date));"
+
+  user_query = "provenance of (select (sum(CASE WHEN t.team_id = g.winner_id THEN 1 ELSE 0 END)*100)::numeric/count(*) as win_ratio, " \
                "DATE_PART('month', g.game_date) as month, s.season_name from team t, game g, season s " \
                "where (t.team_id = g.home_id OR t.team_id = g.away_id) and g.season_id = s.season_id " \
                "and t.team = 'GSW' group by s.season_name, DATE_PART('month', g.game_date));"

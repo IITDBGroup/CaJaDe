@@ -2,6 +2,8 @@ from causalgraphicalmodels import CausalGraphicalModel
 import logging
 import re
 import pandas
+import math
+import dame_flame
 
 logger = logging.getLogger(__name__)
 
@@ -9,7 +11,8 @@ logger = logging.getLogger(__name__)
 class Improvements:
 
     def __init__(self):
-        pass
+        self.dummy_pattern_pool = []
+        self.attr_ranges = {}
 
     '''
     This function creates a new table from the JG (materialized view) applying to each column the corresponding summarization
@@ -18,8 +21,17 @@ class Improvements:
     its appropriate summarization function. After the mapping is done, a query to create the table is constructed and executed.
     '''
     def create_new_APT(self, jg, conn):
+        logger.debug(f'This are the details {repr(jg)} and number {jg.jg_number}')
+
         cur = conn.cursor()
-        select_query = ""
+        summ_query, select_query = [], []
+        self.attr_ranges[f'summ_jg_{jg.jg_number}'] = {}
+        range_q = """
+        SELECT n1, min({0}), max({0}) 
+        FROM (SELECT {0}, NTILE(3) OVER (ORDER BY {0}) AS n1 FROM 
+        (SELECT avg({0})::numeric(10,3) as {0} 
+        FROM jg_{1} GROUP BY is_user) as grouped_table) as test_table GROUP BY n1
+        """
 
         # we get the mapping table values
         summ_val_q = "select * from mapping_summ"
@@ -37,55 +49,176 @@ class Improvements:
                     if  summ_func == 'drop':
                         continue
                     else:
-                        if not select_query:
-                            select_query += f'{summ_func} OVER (ORDER BY {dummy}) as {dummy}'
+                        if summ_func == 'keep':
+                            summ_query.append(f'{dummy}')
+                            if (attr == 'win_ratio'):
+                                select_query.append(f'avg({dummy})::numeric(10,5) as {dummy}')
+                            else:
+                                select_query.append(f'{dummy}')
                         else:
-                            select_query += f', {summ_func} OVER (ORDER BY {dummy}) as {dummy}'
+                            summ_query.append(f'{summ_func} OVER (ORDER BY {dummy}) as {dummy}')
+                            select_query.append(f'avg({dummy}) as {dummy}')
+
+                        ranges = pandas.read_sql_query(range_q.format(dummy, jg.jg_number), conn)
+                        self.attr_ranges[f'summ_jg_{jg.jg_number}'][dummy] = ranges
 
         # use the query made to create the table from the jg_number
-        drop_new_apt = f"DROP TABLE IF EXISTS summ_jg_{jg.jg_number};"
+        drop_new_apt = f"DROP TABLE IF EXISTS summ_jg_{jg.jg_number} CASCADE;"
         new_apt_query = f"""
         CREATE TABLE summ_jg_{jg.jg_number} AS
-        SELECT {select_query}
-        FROM jg_{jg.jg_number}
+        SELECT {','.join(summ_query)}
+        FROM (
+        SELECT {','.join(select_query)} FROM jg_{jg.jg_number}
+        GROUP BY is_user) as grouped_table
         """
 
         logger.debug(new_apt_query)
-        # cur.execute(drop_new_apt)
-        # cur.execute(new_apt_query)
+        cur.execute(drop_new_apt)
+        cur.execute(new_apt_query)
+
+
+    def gen_patterns_v2(self, jg, jg_name, conn, skip_cols, original_pt_size, attr_alias='a', lca_s_max_size = 1000,
+                      lca_s_min_size = 100, s_rate_for_s=0.1):
+        cur = conn.cursor()
+
+        get_attrs_q = f"""
+        select atr.attname
+        from pg_class mv
+            join pg_namespace ns on mv.relnamespace = ns.oid
+            join pg_attribute atr 
+                on atr.attrelid = mv.oid 
+                and atr.attnum > 0 
+                and not atr.attisdropped
+        where mv.relkind = 'r'
+        and mv.relname = '{jg_name}'
+        """
+
+        cur.execute(get_attrs_q)
+        attrs = [x[0] for x in cur.fetchall()]
+
+        considered_attrs_s = [x for x in attrs if x not in skip_cols and re.search(r'{}_'.format(attr_alias), x)]
+
+        considered_attrs_d = [x for x in attrs if (x not in skip_cols and re.search(r'{}_'.format(attr_alias), x))
+                              or (x == 'is_user' or x == 'pnumber')]
+        attrs_in_d = ','.join(considered_attrs_d)
+
+        drop_prov_d = f"DROP MATERIALIZED VIEW IF EXISTS {jg_name}_d CASCADE;"
+        cur.execute(drop_prov_d)
+
+        drop_prov_s = f"DROP MATERIALIZED VIEW IF EXISTS {jg_name}_s CASCADE;"
+        cur.execute(drop_prov_s)
+
+        lca_sample_size = max([min(math.ceil(original_pt_size * s_rate_for_s), lca_s_max_size), lca_s_min_size])
+
+        if (lca_sample_size != 0):
+            pattern_cond_attr_list = []
+            pattern_attr_list = []
+
+            for attr in considered_attrs_s:
+                one_attr_in_pattern = f"CASE WHEN l.{attr} = r.{attr} THEN l.{attr} ELSE NULL END AS {attr}"
+                pattern_cond_attr_list.append(one_attr_in_pattern)
+                pattern_attr_list.append(attr)
+
+            pattern_q_selection_clause = ",".join(pattern_cond_attr_list)
+            pattern_attr_clause = ",".join(pattern_attr_list)
+
+            prov_d_creation_q = f"""
+            CREATE MATERIALIZED VIEW {jg_name}_d AS (
+                SELECT {attrs_in_d}
+                FROM {jg_name} 
+                ORDER BY RANDOM()
+                LIMIT {lca_sample_size});
+            """
+            cur.execute(prov_d_creation_q)
+
+            prov_s_creation_q = f"""
+            CREATE MATERIALIZED VIEW {jg_name}_s AS (
+                SELECT {attrs_in_d}
+                FROM {jg_name} 
+                ORDER BY RANDOM()
+                LIMIT {lca_sample_size});
+            """
+            cur.execute(prov_s_creation_q)
+
+            pattern_creation_q = f"""
+            CREATE MATERIALIZED VIEW {jg_name}_p AS
+            WITH cp AS (
+            SELECT {pattern_q_selection_clause}
+            FROM {jg_name}_d l, {jg_name}_s r)
+            SELECT COUNT(*) AS pattern_freq,
+            {pattern_attr_clause}
+            FROM cp
+            GROUP BY {pattern_attr_clause}
+            ORDER BY pattern_freq DESC
+            limit 30;
+            """
+
+            get_patterns_q = f' SELECT {pattern_attr_clause} FROM {jg_name}_p;'
+
+            cur.execute(pattern_creation_q)
+
+            pattern_df = pandas.read_sql_query(get_patterns_q, conn)
+            pattern_dicts = pattern_df.to_dict('records')
+
+            pattern_dict_list = []
+            for pa in pattern_dicts:
+                pa_dict = {}
+                pa_dict['values'] = [[k, v] for k, v in pa.items() if (v is not None and not pandas.isnull(v))]
+                if (pa_dict['values']):
+                    pa_dict['join_graph'] = jg
+                    pa_dict['jg_name'] = jg_name
+                    pattern_dict_list.append(pa_dict)
+
+            # create a pattern with the jg, jg_name, renaming dict, the patterns itself and append it to the pool
+            for pattern in pattern_dict_list:
+                self.dummy_pattern_pool.append(pattern)
 
 
     # This function is used to get the average treatment effect of each pattern to see if it should be dropped or not
-    def matching_patterns(self, patterns, dummy_patterns, user_specified_attrs, conn):
+    def matching_patterns(self, dummy_patterns, conn):
         cur = conn.cursor()
 
-        jg_name_list = []
-        rel_attr_dict = {}
-
-        for pattern in patterns:
-            logger.debug(pattern['desc'])
-
-        for idx, pattern in enumerate(dummy_patterns):
+        for pattern in dummy_patterns:
             clauses = []
             jg = pattern['join_graph']
             renaming_dict = jg.renaming_dict
             jg_name = pattern['jg_name']
 
-            if (jg_name not in jg_name_list):
-                rel_attr_dict = self.get_rel_attr_dict(renaming_dict, rel_attr_dict, jg_name)
-                jg_name_list.append(jg_name)
+            for true_p in pattern['values']:
+                clause = true_p[0] + '=' + str(true_p[1])
+                clauses.append(clause)
 
-            clauses = self.get_dummy_clause(pattern, clauses)
             c_query = ' and '.join(clauses)
-            ordinal_attr = ' '.join(self.get_ordinal_attributes(renaming_dict, rel_attr_dict[jg_name]))
 
             if (self.is_pattern_treated(cur, jg_name, c_query)):
-                df = self.get_input_FLAME(conn, jg_name, c_query, ordinal_attr)
-
-                logger.debug(pattern)
-                # logger.debug(c_query)
+                pattern = self.translate_pattern(pattern, jg_name, renaming_dict)
+                logger.debug(f'This is the real pattern {pattern}')
+                df = self.get_input_FLAME(conn, jg_name, c_query)
                 logger.debug(df)
-                logger.debug("It's goood!!!")
+                # self.calculate_ATE(df)
+
+
+        # for pattern in dummy_patterns:
+        #     clauses = []
+        #     jg = pattern['join_graph']
+        #     renaming_dict = jg.renaming_dict
+        #     jg_name = pattern['jg_name']
+        #
+        #     if (jg_name not in jg_name_list):
+        #         rel_attr_dict = self.get_rel_attr_dict(renaming_dict, rel_attr_dict, jg_name)
+        #         jg_name_list.append(jg_name)
+        #
+        #     clauses = self.get_dummy_clause(pattern, clauses)
+        #     c_query = ' and '.join(clauses)
+        #     ordinal_attr = ' '.join(self.get_ordinal_attributes(renaming_dict, rel_attr_dict[jg_name]))
+        #
+        #     if (self.is_pattern_treated(cur, jg_name, c_query)):
+        #         df = self.get_input_FLAME(conn, jg_name, c_query, ordinal_attr)
+        #
+        #         logger.debug(pattern)
+        #         # logger.debug(c_query)
+        #         logger.debug(df)
+        #         logger.debug("It's goood!!!")
 
 
     '''
@@ -97,13 +230,9 @@ class Improvements:
         treated_query = f"""
         select avg(treated) between 0.2 and 0.8 as good_coverage 
         from (select 
-        case when 
-        (count(distinct(case when {c_query} then pnumber else 0 end))::float / 
-        count(distinct pnumber)::float) 
-        > 0.8 
+        case when {c_query}
         then 1 else 0 end treated 
-        from {jg_name}
-        group by a_2, season_name) as unit_treated;
+        from {jg_name}) as unit_treated;
         """
 
         # logger.debug(treated_query)
@@ -119,30 +248,63 @@ class Improvements:
     or not
     '''
 
-    def get_input_FLAME(self, conn, jg_name, c_query, ordinal_attr):
-        treated_query = f"""
-        select * 
-        from (select 
-        {ordinal_attr} case when 
-        (count(distinct(case when {c_query} then pnumber else 0 end))::float / 
-        count(distinct pnumber)::float) 
-        > 0.8 
-        then 1 else 0 end treated 
-        from {jg_name}
-        group by a_2, season_name) as unit_treated;
-        """
+    def get_input_FLAME(self, conn, jg_name, c_query):
+        # get the columns from the jg_name
+        attr_to_keep = []
 
-        logger.debug(treated_query)
+        column_query = f"select column_name from information_schema.columns where table_name='{jg_name}'"
+        columns = pandas.read_sql_query(column_query, conn)
 
-        treated = pandas.read_sql_query(treated_query, conn)
+        for column in list(columns['column_name']):
+            if column == 'is_user':
+                continue
+            elif column == 'win_ratio':
+                attr_to_keep.append(f'{column} as outcome')
+            else:
+                attr_to_keep.append(f'{column}')
 
-        return treated
+        flame_query = f"select * from (select {','.join(attr_to_keep)}, case when {c_query} then 1 else 0 end treated from {jg_name}) as unit_treated; "
+
+        df = pandas.read_sql_query(flame_query, conn)
+
+        return df
+
+
+    '''
+    This function calculates the ATE from FLAME giving a df
+    '''
+    def calculate_ATE(self, df):
+        model = dame_flame.matching.FLAME(early_stop_un_c_frac=0.01, early_stop_un_t_frac=0.01)
+        model.fit(df)
+        result = model.predict(df, pre_dame=5)
+
+        # logger.debug(f'This is the result: {result}')
+
+        logger.debug(f'This is unit per group {model.units_per_group}')
+
+        model.units_per_group = [unit for unit in model.units_per_group if not isinstance(unit, int)]
+
+        logger.debug(f'This is unit per group {model.units_per_group}')
+
+        # for unit in range(len(model.units_per_group)):
+        #     logger.debug(f'Uniiiiit: {model.units_per_group[unit]}')
+        #     test = model.input_data.loc[model.units_per_group[unit], [model.treatment_column_name, model.outcome_column_name]]
+        #
+        #     treated = test.loc[test[model.treatment_column_name] == 1]
+        #
+        #     logger.debug(f'This is the test: {test}')
+        #
+        #     logger.debug(f'This is the treated: {treated}')
+
+        # treated = group_data.loc[group_data[df.treatment_column_name] == 1]
+
+        ate = dame_flame.utils.post_processing.ATE(matching_object=model)
+
+        logger.debug(f'This is the ATE for the pattern: {ate}')
 
     '''
     This function checks whether the pattern is causally independent from the outcome variable or not
     '''
-
-
     def check_causality(self, patterns, outcome_var):
         '''
         We receive the patterns generated and together with the causal graph we determine whether the variables
@@ -389,3 +551,23 @@ class Improvements:
         rel_attr_dict[jg_name] = rel_dummy_to_attr
 
         return rel_attr_dict
+
+    def translate_pattern(self, pattern, jg_name, renaming_dict):
+        final_pattern = []
+        for true_p in pattern['values']:
+            df = self.attr_ranges[jg_name][true_p[0]]
+            range = f"[{df.loc[df['n1'] == true_p[1], 'min'].iloc[0]}, {df.loc[df['n1'] == true_p[1], 'max'].iloc[0]}]"
+            # logger.debug(f'This is the range for the pattern {range}')
+
+            for key, value in renaming_dict.items():
+                if (key == 'max_rel_index' or key == 'max_attr_index' or key == 'dtypes'):
+                    continue
+                else:
+                    for dummy, attr in renaming_dict[key]['columns'].items():
+                        if dummy == true_p[0]:
+                            real_name = self.get_variable(attr)
+
+            # logger.debug(f'This is the real pattern: {real_name} between {range}')
+            final_pattern.append(f'{real_name} between {range}')
+
+        return ' and '.join(final_pattern)

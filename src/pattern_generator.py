@@ -770,21 +770,21 @@ class Pattern_Generator:
                         """
                         self.cur.execute(create_f1_jg_size)
                     
-                        # q_tp_yes = f"""
-                        # SELECT COUNT(DISTINCT pnumber)
-                        # FROM {jg_name}_fs
-                        # WHERE is_user='yes'
-                        # """
-                        # self.cur.execute(q_tp_yes)
-                        # sample_recall_dict['yes'] = int(self.cur.fetchone()[0])
-                        #
-                        # q_tp_no = f"""
-                        # SELECT COUNT(DISTINCT pnumber)
-                        # FROM {jg_name}_fs
-                        # WHERE is_user='no'
-                        # """
-                        # self.cur.execute(q_tp_no)
-                        # sample_recall_dict['no'] = int(self.cur.fetchone()[0])
+                        q_tp_yes = f"""
+                        SELECT COUNT(DISTINCT pnumber)
+                        FROM {jg_name}_fs
+                        WHERE is_user='yes'
+                        """
+                        self.cur.execute(q_tp_yes)
+                        sample_recall_dict['yes'] = int(self.cur.fetchone()[0])
+
+                        q_tp_no = f"""
+                        SELECT COUNT(DISTINCT pnumber)
+                        FROM {jg_name}_fs
+                        WHERE is_user='no'
+                        """
+                        self.cur.execute(q_tp_no)
+                        sample_recall_dict['no'] = int(self.cur.fetchone()[0])
 
                         self.stats.stopTimer('f1_sample')
 
@@ -815,21 +815,21 @@ class Pattern_Generator:
                     """
                     self.cur.execute(create_f1_jg_size)
                 
-                    # q_tp_yes = f"""
-                    # SELECT COUNT(DISTINCT pnumber)
-                    # FROM {jg_name}_fs
-                    # WHERE is_user='yes'
-                    # """
-                    # self.cur.execute(q_tp_yes)
-                    # sample_recall_dict['yes'] = int(self.cur.fetchone()[0])
-                    #
-                    # q_tp_no = f"""
-                    # SELECT COUNT(DISTINCT pnumber)
-                    # FROM {jg_name}_fs
-                    # WHERE is_user='no'
-                    # """
-                    # self.cur.execute(q_tp_no)
-                    # sample_recall_dict['no'] = int(self.cur.fetchone()[0])
+                    q_tp_yes = f"""
+                    SELECT COUNT(DISTINCT pnumber)
+                    FROM {jg_name}_fs
+                    WHERE is_user='yes'
+                    """
+                    self.cur.execute(q_tp_yes)
+                    sample_recall_dict['yes'] = int(self.cur.fetchone()[0])
+
+                    q_tp_no = f"""
+                    SELECT COUNT(DISTINCT pnumber)
+                    FROM {jg_name}_fs
+                    WHERE is_user='no'
+                    """
+                    self.cur.execute(q_tp_no)
+                    sample_recall_dict['no'] = int(self.cur.fetchone()[0])
 
                     self.stats.stopTimer('f1_sample')
 
@@ -838,21 +838,21 @@ class Pattern_Generator:
 
             original_recall_dict={}
 
-            # q_tp_yes = f"""
-            # SELECT COUNT(DISTINCT pnumber)
-            # FROM {jg_name}
-            # WHERE is_user='yes'
-            # """
-            # self.cur.execute(q_tp_yes)
-            # original_recall_dict['yes'] = int(self.cur.fetchone()[0])
-            #
-            # q_tp_no = f"""
-            # SELECT COUNT(DISTINCT pnumber)
-            # FROM {jg_name}
-            # WHERE is_user='no'
-            # """
-            # self.cur.execute(q_tp_no)
-            # original_recall_dict['no'] = int(self.cur.fetchone()[0])
+            q_tp_yes = f"""
+            SELECT COUNT(DISTINCT pnumber)
+            FROM {jg_name}
+            WHERE is_user='yes'
+            """
+            self.cur.execute(q_tp_yes)
+            original_recall_dict['yes'] = int(self.cur.fetchone()[0])
+
+            q_tp_no = f"""
+            SELECT COUNT(DISTINCT pnumber)
+            FROM {jg_name}
+            WHERE is_user='no'
+            """
+            self.cur.execute(q_tp_no)
+            original_recall_dict['no'] = int(self.cur.fetchone()[0])
 
             recall_dicts['original'] = original_recall_dict
 
@@ -930,36 +930,14 @@ class Pattern_Generator:
                 select setseed({seed})
                 """
 
-                if(prov_version=='fractional'): # Dont use this, not working...
-                    prov_d_creation_q = f"""
-                    CREATE MATERIALIZED VIEW {jg_name}_d AS
-                    (
-                    WITH d_{jg_name} AS 
-                      (
-                        SELECT {attrs_in_d}
-                        FROM {jg_name}
-                        ORDER BY RANDOM()
-                        LIMIT {lca_sample_size}
-                      ),
-                      prov_groups AS
-                      (
-                      SELECT is_user, pnumber, count(*) AS group_size 
-                      FROM d_{jg_name} 
-                      GROUP BY is_user,pnumber
-                      )
-                      SELECT d.*, ROUND(CAST(1 AS NUMERIC)/CAST(pg.group_size AS NUMERIC),5) AS prov_value 
-                      FROM d_{jg_name} d, prov_groups pg WHERE d.pnumber = pg.pnumber AND d.is_user=pg.is_user
-                    );
-                    """
-                else:
-                    prov_d_creation_q = f"""
-                    CREATE MATERIALIZED VIEW {jg_name}_d AS
-                    (
-                        SELECT {attrs_in_d}
-                        FROM {jg_name} 
-                        ORDER BY RANDOM()
-                        LIMIT {lca_sample_size} 
-                    );
+                prov_d_creation_q = f"""
+                CREATE MATERIALIZED VIEW {jg_name}_d AS
+                (
+                    SELECT {attrs_in_d}
+                    FROM {jg_name} 
+                    ORDER BY RANDOM()
+                    LIMIT {lca_sample_size} 
+                );
                 """
 
                 if(sample_repeatable):
@@ -975,6 +953,7 @@ class Pattern_Generator:
                     LIMIT {lca_sample_size} 
                 );
                 """
+
                 if(sample_repeatable):
                     self.cur.execute(setseed_q)
 
