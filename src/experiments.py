@@ -433,7 +433,7 @@ def run_experiment(conn=None,
 
       for n in valid_result:
         # logger.debug(f'we are on join graph number {jg_cnt}')
-        logger.debug(f'This is the renaming dict {n.renaming_dict}')
+        # logger.debug(f'This is the renaming dict {n.renaming_dict}')
         jg_cnt+=1
 
         jg_individual_times_dict[n] = 0

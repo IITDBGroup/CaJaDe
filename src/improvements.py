@@ -207,7 +207,6 @@ class Improvements:
                 self.stats.startTimer('input_flame')
                 df = self.get_input_FLAME(conn, jg_name, c_query)
                 self.stats.stopTimer('input_flame')
-                logger.debug(df)
 
                 self.stats.startTimer('calculate_ate')
                 ate = self.calculate_ATE(df)
@@ -220,37 +219,14 @@ class Improvements:
 
         self.stats.startTimer('sort_dict')
         dict_sorted = self.sort_dict(ate_dict)
-        logger.debug(f'This is the dict for the ATE {dict_sorted}')
+        # logger.debug(f'This is the dict for the ATE {dict_sorted}')
         self.stats.stopTimer('sort_dict')
-
-        # for pattern in dummy_patterns:
-        #     clauses = []
-        #     jg = pattern['join_graph']
-        #     renaming_dict = jg.renaming_dict
-        #     jg_name = pattern['jg_name']
-        #
-        #     if (jg_name not in jg_name_list):
-        #         rel_attr_dict = self.get_rel_attr_dict(renaming_dict, rel_attr_dict, jg_name)
-        #         jg_name_list.append(jg_name)
-        #
-        #     clauses = self.get_dummy_clause(pattern, clauses)
-        #     c_query = ' and '.join(clauses)
-        #     ordinal_attr = ' '.join(self.get_ordinal_attributes(renaming_dict, rel_attr_dict[jg_name]))
-        #
-        #     if (self.is_pattern_treated(cur, jg_name, c_query)):
-        #         df = self.get_input_FLAME(conn, jg_name, c_query, ordinal_attr)
-        #
-        #         logger.debug(pattern)
-        #         # logger.debug(c_query)
-        #         logger.debug(df)
-        #         logger.debug("It's goood!!!")
 
 
     '''
     This function checks whether the pattern should be treated or discarded before calculating its ATE.
     This checking is done by calculating the average values that match the pattern in the APT.
     '''
-
     def is_pattern_treated(self, cur, jg_name, c_query):
         treated_query = f"""
         select avg(treated) between 0.2 and 0.8 as good_coverage 
@@ -270,7 +246,6 @@ class Improvements:
     the average of all the ordinal columns as well as the 'treated' column that tells us whether that row is treated
     or not
     '''
-
     def get_input_FLAME(self, conn, jg_name, c_query):
         # get the columns from the jg_name
         attr_to_keep = []
@@ -301,28 +276,12 @@ class Improvements:
         model.fit(df)
         result = model.predict(df)
 
-        # logger.debug(f'This is the result: {result}')
+        logger.debug(f'This is the result: {result}')
 
         # logger.debug(f'This is unit per group {model.units_per_group}')
 
         if len(model.units_per_group) == 0:
             return 0
-
-        # model.units_per_group = [unit for unit in model.units_per_group if not isinstance(unit, int)]
-        #
-        # logger.debug(f'This is unit per group {model.units_per_group}')
-
-        # for unit in range(len(model.units_per_group)):
-        #     logger.debug(f'Uniiiiit: {model.units_per_group[unit]}')
-        #     test = model.input_data.loc[model.units_per_group[unit], [model.treatment_column_name, model.outcome_column_name]]
-        #
-        #     treated = test.loc[test[model.treatment_column_name] == 1]
-        #
-        #     logger.debug(f'This is the test: {test}')
-        #
-        #     logger.debug(f'This is the treated: {treated}')
-
-        # treated = group_data.loc[group_data[df.treatment_column_name] == 1]
 
         ate = dame_flame.utils.post_processing.ATE(matching_object=model)
 
@@ -363,7 +322,6 @@ class Improvements:
     This function checks the support of each pattern to see if the pattern is good enough or if it should be 
     dropped
     '''
-
     def is_treatment(self, patterns, user_questions, conn):
         cur = conn.cursor()
         # unit = re.compile('(.*)[=]').search(user_questions[0]).group(1)
@@ -437,8 +395,6 @@ class Improvements:
     ''' 
     This function retrieves the table and the clause that has to be used for a pattern
     '''
-
-
     def get_table_and_clause(self, var, table, clause):
         if ('prov' in var):
             matches = re.compile('prov_([A-z]*__)*([A-z]*?)_(.*)').search(var)  # prov_([A-z]*__[A-z]*?)_(.*)
@@ -474,8 +430,6 @@ class Improvements:
     ''' 
     This function retrieves the table that has to be used for a pattern
     '''
-
-
     def get_table(self, var, table):
         if ('prov' in var):
             matches = re.compile('prov_([A-z]*__)*([A-z]*?)_(.*)').search(var)  # prov_([A-z]*__[A-z]*?)_(.*)
@@ -496,7 +450,6 @@ class Improvements:
     ''' 
     This function retrieves the clause that has to be used for a pattern
     '''
-
     def get_clause(self, var, clause):
         if ('prov' in var):
             matches = re.compile('prov_([A-z]*__)*([A-z]*?)_(.*)').search(var)  # prov_([A-z]*__[A-z]*?)_(.*)
