@@ -34,7 +34,8 @@ class PatternGeneratorStats(ExecStats):
               'pattern_recover',
               'rank_patterns',
               'f1_sample',
-              'per_jg_timer'
+              'per_jg_timer',
+              'gen_patterns'
               }
 
     PARAMS = {'n_p_pass_node_rule_and_recall_thresh',

@@ -27,7 +27,8 @@ class QueryGeneratorStats(ExecStats):
     """
 
     TIMERS = {'renaming',
-              'materialize_jg'
+              'materialize_jg',
+              'summarize_jg'
               }
 
 class Join_Graph_Materializer:

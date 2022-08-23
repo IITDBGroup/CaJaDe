@@ -4,15 +4,24 @@ import re
 import pandas
 import math
 import dame_flame
+from src.instrumentation import ExecStats
+
 
 logger = logging.getLogger(__name__)
 
+
+class MatchingPatternsGeneratorStats(ExecStats):
+    TIMERS = {'calculate_ate',
+              'input_flame',
+              'sort_dict'
+              }
 
 class Improvements:
 
     def __init__(self):
         self.dummy_pattern_pool = []
         self.attr_ranges = {}
+        self.stats = MatchingPatternsGeneratorStats()
 
     '''
     This function creates a new table from the JG (materialized view) applying to each column the corresponding summarization
@@ -21,7 +30,7 @@ class Improvements:
     its appropriate summarization function. After the mapping is done, a query to create the table is constructed and executed.
     '''
     def create_new_APT(self, jg, conn):
-        logger.debug(f'This are the details {repr(jg)} and number {jg.jg_number}')
+        logger.debug(f'This are the details for the jg_{jg.jg_number} -> {repr(jg)}')
 
         cur = conn.cursor()
         summ_query, select_query = [], []
@@ -177,6 +186,7 @@ class Improvements:
     # This function is used to get the average treatment effect of each pattern to see if it should be dropped or not
     def matching_patterns(self, dummy_patterns, conn):
         cur = conn.cursor()
+        ate_dict = {}
 
         for pattern in dummy_patterns:
             clauses = []
@@ -191,12 +201,27 @@ class Improvements:
             c_query = ' and '.join(clauses)
 
             if (self.is_pattern_treated(cur, jg_name, c_query)):
-                pattern = self.translate_pattern(pattern, jg_name, renaming_dict)
-                logger.debug(f'This is the real pattern {pattern}')
-                df = self.get_input_FLAME(conn, jg_name, c_query)
-                logger.debug(df)
-                # self.calculate_ATE(df)
+                real_pattern = self.translate_pattern(pattern, jg_name, renaming_dict)
+                logger.debug(f'This is the real pattern {real_pattern}')
 
+                self.stats.startTimer('input_flame')
+                df = self.get_input_FLAME(conn, jg_name, c_query)
+                self.stats.stopTimer('input_flame')
+                logger.debug(df)
+
+                self.stats.startTimer('calculate_ate')
+                ate = self.calculate_ATE(df)
+                self.stats.stopTimer('calculate_ate')
+
+                if ate > 0:
+                    ate_dict[real_pattern] = {}
+                    ate_dict[real_pattern]['ATE'] = ate
+                    ate_dict[real_pattern]['jg_details'] = f'This are the details for the jg_{jg.jg_number} -> {repr(jg)}'
+
+        self.stats.startTimer('sort_dict')
+        dict_sorted = self.sort_dict(ate_dict)
+        logger.debug(f'This is the dict for the ATE {dict_sorted}')
+        self.stats.stopTimer('sort_dict')
 
         # for pattern in dummy_patterns:
         #     clauses = []
@@ -235,8 +260,6 @@ class Improvements:
         from {jg_name}) as unit_treated;
         """
 
-        # logger.debug(treated_query)
-
         cur.execute(treated_query)
         is_treated = cur.fetchone()[0]
 
@@ -274,17 +297,20 @@ class Improvements:
     This function calculates the ATE from FLAME giving a df
     '''
     def calculate_ATE(self, df):
-        model = dame_flame.matching.FLAME(early_stop_un_c_frac=0.01, early_stop_un_t_frac=0.01)
+        model = dame_flame.matching.FLAME(early_stop_un_c_frac=0.1, early_stop_un_t_frac=0.1)
         model.fit(df)
-        result = model.predict(df, pre_dame=5)
+        result = model.predict(df)
 
         # logger.debug(f'This is the result: {result}')
 
-        logger.debug(f'This is unit per group {model.units_per_group}')
+        # logger.debug(f'This is unit per group {model.units_per_group}')
 
-        model.units_per_group = [unit for unit in model.units_per_group if not isinstance(unit, int)]
+        if len(model.units_per_group) == 0:
+            return 0
 
-        logger.debug(f'This is unit per group {model.units_per_group}')
+        # model.units_per_group = [unit for unit in model.units_per_group if not isinstance(unit, int)]
+        #
+        # logger.debug(f'This is unit per group {model.units_per_group}')
 
         # for unit in range(len(model.units_per_group)):
         #     logger.debug(f'Uniiiiit: {model.units_per_group[unit]}')
@@ -301,6 +327,8 @@ class Improvements:
         ate = dame_flame.utils.post_processing.ATE(matching_object=model)
 
         logger.debug(f'This is the ATE for the pattern: {ate}')
+
+        return ate
 
     '''
     This function checks whether the pattern is causally independent from the outcome variable or not
@@ -571,3 +599,11 @@ class Improvements:
             final_pattern.append(f'{real_name} between {range}')
 
         return ' and '.join(final_pattern)
+
+    def sort_dict(self, d):
+        new_dict = {}
+        for w in sorted(d, key=lambda x: d[x]['ATE'], reverse=True):
+            logger.debug('-> Pattern: ' + w + '. ATE: ' + str(d[w]['ATE']) + '\n-> JG_details: ' + d[w]['jg_details'] + '\n')
+            new_dict[w] = d[w]
+
+        return(new_dict)

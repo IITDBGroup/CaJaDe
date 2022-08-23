@@ -445,13 +445,16 @@ def run_experiment(conn=None,
         jgm.cur.execute(jg_query_view)
         jgm.stats.stopTimer('materialize_jg')
 
+        jgm.stats.startTimer('summarize_jg')
         improv.create_new_APT(n, conn)  # this function creates the new APT with the summarization functions
+        jgm.stats.stopTimer('summarize_jg')
 
         apt_size_query = f"SELECT count(*) FROM jg_{n.jg_number}"
         jgm.cur.execute(apt_size_query)
         apt_size = int(jgm.cur.fetchone()[0])
 
         pgen.stats.startTimer('per_jg_timer')
+        pgen.stats.startTimer('gen_patterns')
 
         improv.gen_patterns_v2(n, f'summ_jg_{n.jg_number}', conn, skip_cols=n.ignored_attrs,
                                original_pt_size=apt_size, lca_s_max_size=lca_s_max_size, lca_s_min_size=lca_s_min_size,
@@ -476,6 +479,9 @@ def run_experiment(conn=None,
         #                   f1_calculation_min_size=f1_min_sample_size_threshold,
         #                   user_assigned_num_pred_cap=user_assigned_max_num_pred
         #                 )
+
+        pgen.stats.stopTimer('gen_patterns')
+
         if(gui):
           logger.debug("gui mode! insert by jg!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
           patterns_to_insert = pgen.top_pattern_from_one_jg(n)
@@ -496,6 +502,11 @@ def run_experiment(conn=None,
     #     logger.debug(f"This is the pattern {full_patern} from jg: {pattern['jg_name']}")
 
     improv.matching_patterns(improv.dummy_pattern_pool, conn)
+
+    logger.debug(f"This are the stats for summarizing {jgm.stats.time['summarize_jg']} and this for generating patterns {pgen.stats.time['gen_patterns']}"
+                 f" and for creating the input_flame {improv.stats.time['input_flame']} and for calculating_ate {improv.stats.time['calculate_ate']} "
+                 f"and for sorting_dict {improv.stats.time['sort_dict']}")
+
     return
 
 
