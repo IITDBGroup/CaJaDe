@@ -999,6 +999,9 @@ def retrieve_explanation():
     get_flag = check_insertion()
 
     logger.debug(f"insertion complete>>>>{get_flag}")
+
+    # aliveCheck = cthread.is_alive()
+    # logger.debug(f"alive: {aliveCheck}")
     
     #if(cur_res):
     if(get_flag):
@@ -1030,6 +1033,20 @@ def retrieve_explanation():
         query6 = "select jg_name, p_desc from "+resultSchemaName+".topk_patterns_from_top_jgs"
         globals()['cursor'].execute(query6)
         temp = globals()['cursor'].fetchall()
+
+        # if(not aliveCheck):
+
+        query_u1_frac = f" SELECT COUNT(*) FROM pt_full WHERE {u1};"
+        query_u2_frac = f" SELECT COUNT(*) FROM pt_full WHERE {u2};"
+
+        globals()['cursor'].execute(query_u1_frac)
+        frac1 = globals()['cursor'].fetchall()
+
+        globals()['cursor'].execute(query_u2_frac)
+        frac2 = globals()['cursor'].fetchall()
+
+        fracnames=[ur1, ur2]
+        fracvalues=[frac1, frac2]
 
     return jsonify(result = "success-explanation", result2 = exp_list, result3 = jg, result5 = test_list, 
                     result6 = highlight_list, result8=fracnames, result9=fracvalues)

@@ -938,12 +938,12 @@ class Join_Graph_Generator:
                         
 
                         ############################################################
-                        ##### f1_rate_testing #####
-                        self.f1rate_test(valid_jgs, cur_edge)
-                        while(True):
-                            if test_insertion_complete:
-                                print("COMPLETED>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-                                break
+                        ########## f1_rate_testing ##########
+                        # self.f1rate_test(valid_jgs, cur_edge)
+                        # while(True):
+                        #     if test_insertion_complete:
+                        #         print("COMPLETED>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+                        #         break
                         ############################################################
 
                         ##### Recommendation #####
