@@ -109,23 +109,23 @@
               <!--<div class="input-group"> -->
                 <div class="input-group1">
                   <div class="input-group-text" style="float: left;">SELECT</div>
-                  <input type="text" class="form-control" id="query-select" name="query-select" style="float: left; width: 82%;"> 
-<!--                   <input type="text" class="form-control" id="query-select" name="query-select" value = "count(*) as win, s.season_name" style="float: left; width: 82%;">  -->
+                  <!-- <input type="text" class="form-control" id="query-select" name="query-select" style="float: left; width: 82%;">  -->
+                  <input type="text" class="form-control" id="query-select" name="query-select" value = "count(*) as win, s.season_name" style="float: left; width: 82%;"> 
                 </div>
                 <div class="input-group2">
                   <div class="input-group-text" style="float: left;">FROM</div>
-                  <input type="text" class="form-control" id="query-from" name="query-from" style="float: left; width: 85%;">
-<!--                   <input type="text" class="form-control" id="query-from" name="query-from" value=" team t, game g, season s " style="float: left; width: 83%;"> -->
+                  <!-- <input type="text" class="form-control" id="query-from" name="query-from" style="float: left; width: 85%;"> -->
+                  <input type="text" class="form-control" id="query-from" name="query-from" value=" team t, game g, season s " style="float: left; width: 83%;">
                 </div>
                 <div class="input-group3">
                   <div class="input-group-text" style="float: left;">WHERE</div>
-                  <input type="text" class="form-control" id="query-where" name="query-where" style="float: left; width: 85%;">
-  <!--                 <input type="text" class="form-control" id="query-where" name="query-where" value=" t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' " style="float: left; width: 83%;"> -->
+                  <!-- <input type="text" class="form-control" id="query-where" name="query-where" style="float: left; width: 85%;"> -->
+                  <input type="text" class="form-control" id="query-where" name="query-where" value=" t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' " style="float: left; width: 83%;">
                 </div>
                 <div class="input-group4">
                   <div class="input-group-text" style="float: left;">GROUP BY</div>
-                  <input type="text" class="form-control" id="query-group" name="query-group" style="float: left; width: 60%;">          
-<!--                   <input type="text" class="form-control" id="query-group" name="query-group" value="s.season_name" style="float: left; width: 60%;">   -->   
+                  <!-- <input type="text" class="form-control" id="query-group" name="query-group" style="float: left; width: 60%;">           -->
+                  <input type="text" class="form-control" id="query-group" name="query-group" value="s.season_name" style="float: left; width: 60%;">     
                   <button type="button" class="btn btn-outline-primary" id="execute" style="width: 18%;">Run</button>             
                 </div>
             </div>
