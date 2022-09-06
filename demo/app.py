@@ -666,6 +666,9 @@ def ratingUD():
         for item in exp_list:
             if(filter_id != item[1]):
                 filtered_exp_list.append(item)
+    else:
+        filtered_exp_list=exp_list
+
 
     query5 = "select jg_details, fscore, p_desc, jg_name from user_updated_exp"
     globals()['cursor'].execute(query5)
