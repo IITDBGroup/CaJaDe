@@ -274,7 +274,7 @@
 
         //let sltList = [];
         $('#reset_JGselection').empty();
-        $('#reset_JGselection').append('<button type="button" class="btn btn-outline-primary" onclick="resetClicked()">Reset</button>');
+        // $('#reset_JGselection').append('<button type="button" class="btn btn-outline-primary" onclick="resetClicked()" style="visibility: visible;">Reset</button>');
 		    dataPerPage = $("#dataPerPage").val();
 		  
 		    var slt = $('#query-select').val();
@@ -697,6 +697,11 @@
 
         $("#explanation_table").empty();
         $("#explanation_table").append(expHtml);
+
+        let resetBtnHtml = "";
+        resetBtnHtml += "<button type=\button\" class=\"btn btn-outline-primary\" onclick=\"resetClicked()\">Reset</button>";
+        $("#reset_JGselection").empty();             
+        $("#reset_JGselection").append(resetBtnHtml);
 
         let updateBtnHtml = "";
         updateBtnHtml += "<button type=\"button\" class=\"btn btn-outline-primary\" onclick=\"ratingUpdate()\">Update</button>";  
