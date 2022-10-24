@@ -17,7 +17,7 @@ import datetime
 import heapq
 from operator import itemgetter
 import json
-
+import threading
 
 logger = logging.getLogger(__name__)
 
@@ -59,6 +59,10 @@ class Pattern_Generator:
         self.pattern_pool = []
         self.pattern_by_jg = {}
         self.weighted_sample_views = {} # key as the pattern structure, value as the name of the view
+        logger.debug('initialize testing_dict')
+        self.testing_dict = {}
+        self.valid_patterns = []
+        self.valid_patterns_cum = 0        
 
     def pattern_recover(self, renaming_dict, pending_pattern, user_questions_map):
 
@@ -671,8 +675,24 @@ class Pattern_Generator:
                     pattern['sample_precision'] = float(sample_prec)
 
                 return pattern, True
+    
+    # global testing_dict = {}
 
+    # @staticmethod
+    global testingTimer
+    def patternLenChecker(self):
+        global testingTimer
+        lcheck = len(self.valid_patterns)
+        logger.debug(f"valid_patterns len>>>>> {lcheck}")
+        if lcheck==0:
+            self.testing_dict[len(self.testing_dict)] = self.valid_patterns_cum
+        else:
+            self.testing_dict[len(self.testing_dict)] = self.valid_patterns_cum+lcheck
+        logger.debug(f"testing_dict>>>>> {self.testing_dict}")
+        testingTimer = threading.Timer(1.0, self.patternLenChecker)
+        testingTimer.start()
 
+    #global valid_patterns = []
     def gen_patterns(self, 
                       jg, 
                       jg_name, 
@@ -720,6 +740,21 @@ class Pattern_Generator:
         num_numerical_attr_rate: if filter method is 'varclus', after random forest, how 
         many important features will be considered? it is equal to user_assigned_num_pred_cap*num_numerical_attr_rate
         """
+        #########################################
+        #########################################
+        ##valid_patterns = []
+        self.valid_patterns = []
+        logger.debug(f"valid_patter_cum len: {self.valid_patterns_cum}")
+        self.patternLenChecker()
+        # self.testing_dict = {}
+        
+        # print(testing_dict)
+        ## testingTimer = threading.Timer(1.0, self.patternLenChecker, args=[self,valid_patterns])
+        ## self.patternLenChecker(valid_patterns, testingTimer)
+        # t.start()
+        #self.patternLenChecker() #check the length of the valid_pattern every 5 seconds
+        #########################################
+        #########################################
 
         self.pattern_by_jg[jg] = []
 
@@ -1129,7 +1164,9 @@ class Pattern_Generator:
 
                     self.weighted_sample_views[jg_name] = {'jg_samples': [], 'ws_index':1, 'nominal_only_recall': nom_sample_dict}
  
-                valid_patterns = [] # list of all the valid patterns that can be generated from this nominal pattern
+                #valid_patterns = [] # list of all the valid patterns that can be generated from this nominal pattern
+                #testingTimer = threading.Timer(1.0, self.patternLenChecker, args=[self,valid_patterns])
+                #self.patternLenChecker(valid_patterns, testingTimer)
 
                 if(numercial_attr_filter_method=='y'):
                     if(ordinal_pattern_attr_list and not just_lca):                        
@@ -1176,7 +1213,7 @@ class Pattern_Generator:
                             for k,v in cluster_dict.items():
                                 cluster_dict[k] = [[x,0,0] for x in v]
 
-                            logger.debug(cluster_dict)      
+                            #logger.debug(cluster_dict)      
 
                             # entropy rank in each cluster to find the highest one 
                             # as the training input variable "representing" the cluster
@@ -1203,8 +1240,8 @@ class Pattern_Generator:
                                 correlation_dict[representative_var_for_clust] = [cora[0] for cora in cluster_dict[k][1:]]
 
                             logger.debug("lagrge number of num attrs")
-                            logger.debug(rf_input_vars)
-                            logger.debug(correlation_dict)
+                            # logger.debug(rf_input_vars)
+                            # logger.debug(correlation_dict)
 
                         # finish clustering here
                         else:
@@ -1216,7 +1253,7 @@ class Pattern_Generator:
 
 
                         rf_df = cor_df[rf_input_vars]
-                        logger.debug(rf_df.head())
+                        #logger.debug(rf_df.head())
                         target = raw_df['is_user']
                         le = LabelEncoder()
                         y = le.fit(target)
@@ -1364,7 +1401,7 @@ class Pattern_Generator:
                                             if(is_valid):
                                                 val_pat = deepcopy(pc_processed)
                                                 # logger.debug(val_pat)
-                                                valid_patterns.append(val_pat)
+                                                self.valid_patterns.append(val_pat)
                                                 good_candidates.append(pc_processed)
 
                                         self.stats.startTimer('refinment')
@@ -1458,7 +1495,7 @@ class Pattern_Generator:
                                                                           sample_size=sample_f1_jg_size)
                                             if(is_valid):
                                                 val_pat = deepcopy(ic_processed)
-                                                valid_patterns.append(val_pat)
+                                                self.valid_patterns.append(val_pat)
                                                 # logger.debug(val_pat)
                                                 cur_pattern_candidates.append(ic_processed)
 
@@ -1493,7 +1530,7 @@ class Pattern_Generator:
 
                                                         if(is_valid):
                                                             val_pat = deepcopy(pc_processed)
-                                                            valid_patterns.append(val_pat)
+                                                            self.valid_patterns.append(val_pat)
                                                             # logger.debug(val_pat)
                                                             good_candidates.append(pc_processed)
 
@@ -1516,7 +1553,7 @@ class Pattern_Generator:
                                 'max_cluster_rank':-2, 'is_user':'no'})
 
                             if(just_lca):
-                                valid_patterns.extend(nominal_patterns)
+                                self.valid_patterns.extend(nominal_patterns)
 
                             else:
                                 for n_pat in nominal_patterns:
@@ -1531,7 +1568,7 @@ class Pattern_Generator:
                                                                       w_sample_attr=w_sample_attr,
                                                                       sample_size=sample_f1_jg_size)
                                     if(is_valid):
-                                        valid_patterns.append(n_pat_processed)
+                                        self.valid_patterns.append(n_pat_processed)
 
                 else:
                     if(ordinal_pattern_attr_list and not just_lca):
@@ -1671,7 +1708,7 @@ class Pattern_Generator:
                                           sample_size=sample_f1_jg_size,
                                           )
                             if(is_valid):
-                                valid_patterns.append(pc_processed)
+                                self.valid_patterns.append(pc_processed)
                     else:
                         for npa in nominal_pattern_dict_list:
 
@@ -1687,7 +1724,7 @@ class Pattern_Generator:
                                 'max_cluster_rank':-2, 'is_user':'no'})
                             
                             if(just_lca):
-                                valid_patterns.extend(nominal_patterns)
+                                self.valid_patterns.extend(nominal_patterns)
                             else:
                                 for n_pat in nominal_patterns:
                                     n_pat_processed, is_valid = self.get_fscore(prov_version=prov_version,
@@ -1701,19 +1738,25 @@ class Pattern_Generator:
                                                                       w_sample_attr=w_sample_attr,
                                                                       sample_size=sample_f1_jg_size)
                                     if(is_valid):
-                                        valid_patterns.append(n_pat_processed)
+                                        self.valid_patterns.append(n_pat_processed)
 
-                if(valid_patterns):
+                if(self.valid_patterns):
                     # logger.debug(f"number of valid patterns {len(valid_patterns)}")
-                    for vp in valid_patterns:
+                    for vp in self.valid_patterns:
                         self.stats.startTimer('pattern_recover')
                         vp_recovered = self.pattern_recover(renaming_dict, vp, user_questions_map)
                         self.stats.params['n_p_pass_node_rule_and_recall_thresh']+=1
                         self.stats.stopTimer('pattern_recover')
                         self.pattern_pool.append(vp_recovered)
                         self.pattern_by_jg[jg].append(vp_recovered)
+                    logger.debug(f"valid_pattern len: {len(self.valid_patterns)}")
+                testingTimer.cancel()
             else:
                 self.stats.stopTimer('create_samples')
+        logger.debug(f"valid_pattern len: {len(self.valid_patterns)}")
+        self.valid_patterns_cum = self.valid_patterns_cum + len(self.valid_patterns)
+        logger.debug(f"valid_pattern_cum len: {self.valid_patterns_cum}")
+        testingTimer.cancel()
 
 
 

@@ -21,6 +21,7 @@ from statistics import mean
 import argparse
 from datetime import datetime
 from time import strftime
+import threading
 
 
 #####
@@ -49,7 +50,17 @@ class ExperimentParams(ExecStats):
               'f1_min_sample_size_threshold'
               }
 
+def Create_testing_table(conn, stats_relation_name, schema):
+  cur = conn.cursor()
+  cur.execute('CREATE SCHEMA IF NOT EXISTS '+schema)
+  
+  cur.execute('create table IF NOT EXISTS ' + schema + '.' + stats_relation_name + ' (' +
+                           'exp_time int, num_patt int);')
 
+def Insert_testing_results(conn, stats_dict, stats_relation_name, schema):
+  cur = conn.cursor()
+  for k,v in stats_dict.items():
+    cur.execute(f"INSERT INTO {schema}.{stats_relation_name}(exp_time, num_patt) VALUES ({k}, {v})")
 
 def Create_Stats_Table(conn, stats_trackers, stats_relation_name, schema):
   """
@@ -565,6 +576,14 @@ global conn
 global sample_rate_for_s_tmp
 global insertion_complete
 
+#global testing_dict = {}
+# def patternLenChecker(p,t):
+#   lcheck = len(p)
+#   logger.debug(lcheck)
+#   testing_dict[len(testing_dict)] = lcheck
+#   logger.debug(testing_dict)
+#   t.start()
+
 def run_experiment(conn=None,
                    result_schema='demotest',
                    user_query = ("provenance of (select count(*) as win, s.season_name from team t, game g, season s where t.team_id = g.winner_id and g.season_id = s.season_id and t.team= 'GSW' group by s.season_name);",'test'),
@@ -591,7 +610,9 @@ def run_experiment(conn=None,
                    lca_eval_mode=False,
                    statstracker=ExperimentParams(),
                    gui=False,
-                   filtering=None):
+                   filtering=None,
+                   simul_u=False,
+                   simul_r=0.8):
                   
     # added a gui parameter, if true bypass pt creation step
     # f1_calculation_type: "o": evaluate on original materialized jg
@@ -688,7 +709,9 @@ def run_experiment(conn=None,
                                 user_questions_map = user_questions_map,
                                 f1_sample_type = f1_sample_type,
                                 f1_min_sample_size_threshold = f1_min_sample_size_threshold,
-                                user_assigned_max_num_pred = user_assigned_max_num_pred
+                                user_assigned_max_num_pred = user_assigned_max_num_pred,
+                                simul_u=simul_u,
+                                simul_r=simul_r
                                 )
 
     # logger.debug('generate new valid_jgs')
@@ -711,6 +734,8 @@ def run_experiment(conn=None,
 
 
     pgen = Pattern_Generator(conn)
+    #logger.debug(len(pgen.valid_patterns))
+    logger.debug(f"dict: {len(pgen.testing_dict)}\n")
 
 
     pattern_ranked_within_jg = {}
@@ -775,6 +800,18 @@ def run_experiment(conn=None,
         apt_size = int(jgm.cur.fetchone()[0])
         jgm.stats.stopTimer('materialize_jg')
         pgen.stats.startTimer('per_jg_timer')
+##########################################################################################
+##########################################################################################
+        # set timeer for gen_patterns for each join graph
+        # collect the length of the valid_patterns to the testing_dict dictionary every 5seconds(set less than 5 sec)
+
+        # how to fetch valid_patterns which is inside of the pattern_generator.py
+
+        # testingTimer = threading.Timer(5.0, patternLenChecker, args=[pgen.valid_patterns])
+        # patternLenChecker(pgen.valid_patterns,testingTimer)
+        #testingTimer.start()
+##########################################################################################
+##########################################################################################
         pgen.gen_patterns(jg=vr,
                             jg_name=f"jg_{vr.jg_number}", 
                             renaming_dict=vr.renaming_dict, 
@@ -794,6 +831,11 @@ def run_experiment(conn=None,
                             f1_calculation_min_size=f1_min_sample_size_threshold,
                             user_assigned_num_pred_cap=user_assigned_max_num_pred
                             )
+##########################################################################################
+##########################################################################################
+        # testingTimer.cancel()
+##########################################################################################
+##########################################################################################
         if(gui):
           logger.debug("gui mode! insert by jg!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
           patterns_to_insert = pgen.top_pattern_from_one_jg(vr)
@@ -855,6 +897,16 @@ def run_experiment(conn=None,
         jgm.cur.execute(apt_size_query)
         apt_size = int(jgm.cur.fetchone()[0])
         pgen.stats.startTimer('per_jg_timer')
+##########################################################################################
+##########################################################################################
+        # set timeer for gen_patterns for each join graph
+        # collect the length of the valid_patterns to the testing_dict dictionary every 5seconds(set less than 5 sec)
+
+        # testingTimer = threading.Timer(5.0, patternLenChecker, args=[pgen.valid_patterns])
+        # patternLenChecker(pgen.valid_patterns,testingTimer)
+        #testingTimer.start()
+##########################################################################################
+##########################################################################################
         pgen.gen_patterns(jg=n,
                           jg_name=f"jg_{n.jg_number}", 
                           renaming_dict=n.renaming_dict, 
@@ -874,6 +926,11 @@ def run_experiment(conn=None,
                           f1_calculation_min_size=f1_min_sample_size_threshold,
                           user_assigned_num_pred_cap=user_assigned_max_num_pred
                         )
+##########################################################################################
+##########################################################################################
+        # testingTimer.cancel()
+##########################################################################################
+##########################################################################################
         if(gui):
           logger.debug("gui mode! insert by jg!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
           patterns_to_insert = pgen.top_pattern_from_one_jg(n)
@@ -915,8 +972,16 @@ def run_experiment(conn=None,
     insertion_complete = True
     logger.debug(f"insertion complete>>>>{insertion_complete}")
 
-    # # collect stats 
+    if pgen.testing_dict[len(pgen.testing_dict)-1] != pgen.valid_patterns_cum:
+      pgen.testing_dict[len(pgen.testing_dict)] = pgen.valid_patterns_cum
+    logger.debug('FINAL testing_dict>>>>')
+    logger.debug(pgen.testing_dict)
+
+    # collect stats 
     stats_trackers = [jgg.stats, jgm.stats, pgen.stats, statstracker]
+
+    Create_testing_table(conn=conn, stats_relation_name='cajade_new_testing', schema=result_schema)
+    Insert_testing_results(conn, stats_dict=pgen.testing_dict, stats_relation_name='cajade_new_testing', schema=result_schema)
 
     Create_Stats_Table(conn=conn, stats_trackers=stats_trackers, stats_relation_name='time_and_params', schema=result_schema)
     InsertStats(conn=conn, stats_trackers=stats_trackers, stats_relation_name='time_and_params', schema=result_schema, exp_time=exp_time, exp_desc=exp_desc)
@@ -1003,6 +1068,14 @@ def main():
   parser.add_argument('-L','--evaluate_lca_mode', metavar='\b', type=str, default='false',
     help='generate LCA results only, will not generate pattern results, (default: %(default)s)')
   
+  # NEW FLAG: -u, --simulated_user 
+  parser.add_argument('-u','--simulated_user',metavar='\b',type=bool,default=False,
+    help='simulated user responses for testing')
+
+  # NEW FLAG: -R, --simulated_user_rate
+  parser.add_argument('-R','--simulated_user_rate',metavar='\b',type=float,default=0.8,
+    help='simulated user responses rate for testing')
+
   requiredNamed = parser.add_argument_group('required named arguments')
 
   requiredNamed.add_argument('-U','--user_name', metavar="\b", type=str, required=True,
@@ -1046,7 +1119,8 @@ def main():
   now=datetime.now()
 
   if(args.result_schema=='none'):
-    str_time = now.strftime("%Y-%m-%d-%H-%M-%S")
+    #str_time = now.strftime("%Y-%m-%d-%H-%M-%S")
+    str_time = now.strftime("%Y_%m_%d_%H_%M_%S")
     result_schema = f"exp_{str_time}"
   else:
     result_schema = args.result_schema
@@ -1088,6 +1162,8 @@ def main():
       f1_sample_type = args.f1_sample_type,
       f1_min_sample_size_threshold=args.f1_sample_thresh,
       lca_eval_mode=eval_lca,
+      simul_u=args.simulated_user,
+      simul_r=args.simulated_user_rate,
       )
   else:
     if(args.workloads!='false'):
@@ -1117,6 +1193,8 @@ def main():
             f1_sample_type = args.f1_sample_type,
             f1_min_sample_size_threshold=args.f1_sample_thresh,
             lca_eval_mode=eval_lca,
+            simul_u=args.simulated_user,
+            simul_r=args.simulated_user_rate,
             )
       if(re.search(r'mimic', args.db_name)):
         for w in mimic_workloads:
@@ -1144,6 +1222,8 @@ def main():
             f1_sample_type = args.f1_sample_type,
             f1_min_sample_size_threshold=args.f1_sample_thresh,
             lca_eval_mode=eval_lca,
+            simul_u=args.simulated_user,
+            simul_r=args.simulated_user_rate,
             )
       # else:
       #   for w in nba_cases:

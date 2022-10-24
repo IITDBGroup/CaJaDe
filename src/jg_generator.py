@@ -15,6 +15,7 @@ from copy import deepcopy
 import re
 import time
 import numpy as np
+import random
 
 class JGGeneratorStats(ExecStats):
     """
@@ -142,7 +143,7 @@ class Join_Graph_Generator:
     def __init__(self, schema_graph, attr_dict, gwrapper, uquery, uq1, uq2, db, conn, uquery0, exclude_high_cost_jg_0, 
                 sample_rate_for_s_tmp, lca_s_max_size, lca_s_min_size, lca_eval_mode, min_recall_threshold,
                 numercial_attr_filter_method, user_pt_size, user_questions_map, f1_sample_type, f1_min_sample_size_threshold,
-                user_assigned_max_num_pred):
+                user_assigned_max_num_pred, simul_u, simul_r):
         self.schema_graph = schema_graph
         self.hash_jg_table = {} # a hash dictionary that used to check duplicates
         self.attr_dict = attr_dict
@@ -166,6 +167,8 @@ class Join_Graph_Generator:
         self.f1_sample_type = f1_sample_type
         self.f1_min_sample_size_threshold = f1_min_sample_size_threshold
         self.user_assigned_max_num_pred = user_assigned_max_num_pred
+        self.simul_u=simul_u
+        self.simul_r=simul_r
 
     def valid_check(self, jg_candidate, pt_rels):
         """
@@ -828,6 +831,53 @@ class Join_Graph_Generator:
         global test_insertion_complete
         test_insertion_complete = True
 
+    def simulated_user_responses(self, recomm, getRavg):
+
+        # do I need to consider back steps?
+        # when to stop?
+
+        # if simul_u is True, run this function to generate user responses based on the simulation rate
+
+        r_max = max(recomm)
+        r_max_idx = [i for i,v in enumerate(recomm) if v==r_max]
+        r_max_cnt = len(r_max_idx)
+
+        # only one max
+        if r_max_cnt == 1:
+            # generate weights
+            weights = []
+            for i in range(0,len(recomm)):
+                if i==r_max_idx[0]:
+                    weights.append(self.simul_r)
+                else:
+                    non_simul_r = (1-self.simul_r)/(len(recomm)-1)
+                    weights.append(non_simul_r)
+
+            # get random choices based on the weights
+            uSelect_value = random.choices(recomm, weights,k=1)[0]
+            simul_result = recomm.index(uSelect_value)+1
+
+        # more than one max, then consider the averages of user ratings
+        else:
+            # find max from getRavg
+            ravg_max_lst = [getRavg[j] for j in range(0,len(getRavg)) if j in r_max_idx]
+            ravg_max = max(ravg_max_lst)
+            ravg_max_idx = [i for i,v in enumerate(getRavg) if v==ravg_max]
+            ravg_max_cnt = len(ravg_max_idx)
+
+            # only one max
+            if ravg_max_cnt == 1:
+                # find max's index, then go with this max value for uSelect_value
+                simul_result = getRavg.index(ravg_max)+1
+
+            # also more than on max, get random choice among them
+            else:
+                simul_result = random.choice(ravg_max_idx)+1          
+
+        # have to return uer selection and user rating
+        # no rating in this simulated user response version
+        return simul_result, -1
+
     def Generate_JGs(self, pt_rels, num_edges, customize=False, filtering_tmp=[]): #, connInfo, statstracker):
         """
         num_edges: this defines the size of a join graph
@@ -955,8 +1005,29 @@ class Join_Graph_Generator:
                         for i in range(0, len(valid_jgs)):
                             print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>[",i+1,"]",repr(valid_jgs[i]))
                         print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-                            
-                        uSelection, uRating = appUselection(valid_jgs,cur_edge, recomm, getRavg)
+
+############################################################################################################################
+############################################################################################################################
+############################################################################################################################                       
+                        # check the simul_u flag if it is True -> run the simulated version for testing
+                        # if simul_u flag is True then check simul_r -> the probablity for choosing the highest score
+                        # add 10 seconds for the simulated usres for their decision making
+                        
+                        if self.simul_u:
+                            # run the simulated version
+                            uSelection, uRating = self.simulated_user_responses(recomm, getRavg)
+                            # add 10 seconds to the OR count as a user time 
+
+                        else:
+                            # run the user interactive version
+                            uSelection, uRating = appUselection(valid_jgs,cur_edge, recomm, getRavg)
+
+############################################################################################################################
+############################################################################################################################
+############################################################################################################################
+
+
+                        # uSelection, uRating = appUselection(valid_jgs,cur_edge, recomm, getRavg)
                         print("uselection, uRating:******: ", uSelection,"*****",uRating)
 
                         for i in range(0, len(valid_jgs)):
