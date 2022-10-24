@@ -545,6 +545,11 @@ def run_experiment(conn=None,
 
     logger.debug(f'total number of patterns {len(patterns_all)}')
 
+    if pgen.testing_dict[len(pgen.testing_dict)-1] != pgen.valid_patterns_cum:
+      pgen.testing_dict[len(pgen.testing_dict)] = pgen.valid_patterns_cum
+    logger.debug('FINAL testing_dict>>>>')
+    logger.debug(pgen.testing_dict)
+
     # collect stats 
     stats_trackers = [jgg.stats, jgm.stats, pgen.stats, statstracker]
 
