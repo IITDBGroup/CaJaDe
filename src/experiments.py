@@ -7,7 +7,6 @@ from src.sg_generator import Schema_Graph_Generator
 from src.workloads import mimic_workloads, nba_workloads
 from src.case_study import mimic_cases, nba_cases
 from src.instrumentation import ExecStats
-from src.instrumentation import RepeatedTimer
 from src.renaming import encode
 import src.config
 from networkx import MultiGraph
