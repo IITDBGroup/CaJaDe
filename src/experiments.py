@@ -7,6 +7,7 @@ from src.sg_generator import Schema_Graph_Generator
 from src.workloads import mimic_workloads, nba_workloads
 from src.case_study import mimic_cases, nba_cases
 from src.instrumentation import ExecStats
+from src.instrumentation import RepeatedTimer
 from src.renaming import encode
 import src.config
 from networkx import MultiGraph
@@ -21,6 +22,7 @@ from statistics import mean
 import argparse
 from datetime import datetime
 from time import strftime
+import threading
 
 
 #####
@@ -49,7 +51,17 @@ class ExperimentParams(ExecStats):
               'f1_min_sample_size_threshold'
               }
 
+def Create_testing_table(conn, stats_relation_name, schema):
+  cur = conn.cursor()
+  cur.execute('CREATE SCHEMA IF NOT EXISTS '+schema)
+  
+  cur.execute('create table IF NOT EXISTS ' + schema + '.' + stats_relation_name + ' (' +
+                           'exp_time int, num_patt int);')
 
+def Insert_testing_results(conn, stats_dict, stats_relation_name, schema):
+  cur = conn.cursor()
+  for k,v in stats_dict.items():
+    cur.execute(f"INSERT INTO {schema}.{stats_relation_name}(exp_time, num_patt) VALUES ({k}, {v})")
 
 def Create_Stats_Table(conn, stats_trackers, stats_relation_name, schema):
   """
@@ -205,6 +217,26 @@ def InsertStats(conn, stats_trackers, stats_relation_name, schema, exp_time, exp
         'INSERT INTO ' + schema + '.' + stats_relation_name + ' ('+ attrs +')' + ' values('+ values +')'
         )
 
+# global vp
+# vp = []
+# global vp_cum
+# vp_cum = 0
+# global testing_dict 
+# testing_dict = {}
+# global testingTimer
+def patternLenChecker():
+  global testingTimer
+  vp_cum = pgen.valid_patterns_cum
+  logger.debug(f"vp_cum 2:{vp_cum}")
+  # testing_dict[len(testing_dict)] = lcheck   
+  # lcheck = len(vp)
+  # logger.debug(lcheck)
+  testing_dict[len(testing_dict)] = vp_cum
+  logger.debug(testing_dict)
+  testingTimer = threading.Timer(1.0, patternLenChecker)
+  testingTimer.start()
+  #t.start()
+
 
 def run_experiment(conn=None,
                    result_schema='demotest',
@@ -302,7 +334,9 @@ def run_experiment(conn=None,
     jgm = Join_Graph_Materializer(conn=conn, db_dict=attr_dict, gwrapper=w, user_query=user_query[0])
     jgm.init_cost_estimator()
 
-    pgen = Pattern_Generator(conn) 
+    pgen = Pattern_Generator(conn)
+    # logger.debug(f"dict: {len(pgen.pattern_by_jg)}\n") 
+    logger.debug(f"dict: {len(pgen.testing_dict)}\n") 
 
     pattern_ranked_within_jg = {}
     jg_individual_times_dict = {}
@@ -346,6 +380,18 @@ def run_experiment(conn=None,
       
       jg_cnt=1
 
+##########################################################################################
+##########################################################################################
+      # vp = pgen.valid_patterns
+      # vp_cum = pgen.valid_patterns_cum
+      # logger.debug(f"vp_cum 1:{vp_cum}")
+      # patternLenChecker()
+
+      #testingTimer = RepeatedTimer(1.0, patternLenChecker, pgen.valid_patterns) #args=[pgen.valid_patterns]
+      #patternLenChecker(pgen.valid_patterns,testingTimer) 
+      # testingTimer.start()
+##########################################################################################
+##########################################################################################
       for vr in valid_result:
         # if(str(vr)=='1: PT, 2: icustays| 2: icustays, 3: patients'):
         jg_individual_times_dict[vr] = 0
@@ -385,6 +431,11 @@ def run_experiment(conn=None,
         jg_individual_times_dict[vr] = pgen.stats.time['per_jg_timer']
         pgen.stats.resetTimer('per_jg_timer')
       # logger.debug(jg_individual_times_dict)
+##########################################################################################
+##########################################################################################
+        # testingTimer.cancel()
+##########################################################################################
+##########################################################################################
     else:
       # cost_estimate_dict 
       valid_result = [v for v in valid_result if not v.intermediate]
@@ -411,6 +462,19 @@ def run_experiment(conn=None,
       avg_cost_estimate_by_num_edges = {k:mean(v) for k,v in cost_estimate_dict.items() if v}
       logger.debug(avg_cost_estimate_by_num_edges)
       logger.debug(f'we found {len(valid_result)} valid join graphs, now materializing and generating patterns')
+##########################################################################################
+##########################################################################################
+      # vp = pgen.valid_patterns
+      # vp_cum = pgen.valid_patterns_cum
+      # logger.debug(f"vp_cum 1:{vp_cum}")
+      # patternLenChecker()
+
+      # testingTimer = RepeatedTimer(1.0, patternLenChecker, pgen.valid_patterns) 
+      # testingTimer = threading.Timer(1.0, patternLenChecker, args=[pgen.valid_patterns])
+      #patternLenChecker(pgen.valid_patterns,testingTimer)
+      # testingTimer.start()
+##########################################################################################
+##########################################################################################
       jg_cnt=1
       for n in valid_result:
         logger.debug(f'we are on join graph number {jg_cnt}')
@@ -455,7 +519,11 @@ def run_experiment(conn=None,
           pgen.stats.resetTimer('per_jg_timer')
         else:
           not_cost_friendly_jgs.append(n)
-
+##########################################################################################
+##########################################################################################
+      # testingTimer.cancel()
+##########################################################################################
+##########################################################################################
       jgg.stats.params['valid_jgs_cost_high']=len(not_cost_friendly_jgs)
 
     if(lca_eval_mode):
@@ -480,6 +548,9 @@ def run_experiment(conn=None,
 
     # collect stats 
     stats_trackers = [jgg.stats, jgm.stats, pgen.stats, statstracker]
+
+    Create_testing_table(conn=conn, stats_relation_name='cajade_prev_testing', schema=result_schema)
+    Insert_testing_results(conn, stats_dict=pgen.testing_dict, stats_relation_name='cajade_prev_testing', schema=result_schema)
 
     exp_time = datetime.now().strftime("%Y_%m_%d__%H_%M_%S")
     Create_Stats_Table(conn=conn, stats_trackers=stats_trackers, stats_relation_name='time_and_params', schema=result_schema)
@@ -607,7 +678,8 @@ def main():
   now=datetime.now()
 
   if(args.result_schema=='none'):
-    str_time = now.strftime("%Y-%m-%d-%H-%M-%S")
+    # str_time = now.strftime("%Y-%m-%d-%H-%M-%S")
+    str_time = now.strftime("%Y_%m_%d_%H_%M_%S")
     result_schema = f"exp_{str_time}"
   else:
     result_schema = args.result_schema
