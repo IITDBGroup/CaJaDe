@@ -224,18 +224,18 @@ def InsertStats(conn, stats_trackers, stats_relation_name, schema, exp_time, exp
 # global testing_dict 
 # testing_dict = {}
 # global testingTimer
-def patternLenChecker():
-  global testingTimer
-  vp_cum = pgen.valid_patterns_cum
-  logger.debug(f"vp_cum 2:{vp_cum}")
-  # testing_dict[len(testing_dict)] = lcheck   
-  # lcheck = len(vp)
-  # logger.debug(lcheck)
-  testing_dict[len(testing_dict)] = vp_cum
-  logger.debug(testing_dict)
-  testingTimer = threading.Timer(1.0, patternLenChecker)
-  testingTimer.start()
-  #t.start()
+# def patternLenChecker():
+#   global testingTimer
+#   vp_cum = pgen.valid_patterns_cum
+#   logger.debug(f"vp_cum 2:{vp_cum}")
+#   # testing_dict[len(testing_dict)] = lcheck   
+#   # lcheck = len(vp)
+#   # logger.debug(lcheck)
+#   testing_dict[len(testing_dict)] = vp_cum
+#   logger.debug(testing_dict)
+#   testingTimer = threading.Timer(1.0, patternLenChecker)
+#   testingTimer.start()
+#   #t.start()
 
 
 def run_experiment(conn=None,

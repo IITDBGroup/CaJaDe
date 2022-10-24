@@ -676,7 +676,8 @@ class Pattern_Generator:
         if lcheck==0:
             self.testing_dict[len(self.testing_dict)] = self.valid_patterns_cum
         else:
-            self.testing_dict[len(self.testing_dict)] = self.testing_dict[len(self.testing_dict)-1]+lcheck
+            # self.testing_dict[len(self.testing_dict)] = self.testing_dict[len(self.testing_dict)-1]+lcheck
+            self.testing_dict[len(self.testing_dict)] = self.valid_patterns_cum+lcheck
         logger.debug(f"testing_dict>>>>> {self.testing_dict}")
         #t.start()
         testingTimer = threading.Timer(1.0, self.patternLenChecker)
