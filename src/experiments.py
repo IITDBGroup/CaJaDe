@@ -624,7 +624,8 @@ def run_experiment(conn=None,
                    gui=False,
                    filtering=None,
                    simul_u=False,
-                   simul_r=0.8):
+                   simul_r=0.8,
+                   simul_s=5):
                   
     # added a gui parameter, if true bypass pt creation step
     # f1_calculation_type: "o": evaluate on original materialized jg
@@ -724,7 +725,8 @@ def run_experiment(conn=None,
                                 f1_min_sample_size_threshold = f1_min_sample_size_threshold,
                                 user_assigned_max_num_pred = user_assigned_max_num_pred,
                                 simul_u=simul_u,
-                                simul_r=simul_r
+                                simul_r=simul_r,
+                                simul_s=simul_s
                                 ) #jg_e_cum=0, jg_h_cum=0, jg_v_cum=0, jg_s_cum=0, jg_utime_cum=0
 
     # logger.debug('generate new valid_jgs')
@@ -1096,8 +1098,8 @@ def main():
   parser.add_argument('-R','--simulated_user_rate',metavar='\b',type=float,default=0.8,
     help='simulated user responses rate for testing')
 
-  # NEW FLAG: -t, --simulated_user_stop
-  parser.add_argument('-t','--simulated_user_stop',metavar='\b',type=int,default=5,
+  # NEW FLAG: -T, --simulated_user_stop
+  parser.add_argument('-T','--simulated_user_stop',metavar='\b',type=int,default=5,
     help='simulated user responses the number of stops for testing')
 
   requiredNamed = parser.add_argument_group('required named arguments')
@@ -1188,6 +1190,7 @@ def main():
       lca_eval_mode=eval_lca,
       simul_u=args.simulated_user,
       simul_r=args.simulated_user_rate,
+      simul_s=args.simulated_user_stop,
       )
   else:
     if(args.workloads!='false'):
@@ -1219,6 +1222,7 @@ def main():
             lca_eval_mode=eval_lca,
             simul_u=args.simulated_user,
             simul_r=args.simulated_user_rate,
+            simul_s=args.simulated_user_stop,
             )
       if(re.search(r'mimic', args.db_name)):
         for w in mimic_workloads:
@@ -1248,6 +1252,7 @@ def main():
             lca_eval_mode=eval_lca,
             simul_u=args.simulated_user,
             simul_r=args.simulated_user_rate,
+            simul_s=args.simulated_user_stop,
             )
       # else:
       #   for w in nba_cases:

@@ -151,7 +151,7 @@ class Join_Graph_Generator:
     def __init__(self, schema_graph, attr_dict, gwrapper, uquery, uq1, uq2, db, conn, uquery0, exclude_high_cost_jg_0, 
                 sample_rate_for_s_tmp, lca_s_max_size, lca_s_min_size, lca_eval_mode, min_recall_threshold,
                 numercial_attr_filter_method, user_pt_size, user_questions_map, f1_sample_type, f1_min_sample_size_threshold,
-                user_assigned_max_num_pred, simul_u, simul_r): #, jg_e_cum, jg_h_cum, jg_v_cum, jg_s_cum, jg_utime_cum):
+                user_assigned_max_num_pred, simul_u, simul_r, simul_s): #, jg_e_cum, jg_h_cum, jg_v_cum, jg_s_cum, jg_utime_cum):
         self.schema_graph = schema_graph
         self.hash_jg_table = {} # a hash dictionary that used to check duplicates
         self.attr_dict = attr_dict
@@ -174,9 +174,11 @@ class Join_Graph_Generator:
         self.user_questions_map = user_questions_map
         self.f1_sample_type = f1_sample_type
         self.f1_min_sample_size_threshold = f1_min_sample_size_threshold
-        self.user_assigned_max_num_pred = user_assigned_max_num_pred      
+        self.user_assigned_max_num_pred = user_assigned_max_num_pred
+        logger.debug('initialize simulation type, rate, stop')
         self.simul_u=simul_u #simulation type
         self.simul_r=simul_r #simulation rate
+        self.simul_s=simul_s
         logger.debug('initialize jg_e_cum and etc')
         # self.jg_e_cum = 0 #jg_enumeration cumulation
         # self.jg_h_cum = 0 #jg_hashing cumulation
@@ -857,12 +859,16 @@ class Join_Graph_Generator:
         global test_insertion_complete
         test_insertion_complete = True
 
-    def simulated_user_responses(self, recomm, getRavg):
+    def simulated_user_responses(self, recomm, getRavg, cur_step):
 
         # do I need to consider back steps?
         # when to stop?
 
         # if simul_u is True, run this function to generate user responses based on the simulation rate
+
+        # check the simul_s: whether stop or not
+        if self.simul_s >= cur_step:
+            return 0, -1
 
         r_max = max(recomm)
         r_max_idx = [i for i,v in enumerate(recomm) if v==r_max]
@@ -1062,7 +1068,7 @@ class Join_Graph_Generator:
                         
                         if self.simul_u:
                             # run the simulated version
-                            uSelection, uRating = self.simulated_user_responses(recomm, getRavg)
+                            uSelection, uRating = self.simulated_user_responses(recomm, getRavg, cur_edge)
                             # add 5 seconds to the OR count as a user time
 
                         else:
