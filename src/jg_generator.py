@@ -34,7 +34,7 @@ class JGGeneratorStats(ExecStats):
               'jg_h_cum',
               'jg_v_cum',
               'jg_s_cum',
-              'jg_utim_cum'              
+              'jg_utime_cum'              
              }
 
 
@@ -661,7 +661,7 @@ class Join_Graph_Generator:
                                     port='5433', #5432 
                                     host='127.0.0.1')
         fcur = fconn.cursor()
-
+        logger.debug(self.exclude_high_cost_jg_0)
         if(self.exclude_high_cost_jg_0==False):
             for n in valid_result:
             # for i in range(0, len(valid_result)):
@@ -731,12 +731,13 @@ class Join_Graph_Generator:
                 fconn.commit()
         else:
             valid_result = [v for v in valid_result if not v.intermediate]
+            logger.debug(valid_result)
             cost_estimate_dict = {i:[] for i in range(0,cur_edge+1)}
-            #for vr in valid_result:
-            for i in range(0, len(valid_result)):
-                vr = repr(valid_result[i])
+            for vr in valid_result:
+            #for i in range(0, len(valid_result)):
+                #vr = repr(valid_result[i])
 
-                cost_estimate, renaming_dict, apt_q = jgm.materialize_jg(vr,cost_estimate=True)
+                cost_estimate, renaming_dict, apt_q = jgm.materialize_jg(vr,cost_estimate=True) #vr
                 if(apt_q is not None):
                     vr.cost = cost_estimate
                     vr.apt_create_q = apt_q
@@ -745,12 +746,20 @@ class Join_Graph_Generator:
                     vr.redundant=True
                     continue
             valid_result = [v for v in valid_result if not v.redundant]
+            logger.debug(valid_result)
             avg_cost_estimate_by_num_edges = {k:mean(v) for k,v in cost_estimate_dict.items() if v}
             jg_cnt=1
-            valid_result = [n for n in valid_result if n.cost<=avg_cost_estimate_by_num_edges[n.num_edges]]
-            #for n in valid_result:
-            for i in range(0, len(valid_result)):
-                n = repr(valid_result[i])
+            for n in valid_result:
+                logger.debug(n.cost)
+                logger.debug(avg_cost_estimate_by_num_edges)
+                logger.debug(n.num_edges)
+                #logger.debug(avg_cost_estimate_by_num_edges[n.num_edges])
+            if len(avg_cost_estimate_by_num_edges)!=0:
+                valid_result = [n for n in valid_result if n.cost<=avg_cost_estimate_by_num_edges[n.num_edges]]
+            logger.debug(valid_result)
+            for n in valid_result:
+            #for i in range(0, len(valid_result)):
+                #n = repr(valid_result[i])
 
                 jg_cnt+=1
                 drop_if_exist_jg_view = "DROP MATERIALIZED VIEW IF EXISTS {} CASCADE;".format('jg_{}'.format(n.jg_number))
@@ -782,16 +791,16 @@ class Join_Graph_Generator:
                 patterns_to_insert_tmp = pgen_tmp.top_pattern_from_one_jg(n)
                 ###############
                 print("##############Pattern 2##############", patterns_to_insert_tmp)
-                if patterns_to_insert_tmp != None or len(patterns_to_insert_tmp) != 0:
+                if patterns_to_insert_tmp == None or len(patterns_to_insert_tmp) == 0:
+                    recomm_val = 0
+                    recomm_result.append(recomm_val) #0)
+                else:
                     tmp = 0
                     for i in range(0, len(patterns_to_insert_tmp)):
                         tmp+= patterns_to_insert_tmp[i]['F1']
                     tmp_avg = tmp/len(patterns_to_insert_tmp)
                     recomm_val = round(tmp_avg, 3)
                     recomm_result.append(recomm_val) #round(tmp_avg, 3))
-                else:
-                    recomm_val = 0
-                    recomm_result.append(recomm_val) #0)
                 
                 insertF1rateQ = F"""
                     INSERT INTO f1sample(f1calrate, f1avg, jg)

@@ -701,7 +701,7 @@ def run_experiment(conn=None,
                                                     user_specified_attrs=user_specified_attrs)
 
     attr_dict['PT'] = pt_dict
-
+    logger.debug(exclude_high_cost_jg)
     jgg = Join_Graph_Generator(schema_graph = sg, 
                                 attr_dict = attr_dict, 
                                 gwrapper=w, 
@@ -1095,6 +1095,10 @@ def main():
   # NEW FLAG: -R, --simulated_user_rate
   parser.add_argument('-R','--simulated_user_rate',metavar='\b',type=float,default=0.8,
     help='simulated user responses rate for testing')
+
+  # NEW FLAG: -t, --simulated_user_stop
+  parser.add_argument('-t','--simulated_user_stop',metavar='\b',type=int,default=5,
+    help='simulated user responses the number of stops for testing')
 
   requiredNamed = parser.add_argument_group('required named arguments')
 
