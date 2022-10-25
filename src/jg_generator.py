@@ -22,7 +22,7 @@ class JGGeneratorStats(ExecStats):
     Statistics gathered during mining
     """
     TIMERS = {'jg_enumeration',
-              'jg_validtaion',
+              'jg_validation',
               'jg_hashing',
               'jg_simulation'
               }
@@ -867,7 +867,9 @@ class Join_Graph_Generator:
         # if simul_u is True, run this function to generate user responses based on the simulation rate
 
         # check the simul_s: whether stop or not
-        if self.simul_s >= cur_step:
+        if cur_step >= self.simul_s:
+            logger.debug("@@@@@@@@@@")
+            logger.debug(f"Current Step: {cur_step} // Simulation Stop: {self.simul_s}")
             return 0, -1
 
         r_max = max(recomm)
@@ -999,9 +1001,9 @@ class Join_Graph_Generator:
 
                 valid_jgs.sort(key=lambda j: j.jg_number)
 #######################################################################################################
-                self.stats.params['jg_e_cum']+=round(self.stats.time['jg_enumeration'],2)
-                self.stats.params['jg_h_cum']+=round(self.stats.time['jg_hashing'],2)
-                self.stats.params['jg_v_cum']+=round(self.stats.time['jg_validtaion'],2)
+                self.stats.params['jg_e_cum']+=self.stats.time['jg_enumeration']
+                self.stats.params['jg_h_cum']+=self.stats.time['jg_hashing']
+                self.stats.params['jg_v_cum']+=self.stats.time['jg_validtaion']
                 logger.debug(f"jg enumeration cum: {self.stats.params['jg_e_cum']}")
                 logger.debug(f"jg hashing cum: {self.stats.params['jg_h_cum']}")
                 logger.debug(f"jg validation cum: {self.stats.params['jg_v_cum']}")
@@ -1142,12 +1144,17 @@ class Join_Graph_Generator:
                     return valid_jgs
                 
                 self.stats.stopTimer('jg_simulation') ################
-                self.stats.params['jg_s_cum']+=round(self.stats.time['jg_simulation'],2)
+                self.stats.params['jg_s_cum']+=self.stats.time['jg_simulation']
                 logger.debug(f"jg simulation cum: {self.stats.params['jg_s_cum']}")
                 #self.jg_s_cum = self.jg_s_cum + round(self.stats.time['jg_simulation'],2)
             #return valid_jgs
         else:
             pass
+
+        self.stats.params['jg_e_cum'] = round(self.stats.params['jg_e_cum'],2)
+        self.stats.params['jg_h_cum'] = round(self.stats.params['jg_h_cum'],2)
+        self.stats.params['jg_v_cum'] = round(self.stats.params['jg_v_cum'],2)
+        self.stats.params['jg_s_cum'] = round(self.stats.params['jg_s_cum'],2)
 
             #################################################################################
 
