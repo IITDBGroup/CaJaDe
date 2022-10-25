@@ -23,17 +23,25 @@ class JGGeneratorStats(ExecStats):
     """
     TIMERS = {'jg_enumeration',
               'jg_validtaion',
-              'jg_hashing'
+              'jg_hashing',
+              'jg_simulation'
               }
 
     PARAMS = {'number_of_jgs',
               'valid_jgs',
-              'valid_jgs_cost_high'
+              'valid_jgs_cost_high',
+              'jg_e_cum',
+              'jg_h_cum',
+              'jg_v_cum',
+              'jg_s_cum',
+              'jg_utim_cum'              
              }
 
 
 logger = logging.getLogger(__name__)
 
+class testingStats(ExecStats):
+    TIMERS = {'jg_simulation'}
 
 
 class Node:
@@ -143,7 +151,7 @@ class Join_Graph_Generator:
     def __init__(self, schema_graph, attr_dict, gwrapper, uquery, uq1, uq2, db, conn, uquery0, exclude_high_cost_jg_0, 
                 sample_rate_for_s_tmp, lca_s_max_size, lca_s_min_size, lca_eval_mode, min_recall_threshold,
                 numercial_attr_filter_method, user_pt_size, user_questions_map, f1_sample_type, f1_min_sample_size_threshold,
-                user_assigned_max_num_pred, simul_u, simul_r):
+                user_assigned_max_num_pred, simul_u, simul_r): #, jg_e_cum, jg_h_cum, jg_v_cum, jg_s_cum, jg_utime_cum):
         self.schema_graph = schema_graph
         self.hash_jg_table = {} # a hash dictionary that used to check duplicates
         self.attr_dict = attr_dict
@@ -166,9 +174,18 @@ class Join_Graph_Generator:
         self.user_questions_map = user_questions_map
         self.f1_sample_type = f1_sample_type
         self.f1_min_sample_size_threshold = f1_min_sample_size_threshold
-        self.user_assigned_max_num_pred = user_assigned_max_num_pred
-        self.simul_u=simul_u
-        self.simul_r=simul_r
+        self.user_assigned_max_num_pred = user_assigned_max_num_pred      
+        self.simul_u=simul_u #simulation type
+        self.simul_r=simul_r #simulation rate
+        logger.debug('initialize jg_e_cum and etc')
+        # self.jg_e_cum = 0 #jg_enumeration cumulation
+        # self.jg_h_cum = 0 #jg_hashing cumulation
+        # self.jg_v_cum = 0 #jg_validation cumulation
+        # self.jg_s_cum = 0 #jg_simulation cumulation
+        # self.jg_utime_cum = 0 #jg_user_time cumulation
+        # self.jg_testing = {}
+        # self.t_stats = testingStats()
+
 
     def valid_check(self, jg_candidate, pt_rels):
         """
@@ -854,6 +871,7 @@ class Join_Graph_Generator:
                     weights.append(non_simul_r)
 
             # get random choices based on the weights
+            time.sleep(5)
             uSelect_value = random.choices(recomm, weights,k=1)[0]
             simul_result = recomm.index(uSelect_value)+1
 
@@ -865,6 +883,7 @@ class Join_Graph_Generator:
             ravg_max_idx = [i for i,v in enumerate(getRavg) if v==ravg_max]
             ravg_max_cnt = len(ravg_max_idx)
 
+            time.sleep(5)
             # only one max
             if ravg_max_cnt == 1:
                 # find max's index, then go with this max value for uSelect_value
@@ -876,6 +895,10 @@ class Join_Graph_Generator:
 
         # have to return uer selection and user rating
         # no rating in this simulated user response version
+
+        #self.jg_utime_cum = self.jg_utime_cum + 5
+        self.stats.params['jg_utime_cum']+=5
+        logger.debug(f"jg usertime cum: {self.stats.params['jg_utime_cum']}")
         return simul_result, -1
 
     def Generate_JGs(self, pt_rels, num_edges, customize=False, filtering_tmp=[]): #, connInfo, statstracker):
@@ -941,7 +964,7 @@ class Join_Graph_Generator:
                 
                 logger.debug(generated_jg_set) ####
                 #if (cur_edge>=1):
-                self.stats.stopTimer('jg_enumeration')            
+                self.stats.stopTimer('jg_enumeration')
                 self.stats.params['number_of_jgs']+=len(generated_jg_set)
                 self.stats.startTimer('jg_hashing')
                 
@@ -959,13 +982,27 @@ class Join_Graph_Generator:
                 logger.debug(valid_jgs) ####
 
                 valid_jgs.sort(key=lambda j: j.jg_number)
-                ######################################################################################
+#######################################################################################################
+                self.stats.params['jg_e_cum']+=round(self.stats.time['jg_enumeration'],2)
+                self.stats.params['jg_h_cum']+=round(self.stats.time['jg_hashing'],2)
+                self.stats.params['jg_v_cum']+=round(self.stats.time['jg_validtaion'],2)
+                logger.debug(f"jg enumeration cum: {self.stats.params['jg_e_cum']}")
+                logger.debug(f"jg hashing cum: {self.stats.params['jg_h_cum']}")
+                logger.debug(f"jg validation cum: {self.stats.params['jg_v_cum']}")
+                # self.jg_e_cum = self.jg_e_cum + round(self.stats.time['jg_enumeration'],2)
+                # self.jg_h_cum = self.jg_h_cum + round(self.stats.time['jg_hashing'],2)
+                # self.jg_v_cum = self.jg_v_cum + round(self.stats.time['jg_validtaion'],2)
+#######################################################################################################
+
+############################################################################################################
+############################################################################################################
                 self.setJGnum(jg_cur_number)
                 print("<<Enter number (Stop:0|Previous step:-1)>>: ")
                 # print('valid jg:', valid_jgs)
 
-                while True:
-                    print("///////////////////////")
+                self.stats.startTimer('jg_simulation') ################
+                while True:                   
+                    # print("///////////////////////")
                     if len(valid_jgs)==0 and cur_edge>=1:
                         print("<<<<<empty valid_jgs>>>>>")
                         dict_tmp = self.getJGselection(cur_edge-1)
@@ -997,26 +1034,26 @@ class Join_Graph_Generator:
                         ############################################################
 
                         ##### Recommendation #####
-                        recomm = self.getRecomm(valid_jgs, cur_edge, 0.3, 'o')
-                        print("recommendation>>>>> ", recomm)
+                        recomm = self.getRecomm(valid_jgs, cur_edge, 0.25, 's') #self.getRecomm(valid_jgs, cur_edge, 0.3, 'o')
+                        #print("recommendation>>>>> ", recomm)
                         
                         ########## get user selection and rating ##########
-                        print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-                        for i in range(0, len(valid_jgs)):
-                            print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>[",i+1,"]",repr(valid_jgs[i]))
-                        print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+                        # print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+                        # for i in range(0, len(valid_jgs)):
+                        #     print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>[",i+1,"]",repr(valid_jgs[i]))
+                        # print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 
 ############################################################################################################################
 ############################################################################################################################
 ############################################################################################################################                       
                         # check the simul_u flag if it is True -> run the simulated version for testing
                         # if simul_u flag is True then check simul_r -> the probablity for choosing the highest score
-                        # add 10 seconds for the simulated usres for their decision making
+                        # add 5 seconds for the simulated usres for their decision making
                         
                         if self.simul_u:
                             # run the simulated version
                             uSelection, uRating = self.simulated_user_responses(recomm, getRavg)
-                            # add 10 seconds to the OR count as a user time 
+                            # add 5 seconds to the OR count as a user time
 
                         else:
                             # run the user interactive version
@@ -1079,13 +1116,19 @@ class Join_Graph_Generator:
                             uSelection_jg = valid_jgs[uSelection-1]
                             #print('$$$$$$$$$$jgs selection dic: ', jgs_selection)
                             break
+
                 jg_hash_table.clear() #####
-                ##########################################################################################
+############################################################################################################
+############################################################################################################
                 #********************** cur_edge+=1
                 #print('[######]jgs selection dic: ', jgs_selection)
                 if uSelection==0:
                     return valid_jgs
-            
+                
+                self.stats.stopTimer('jg_simulation') ################
+                self.stats.params['jg_s_cum']+=round(self.stats.time['jg_simulation'],2)
+                logger.debug(f"jg simulation cum: {self.stats.params['jg_s_cum']}")
+                #self.jg_s_cum = self.jg_s_cum + round(self.stats.time['jg_simulation'],2)
             #return valid_jgs
         else:
             pass

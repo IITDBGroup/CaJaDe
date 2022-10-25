@@ -49,11 +49,10 @@ class ExperimentParams(ExecStats):
               'f1_sample_rate',
               'f1_min_sample_size_threshold'
               }
-
+###################################################################################################
 def Create_testing_table(conn, stats_relation_name, schema):
   cur = conn.cursor()
-  cur.execute('CREATE SCHEMA IF NOT EXISTS '+schema)
-  
+  cur.execute('CREATE SCHEMA IF NOT EXISTS '+schema)  
   cur.execute('create table IF NOT EXISTS ' + schema + '.' + stats_relation_name + ' (' +
                            'exp_time int, num_patt int);')
 
@@ -62,6 +61,19 @@ def Insert_testing_results(conn, stats_dict, stats_relation_name, schema):
   for k,v in stats_dict.items():
     cur.execute(f"INSERT INTO {schema}.{stats_relation_name}(exp_time, num_patt) VALUES ({k}, {v})")
 
+# def Create_testingjg_table(conn, stats_relation_name, schema):
+#   cur = conn.cursor()
+#   cur.execute('CREATE SCHEMA IF NOT EXISTS '+schema)
+#   cur.execute('create table IF NOT EXISTS ' + schema + '.' + stats_relation_name + ' (' +
+#                            'jg_e_time float,  jg_h_time float, jg_v_time float, jg_s_time float, jg_user_time float);')
+
+# def Insert_testingjg_results(conn, stats_trackers, stats_relation_name, schema):
+#   cur = conn.cursor()
+#   cur.execute(f"INSERT INTO {schema}.{stats_relation_name}(jg_e_time, jg_h_time, jg_v_time, jg_s_time, jg_user_time)"+
+#                 " VALUES ({jg_e}, {jg_h}, {jg_v}, {}, {})")
+  ##############
+
+###################################################################################################
 def Create_Stats_Table(conn, stats_trackers, stats_relation_name, schema):
   """
   stats_trackers: a list of objects keep tracking of the stats from experiment
@@ -712,7 +724,7 @@ def run_experiment(conn=None,
                                 user_assigned_max_num_pred = user_assigned_max_num_pred,
                                 simul_u=simul_u,
                                 simul_r=simul_r
-                                )
+                                ) #jg_e_cum=0, jg_h_cum=0, jg_v_cum=0, jg_s_cum=0, jg_utime_cum=0
 
     # logger.debug('generate new valid_jgs')
     valid_result = jgg.Generate_JGs(pt_rels=pt_relations, num_edges=maximum_edges, customize=False, filtering_tmp=filtering) #, conn, statstracker)
@@ -980,8 +992,15 @@ def run_experiment(conn=None,
     # collect stats 
     stats_trackers = [jgg.stats, jgm.stats, pgen.stats, statstracker]
 
+#######################################################################################################
+#######################################################################################################
     Create_testing_table(conn=conn, stats_relation_name='cajade_new_testing', schema=result_schema)
-    Insert_testing_results(conn, stats_dict=pgen.testing_dict, stats_relation_name='cajade_new_testing', schema=result_schema)
+    Insert_testing_results(conn=conn, stats_dict=pgen.testing_dict, stats_relation_name='cajade_new_testing', schema=result_schema)
+
+    #Create_testingjg_table(conn=conn, stats_relation_name='cajade_new_testing_jg', schema=result_schema)
+    #Insert_testingjg_results(conn=conn, jg_e=jgg, stats_trackers=[jgg.stats] stats_relation_name='cajade_new_testing_jg', schema=result_schema)
+#######################################################################################################
+#######################################################################################################
 
     Create_Stats_Table(conn=conn, stats_trackers=stats_trackers, stats_relation_name='time_and_params', schema=result_schema)
     InsertStats(conn=conn, stats_trackers=stats_trackers, stats_relation_name='time_and_params', schema=result_schema, exp_time=exp_time, exp_desc=exp_desc)
