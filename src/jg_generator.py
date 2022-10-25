@@ -506,9 +506,9 @@ class Join_Graph_Generator:
             print("check::::::", pt_cond, node_cond, node)
         
             rconn = psycopg2.connect(database='rating', 
-                                        user='juseung', 
+                                        user='postgres', #juseung 
                                         password='1234', 
-                                        port='5432', 
+                                        port='5433', #5432 
                                         host='127.0.0.1')
             cur = rconn.cursor()
 
@@ -562,9 +562,9 @@ class Join_Graph_Generator:
             #connect DB - myrating.rating(id, usel)
             #connect DB - myrating.table(uquery, uq1, uq2, usel, urating)
         rconn = psycopg2.connect(database='rating', 
-                                user='juseung', 
+                                user='postgres', #juseung 
                                 password='1234', 
-                                port='5432', 
+                                port='5433', #5432 
                                 host='127.0.0.1')
         cur = rconn.cursor()
 
@@ -656,9 +656,9 @@ class Join_Graph_Generator:
         # cost_friendly_jgs = []
         # not_cost_friendly_jgs = []
         fconn = psycopg2.connect(database='f1rate', 
-                                    user='juseung', 
+                                    user='postgres', #juseung 
                                     password='1234', 
-                                    port='5432', 
+                                    port='5433', #5432 
                                     host='127.0.0.1')
         fcur = fconn.cursor()
 
@@ -825,9 +825,9 @@ class Join_Graph_Generator:
 
         for i in range(0, len(rc01)):
             ftconn = psycopg2.connect(database='f1rate_test',
-                                user='juseung', 
+                                user='postgres', #juseung 
                                 password='1234', 
-                                port='5432', 
+                                port='5433', #5432 
                                 host='127.0.0.1')
             ftcur = ftconn.cursor()
 
@@ -926,7 +926,8 @@ class Join_Graph_Generator:
 
             while True:
                 # self.displayFiltering()
-                self.setFiltering(filtering_tmp)
+                if filtering_tmp:
+                  self.setFiltering(filtering_tmp)
 
 
                 # print("[*******]cur_edge:",cur_edge)
