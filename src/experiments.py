@@ -1,6 +1,6 @@
 from src.provenance_getter import provenance_getter
 from src.gprom_wrapper import  GProMWrapper
-from src.jg_generator import Join_Graph_Generator
+from src.jg_generator import * #Join_Graph_Generator
 from src.jg_materializer import Join_Graph_Materializer
 from src.pattern_generator import Pattern_Generator
 from src.sg_generator import Schema_Graph_Generator
