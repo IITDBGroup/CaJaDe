@@ -9,7 +9,7 @@ cmmd = 'python3 experiments.py -H 127.0.0.1 -P 5433 -U postgres -d nba_db -p 123
 
 for i in rate:
     for j in stop:
-        result_schema_name = 'testing_'+str(i)+'_'+str(j)
+        result_schema_name = 'exp_'+str(i)+'_'+str(j)
         cmmd = cmmd + str(i) + ' -T ' + str(j) + ' -D ' + result_schema_name
         os.system(cmmd)
 
