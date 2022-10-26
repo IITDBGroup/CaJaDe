@@ -990,12 +990,12 @@ class Join_Graph_Generator:
                 self.stats.stopTimer('jg_hashing')
                 valid_jgs = []
 
-                self.stats.startTimer('jg_validtaion')
+                self.stats.startTimer('jg_validation')
                 for n in jg_hash_table:
                     logger.debug(n) ####
                     if(self.valid_check(n, pt_rels)==True):
                         valid_jgs.append(n)
-                self.stats.stopTimer('jg_validtaion')
+                self.stats.stopTimer('jg_validation')
 
                 logger.debug(valid_jgs) ####
 
@@ -1003,13 +1003,13 @@ class Join_Graph_Generator:
 #######################################################################################################
                 self.stats.params['jg_e_cum']+=self.stats.time['jg_enumeration']
                 self.stats.params['jg_h_cum']+=self.stats.time['jg_hashing']
-                self.stats.params['jg_v_cum']+=self.stats.time['jg_validtaion']
+                self.stats.params['jg_v_cum']+=self.stats.time['jg_validation']
                 logger.debug(f"jg enumeration cum: {self.stats.params['jg_e_cum']}")
                 logger.debug(f"jg hashing cum: {self.stats.params['jg_h_cum']}")
                 logger.debug(f"jg validation cum: {self.stats.params['jg_v_cum']}")
                 # self.jg_e_cum = self.jg_e_cum + round(self.stats.time['jg_enumeration'],2)
                 # self.jg_h_cum = self.jg_h_cum + round(self.stats.time['jg_hashing'],2)
-                # self.jg_v_cum = self.jg_v_cum + round(self.stats.time['jg_validtaion'],2)
+                # self.jg_v_cum = self.jg_v_cum + round(self.stats.time['jg_validation'],2)
 #######################################################################################################
 
 ############################################################################################################
@@ -1205,11 +1205,11 @@ class Join_Graph_Generator:
             # self.stats.stopTimer('jg_hashing')
             # valid_jgs = []
 
-            # self.stats.startTimer('jg_validtaion')
+            # self.stats.startTimer('jg_validation')
             # for n in jg_hash_table:
             #     if(self.valid_check(n, pt_rels)==True):
             #         valid_jgs.append(n)
-            # self.stats.stopTimer('jg_validtaion')
+            # self.stats.stopTimer('jg_validation')
 
             # valid_jgs.sort(key=lambda j: j.jg_number)
             # ########################################
