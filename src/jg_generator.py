@@ -1151,10 +1151,10 @@ class Join_Graph_Generator:
         else:
             pass
 
-        self.stats.params['jg_e_cum'] = round(self.stats.params['jg_e_cum'],2)
-        self.stats.params['jg_h_cum'] = round(self.stats.params['jg_h_cum'],2)
-        self.stats.params['jg_v_cum'] = round(self.stats.params['jg_v_cum'],2)
-        self.stats.params['jg_s_cum'] = round(self.stats.params['jg_s_cum'],2)
+        # self.stats.params['jg_e_cum'] = round(self.stats.params['jg_e_cum'],2)
+        # self.stats.params['jg_h_cum'] = round(self.stats.params['jg_h_cum'],2)
+        # self.stats.params['jg_v_cum'] = round(self.stats.params['jg_v_cum'],2)
+        # self.stats.params['jg_s_cum'] = round(self.stats.params['jg_s_cum'],2)
 
             #################################################################################
 
