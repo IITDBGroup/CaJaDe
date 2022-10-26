@@ -873,7 +873,9 @@ def run_experiment(conn=None,
       # cost_estimate_dict 
       valid_result = [v for v in valid_result if not v.intermediate]
 
-      cost_estimate_dict = {i:[] for i in range(0,maximum_edges+1)}
+      max_edge = valid_result[0].num_edges
+
+      cost_estimate_dict = {i:[] for i in range(0,max_edge+1)} #maximum_edges
       # logger.debug(cost_estimate_dict)
       for vr in valid_result:
         jgm.stats.startTimer('materialize_jg')
@@ -882,6 +884,9 @@ def run_experiment(conn=None,
           vr.cost = cost_estimate
           vr.apt_create_q = apt_q
           vr.renaming_dict = renaming_dict
+          logger.debug(cost_estimate_dict)
+          logger.debug(vr.num_edges)
+          logger.debug(vr.cost)
           cost_estimate_dict[vr.num_edges].append(vr.cost)
         else:
           vr.redundant=True
