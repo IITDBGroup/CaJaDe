@@ -1,7 +1,7 @@
 import psycopg2
 from matplotlib import pyplot as plt
 
-conn = psycopg2.connect(databse='nba_db', user='postgres', password='1234', port='5433', host='127.0.0.1')
+conn = psycopg2.connect(database='nba_db', user='postgres', password='1234', port='5433', host='127.0.0.1')
 cur = conn.cursor()
 
 ############################################
@@ -15,9 +15,10 @@ jg_total_time = 0
 get_prev_jg_results = "SELECT jg_enumeration, jg_hashing, jg_validtaion FROM exp_2022_10_24_03_47_04.time_and_params;"
 cur.execute(get_prev_jg_results)
 prev_jg_results = cur.fetchall()
-
-for item in prev_jg_results:
-  jg_total_time+=item
+print(prev_jg_results)
+for item in prev_jg_results[0]:
+  print(item)
+  jg_total_time+=float(item)
 jg_total_time = round(jg_total_time)
 
 for i in range(0,jg_total_time+1):
