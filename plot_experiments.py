@@ -65,7 +65,7 @@ for k in range(0,len(rate_list)):
     new_ptt_x = []
     new_ptt_y = []
     new_jg_total_time = 0
-    schema_name = "testing_"+k+"_"+stop_list[i]
+    schema_name = "testing_"+str(rate_list[k])+"_"+str(stop_list[i])
 
     # runtime in the Join Graph generation
     get_new_jg_results = "SELECT jg_e_cum, jg_h_cum, jg_v_cum, jg_s_cum, jg_utime_cum FROM "+schema_name+".time_and_params;"
@@ -76,8 +76,8 @@ for k in range(0,len(rate_list)):
       new_jg_total_time+=float(item)
       new_jg_total_time = round(new_jg_total_time)
 
-    for i in range(0,new_jg_total_time+1):
-      new_jg_x.append(i)
+    for j in range(0,new_jg_total_time+1):
+      new_jg_x.append(j)
       new_jg_y.append(0)
 
     plt.plot(new_jg_x, new_jg_y, plot_option[i]+'--')
