@@ -55,7 +55,7 @@ def plot_new_app(conn, cur):
   marker_shape = ['o', 's', 'v', 'p', '*']
   marker_color = ['k','g','r','c','m']
 
-  sub_plots = plt.subplots(3,2,figsize=(45,15))
+  sub_plots = plt.subplots(3,2,figsize=(30,15))
   fig = sub_plots[0]
   graph = sub_plots[1]
 
@@ -205,8 +205,8 @@ def plot_both(conn, cur):
 ############################################
 conn = psycopg2.connect(database='nba_db', user='postgres', password='1234', port='5433', host='127.0.0.1')
 cur = conn.cursor()
-plot_cajade_orig(conn, cur)
-plot_new_app(conn, cur)
+#plot_cajade_orig(conn, cur)
+#plot_new_app(conn, cur)
 plot_both(conn, cur)
 cur.close()
 conn.close()
