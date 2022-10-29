@@ -82,7 +82,8 @@ def plot_new_app(conn, cur):
         new_jg_x.append(j)
         new_jg_y.append(0)
 
-      graph[k//2][k%2].plot(new_jg_x, new_jg_y, marker_color[i]+'--')
+      #graph[k//2][k%2]
+      plt.plot(new_jg_x, new_jg_y, marker_color[i]+'--')
 
       # runtime in the Pattern generation
       get_new_ptt_results = "SELECT * FROM "+schema_name+".cajade_new_testing;"
@@ -93,15 +94,20 @@ def plot_new_app(conn, cur):
         new_ptt_x.append(item[0]+new_jg_total_time)
         new_ptt_y.append(item[1])
 
-      graph[k//2][k%2].plot(new_ptt_x, new_ptt_y, marker_color[i]+marker_shape[i]+'-',label='stop #'+str(stop_list[i]))
-      graph[k//2][k%2].set_title('rate_'+str(rate_list[k])+'_result')
-      graph[k//2][k%2].set_xlabel('time(sec)')
-      graph[k//2][k%2].set_ylabel('# explanation')
-      graph[k//2][k%2].legend()
+      #graph[k//2][k%2]
+      plt.plot(new_ptt_x, new_ptt_y, marker_color[i]+marker_shape[i]+'-',label='stop #'+str(stop_list[i]))
+      #graph[k//2][k%2]
+      ###plt.set_title('rate_'+str(rate_list[k])+'_result')
+      #graph[k//2][k%2]
+      plt.xlabel('time(sec)')
+      #graph[k//2][k%2]
+      plt.ylabel('# explanation')
+      #graph[k//2][k%2]
+      plt.legend()
 
   # fig.suptitle('Runtime experiment of the new approach')
-  fig.tight_layout(pad=5)
-  plt.savefig('new_approach_result.png')
+  #fig.tight_layout(pad=5)
+    plt.savefig('new_approach_'+str(rate_list[k])+'_result.png')
   conn.commit()
 
 ############################################
@@ -119,7 +125,7 @@ def plot_both(conn, cur):
   stop_list = [1, 3, 5, 7, 9]
   marker_shape = ['o', 's', 'v', 'p', '*']
   marker_color = ['k','g','r','c','m']
-
+  plt.figure(figsize=(10,15))
   # runtime in the Join Graph generation
   get_prev_jg_results = "SELECT jg_enumeration, jg_hashing, jg_validtaion FROM exp_2022_10_24_03_47_04.time_and_params;"
   cur.execute(get_prev_jg_results)
@@ -186,7 +192,7 @@ def plot_both(conn, cur):
   plt.ylabel('# explanation')
   # plt.title('Runtime experiment of the CaJaDE system')
   plt.legend()
-  plt.savefig('integ_cajade_result.png')
+  plt.savefig('integ_cajade_result2.png')
 
   conn.commit()
 
