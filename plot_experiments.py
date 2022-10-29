@@ -50,14 +50,15 @@ def plot_cajade_orig(conn, cur):
 ############################################
 ## Plot for CaJaDe_new - Each # rates has five different stops
 def plot_new_app(conn, cur):
-  rate_list = ['10','09','08','07','06','05']
+  rate_list = ['05']#,'10','09','08','07','06'],
   stop_list = [1, 3, 5, 7, 9]
   marker_shape = ['o', 's', 'v', 'p', '*']
   marker_color = ['k','g','r','c','m']
 
-  sub_plots = plt.subplots(3,2,figsize=(30,15))
-  fig = sub_plots[0]
-  graph = sub_plots[1]
+  #sub_plots = plt.subplots(3,2,figsize=(30,15))
+  #fig = sub_plots[0]
+  #graph = sub_plots[1]
+  plt.figure(figsize=(15,10))
 
   for k in range(0,len(rate_list)): 
     for i in range(0,len(stop_list)):
@@ -107,7 +108,7 @@ def plot_new_app(conn, cur):
 
   # fig.suptitle('Runtime experiment of the new approach')
   #fig.tight_layout(pad=5)
-    plt.savefig('new_approach_'+str(rate_list[k])+'_result.png')
+  plt.savefig('new_approach_'+str(rate_list[k])+'_result_mod.png')
   conn.commit()
 
 ############################################
@@ -182,10 +183,12 @@ def plot_both(conn, cur):
     new_ptt_results = cur.fetchall()
 
     for item in new_ptt_results:
-      if (item[0]+new_jg_total_time)>600:
+      if (item[0]+new_jg_total_time)<=600:
+        new_ptt_x.append(item[0]+new_jg_total_time)
+        new_ptt_y.append(item[1])
+      else:
+        print(item[0]+new_jg_total_time)
         break
-      new_ptt_x.append(item[0]+new_jg_total_time)
-      new_ptt_y.append(item[1])
 
     plt.plot(new_ptt_x, new_ptt_y, marker_color[i]+marker_shape[i]+'-',label='stop #'+str(stop_list[i]))
     plt.legend()
@@ -194,7 +197,7 @@ def plot_both(conn, cur):
   plt.ylabel('# explanation')
   # plt.title('Runtime experiment of the CaJaDE system')
   plt.legend()
-  plt.savefig('integ_cajade_result_mod.png')
+  plt.savefig('integ_cajade_result_mod2.png')
 
   conn.commit()
 
@@ -214,7 +217,7 @@ def plot_both(conn, cur):
 conn = psycopg2.connect(database='nba_db', user='postgres', password='1234', port='5433', host='127.0.0.1')
 cur = conn.cursor()
 #plot_cajade_orig(conn, cur)
-#plot_new_app(conn, cur)
-plot_both(conn, cur)
+plot_new_app(conn, cur)
+#plot_both(conn, cur)
 cur.close()
 conn.close()
