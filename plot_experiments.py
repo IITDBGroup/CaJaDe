@@ -148,6 +148,8 @@ def plot_both(conn, cur):
   prev_ptt_results = cur.fetchall()
 
   for item in prev_ptt_results:
+    if (item[0]+prev_jg_total_time)>600:
+      break
     prev_ptt_x.append(item[0]+prev_jg_total_time)
     prev_ptt_y.append(item[1])
     
@@ -183,12 +185,8 @@ def plot_both(conn, cur):
     new_ptt_results = cur.fetchall()
 
     for item in new_ptt_results:
-      if (item[0]+new_jg_total_time)<=600:
-        new_ptt_x.append(item[0]+new_jg_total_time)
-        new_ptt_y.append(item[1])
-      else:
-        print(item[0]+new_jg_total_time)
-        break
+      new_ptt_x.append(item[0]+new_jg_total_time)
+      new_ptt_y.append(item[1])
 
     plt.plot(new_ptt_x, new_ptt_y, marker_color[i]+marker_shape[i]+'-',label='stop #'+str(stop_list[i]))
     plt.legend()
@@ -197,27 +195,16 @@ def plot_both(conn, cur):
   plt.ylabel('# explanation')
   # plt.title('Runtime experiment of the CaJaDE system')
   plt.legend()
-  plt.savefig('integ_cajade_result_mod2.png')
+  plt.savefig('integ_cajade_result_mod3.png')
 
   conn.commit()
-
-
-
-
-
-
-
-
-
-
-
 
 ############################################
 ############################################
 conn = psycopg2.connect(database='nba_db', user='postgres', password='1234', port='5433', host='127.0.0.1')
 cur = conn.cursor()
 #plot_cajade_orig(conn, cur)
-plot_new_app(conn, cur)
-#plot_both(conn, cur)
+#plot_new_app(conn, cur)
+plot_both(conn, cur)
 cur.close()
 conn.close()
