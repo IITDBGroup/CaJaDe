@@ -123,7 +123,7 @@ def plot_both(conn, cur):
   prev_jg_total_time = 0
 
   rate = '10'
-  stop_list = [1, 3, 5, 7, 9]
+  stop_list = [1, 3, 5]#, 7, 9]
   marker_shape = ['o', 's', 'v', 'p', '*']
   marker_color = ['k','g','r','c','m']
   plt.figure(figsize=(10,15))
@@ -148,7 +148,7 @@ def plot_both(conn, cur):
   prev_ptt_results = cur.fetchall()
 
   for item in prev_ptt_results:
-    if (item[0]+prev_jg_total_time)>300:
+    if (item[0]+prev_jg_total_time)>260:
       break
     prev_ptt_x.append(item[0]+prev_jg_total_time)
     prev_ptt_y.append(item[1])
@@ -185,7 +185,7 @@ def plot_both(conn, cur):
     new_ptt_results = cur.fetchall()
 
     for item in new_ptt_results:
-      if (item[0]+new_jg_total_time)>300:
+      if (item[0]+new_jg_total_time)>260:
         break
       new_ptt_x.append(item[0]+new_jg_total_time)
       new_ptt_y.append(item[1])
@@ -197,7 +197,7 @@ def plot_both(conn, cur):
   plt.ylabel('# explanation')
   # plt.title('Runtime experiment of the CaJaDE system')
   plt.legend()
-  plt.savefig('integ_cajade_result_mod4.png')
+  plt.savefig('integ_cajade_result_mod5.png')
 
   conn.commit()
 
