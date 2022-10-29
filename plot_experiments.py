@@ -82,7 +82,7 @@ def plot_new_app(conn, cur):
         new_jg_x.append(j)
         new_jg_y.append(0)
 
-      graph[k/2][k%2].plot(new_jg_x, new_jg_y, marker_color[i]+'--')
+      graph[k//2][k%2].plot(new_jg_x, new_jg_y, marker_color[i]+'--')
 
       # runtime in the Pattern generation
       get_new_ptt_results = "SELECT * FROM "+schema_name+".cajade_new_testing;"
@@ -93,11 +93,11 @@ def plot_new_app(conn, cur):
         new_ptt_x.append(item[0]+new_jg_total_time)
         new_ptt_y.append(item[1])
 
-      graph[k/2][k%2].plot(new_ptt_x, new_ptt_y, marker_color[i]+marker_shape[i]+'-',label='stop #'+str(stop_list[i]))
-      graph[k/2][k%2].set_title('rate_'+str(rate_list[k])+'_result')
-      graph[k/2][k%2].set_xlabel('time(sec)')
-      graph[k/2][k%2].set_ylabel('# explanation')
-      graph[k/2][k%2].legend()
+      graph[k//2][k%2].plot(new_ptt_x, new_ptt_y, marker_color[i]+marker_shape[i]+'-',label='stop #'+str(stop_list[i]))
+      graph[k//2][k%2].set_title('rate_'+str(rate_list[k])+'_result')
+      graph[k//2][k%2].set_xlabel('time(sec)')
+      graph[k//2][k%2].set_ylabel('# explanation')
+      graph[k//2][k%2].legend()
 
   # fig.suptitle('Runtime experiment of the new approach')
   fig.tight_layout(pad=5)
