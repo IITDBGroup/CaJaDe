@@ -106,12 +106,13 @@ def plot_new_app(conn, cur):
       #graph[k//2][k%2]
       plt.ylabel('# explanation')
       #graph[k//2][k%2]
-      plt.legend()
+      #plt.legend()
 
   # fig.suptitle('Runtime experiment of the new approach')
   #fig.tight_layout(pad=5)
   #plt.savefig('new_approach_'+str(rate_list[k])+'_result_mod.png')
-  plt.savefig('new_approach_plots.png')
+  plt.subplots(constrained_layout=True)
+  plt.savefig('new_approach_plots2.png')
   conn.commit()
 
 ############################################
@@ -209,7 +210,7 @@ def plot_both(conn, cur):
 conn = psycopg2.connect(database='nba_db', user='postgres', password='1234', port='5433', host='127.0.0.1')
 cur = conn.cursor()
 #plot_cajade_orig(conn, cur)
-#plot_new_app(conn, cur)
-plot_both(conn, cur)
+plot_new_app(conn, cur)
+#plot_both(conn, cur)
 cur.close()
 conn.close()
