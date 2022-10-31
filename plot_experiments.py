@@ -55,9 +55,9 @@ def plot_new_app(conn, cur):
   marker_shape = ['o', 's', 'v', 'p', '*']
   marker_color = ['k','g','r','c','m']
 
-  #sub_plots = plt.subplots(3,2,figsize=(15,10))
-  #fig = sub_plots[0]
-  #graph = sub_plots[1]
+  sub_plots = plt.subplots(3,2,figsize=(15,10))
+  fig = sub_plots[0]
+  graph = sub_plots[1]
   #plt.figure(figsize=(15,10))
 
   for k in range(0,len(rate_list)): 
@@ -83,9 +83,9 @@ def plot_new_app(conn, cur):
         new_jg_x.append(j)
         new_jg_y.append(0)
 
-      #graph[k//2][k%2]
-      plt.subplot(3,2,k+1)
-      plt.plot(new_jg_x, new_jg_y, marker_color[i]+'--')
+      graph[k//2][k%2].plot(new_jg_x,new_jg_y, marker_color[i]+'--')
+      #plt.subplot(3,2,k+1)
+      #plt.plot(new_jg_x, new_jg_y, marker_color[i]+'--')
 
       # runtime in the Pattern generation
       get_new_ptt_results = "SELECT * FROM "+schema_name+".cajade_new_testing;"
@@ -96,24 +96,21 @@ def plot_new_app(conn, cur):
         new_ptt_x.append(item[0]+new_jg_total_time)
         new_ptt_y.append(item[1])
 
-      #graph[k//2][k%2]
-      plt.subplot(3,2,k+1)
-      plt.plot(new_ptt_x, new_ptt_y, marker_color[i]+marker_shape[i]+'-',label='stop #'+str(stop_list[i]))
-      #graph[k//2][k%2]
-      plt.title('rate_'+str(rate_list[k])+'_result')
-      #graph[k//2][k%2]
-      plt.xlabel('time(sec)')
-      #graph[k//2][k%2]
-      plt.ylabel('# explanation')
+      graph[k//2][k%2].plot(new_ptt_x, new_ptt_y, marker_color[i]+marker_shape[i]+'-',label='stop #'+str(stop_list[i]))
+      #plt.subplot(3,2,k+1)
+      #plt.plot(new_ptt_x, new_ptt_y, marker_color[i]+marker_shape[i]+'-',label='stop #'+str(stop_list[i]))
+      graph[k//2][k%2].set_title('rate_'+str(rate_list[k])+'_result')
+      graph[k//2][k%2].set_xlabel('time(sec)')
+      graph[k//2][k%2].set_ylabel('# explanation')
       #graph[k//2][k%2]
       #plt.legend()
 
   # fig.suptitle('Runtime experiment of the new approach')
-  #fig.tight_layout(pad=5)
+  fig.tight_layout(pad=2)
   #plt.savefig('new_approach_'+str(rate_list[k])+'_result_mod.png')
   #plt.subplot_tool()
-  plt.subplots_adjust(left=0.1, bottom=0.1, right=0.9, top=0.9, wspace=0.4, hspace=0.4)
-  plt.savefig('new_approach_plots4.png')
+  #plt.subplots_adjust(left=0.1, bottom=2.1, right=0.9, top=2.9, wspace=0.4, hspace=0.4)
+  plt.savefig('new_approach_plots_new.png')
   conn.commit()
 
 ############################################
