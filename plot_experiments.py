@@ -111,8 +111,8 @@ def plot_new_app(conn, cur):
   # fig.suptitle('Runtime experiment of the new approach')
   #fig.tight_layout(pad=5)
   #plt.savefig('new_approach_'+str(rate_list[k])+'_result_mod.png')
-  plt.subplots(constrained_layout=True)
-  plt.savefig('new_approach_plots2.png')
+  plt.subplot_tool()
+  plt.savefig('new_approach_plots3.png')
   conn.commit()
 
 ############################################
