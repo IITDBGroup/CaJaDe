@@ -125,10 +125,11 @@ def plot_both(conn, cur):
   prev_jg_total_time = 0
 
   rate = '10'
-  stop_list = [1, 3, 5]#, 7, 9]
+  stop_list = [1, 3, 5, 7, 9]
   marker_shape = ['o', 's', 'v', 'p', '*']
   marker_color = ['k','g','r','c','m']
   plt.figure(figsize=(10,15))
+  plt.rc('font', size=20)
   # runtime in the Join Graph generation
   get_prev_jg_results = "SELECT jg_enumeration, jg_hashing, jg_validtaion FROM exp_2022_10_24_03_47_04.time_and_params;"
   cur.execute(get_prev_jg_results)
@@ -150,8 +151,8 @@ def plot_both(conn, cur):
   prev_ptt_results = cur.fetchall()
 
   for item in prev_ptt_results:
-    if (item[0]+prev_jg_total_time)>240:
-      break
+    #if (item[0]+prev_jg_total_time)>240:
+      #break
     prev_ptt_x.append(item[0]+prev_jg_total_time)
     prev_ptt_y.append(item[1])
     
@@ -187,8 +188,8 @@ def plot_both(conn, cur):
     new_ptt_results = cur.fetchall()
 
     for item in new_ptt_results:
-      if (item[0]+new_jg_total_time)>240:
-        break
+      #if (item[0]+new_jg_total_time)>240:
+        #break
       new_ptt_x.append(item[0]+new_jg_total_time)
       new_ptt_y.append(item[1])
 
@@ -199,7 +200,7 @@ def plot_both(conn, cur):
   plt.ylabel('# explanation')
   # plt.title('Runtime experiment of the CaJaDE system')
   plt.legend()
-  plt.savefig('integ_cajade_result_mod7.png')
+  plt.savefig('integ_cajade_result_bigsize2.png')
 
   conn.commit()
 
@@ -208,7 +209,7 @@ def plot_both(conn, cur):
 conn = psycopg2.connect(database='nba_db', user='postgres', password='1234', port='5433', host='127.0.0.1')
 cur = conn.cursor()
 #plot_cajade_orig(conn, cur)
-plot_new_app(conn, cur)
-#plot_both(conn, cur)
+#plot_new_app(conn, cur)
+plot_both(conn, cur)
 cur.close()
 conn.close()
